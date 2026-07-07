@@ -1,0 +1,917 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Error Identification Pack 002",
+    "description": "Original error identification practice with corrections and explanations.",
+    "originalFileName": "07-error-identification-pack-002.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile Content Pack 002 generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Error Identification 002 Set 01",
+      "slug": "pack-002-error-identification-002-set-01",
+      "skillType": "ERROR_IDENTIFICATION",
+      "questionType": "ERROR_IDENTIFICATION",
+      "difficulty": "CHUYEN",
+      "statement": "Xác định lỗi sai và viết phần sửa đúng.",
+      "instructions": "Tập trung vào lỗi ngữ pháp nâng cao: agreement, inversion, preposition pattern, verb pattern.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Error Identification",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Despite of his careful preparation, he still felt nervous before the interview.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "Despite his careful preparation",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: Despite his careful preparation"
+          },
+          "explanation": "'Despite' is not followed by 'of'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Despite of his careful preparation, he still felt nervous before the interview.",
+            "correction": "Despite his careful preparation",
+            "questionNumber": 1,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The number of students taking advanced English have increased steadily.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "has increased",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: has increased"
+          },
+          "explanation": "The subject is 'The number', singular.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The number of students taking advanced English have increased steadily.",
+            "correction": "has increased",
+            "questionNumber": 2,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Hardly the teacher had entered the room when the students became silent.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "Hardly had the teacher entered",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: Hardly had the teacher entered"
+          },
+          "explanation": "Hardly at the beginning requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Hardly the teacher had entered the room when the students became silent.",
+            "correction": "Hardly had the teacher entered",
+            "questionNumber": 3,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "She suggested me to rewrite the introduction more clearly.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "suggested that I rewrite / suggested rewriting",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: suggested that I rewrite / suggested rewriting"
+          },
+          "explanation": "Suggest is not followed by object + to-infinitive.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "She suggested me to rewrite the introduction more clearly.",
+            "correction": "suggested that I rewrite / suggested rewriting",
+            "questionNumber": 4,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The essay was too much vague to convince the examiner.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "too vague",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: too vague"
+          },
+          "explanation": "Use 'too + adjective', not 'too much + adjective'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The essay was too much vague to convince the examiner.",
+            "correction": "too vague",
+            "questionNumber": 5,
+            "pack": "002"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Error Identification 002 Set 02",
+      "slug": "pack-002-error-identification-002-set-02",
+      "skillType": "ERROR_IDENTIFICATION",
+      "questionType": "ERROR_IDENTIFICATION",
+      "difficulty": "CHUYEN",
+      "statement": "Xác định lỗi sai và viết phần sửa đúng.",
+      "instructions": "Tập trung vào lỗi ngữ pháp nâng cao: agreement, inversion, preposition pattern, verb pattern.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Error Identification",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Not only he solved the problem, but he also explained it beautifully.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "Not only did he solve",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: Not only did he solve"
+          },
+          "explanation": "Not only at the beginning requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Not only he solved the problem, but he also explained it beautifully.",
+            "correction": "Not only did he solve",
+            "questionNumber": 6,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The data shows that students who read widely tend to write better essays.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "show",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: show"
+          },
+          "explanation": "Data is treated as plural in formal academic English here.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The data shows that students who read widely tend to write better essays.",
+            "correction": "show",
+            "questionNumber": 7,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "I look forward to hear from you after the interview.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "hearing",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: hearing"
+          },
+          "explanation": "look forward to + -ing.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "I look forward to hear from you after the interview.",
+            "correction": "hearing",
+            "questionNumber": 8,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The principal insisted that every student wears the school badge.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "wear",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: wear"
+          },
+          "explanation": "Subjunctive: insist that someone do something.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The principal insisted that every student wears the school badge.",
+            "correction": "wear",
+            "questionNumber": 9,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "There is little evidences to support such a strong conclusion.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "little evidence",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: little evidence"
+          },
+          "explanation": "Evidence is uncountable.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "There is little evidences to support such a strong conclusion.",
+            "correction": "little evidence",
+            "questionNumber": 10,
+            "pack": "002"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Error Identification 002 Set 03",
+      "slug": "pack-002-error-identification-002-set-03",
+      "skillType": "ERROR_IDENTIFICATION",
+      "questionType": "ERROR_IDENTIFICATION",
+      "difficulty": "CHUYEN",
+      "statement": "Xác định lỗi sai và viết phần sửa đúng.",
+      "instructions": "Tập trung vào lỗi ngữ pháp nâng cao: agreement, inversion, preposition pattern, verb pattern.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Error Identification",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The report was consisted of three sections and an appendix.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "consisted of",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: consisted of"
+          },
+          "explanation": "Consist of is not passive.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The report was consisted of three sections and an appendix.",
+            "correction": "consisted of",
+            "questionNumber": 11,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee discussed about the proposal for nearly two hours.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "discussed the proposal",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: discussed the proposal"
+          },
+          "explanation": "Discuss is transitive; no 'about'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The committee discussed about the proposal for nearly two hours.",
+            "correction": "discussed the proposal",
+            "questionNumber": 12,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "He is one of the students who has submitted the assignment early.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "have submitted",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: have submitted"
+          },
+          "explanation": "Relative clause refers to plural 'students'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "He is one of the students who has submitted the assignment early.",
+            "correction": "have submitted",
+            "questionNumber": 13,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "No sooner the test began than the fire alarm went off.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "No sooner had the test begun",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: No sooner had the test begun"
+          },
+          "explanation": "No sooner requires inversion and past perfect.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "No sooner the test began than the fire alarm went off.",
+            "correction": "No sooner had the test begun",
+            "questionNumber": 14,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher made us to revise the paragraph again.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "made us revise",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: made us revise"
+          },
+          "explanation": "make + object + bare infinitive.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The teacher made us to revise the paragraph again.",
+            "correction": "made us revise",
+            "questionNumber": 15,
+            "pack": "002"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Error Identification 002 Set 04",
+      "slug": "pack-002-error-identification-002-set-04",
+      "skillType": "ERROR_IDENTIFICATION",
+      "questionType": "ERROR_IDENTIFICATION",
+      "difficulty": "CHUYEN",
+      "statement": "Xác định lỗi sai và viết phần sửa đúng.",
+      "instructions": "Tập trung vào lỗi ngữ pháp nâng cao: agreement, inversion, preposition pattern, verb pattern.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Error Identification",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The reason why he failed was because he ignored the instructions.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "that he ignored / he ignored",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: that he ignored / he ignored"
+          },
+          "explanation": "Avoid 'the reason why... was because'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The reason why he failed was because he ignored the instructions.",
+            "correction": "that he ignored / he ignored",
+            "questionNumber": 16,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "This is a highly recommended course for students who are interested to academic writing.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "interested in",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: interested in"
+          },
+          "explanation": "interested in + noun/-ing.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "This is a highly recommended course for students who are interested to academic writing.",
+            "correction": "interested in",
+            "questionNumber": 17,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Each of the candidates were asked to prepare a short speech.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "was asked",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: was asked"
+          },
+          "explanation": "Each is singular.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Each of the candidates were asked to prepare a short speech.",
+            "correction": "was asked",
+            "questionNumber": 18,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The article provides many useful informations about exam strategies.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "much useful information / many useful pieces of information",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: much useful information / many useful pieces of information"
+          },
+          "explanation": "Information is uncountable.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The article provides many useful informations about exam strategies.",
+            "correction": "much useful information / many useful pieces of information",
+            "questionNumber": 19,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Only after reading the passage carefully I understood the writer's attitude.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "did I understand",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: did I understand"
+          },
+          "explanation": "Only after at the beginning requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Only after reading the passage carefully I understood the writer's attitude.",
+            "correction": "did I understand",
+            "questionNumber": 20,
+            "pack": "002"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Error Identification 002 Set 05",
+      "slug": "pack-002-error-identification-002-set-05",
+      "skillType": "ERROR_IDENTIFICATION",
+      "questionType": "ERROR_IDENTIFICATION",
+      "difficulty": "CHUYEN",
+      "statement": "Xác định lỗi sai và viết phần sửa đúng.",
+      "instructions": "Tập trung vào lỗi ngữ pháp nâng cao: agreement, inversion, preposition pattern, verb pattern.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Error Identification",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "She is used to work under pressure because she has joined many competitions.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "used to working",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: used to working"
+          },
+          "explanation": "be used to + -ing.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "She is used to work under pressure because she has joined many competitions.",
+            "correction": "used to working",
+            "questionNumber": 21,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The school provided students with a large amount of opportunities to practise speaking.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "a large number of opportunities",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: a large number of opportunities"
+          },
+          "explanation": "Opportunities are countable; use number.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The school provided students with a large amount of opportunities to practise speaking.",
+            "correction": "a large number of opportunities",
+            "questionNumber": 22,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The novel was so bored that I stopped reading after two chapters.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "so boring",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: so boring"
+          },
+          "explanation": "Boring describes the novel; bored describes a person.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The novel was so bored that I stopped reading after two chapters.",
+            "correction": "so boring",
+            "questionNumber": 23,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Had he listened to the advice, he will not have made that mistake.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "would not have made",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: would not have made"
+          },
+          "explanation": "Third conditional requires would have + past participle.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Had he listened to the advice, he will not have made that mistake.",
+            "correction": "would not have made",
+            "questionNumber": 24,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The students were made rewrite their essays after receiving feedback.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "made to rewrite",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: made to rewrite"
+          },
+          "explanation": "Passive form: be made to + infinitive.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The students were made rewrite their essays after receiving feedback.",
+            "correction": "made to rewrite",
+            "questionNumber": 25,
+            "pack": "002"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Error Identification 002 Set 06",
+      "slug": "pack-002-error-identification-002-set-06",
+      "skillType": "ERROR_IDENTIFICATION",
+      "questionType": "ERROR_IDENTIFICATION",
+      "difficulty": "CHUYEN",
+      "statement": "Xác định lỗi sai và viết phần sửa đúng.",
+      "instructions": "Tập trung vào lỗi ngữ pháp nâng cao: agreement, inversion, preposition pattern, verb pattern.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Error Identification",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "She denied to have copied the paragraph from the website.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "denied having copied / denied copying",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: denied having copied / denied copying"
+          },
+          "explanation": "Deny + -ing/perfect -ing.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "She denied to have copied the paragraph from the website.",
+            "correction": "denied having copied / denied copying",
+            "questionNumber": 26,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The passage raises an important question of whether success should be measured by wealth.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "question as to whether / question whether",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: question as to whether / question whether"
+          },
+          "explanation": "Natural pattern: question whether/as to whether.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The passage raises an important question of whether success should be measured by wealth.",
+            "correction": "question as to whether / question whether",
+            "questionNumber": 27,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Under no circumstances students should leave the room during the test.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "should students leave",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: should students leave"
+          },
+          "explanation": "Negative phrase requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "Under no circumstances students should leave the room during the test.",
+            "correction": "should students leave",
+            "questionNumber": 28,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The more you practise, your answers become more accurate.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "A",
+            "correction": "the more accurate your answers become",
+            "accepted": [
+              "A"
+            ],
+            "display": "A: the more accurate your answers become"
+          },
+          "explanation": "The more..., the more... structure.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The more you practise, your answers become more accurate.",
+            "correction": "the more accurate your answers become",
+            "questionNumber": 29,
+            "pack": "002"
+          }
+        },
+        {
+          "type": "ERROR_IDENTIFICATION",
+          "skillType": "ERROR_IDENTIFICATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher advised that the essay was rewritten before submission.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "errorPart": "B",
+            "correction": "be rewritten",
+            "accepted": [
+              "B"
+            ],
+            "display": "B: be rewritten"
+          },
+          "explanation": "Subjunctive passive after advise/recommend that.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentence": "The teacher advised that the essay was rewritten before submission.",
+            "correction": "be rewritten",
+            "questionNumber": 30,
+            "pack": "002"
+          }
+        }
+      ]
+    }
+  ]
+}

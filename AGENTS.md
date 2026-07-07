@@ -1,0 +1,102 @@
+# AGENTS.md
+
+Instructions for future Codex agents working on Englishphile:
+
+- Keep all UI text in Vietnamese.
+- Keep code, database fields, TypeScript types, enums, and file names in English.
+- Treat `DAY` in uploaded file names as source metadata only.
+- Do not use old coding-practice comparison wording in UI, README, AGENTS, metadata, dashboards, or product descriptions.
+- Englishphile is a personalized English practice platform centered on diagnostic testing, ability-based recommendations, independent practice, and progress tracking.
+- Preserve the practice structure: Gym mode, skill, topic, difficulty, problem status, problem bank, submissions.
+- Main student navigation is Trang chủ, Gym, Contests, Wiki, and Về Englishphile.
+- Gym contains Reading, Writing, Listening, and Use of English.
+- Use of English contains Pronunciation, Multiple Choice, Open Cloze, Guided Cloze, Word Formation, Sentence Transformation, Error Identification, Trios / Gapped Sentences, Collocations, Phrasal Verbs, Transitions, and Grammar Focus.
+- Wiki is the renamed theory area. Keep `/theory` as a redirect if needed.
+- Contests are for old exam practice and occasional timed English contests, not classroom homework.
+- Contest builders must use `PUBLISHED` problems by default and server-validate that selected contest problems are published.
+- Contest leaderboards must not expose user email.
+- Student self-practice and diagnostic recommendations are primary.
+- Do not make classroom or assignment features primary in student navigation, dashboard, landing page, or product positioning. They can remain hidden secondary/legacy admin-compatible tools.
+- Do not create public teacher signup. Public signup must create normal learner accounts only.
+- Public signup must never expose `STUDENT`/`TEACHER`/`ADMIN` role choices.
+- Owner/admin access is controlled by admin-compatible roles and `OWNER_EMAIL`; do not automatically promote random public users.
+- Keep `OWNER_EMAIL` behavior clear in docs and UI. Public users still sign up as learners even when an owner email is configured.
+- Admin/owner route protection is mandatory for `/admin`, `/admin/*`, and admin API routes.
+- Protect admin APIs as well as admin pages; return or redirect with friendly no-access behavior and never leak admin data to learners.
+- Normal learners must not see admin navigation or admin data. Use friendly no-access UI for unauthorized admin access.
+- Hide teacher/classroom/assignment concepts from the main student flow unless the user explicitly asks to revive legacy tools.
+- Site-owner/admin wording should use admin, quản trị, or người điều hành in visible UI.
+- Avoid unnecessary chip/tag sections that make the UI look AI-generated. Topic tags should be subtle metadata or deliberate filters, never large empty chip-only cards.
+- Keep student-facing UI polished, calm, academic, spacious, and human-designed.
+- Keep Gym as the core practice hub. Diagnostic and recommendations should feed Gym practice.
+- Diagnostic must use `PUBLISHED` content only.
+- Diagnostic should prefer `isDiagnosticEligible` problems but fall back safely to published content when the bank is incomplete.
+- Listening diagnostic content is optional/future-ready; exclude Listening from auto-score when no published listening content exists.
+- Diagnostic scoring must stay deterministic and explainable. Do not add AI scoring unless explicitly requested.
+- Keep difficulty weighting and confidence rules visible in result/admin UX when relevant.
+- Recommendations must be deterministic, explainable, and based on wrong answers, diagnostic weak skills/topics, current level, challenge items, and sparse Reading/Writing data.
+- Do not reset user data, imported content packs, or local diagnostic/admin data accidentally. Do not run seed unless the user explicitly accepts the reset.
+- Do not run `npm run prisma:seed` casually on populated beta/local databases.
+- Never run seed on populated data unless explicitly asked and the reset risk is acknowledged.
+- Always backup before migrations, large imports, or data-shaping scripts when a database may contain real/local imported data.
+- Use `npm run db:backup`, `npm run db:stats`, and `npm run db:export` for beta data safety workflows.
+- Do not expose `passwordHash` in exports, logs, UI, support pages, or debugging output.
+- Production migrations should use `npm run prisma:deploy`; do not use migrate-dev against production data.
+- Preserve `/api/health`, `/status`, `/privacy`, `/terms`, `/contact`, and `/admin/beta-checklist` as beta readiness surfaces.
+- Do not reorganize the product around “Day 1, Day 2”.
+- Preserve modular question renderers under `src/components/questions/`.
+- Preserve importer validation under `src/lib/import/`.
+- Do not bypass dry-run validation or admin review paths.
+- Do not add OCR/PDF/DOCX extraction unless explicitly requested.
+- Keep JSON/CSV import formats backward-compatible.
+- Keep importer errors and UI copy in Vietnamese.
+- Preserve the `ContentStatus` lifecycle: `DRAFT`, `NEEDS_REVIEW`, `PUBLISHED`, `ARCHIVED`.
+- Imported content should default to `NEEDS_REVIEW` unless an admin explicitly chooses to publish during import.
+- Do not expose draft, needs-review, or archived content to students through `/problems`, random practice, dashboard recommendations, or public problem detail pages.
+- Do not confuse `ContentStatus` with `UserProblemStatus`; one is editorial lifecycle, the other is learner progress.
+- Always validate JSON fields before saving question edits.
+- Do not bypass publish validation rules. Problems cannot publish without questions, and objective questions need valid answer/options data.
+- Preserve legacy classroom permissions if touching those routes: students can only see their own joined classes and assigned work, admin-compatible managers can manage only their own classes/assignments unless they are `ADMIN`.
+- Do not expose admin-only or legacy class data, student lists, or submission tables to students.
+- Only `PUBLISHED` problems can be assigned by default.
+- Keep `AssignmentSubmission` separate from single-problem `Submission` unless a future refactor intentionally changes the data model.
+- Assignment completion should continue to create normal `Submission`/`SubmissionAnswer` records so wrong-question review and progress tracking keep working.
+- Do not break existing wrong-question, problem-solving, import, review, or content lifecycle flows while changing classroom features.
+- Preserve analytics permission boundaries: students see only their own analytics; admin-compatible users see only authorized legacy classes/assignments/students unless `ADMIN`.
+- Do not expose one student’s analytics or submissions to another student.
+- Do not count needs-review writing or non-exact sentence transformation answers as correct/incorrect until an admin-compatible grader saves a manual grade.
+- Keep recommendation logic deterministic unless the user explicitly asks for AI recommendations.
+- Student recommendations must use `PUBLISHED` problems only.
+- Keep manual grading auditable through `ManualGrade`; do not silently overwrite grading behavior without updating recalculation logic.
+- Preserve the content pack workflow under `/admin/content-packs`, `/admin/content-qa`, and `/admin/import`.
+- Do not bypass content QA for bulk publish. QA `ERROR` items must not be bulk-published.
+- Do not expose content pack pages, QA reports, import batches, or other admin-only pack data to students.
+- Imported content pack problems should default to `NEEDS_REVIEW` unless an admin explicitly chooses immediate publish.
+- Upload-first import is preferred. Do not rely on manual paste import as the main workflow; keep paste import as advanced/debug.
+- Imported content must go through duplicate detection.
+- Exact and high-similarity duplicate questions should be skipped.
+- Possible duplicates should be imported as `NEEDS_REVIEW`, flagged for manual review, and blocked from bulk publish by QA.
+- PDF/OCR/AI extraction is not part of Phase 6 unless the user explicitly requests it.
+- Keep generated or imported content traceable to `SourceCollection`, `ImportBatch`, and `ContentPack`.
+- Prefer split content-pack files such as `01-...` through `10-...` over `00-all-in-one` when both are present.
+- Do not paste large copyrighted worksheet content into seed data, examples, or templates.
+- Use original sample questions unless cleaned/importable content is explicitly provided.
+- Keep Prisma models future-friendly for JSON/CSV/PDF/DOCX import workflows.
+- Run `npm run lint`, `npm run typecheck`, and `npm run build` before final response.
+- When reporting work, explain files changed and commands run.
+
+## Deployment (Vercel + Neon)
+
+- Always read `handoff.md` before starting major work.
+- Do not run seed on populated/local/production data.
+- For deployment, prefer Vercel Hobby + Neon Free unless the user chooses otherwise.
+- Keep production database on PostgreSQL (Neon). Do not use SQLite for deployed production.
+- Use `DIRECT_URL` (Neon non-pooled) for migrations. `DATABASE_URL` (pooled) is for app runtime.
+- Set `DATABASE_URL` and `DIRECT_URL` in Vercel environment variables.
+- Production migration: `npm run prisma:deploy` (triggered by Vercel build via `npm run build`).
+- Do not use `prisma migrate dev` against production data.
+- Run `npm run db:export:portable` before migrating to Neon, then `npm run db:import:portable`.
+- Do not export `passwordHash` in any export.
+- Preserve all imported/uploaded content — content packs must be portable.
+- Vercel Hobby is for non-commercial / personal beta only.
+- See README "Deploy miễn phí với Vercel + Neon" for step-by-step instructions.

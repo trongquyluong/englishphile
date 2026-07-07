@@ -1,0 +1,1819 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Phrasal Verbs Pack 002",
+    "description": "Original phrasal verb MCQ practice for specialized English learners.",
+    "originalFileName": "04-phrasal-verbs-pack-002.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile Content Pack 002 generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Phrasal Verbs Practice 002 Set 01",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-01",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The meeting was _____ because the director was ill.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "called off"
+            },
+            {
+              "label": "B",
+              "text": "called up"
+            },
+            {
+              "label": "C",
+              "text": "called in"
+            },
+            {
+              "label": "D",
+              "text": "called out"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "call off = cancel.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 1,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "She _____ the old letters while cleaning the attic.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "came across"
+            },
+            {
+              "label": "B",
+              "text": "came into"
+            },
+            {
+              "label": "C",
+              "text": "came out"
+            },
+            {
+              "label": "D",
+              "text": "came about"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "come across = find by chance.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 2,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The company had to _____ several employees during the recession.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "lay off"
+            },
+            {
+              "label": "B",
+              "text": "put off"
+            },
+            {
+              "label": "C",
+              "text": "set off"
+            },
+            {
+              "label": "D",
+              "text": "turn off"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "lay off = dismiss from work.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 3,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "He tried to _____ his nervousness with a joke.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "cover up"
+            },
+            {
+              "label": "B",
+              "text": "cover for"
+            },
+            {
+              "label": "C",
+              "text": "cover over"
+            },
+            {
+              "label": "D",
+              "text": "cover in"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "cover up = hide.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 4,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The new evidence _____ his claim that he was elsewhere.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "backs up"
+            },
+            {
+              "label": "B",
+              "text": "brings up"
+            },
+            {
+              "label": "C",
+              "text": "breaks up"
+            },
+            {
+              "label": "D",
+              "text": "builds up"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "back up = support.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 5,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 02",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-02",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "She refused to _____ to pressure from her classmates.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "give in"
+            },
+            {
+              "label": "B",
+              "text": "give off"
+            },
+            {
+              "label": "C",
+              "text": "give out"
+            },
+            {
+              "label": "D",
+              "text": "give away"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "give in to pressure = yield.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 6,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher asked us to _____ the key points of the article.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "sum up"
+            },
+            {
+              "label": "B",
+              "text": "make up"
+            },
+            {
+              "label": "C",
+              "text": "hold up"
+            },
+            {
+              "label": "D",
+              "text": "take up"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "sum up = summarise.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 7,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan _____ because no one was willing to fund it.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "fell through"
+            },
+            {
+              "label": "B",
+              "text": "fell over"
+            },
+            {
+              "label": "C",
+              "text": "fell back"
+            },
+            {
+              "label": "D",
+              "text": "fell out"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "fall through = fail to happen.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 8,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The smell of smoke _____ memories of his childhood home.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "brought back"
+            },
+            {
+              "label": "B",
+              "text": "brought up"
+            },
+            {
+              "label": "C",
+              "text": "brought out"
+            },
+            {
+              "label": "D",
+              "text": "brought down"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "bring back memories.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 9,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee will _____ the proposal at the next meeting.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "look into"
+            },
+            {
+              "label": "B",
+              "text": "look after"
+            },
+            {
+              "label": "C",
+              "text": "look over"
+            },
+            {
+              "label": "D",
+              "text": "look up"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "look into = investigate/consider.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 10,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 03",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-03",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "He _____ the difficult word in an online dictionary.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "looked up"
+            },
+            {
+              "label": "B",
+              "text": "looked into"
+            },
+            {
+              "label": "C",
+              "text": "looked over"
+            },
+            {
+              "label": "D",
+              "text": "looked after"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "look up a word.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 11,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The scandal _____ serious questions about accountability.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "raises"
+            },
+            {
+              "label": "B",
+              "text": "sets up"
+            },
+            {
+              "label": "C",
+              "text": "brings about"
+            },
+            {
+              "label": "D",
+              "text": "calls off"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "raise questions is not a phrasal verb but the best collocation here.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 12,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The athlete managed to _____ from an early injury.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "bounce back"
+            },
+            {
+              "label": "B",
+              "text": "bounce off"
+            },
+            {
+              "label": "C",
+              "text": "bounce over"
+            },
+            {
+              "label": "D",
+              "text": "bounce in"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "bounce back = recover.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 13,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The school decided to _____ a new reading programme.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "bring in"
+            },
+            {
+              "label": "B",
+              "text": "bring out"
+            },
+            {
+              "label": "C",
+              "text": "bring off"
+            },
+            {
+              "label": "D",
+              "text": "bring around"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "bring in = introduce.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 14,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The speaker kept _____ the same point.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "coming back to"
+            },
+            {
+              "label": "B",
+              "text": "coming over to"
+            },
+            {
+              "label": "C",
+              "text": "coming down to"
+            },
+            {
+              "label": "D",
+              "text": "coming out to"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "come back to = return to a topic.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 15,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 04",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-04",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "Do not _____ your notes until the exam starts.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "put away"
+            },
+            {
+              "label": "B",
+              "text": "put off"
+            },
+            {
+              "label": "C",
+              "text": "put out"
+            },
+            {
+              "label": "D",
+              "text": "put through"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "put away = place out of sight/store.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 16,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher _____ the instructions once more for clarity.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "went over"
+            },
+            {
+              "label": "B",
+              "text": "went off"
+            },
+            {
+              "label": "C",
+              "text": "went under"
+            },
+            {
+              "label": "D",
+              "text": "went through"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "go over = review/explain.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 17,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "We need to _____ the weaker arguments from the essay.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "cut out"
+            },
+            {
+              "label": "B",
+              "text": "cut in"
+            },
+            {
+              "label": "C",
+              "text": "cut up"
+            },
+            {
+              "label": "D",
+              "text": "cut back"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "cut out = remove.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 18,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "Her talent really _____ during the final debate.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "stood out"
+            },
+            {
+              "label": "B",
+              "text": "stood by"
+            },
+            {
+              "label": "C",
+              "text": "stood down"
+            },
+            {
+              "label": "D",
+              "text": "stood for"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "stand out = be noticeable.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 19,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "He _____ the story to make himself sound braver.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "made up"
+            },
+            {
+              "label": "B",
+              "text": "made out"
+            },
+            {
+              "label": "C",
+              "text": "made for"
+            },
+            {
+              "label": "D",
+              "text": "made after"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "make up = invent.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 20,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 05",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-05",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The charity is trying to _____ enough money for a new library.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "raise"
+            },
+            {
+              "label": "B",
+              "text": "run up"
+            },
+            {
+              "label": "C",
+              "text": "come up"
+            },
+            {
+              "label": "D",
+              "text": "take in"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "raise money.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 21,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "She _____ the job offer after discussing it with her parents.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "turned down"
+            },
+            {
+              "label": "B",
+              "text": "turned out"
+            },
+            {
+              "label": "C",
+              "text": "turned up"
+            },
+            {
+              "label": "D",
+              "text": "turned over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "turn down = refuse.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 22,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The lights suddenly _____ during the storm.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "went out"
+            },
+            {
+              "label": "B",
+              "text": "went off"
+            },
+            {
+              "label": "C",
+              "text": "went over"
+            },
+            {
+              "label": "D",
+              "text": "went by"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "go out = stop burning/shining.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 23,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "His explanation did not _____ to me.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "add up"
+            },
+            {
+              "label": "B",
+              "text": "add in"
+            },
+            {
+              "label": "C",
+              "text": "add on"
+            },
+            {
+              "label": "D",
+              "text": "add over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "add up = make sense.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 24,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The police are trying to _____ who leaked the document.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "find out"
+            },
+            {
+              "label": "B",
+              "text": "find off"
+            },
+            {
+              "label": "C",
+              "text": "find up"
+            },
+            {
+              "label": "D",
+              "text": "find over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "find out = discover.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 25,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 06",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-06",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The student _____ a convincing argument in her essay.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "put forward"
+            },
+            {
+              "label": "B",
+              "text": "put off"
+            },
+            {
+              "label": "C",
+              "text": "put out"
+            },
+            {
+              "label": "D",
+              "text": "put down"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "put forward = propose.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 26,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "They _____ a small business after graduating.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "set up"
+            },
+            {
+              "label": "B",
+              "text": "set off"
+            },
+            {
+              "label": "C",
+              "text": "set in"
+            },
+            {
+              "label": "D",
+              "text": "set apart"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "set up = establish.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 27,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The project _____ more difficult than expected.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "turned out"
+            },
+            {
+              "label": "B",
+              "text": "turned in"
+            },
+            {
+              "label": "C",
+              "text": "turned down"
+            },
+            {
+              "label": "D",
+              "text": "turned over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "turn out = prove to be.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 28,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "He promised to _____ the matter with the principal.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "take up"
+            },
+            {
+              "label": "B",
+              "text": "take in"
+            },
+            {
+              "label": "C",
+              "text": "take off"
+            },
+            {
+              "label": "D",
+              "text": "take after"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "take up a matter = raise/discuss it.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 29,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The old rule was finally _____.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "done away with"
+            },
+            {
+              "label": "B",
+              "text": "done up"
+            },
+            {
+              "label": "C",
+              "text": "done in"
+            },
+            {
+              "label": "D",
+              "text": "done by"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "do away with = abolish.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 30,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 07",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-07",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The class _____ laughing when the projector failed again.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "burst out"
+            },
+            {
+              "label": "B",
+              "text": "broke into"
+            },
+            {
+              "label": "C",
+              "text": "broke out"
+            },
+            {
+              "label": "D",
+              "text": "burst into"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "burst into laughter is the natural phrase.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 31,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "Her confidence _____ as the interview progressed.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "built up"
+            },
+            {
+              "label": "B",
+              "text": "built in"
+            },
+            {
+              "label": "C",
+              "text": "built on"
+            },
+            {
+              "label": "D",
+              "text": "built over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "build up = increase gradually.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 32,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The government promised to _____ the causes of unemployment.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "deal with"
+            },
+            {
+              "label": "B",
+              "text": "deal in"
+            },
+            {
+              "label": "C",
+              "text": "deal out"
+            },
+            {
+              "label": "D",
+              "text": "deal over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "deal with = address.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 33,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The noise made it hard to _____ what the speaker was saying.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "make out"
+            },
+            {
+              "label": "B",
+              "text": "make up"
+            },
+            {
+              "label": "C",
+              "text": "make off"
+            },
+            {
+              "label": "D",
+              "text": "make for"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "make out = hear/understand with difficulty.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 34,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "He _____ his success to years of disciplined practice.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "put down"
+            },
+            {
+              "label": "B",
+              "text": "put forward"
+            },
+            {
+              "label": "C",
+              "text": "put across"
+            },
+            {
+              "label": "D",
+              "text": "put aside"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "put something down to = attribute to.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 35,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Phrasal Verbs Practice 002 Set 08",
+      "slug": "pack-002-phrasal-verbs-practice-002-set-08",
+      "skillType": "PHRASAL_VERBS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn phrasal verb/cụm động từ phù hợp nhất.",
+      "instructions": "Chú ý nghĩa trong ngữ cảnh và giới từ/tiểu từ đi kèm.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Phrasal Verbs",
+        "Vocabulary"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher _____ the essays on Friday.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "handed back"
+            },
+            {
+              "label": "B",
+              "text": "handed over"
+            },
+            {
+              "label": "C",
+              "text": "handed out"
+            },
+            {
+              "label": "D",
+              "text": "handed in"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "hand back = return.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 36,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "Please _____ your homework before leaving.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "hand in"
+            },
+            {
+              "label": "B",
+              "text": "hand out"
+            },
+            {
+              "label": "C",
+              "text": "hand over"
+            },
+            {
+              "label": "D",
+              "text": "hand back"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "hand in = submit.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 37,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The argument _____ after both sides apologised.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "died down"
+            },
+            {
+              "label": "B",
+              "text": "died out"
+            },
+            {
+              "label": "C",
+              "text": "died off"
+            },
+            {
+              "label": "D",
+              "text": "died away"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "die down = become less intense.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 38,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "The speaker failed to _____ his message clearly.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "get across"
+            },
+            {
+              "label": "B",
+              "text": "get over"
+            },
+            {
+              "label": "C",
+              "text": "get into"
+            },
+            {
+              "label": "D",
+              "text": "get by"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "get across = communicate successfully.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 39,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "PHRASAL_VERBS",
+          "difficulty": "CHUYEN",
+          "prompt": "She _____ the missing paragraph from her final draft.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "left out"
+            },
+            {
+              "label": "B",
+              "text": "left over"
+            },
+            {
+              "label": "C",
+              "text": "left behind"
+            },
+            {
+              "label": "D",
+              "text": "left off"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "leave out = omit.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 40,
+            "pack": "002",
+            "focus": "phrasal verbs"
+          }
+        }
+      ]
+    }
+  ]
+}

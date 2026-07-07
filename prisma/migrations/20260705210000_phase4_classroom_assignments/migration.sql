@@ -1,0 +1,2 @@
+-- Superseded by 20260705000000_postgres_baseline.
+-- Intentionally blank so fresh PostgreSQL databases create the current schema once.

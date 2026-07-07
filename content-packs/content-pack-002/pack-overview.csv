@@ -1,0 +1,8 @@
+fileName,skillType,problemCount,questionCount
+01-word-formation-pack-002.json,WORD_FORMATION,12,60
+02-sentence-transformation-pack-002.json,SENTENCE_TRANSFORMATION,10,50
+03-collocation-mcq-pack-002.json,MULTIPLE_CHOICE,11,55
+04-phrasal-verbs-pack-002.json,PHRASAL_VERBS,8,40
+05-transitions-pack-002.json,TRANSITIONS,4,20
+06-grammar-focus-pack-002.json,GRAMMAR_FOCUS,4,20
+07-error-identification-pack-002.json,ERROR_IDENTIFICATION,6,30

@@ -1,0 +1,919 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Grammar Focus Pack 002",
+    "description": "Original advanced grammar focus practice on inversion, conditionals and subjunctive structures.",
+    "originalFileName": "06-grammar-focus-pack-002.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile Content Pack 002 generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Grammar Focus: Inversion and Conditionals 002 Set 01",
+      "slug": "pack-002-grammar-focus-inversion-and-conditionals-002-set-01",
+      "skillType": "GRAMMAR_FOCUS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn cấu trúc ngữ pháp chính xác nhất.",
+      "instructions": "Tập trung vào đảo ngữ, conditional forms, subjunctive và comparative structures.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Inversion",
+        "Conditionals",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Never before _____ such a difficult transformation question.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "have I seen"
+            },
+            {
+              "label": "B",
+              "text": "I have seen"
+            },
+            {
+              "label": "C",
+              "text": "did I saw"
+            },
+            {
+              "label": "D",
+              "text": "I saw"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Negative adverbial 'Never before' requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 1,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Had I known about the deadline, I _____ the essay earlier.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "would have started"
+            },
+            {
+              "label": "B",
+              "text": "will start"
+            },
+            {
+              "label": "C",
+              "text": "started"
+            },
+            {
+              "label": "D",
+              "text": "had started"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Third conditional inversion: Had I known..., I would have...",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 2,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Only after the results were announced _____ the mistake.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "did they notice"
+            },
+            {
+              "label": "B",
+              "text": "they noticed"
+            },
+            {
+              "label": "C",
+              "text": "had they notice"
+            },
+            {
+              "label": "D",
+              "text": "they had noticed"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Only after + inversion in main clause.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 3,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Not only _____ the answer, but she also explained the method.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "did she find"
+            },
+            {
+              "label": "B",
+              "text": "she found"
+            },
+            {
+              "label": "C",
+              "text": "found she"
+            },
+            {
+              "label": "D",
+              "text": "had she find"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Not only at the start requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 4,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Were the school to change the timetable, many students _____ affected.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "would be"
+            },
+            {
+              "label": "B",
+              "text": "will be"
+            },
+            {
+              "label": "C",
+              "text": "are"
+            },
+            {
+              "label": "D",
+              "text": "had been"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Formal second conditional inversion: Were + subject + to V.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 5,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Grammar Focus: Inversion and Conditionals 002 Set 02",
+      "slug": "pack-002-grammar-focus-inversion-and-conditionals-002-set-02",
+      "skillType": "GRAMMAR_FOCUS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn cấu trúc ngữ pháp chính xác nhất.",
+      "instructions": "Tập trung vào đảo ngữ, conditional forms, subjunctive và comparative structures.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Inversion",
+        "Conditionals",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "No sooner had the bell rung _____ the students rushed out.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "than"
+            },
+            {
+              "label": "B",
+              "text": "when"
+            },
+            {
+              "label": "C",
+              "text": "that"
+            },
+            {
+              "label": "D",
+              "text": "as"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "No sooner... than.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 6,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Scarcely had the speaker begun _____ the microphone stopped working.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "when"
+            },
+            {
+              "label": "B",
+              "text": "than"
+            },
+            {
+              "label": "C",
+              "text": "that"
+            },
+            {
+              "label": "D",
+              "text": "as"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Scarcely/Hardly... when.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 7,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Under no circumstances _____ your password with anyone.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "should you share"
+            },
+            {
+              "label": "B",
+              "text": "you should share"
+            },
+            {
+              "label": "C",
+              "text": "share you"
+            },
+            {
+              "label": "D",
+              "text": "you share"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Negative phrase + auxiliary inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 8,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "If it _____ for her advice, I would have made a serious mistake.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "hadn't been"
+            },
+            {
+              "label": "B",
+              "text": "wasn't"
+            },
+            {
+              "label": "C",
+              "text": "weren't"
+            },
+            {
+              "label": "D",
+              "text": "isn't"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "If it hadn't been for = without past help.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 9,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Were it not for public support, the charity _____ survive.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "would not"
+            },
+            {
+              "label": "B",
+              "text": "will not"
+            },
+            {
+              "label": "C",
+              "text": "does not"
+            },
+            {
+              "label": "D",
+              "text": "did not"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Were it not for = without; use would.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 10,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Grammar Focus: Inversion and Conditionals 002 Set 03",
+      "slug": "pack-002-grammar-focus-inversion-and-conditionals-002-set-03",
+      "skillType": "GRAMMAR_FOCUS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn cấu trúc ngữ pháp chính xác nhất.",
+      "instructions": "Tập trung vào đảo ngữ, conditional forms, subjunctive và comparative structures.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Inversion",
+        "Conditionals",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Supposing you _____ the scholarship, what would you do first?",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "won"
+            },
+            {
+              "label": "B",
+              "text": "win"
+            },
+            {
+              "label": "C",
+              "text": "had won"
+            },
+            {
+              "label": "D",
+              "text": "would win"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Supposing + past simple for hypothetical present/future.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 11,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "It is essential that every candidate _____ the instructions carefully.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "read"
+            },
+            {
+              "label": "B",
+              "text": "reads"
+            },
+            {
+              "label": "C",
+              "text": "will read"
+            },
+            {
+              "label": "D",
+              "text": "is reading"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Subjunctive after 'It is essential that'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 12,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "The more carefully you revise, _____ mistakes you will make.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "the fewer"
+            },
+            {
+              "label": "B",
+              "text": "the less"
+            },
+            {
+              "label": "C",
+              "text": "fewer"
+            },
+            {
+              "label": "D",
+              "text": "less"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "The + comparative, the + comparative.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 13,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Little _____ that his comment would cause such controversy.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "did he realise"
+            },
+            {
+              "label": "B",
+              "text": "he realised"
+            },
+            {
+              "label": "C",
+              "text": "had he realise"
+            },
+            {
+              "label": "D",
+              "text": "he had realised"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Little at the front requires inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 14,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "So convincing _____ that the committee approved the plan immediately.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "was her argument"
+            },
+            {
+              "label": "B",
+              "text": "her argument was"
+            },
+            {
+              "label": "C",
+              "text": "did her argument"
+            },
+            {
+              "label": "D",
+              "text": "her argument did"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "So + adjective + be + subject + that.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 15,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Grammar Focus: Inversion and Conditionals 002 Set 04",
+      "slug": "pack-002-grammar-focus-inversion-and-conditionals-002-set-04",
+      "skillType": "GRAMMAR_FOCUS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn cấu trúc ngữ pháp chính xác nhất.",
+      "instructions": "Tập trung vào đảo ngữ, conditional forms, subjunctive và comparative structures.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Inversion",
+        "Conditionals",
+        "Grammar Focus"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Should you _____ any difficulty, contact the exam supervisor.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "experience"
+            },
+            {
+              "label": "B",
+              "text": "experienced"
+            },
+            {
+              "label": "C",
+              "text": "experiencing"
+            },
+            {
+              "label": "D",
+              "text": "to experience"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Should + subject + base verb.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 16,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "The report recommends that the rule _____ revised.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "be"
+            },
+            {
+              "label": "B",
+              "text": "is"
+            },
+            {
+              "label": "C",
+              "text": "was"
+            },
+            {
+              "label": "D",
+              "text": "will be"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Subjunctive passive: be revised.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 17,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Not until the final paragraph _____ the writer's real opinion.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "do we understand"
+            },
+            {
+              "label": "B",
+              "text": "we understand"
+            },
+            {
+              "label": "C",
+              "text": "did we understood"
+            },
+            {
+              "label": "D",
+              "text": "we understood"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Not until + inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 18,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "But for the librarian's help, we _____ the archive so quickly.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "would not have found"
+            },
+            {
+              "label": "B",
+              "text": "will not find"
+            },
+            {
+              "label": "C",
+              "text": "did not find"
+            },
+            {
+              "label": "D",
+              "text": "had not found"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "But for + noun = if it hadn't been for.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 19,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "GRAMMAR_FOCUS",
+          "difficulty": "CHUYEN",
+          "prompt": "Only by comparing the two texts _____ the difference in tone.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "can students notice"
+            },
+            {
+              "label": "B",
+              "text": "students can notice"
+            },
+            {
+              "label": "C",
+              "text": "notice students can"
+            },
+            {
+              "label": "D",
+              "text": "students notice"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Only by + -ing requires inversion in main clause.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 20,
+            "pack": "002",
+            "focus": "conditionals/inversion/subjunctive"
+          }
+        }
+      ]
+    }
+  ]
+}

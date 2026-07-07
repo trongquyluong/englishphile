@@ -1,0 +1,741 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Sentence Transformation Pack 001",
+    "description": "Original sentence transformation questions.",
+    "originalFileName": "englishphile-sentence-transformation-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Sentence Transformation Set 01",
+      "slug": "sentence-transformation-pack-001-sentence-transformation-set-01",
+      "skillType": "SENTENCE_TRANSFORMATION",
+      "questionType": "SENTENCE_TRANSFORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Viết lại câu sao cho nghĩa không đổi.",
+      "instructions": "Nếu có từ khóa, không thay đổi dạng của từ khóa. Hệ thống chỉ chấm đúng tuyệt đối; câu khác đáp án mẫu sẽ cần giáo viên kiểm tra.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Sentence Transformation",
+        "Inversion"
+      ],
+      "questions": [
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: I only realised how serious the problem was when I read the report.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "Not until I read the report did I realise how serious the problem was."
+            ],
+            "display": "Not until I read the report did I realise how serious the problem was.",
+            "manualReview": true
+          },
+          "explanation": "Not until + inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "I only realised how serious the problem was when I read the report.",
+            "modelAnswer": "Not until I read the report did I realise how serious the problem was.",
+            "grammarNote": "Not until + inversion.",
+            "questionNumber": 1
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: She was so absorbed in the book that she missed her stop.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "She was so wrapped up in the book that she missed her stop."
+            ],
+            "display": "She was so wrapped up in the book that she missed her stop.",
+            "manualReview": true
+          },
+          "explanation": "be wrapped up in.",
+          "rootWord": null,
+          "keyword": "WRAPPED",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "She was so absorbed in the book that she missed her stop.",
+            "modelAnswer": "She was so wrapped up in the book that she missed her stop.",
+            "grammarNote": "be wrapped up in.",
+            "questionNumber": 2
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The committee will not approve the plan under any circumstances.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "Under no circumstances will the committee approve the plan."
+            ],
+            "display": "Under no circumstances will the committee approve the plan.",
+            "manualReview": true
+          },
+          "explanation": "Negative adverbial inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The committee will not approve the plan under any circumstances.",
+            "modelAnswer": "Under no circumstances will the committee approve the plan.",
+            "grammarNote": "Negative adverbial inversion.",
+            "questionNumber": 3
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: He regrets not applying for the scholarship.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "He wishes he had applied for the scholarship."
+            ],
+            "display": "He wishes he had applied for the scholarship.",
+            "manualReview": true
+          },
+          "explanation": "wish + past perfect.",
+          "rootWord": null,
+          "keyword": "WISHES",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "He regrets not applying for the scholarship.",
+            "modelAnswer": "He wishes he had applied for the scholarship.",
+            "grammarNote": "wish + past perfect.",
+            "questionNumber": 4
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The lecture was too technical for most students to understand.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "It was such a technical lecture that most students could not understand it."
+            ],
+            "display": "It was such a technical lecture that most students could not understand it.",
+            "manualReview": true
+          },
+          "explanation": "such + adjective + noun + that.",
+          "rootWord": null,
+          "keyword": "SUCH",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The lecture was too technical for most students to understand.",
+            "modelAnswer": "It was such a technical lecture that most students could not understand it.",
+            "grammarNote": "such + adjective + noun + that.",
+            "questionNumber": 5
+          }
+        }
+      ]
+    },
+    {
+      "title": "Sentence Transformation Set 02",
+      "slug": "sentence-transformation-pack-001-sentence-transformation-set-02",
+      "skillType": "SENTENCE_TRANSFORMATION",
+      "questionType": "SENTENCE_TRANSFORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Viết lại câu sao cho nghĩa không đổi.",
+      "instructions": "Nếu có từ khóa, không thay đổi dạng của từ khóa. Hệ thống chỉ chấm đúng tuyệt đối; câu khác đáp án mẫu sẽ cần giáo viên kiểm tra.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Sentence Transformation",
+        "Idiomatic Transformations"
+      ],
+      "questions": [
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: I would prefer you not to mention this to anyone.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "I would rather you did not mention this to anyone."
+            ],
+            "display": "I would rather you did not mention this to anyone.",
+            "manualReview": true
+          },
+          "explanation": "would rather + past simple.",
+          "rootWord": null,
+          "keyword": "RATHER",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "I would prefer you not to mention this to anyone.",
+            "modelAnswer": "I would rather you did not mention this to anyone.",
+            "grammarNote": "would rather + past simple.",
+            "questionNumber": 6
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The manager did not explain the delay until the meeting ended.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "Only after the meeting ended did the manager explain the delay."
+            ],
+            "display": "Only after the meeting ended did the manager explain the delay.",
+            "manualReview": true
+          },
+          "explanation": "Only after + inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The manager did not explain the delay until the meeting ended.",
+            "modelAnswer": "Only after the meeting ended did the manager explain the delay.",
+            "grammarNote": "Only after + inversion.",
+            "questionNumber": 7
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: His failure to revise thoroughly led to his poor result.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "He got a poor result because he had not revised thoroughly."
+            ],
+            "display": "He got a poor result because he had not revised thoroughly.",
+            "manualReview": true
+          },
+          "explanation": "Cause-result transformation.",
+          "rootWord": null,
+          "keyword": "BECAUSE",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "His failure to revise thoroughly led to his poor result.",
+            "modelAnswer": "He got a poor result because he had not revised thoroughly.",
+            "grammarNote": "Cause-result transformation.",
+            "questionNumber": 8
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The film was not nearly as impressive as the reviews suggested.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The film was nowhere near as impressive as the reviews suggested."
+            ],
+            "display": "The film was nowhere near as impressive as the reviews suggested.",
+            "manualReview": true
+          },
+          "explanation": "nowhere near as.",
+          "rootWord": null,
+          "keyword": "NOWHERE",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The film was not nearly as impressive as the reviews suggested.",
+            "modelAnswer": "The film was nowhere near as impressive as the reviews suggested.",
+            "grammarNote": "nowhere near as.",
+            "questionNumber": 9
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: No one expected the quiet student to win the debate.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The quiet student turned out to be the winner of the debate."
+            ],
+            "display": "The quiet student turned out to be the winner of the debate.",
+            "manualReview": true
+          },
+          "explanation": "turn out to be.",
+          "rootWord": null,
+          "keyword": "TURNED",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "No one expected the quiet student to win the debate.",
+            "modelAnswer": "The quiet student turned out to be the winner of the debate.",
+            "grammarNote": "turn out to be.",
+            "questionNumber": 10
+          }
+        }
+      ]
+    },
+    {
+      "title": "Sentence Transformation Set 03",
+      "slug": "sentence-transformation-pack-001-sentence-transformation-set-03",
+      "skillType": "SENTENCE_TRANSFORMATION",
+      "questionType": "SENTENCE_TRANSFORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Viết lại câu sao cho nghĩa không đổi.",
+      "instructions": "Nếu có từ khóa, không thay đổi dạng của từ khóa. Hệ thống chỉ chấm đúng tuyệt đối; câu khác đáp án mẫu sẽ cần giáo viên kiểm tra.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Sentence Transformation",
+        "Idiomatic Transformations"
+      ],
+      "questions": [
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: If the weather had not changed suddenly, we would have reached the summit.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "But for the sudden change in the weather, we would have reached the summit."
+            ],
+            "display": "But for the sudden change in the weather, we would have reached the summit.",
+            "manualReview": true
+          },
+          "explanation": "But for + noun.",
+          "rootWord": null,
+          "keyword": "BUT",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "If the weather had not changed suddenly, we would have reached the summit.",
+            "modelAnswer": "But for the sudden change in the weather, we would have reached the summit.",
+            "grammarNote": "But for + noun.",
+            "questionNumber": 11
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The teacher said that the essay needed a clearer argument.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The teacher said that the essay called for a clearer argument."
+            ],
+            "display": "The teacher said that the essay called for a clearer argument.",
+            "manualReview": true
+          },
+          "explanation": "call for = require.",
+          "rootWord": null,
+          "keyword": "CALLED",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The teacher said that the essay needed a clearer argument.",
+            "modelAnswer": "The teacher said that the essay called for a clearer argument.",
+            "grammarNote": "call for = require.",
+            "questionNumber": 12
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: She did not lose her temper despite the unfair criticism.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "She kept her temper despite the unfair criticism."
+            ],
+            "display": "She kept her temper despite the unfair criticism.",
+            "manualReview": true
+          },
+          "explanation": "keep one’s temper.",
+          "rootWord": null,
+          "keyword": "KEPT",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "She did not lose her temper despite the unfair criticism.",
+            "modelAnswer": "She kept her temper despite the unfair criticism.",
+            "grammarNote": "keep one’s temper.",
+            "questionNumber": 13
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: He spoke so quietly that nobody at the back could hear him.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "He could not make himself heard at the back because he spoke so quietly."
+            ],
+            "display": "He could not make himself heard at the back because he spoke so quietly.",
+            "manualReview": true
+          },
+          "explanation": "make oneself heard.",
+          "rootWord": null,
+          "keyword": "MAKE",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "He spoke so quietly that nobody at the back could hear him.",
+            "modelAnswer": "He could not make himself heard at the back because he spoke so quietly.",
+            "grammarNote": "make oneself heard.",
+            "questionNumber": 14
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: They believe the painting was stolen during the night.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The painting is thought to have been stolen during the night."
+            ],
+            "display": "The painting is thought to have been stolen during the night.",
+            "manualReview": true
+          },
+          "explanation": "passive reporting.",
+          "rootWord": null,
+          "keyword": "THOUGHT",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "They believe the painting was stolen during the night.",
+            "modelAnswer": "The painting is thought to have been stolen during the night.",
+            "grammarNote": "passive reporting.",
+            "questionNumber": 15
+          }
+        }
+      ]
+    },
+    {
+      "title": "Sentence Transformation Set 04",
+      "slug": "sentence-transformation-pack-001-sentence-transformation-set-04",
+      "skillType": "SENTENCE_TRANSFORMATION",
+      "questionType": "SENTENCE_TRANSFORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Viết lại câu sao cho nghĩa không đổi.",
+      "instructions": "Nếu có từ khóa, không thay đổi dạng của từ khóa. Hệ thống chỉ chấm đúng tuyệt đối; câu khác đáp án mẫu sẽ cần giáo viên kiểm tra.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Sentence Transformation",
+        "Inversion"
+      ],
+      "questions": [
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The company had never faced such a serious crisis before.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "Never before had the company faced such a serious crisis."
+            ],
+            "display": "Never before had the company faced such a serious crisis.",
+            "manualReview": true
+          },
+          "explanation": "Never before + inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The company had never faced such a serious crisis before.",
+            "modelAnswer": "Never before had the company faced such a serious crisis.",
+            "grammarNote": "Never before + inversion.",
+            "questionNumber": 16
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: It was careless of him to leave the documents on the train.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "He should not have left the documents on the train."
+            ],
+            "display": "He should not have left the documents on the train.",
+            "manualReview": true
+          },
+          "explanation": "should not have + p.p.",
+          "rootWord": null,
+          "keyword": "SHOULD",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "It was careless of him to leave the documents on the train.",
+            "modelAnswer": "He should not have left the documents on the train.",
+            "grammarNote": "should not have + p.p.",
+            "questionNumber": 17
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The new rule made many students confused.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The new rule gave rise to confusion among many students."
+            ],
+            "display": "The new rule gave rise to confusion among many students.",
+            "manualReview": true
+          },
+          "explanation": "give rise to.",
+          "rootWord": null,
+          "keyword": "GAVE",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The new rule made many students confused.",
+            "modelAnswer": "The new rule gave rise to confusion among many students.",
+            "grammarNote": "give rise to.",
+            "questionNumber": 18
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: She immediately accepted the offer when it was made.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "No sooner was the offer made than she accepted it."
+            ],
+            "display": "No sooner was the offer made than she accepted it.",
+            "manualReview": true
+          },
+          "explanation": "No sooner ... than.",
+          "rootWord": null,
+          "keyword": "SOONER",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "She immediately accepted the offer when it was made.",
+            "modelAnswer": "No sooner was the offer made than she accepted it.",
+            "grammarNote": "No sooner ... than.",
+            "questionNumber": 19
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: His explanation did not convince me at all.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "I found his explanation completely unconvincing."
+            ],
+            "display": "I found his explanation completely unconvincing.",
+            "manualReview": true
+          },
+          "explanation": "find + object + adjective.",
+          "rootWord": null,
+          "keyword": "FOUND",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "His explanation did not convince me at all.",
+            "modelAnswer": "I found his explanation completely unconvincing.",
+            "grammarNote": "find + object + adjective.",
+            "questionNumber": 20
+          }
+        }
+      ]
+    },
+    {
+      "title": "Sentence Transformation Set 05",
+      "slug": "sentence-transformation-pack-001-sentence-transformation-set-05",
+      "skillType": "SENTENCE_TRANSFORMATION",
+      "questionType": "SENTENCE_TRANSFORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Viết lại câu sao cho nghĩa không đổi.",
+      "instructions": "Nếu có từ khóa, không thay đổi dạng của từ khóa. Hệ thống chỉ chấm đúng tuyệt đối; câu khác đáp án mẫu sẽ cần giáo viên kiểm tra.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Sentence Transformation",
+        "Inversion"
+      ],
+      "questions": [
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: They did not start repairing the bridge until funding was secured.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "Not until funding was secured did they start repairing the bridge."
+            ],
+            "display": "Not until funding was secured did they start repairing the bridge.",
+            "manualReview": true
+          },
+          "explanation": "Not until + inversion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "They did not start repairing the bridge until funding was secured.",
+            "modelAnswer": "Not until funding was secured did they start repairing the bridge.",
+            "grammarNote": "Not until + inversion.",
+            "questionNumber": 21
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The principal’s speech encouraged us to work harder.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The principal’s speech spurred us on to work harder."
+            ],
+            "display": "The principal’s speech spurred us on to work harder.",
+            "manualReview": true
+          },
+          "explanation": "spur someone on.",
+          "rootWord": null,
+          "keyword": "SPURRED",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The principal’s speech encouraged us to work harder.",
+            "modelAnswer": "The principal’s speech spurred us on to work harder.",
+            "grammarNote": "spur someone on.",
+            "questionNumber": 22
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: It is possible that she misunderstood the instructions.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "She may have misunderstood the instructions."
+            ],
+            "display": "She may have misunderstood the instructions.",
+            "manualReview": true
+          },
+          "explanation": "may have + p.p.",
+          "rootWord": null,
+          "keyword": "MAY",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "It is possible that she misunderstood the instructions.",
+            "modelAnswer": "She may have misunderstood the instructions.",
+            "grammarNote": "may have + p.p.",
+            "questionNumber": 23
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The team failed because they underestimated their opponents.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "The team’s failure can be accounted for by their underestimating their opponents."
+            ],
+            "display": "The team’s failure can be accounted for by their underestimating their opponents.",
+            "manualReview": true
+          },
+          "explanation": "account for = explain.",
+          "rootWord": null,
+          "keyword": "ACCOUNT",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The team failed because they underestimated their opponents.",
+            "modelAnswer": "The team’s failure can be accounted for by their underestimating their opponents.",
+            "grammarNote": "account for = explain.",
+            "questionNumber": 24
+          }
+        },
+        {
+          "type": "SENTENCE_TRANSFORMATION",
+          "skillType": "SENTENCE_TRANSFORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Rewrite the sentence so that it has a similar meaning: The question was so difficult that nobody answered it correctly.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "Such was the difficulty of the question that nobody answered it correctly."
+            ],
+            "display": "Such was the difficulty of the question that nobody answered it correctly.",
+            "manualReview": true
+          },
+          "explanation": "Such was + noun + that.",
+          "rootWord": null,
+          "keyword": "SUCH",
+          "targetSentence": "______________________________",
+          "lineNumber": null,
+          "metadata": {
+            "originalSentence": "The question was so difficult that nobody answered it correctly.",
+            "modelAnswer": "Such was the difficulty of the question that nobody answered it correctly.",
+            "grammarNote": "Such was + noun + that.",
+            "questionNumber": 25
+          }
+        }
+      ]
+    }
+  ]
+}

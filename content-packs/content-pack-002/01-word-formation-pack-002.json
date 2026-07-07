@@ -1,0 +1,1775 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Word Formation Pack 002",
+    "description": "Original intensive word formation practice with word-class and formation metadata.",
+    "originalFileName": "01-word-formation-pack-002.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile Content Pack 002 generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Word Formation Intensive 002 Set 01",
+      "slug": "pack-002-word-formation-intensive-002-set-01",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The minister's statement was criticised for its apparent _____ towards rural schools.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "indifference"
+            ],
+            "display": "indifference"
+          },
+          "explanation": "The sentence needs a noun meaning lack of concern.",
+          "rootWord": "DIFFER",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "in- + different -> indifference",
+            "questionNumber": 1,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Her explanation was admirable for its _____, even though the issue was complex.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "clarity"
+            ],
+            "display": "clarity"
+          },
+          "explanation": "After 'its', a noun is required.",
+          "rootWord": "CLEAR",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "clear -> clarity",
+            "questionNumber": 2,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee rejected the plan because it was financially _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unsustainable"
+            ],
+            "display": "unsustainable"
+          },
+          "explanation": "The context means the plan cannot continue financially.",
+          "rootWord": "SUSTAIN",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "un- + sustain + -able",
+            "questionNumber": 3,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The witness gave a _____ account of the accident, so the police trusted his version.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "consistent"
+            ],
+            "display": "consistent"
+          },
+          "explanation": "An adjective is needed before 'account'.",
+          "rootWord": "CONSIST",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "consist -> consistent",
+            "questionNumber": 4,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The charity works to reduce social _____ in remote communities.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "inequality"
+            ],
+            "display": "inequality"
+          },
+          "explanation": "The phrase 'social inequality' is the natural collocation.",
+          "rootWord": "EQUAL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "in- + equal + -ity",
+            "questionNumber": 5,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 02",
+      "slug": "pack-002-word-formation-intensive-002-set-02",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "She handled the criticism with remarkable _____ and refused to respond angrily.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "maturity"
+            ],
+            "display": "maturity"
+          },
+          "explanation": "The sentence needs a noun after 'with remarkable'.",
+          "rootWord": "MATURE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "mature -> maturity",
+            "questionNumber": 6,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The new rules are intended to _____ the application process for all candidates.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "simplify"
+            ],
+            "display": "simplify"
+          },
+          "explanation": "After 'to', use the base verb.",
+          "rootWord": "SIMPLE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "verb",
+            "formation": "simple -> simplify",
+            "questionNumber": 7,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His argument sounded persuasive, but it was built on a _____ assumption.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "faulty"
+            ],
+            "display": "faulty"
+          },
+          "explanation": "An adjective is needed before 'assumption'.",
+          "rootWord": "FAULT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "fault -> faulty",
+            "questionNumber": 8,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The museum is planning an _____ of rare manuscripts next spring.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "exhibition"
+            ],
+            "display": "exhibition"
+          },
+          "explanation": "An exhibition is a public display.",
+          "rootWord": "EXHIBIT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "exhibit -> exhibition",
+            "questionNumber": 9,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The mayor's decision was deeply _____ because it ignored expert advice.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "irresponsible"
+            ],
+            "display": "irresponsible"
+          },
+          "explanation": "The context is negative: lacking responsibility.",
+          "rootWord": "RESPONSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "ir- + responsible",
+            "questionNumber": 10,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 03",
+      "slug": "pack-002-word-formation-intensive-002-set-03",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The athlete's recovery was surprisingly _____ considering the severity of the injury.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "speedy"
+            ],
+            "display": "speedy"
+          },
+          "explanation": "An adjective modifies 'recovery'.",
+          "rootWord": "SPEED",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "speed -> speedy",
+            "questionNumber": 11,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The article offered an unusually _____ analysis of the election results.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "insightful"
+            ],
+            "display": "insightful"
+          },
+          "explanation": "Insightful means showing deep understanding.",
+          "rootWord": "INSIGHT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "insight -> insightful",
+            "questionNumber": 12,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The speaker's tone was calm but unmistakably _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "assertive"
+            ],
+            "display": "assertive"
+          },
+          "explanation": "Assertive describes confident communication.",
+          "rootWord": "ASSERT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "assert -> assertive",
+            "questionNumber": 13,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The company apologised for the _____ caused by the delayed delivery.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "inconvenience"
+            ],
+            "display": "inconvenience"
+          },
+          "explanation": "The fixed phrase is 'cause inconvenience'.",
+          "rootWord": "CONVENIENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "in- + convenience",
+            "questionNumber": 14,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher praised the student's _____ in revising such a difficult essay.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "perseverance"
+            ],
+            "display": "perseverance"
+          },
+          "explanation": "The sentence needs an abstract noun.",
+          "rootWord": "PERSEVERE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "persevere -> perseverance",
+            "questionNumber": 15,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 04",
+      "slug": "pack-002-word-formation-intensive-002-set-04",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The evidence was too _____ to support such a serious accusation.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "insubstantial"
+            ],
+            "display": "insubstantial"
+          },
+          "explanation": "Too insubstantial = not strong enough.",
+          "rootWord": "SUBSTANCE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "in- + substantial",
+            "questionNumber": 16,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The village remained almost _____ by modern tourism.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "untouched"
+            ],
+            "display": "untouched"
+          },
+          "explanation": "Untouched means not affected.",
+          "rootWord": "TOUCH",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective/participle",
+            "formation": "un- + touched",
+            "questionNumber": 17,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The judge questioned the _____ of the witness's memory.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "reliability"
+            ],
+            "display": "reliability"
+          },
+          "explanation": "Reliability means trustworthiness.",
+          "rootWord": "RELY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "rely -> reliable -> reliability",
+            "questionNumber": 18,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The instructions were so _____ that several candidates misunderstood the task.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "ambiguous"
+            ],
+            "display": "ambiguous"
+          },
+          "explanation": "An adjective is needed after 'so'.",
+          "rootWord": "AMBIGUITY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "ambiguity -> ambiguous",
+            "questionNumber": 19,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The new policy aims to _____ access to advanced courses.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "broaden"
+            ],
+            "display": "broaden"
+          },
+          "explanation": "To broaden access = make it wider.",
+          "rootWord": "BROAD",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "verb",
+            "formation": "broad -> broaden",
+            "questionNumber": 20,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 05",
+      "slug": "pack-002-word-formation-intensive-002-set-05",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Her _____ to accept responsibility made the situation worse.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "refusal"
+            ],
+            "display": "refusal"
+          },
+          "explanation": "A noun is needed after possessive 'her'.",
+          "rootWord": "REFUSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "refuse -> refusal",
+            "questionNumber": 21,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The research team made a _____ discovery about language learning.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "significant"
+            ],
+            "display": "significant"
+          },
+          "explanation": "Significant means important.",
+          "rootWord": "SIGNIFY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "signify -> significant",
+            "questionNumber": 22,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His apology sounded _____ rather than sincere.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "mechanical"
+            ],
+            "display": "mechanical"
+          },
+          "explanation": "Mechanical can mean automatic and lacking feeling.",
+          "rootWord": "MECHANIC",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "mechanic -> mechanical",
+            "questionNumber": 23,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan failed because of poor _____ between the two departments.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "coordination"
+            ],
+            "display": "coordination"
+          },
+          "explanation": "Coordination is cooperation/organisation.",
+          "rootWord": "COORDINATE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "coordinate -> coordination",
+            "questionNumber": 24,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The essay was criticised for its _____ use of evidence.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "selective"
+            ],
+            "display": "selective"
+          },
+          "explanation": "Selective use means choosing only convenient evidence.",
+          "rootWord": "SELECT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "select -> selective",
+            "questionNumber": 25,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 06",
+      "slug": "pack-002-word-formation-intensive-002-set-06",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The director's _____ helped the actors understand the emotional tone of the scene.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "guidance"
+            ],
+            "display": "guidance"
+          },
+          "explanation": "Guidance means advice/direction.",
+          "rootWord": "GUIDE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "guide -> guidance",
+            "questionNumber": 26,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The idea was dismissed as _____ because no one had tested it properly.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "speculative"
+            ],
+            "display": "speculative"
+          },
+          "explanation": "Speculative means based on guesswork.",
+          "rootWord": "SPECULATE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "speculate -> speculative",
+            "questionNumber": 27,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The school introduced measures to improve student _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "attendance"
+            ],
+            "display": "attendance"
+          },
+          "explanation": "Attendance means presence at school.",
+          "rootWord": "ATTEND",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "attend -> attendance",
+            "questionNumber": 28,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The manager's response was _____ short and left many questions unanswered.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "disappointingly"
+            ],
+            "display": "disappointingly"
+          },
+          "explanation": "An adverb modifies the adjective 'short'.",
+          "rootWord": "DISAPPOINT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "formation": "disappointing -> disappointingly",
+            "questionNumber": 29,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The journalist was known for her _____ pursuit of the truth.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "relentless"
+            ],
+            "display": "relentless"
+          },
+          "explanation": "Relentless means continuing without stopping.",
+          "rootWord": "RELENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "relent -> relentless",
+            "questionNumber": 30,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 07",
+      "slug": "pack-002-word-formation-intensive-002-set-07",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The book is not merely informative but also highly _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "readable"
+            ],
+            "display": "readable"
+          },
+          "explanation": "Readable means easy/pleasant to read.",
+          "rootWord": "READ",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "read -> readable",
+            "questionNumber": 31,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee found the proposal _____ because it lacked a budget.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unacceptable"
+            ],
+            "display": "unacceptable"
+          },
+          "explanation": "Unacceptable means not able to be accepted.",
+          "rootWord": "ACCEPT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "un- + acceptable",
+            "questionNumber": 32,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The candidate answered with impressive _____ under pressure.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "composure"
+            ],
+            "display": "composure"
+          },
+          "explanation": "Composure means calm self-control.",
+          "rootWord": "COMPOSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "compose -> composure",
+            "questionNumber": 33,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The river became heavily _____ after years of industrial dumping.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "polluted"
+            ],
+            "display": "polluted"
+          },
+          "explanation": "The river is described as polluted.",
+          "rootWord": "POLLUTE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective/participle",
+            "formation": "pollute -> polluted",
+            "questionNumber": 34,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "A good teacher can make even abstract ideas _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "accessible"
+            ],
+            "display": "accessible"
+          },
+          "explanation": "Accessible means easy to understand.",
+          "rootWord": "ACCESS",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "access -> accessible",
+            "questionNumber": 35,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 08",
+      "slug": "pack-002-word-formation-intensive-002-set-08",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The film's ending was deliberately _____, leaving viewers to decide what happened.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "inconclusive"
+            ],
+            "display": "inconclusive"
+          },
+          "explanation": "Inconclusive means not giving a clear conclusion.",
+          "rootWord": "CONCLUDE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "in- + conclusive",
+            "questionNumber": 36,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The scientist warned that the results were _____ and should not be exaggerated.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "preliminary"
+            ],
+            "display": "preliminary"
+          },
+          "explanation": "Preliminary already functions as an adjective.",
+          "rootWord": "PRELIMINARY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "base form",
+            "questionNumber": 37,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The principal spoke _____ about the need for discipline.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "emphatically"
+            ],
+            "display": "emphatically"
+          },
+          "explanation": "An adverb modifies 'spoke'.",
+          "rootWord": "EMPHASIS",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "formation": "emphasis -> emphatic -> emphatically",
+            "questionNumber": 38,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The two accounts of the incident were mutually _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "contradictory"
+            ],
+            "display": "contradictory"
+          },
+          "explanation": "Contradictory means in conflict.",
+          "rootWord": "CONTRADICT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "contradict -> contradictory",
+            "questionNumber": 39,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His remarks were widely seen as _____ to younger colleagues.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "disrespectful"
+            ],
+            "display": "disrespectful"
+          },
+          "explanation": "The context is negative.",
+          "rootWord": "RESPECT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "dis- + respectful",
+            "questionNumber": 40,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 09",
+      "slug": "pack-002-word-formation-intensive-002-set-09",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan's main _____ is that it depends too heavily on volunteers.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "weakness"
+            ],
+            "display": "weakness"
+          },
+          "explanation": "A noun is needed after 'main'.",
+          "rootWord": "WEAK",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "weak -> weakness",
+            "questionNumber": 41,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The school encourages _____ thinking rather than memorisation.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "independent"
+            ],
+            "display": "independent"
+          },
+          "explanation": "Independent thinking is thinking for oneself.",
+          "rootWord": "DEPEND",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "in- + dependent",
+            "questionNumber": 42,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The sudden change in policy caused considerable _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "confusion"
+            ],
+            "display": "confusion"
+          },
+          "explanation": "Confusion is the state of being confused.",
+          "rootWord": "CONFUSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "confuse -> confusion",
+            "questionNumber": 43,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The critic described the novel as _____ but uneven.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "ambitious"
+            ],
+            "display": "ambitious"
+          },
+          "explanation": "Ambitious describes a work with high aims.",
+          "rootWord": "AMBITION",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "ambition -> ambitious",
+            "questionNumber": 44,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The evidence was _____ enough to change the committee's mind.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "compelling"
+            ],
+            "display": "compelling"
+          },
+          "explanation": "Compelling evidence is convincing.",
+          "rootWord": "COMPEL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "compel -> compelling",
+            "questionNumber": 45,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 10",
+      "slug": "pack-002-word-formation-intensive-002-set-10",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The organisation has been praised for its financial _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "transparency"
+            ],
+            "display": "transparency"
+          },
+          "explanation": "Financial transparency is openness about money.",
+          "rootWord": "TRANSPARENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "transparent -> transparency",
+            "questionNumber": 46,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The coach demanded total _____ from every player.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "commitment"
+            ],
+            "display": "commitment"
+          },
+          "explanation": "Commitment means dedication.",
+          "rootWord": "COMMIT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "commit -> commitment",
+            "questionNumber": 47,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The proposal was rejected because of its _____ impact on small businesses.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "harmful"
+            ],
+            "display": "harmful"
+          },
+          "explanation": "Harmful means causing damage.",
+          "rootWord": "HARM",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "harm -> harmful",
+            "questionNumber": 48,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The novel explores the _____ between ambition and loyalty.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "tension"
+            ],
+            "display": "tension"
+          },
+          "explanation": "Tension means conflict/strain.",
+          "rootWord": "TENSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "tense -> tension",
+            "questionNumber": 49,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The speaker tried to _____ the audience with a dramatic opening story.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "captivate"
+            ],
+            "display": "captivate"
+          },
+          "explanation": "To captivate means to hold attention.",
+          "rootWord": "CAPTIVE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "verb",
+            "formation": "captive -> captivate",
+            "questionNumber": 50,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 11",
+      "slug": "pack-002-word-formation-intensive-002-set-11",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The medication should be taken only under medical _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "supervision"
+            ],
+            "display": "supervision"
+          },
+          "explanation": "Supervision means oversight.",
+          "rootWord": "SUPERVISE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "supervise -> supervision",
+            "questionNumber": 51,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His _____ for detail made him an excellent proofreader.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "attentiveness"
+            ],
+            "display": "attentiveness"
+          },
+          "explanation": "Attentiveness is careful attention.",
+          "rootWord": "ATTEND",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "attentive -> attentiveness",
+            "questionNumber": 52,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The article was criticised for being politically _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "biased"
+            ],
+            "display": "biased"
+          },
+          "explanation": "Biased means not neutral.",
+          "rootWord": "BIAS",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "bias -> biased",
+            "questionNumber": 53,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The speaker's _____ was evident from the way she answered hostile questions.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "confidence"
+            ],
+            "display": "confidence"
+          },
+          "explanation": "Confidence is the noun form.",
+          "rootWord": "CONFIDENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "confident -> confidence",
+            "questionNumber": 54,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The town is almost _____ after 9 p.m., with only a few shops open.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "deserted"
+            ],
+            "display": "deserted"
+          },
+          "explanation": "Deserted means empty of people.",
+          "rootWord": "DESERT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "desert -> deserted",
+            "questionNumber": 55,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Intensive 002 Set 12",
+      "slug": "pack-002-word-formation-intensive-002-set-12",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ in hoa để hoàn thành câu.",
+      "instructions": "Chú ý loại từ, sắc thái nghĩa, tiền tố/phụ tố và collocation trong câu.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Word Class",
+        "Suffixes",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The campaign was designed to raise public _____ of cyberbullying.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "awareness"
+            ],
+            "display": "awareness"
+          },
+          "explanation": "Awareness means knowledge/understanding.",
+          "rootWord": "AWARE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "aware -> awareness",
+            "questionNumber": 56,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The machine stopped working because of a _____ in the cooling system.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "failure"
+            ],
+            "display": "failure"
+          },
+          "explanation": "Failure means breakdown.",
+          "rootWord": "FAIL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "formation": "fail -> failure",
+            "questionNumber": 57,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The report was _____ edited to remove personal details.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "carefully"
+            ],
+            "display": "carefully"
+          },
+          "explanation": "An adverb modifies 'edited'.",
+          "rootWord": "CARE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "formation": "careful -> carefully",
+            "questionNumber": 58,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The new law is _____ only if local authorities enforce it consistently.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "effective"
+            ],
+            "display": "effective"
+          },
+          "explanation": "Effective means producing the intended result.",
+          "rootWord": "EFFECT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "effect -> effective",
+            "questionNumber": 59,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The politician's statement was deliberately _____ to avoid offending either side.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "vague"
+            ],
+            "display": "vague"
+          },
+          "explanation": "Vague already works as an adjective.",
+          "rootWord": "VAGUE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "formation": "base form",
+            "questionNumber": 60,
+            "pack": "002",
+            "focus": "word formation"
+          }
+        }
+      ]
+    }
+  ]
+}

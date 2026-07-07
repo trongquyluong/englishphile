@@ -1,0 +1,915 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Transitions Pack 002",
+    "description": "Original transition and discourse marker practice.",
+    "originalFileName": "05-transitions-pack-002.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile Content Pack 002 generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Transitions and Discourse Markers 002 Set 01",
+      "slug": "pack-002-transitions-and-discourse-markers-002-set-01",
+      "skillType": "TRANSITIONS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn discourse marker phù hợp nhất.",
+      "instructions": "Xác định quan hệ logic: contrast, result, addition, clarification, sequence.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Discourse Markers",
+        "Transitions"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The proposal is ambitious. _____, it lacks a realistic budget.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "However"
+            },
+            {
+              "label": "B",
+              "text": "Therefore"
+            },
+            {
+              "label": "C",
+              "text": "Moreover"
+            },
+            {
+              "label": "D",
+              "text": "Similarly"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "However introduces contrast.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 1,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The experiment was repeated several times; _____, the results remained unchanged.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "nevertheless"
+            },
+            {
+              "label": "B",
+              "text": "consequently"
+            },
+            {
+              "label": "C",
+              "text": "for instance"
+            },
+            {
+              "label": "D",
+              "text": "in addition"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Nevertheless contrasts repeated attempts with unchanged results.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 2,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The school has invested in new facilities. _____, teachers have received extra training.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "In addition"
+            },
+            {
+              "label": "B",
+              "text": "In contrast"
+            },
+            {
+              "label": "C",
+              "text": "As a result"
+            },
+            {
+              "label": "D",
+              "text": "Otherwise"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "In addition adds another point.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 3,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The evidence was incomplete. _____, the committee postponed its decision.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Consequently"
+            },
+            {
+              "label": "B",
+              "text": "Conversely"
+            },
+            {
+              "label": "C",
+              "text": "Nevertheless"
+            },
+            {
+              "label": "D",
+              "text": "For example"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Consequently shows result.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 4,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "Some students prefer self-study; _____, others need direct guidance.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "whereas"
+            },
+            {
+              "label": "B",
+              "text": "therefore"
+            },
+            {
+              "label": "C",
+              "text": "moreover"
+            },
+            {
+              "label": "D",
+              "text": "namely"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Whereas contrasts two groups.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 5,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Transitions and Discourse Markers 002 Set 02",
+      "slug": "pack-002-transitions-and-discourse-markers-002-set-02",
+      "skillType": "TRANSITIONS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn discourse marker phù hợp nhất.",
+      "instructions": "Xác định quan hệ logic: contrast, result, addition, clarification, sequence.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Discourse Markers",
+        "Transitions"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The article is persuasive; _____, its conclusion is too broad.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "even so"
+            },
+            {
+              "label": "B",
+              "text": "as such"
+            },
+            {
+              "label": "C",
+              "text": "in other words"
+            },
+            {
+              "label": "D",
+              "text": "for this reason"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Even so introduces a limitation/contrast.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 6,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The first solution is cheap. _____, the second is more reliable.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "On the other hand"
+            },
+            {
+              "label": "B",
+              "text": "As a result"
+            },
+            {
+              "label": "C",
+              "text": "For instance"
+            },
+            {
+              "label": "D",
+              "text": "In short"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "On the other hand introduces an alternative contrast.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 7,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "He ignored the warning signs. _____, the problem became much worse.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "As a result"
+            },
+            {
+              "label": "B",
+              "text": "By contrast"
+            },
+            {
+              "label": "C",
+              "text": "Likewise"
+            },
+            {
+              "label": "D",
+              "text": "In particular"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "As a result shows consequence.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 8,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The writer uses statistics to support her claim. _____, she includes personal anecdotes.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Furthermore"
+            },
+            {
+              "label": "B",
+              "text": "Instead"
+            },
+            {
+              "label": "C",
+              "text": "Otherwise"
+            },
+            {
+              "label": "D",
+              "text": "Nevertheless"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Furthermore adds support.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 9,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The task is difficult; _____, it is not impossible.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "nevertheless"
+            },
+            {
+              "label": "B",
+              "text": "therefore"
+            },
+            {
+              "label": "C",
+              "text": "similarly"
+            },
+            {
+              "label": "D",
+              "text": "namely"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Nevertheless contrasts difficulty with possibility.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 10,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Transitions and Discourse Markers 002 Set 03",
+      "slug": "pack-002-transitions-and-discourse-markers-002-set-03",
+      "skillType": "TRANSITIONS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn discourse marker phù hợp nhất.",
+      "instructions": "Xác định quan hệ logic: contrast, result, addition, clarification, sequence.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Discourse Markers",
+        "Transitions"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "Many people blame technology for distraction. _____, poor study habits are also responsible.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "However"
+            },
+            {
+              "label": "B",
+              "text": "Therefore"
+            },
+            {
+              "label": "C",
+              "text": "For example"
+            },
+            {
+              "label": "D",
+              "text": "In conclusion"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "However introduces a contrasting/additional perspective.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 11,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The city has improved public transport. _____, traffic congestion remains severe.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Even so"
+            },
+            {
+              "label": "B",
+              "text": "Thus"
+            },
+            {
+              "label": "C",
+              "text": "For example"
+            },
+            {
+              "label": "D",
+              "text": "Accordingly"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Even so introduces an unexpected contrast.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 12,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The essay lacks examples. _____, the argument feels abstract.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "As a result"
+            },
+            {
+              "label": "B",
+              "text": "On the contrary"
+            },
+            {
+              "label": "C",
+              "text": "In addition"
+            },
+            {
+              "label": "D",
+              "text": "Likewise"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "As a result links cause and effect.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 13,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The candidate was confident and fluent. _____, she answered questions precisely.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Moreover"
+            },
+            {
+              "label": "B",
+              "text": "Instead"
+            },
+            {
+              "label": "C",
+              "text": "Otherwise"
+            },
+            {
+              "label": "D",
+              "text": "Nevertheless"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Moreover adds a positive point.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 14,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The policy may reduce costs. _____, it could lower the quality of service.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Conversely"
+            },
+            {
+              "label": "B",
+              "text": "For this reason"
+            },
+            {
+              "label": "C",
+              "text": "In short"
+            },
+            {
+              "label": "D",
+              "text": "For example"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Conversely introduces the opposite side/effect.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 15,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Transitions and Discourse Markers 002 Set 04",
+      "slug": "pack-002-transitions-and-discourse-markers-002-set-04",
+      "skillType": "TRANSITIONS",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn discourse marker phù hợp nhất.",
+      "instructions": "Xác định quan hệ logic: contrast, result, addition, clarification, sequence.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Discourse Markers",
+        "Transitions"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The passage criticises consumerism. _____, it warns against measuring success by possessions.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "In other words"
+            },
+            {
+              "label": "B",
+              "text": "By contrast"
+            },
+            {
+              "label": "C",
+              "text": "Otherwise"
+            },
+            {
+              "label": "D",
+              "text": "For instance"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "In other words rephrases the idea.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 16,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The instructions were unclear. _____, several candidates answered the wrong question.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Consequently"
+            },
+            {
+              "label": "B",
+              "text": "Nevertheless"
+            },
+            {
+              "label": "C",
+              "text": "Similarly"
+            },
+            {
+              "label": "D",
+              "text": "In fact"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Consequently shows result.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 17,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The first paragraph defines the problem. _____, the second paragraph explores its causes.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Meanwhile"
+            },
+            {
+              "label": "B",
+              "text": "Subsequently"
+            },
+            {
+              "label": "C",
+              "text": "Similarly"
+            },
+            {
+              "label": "D",
+              "text": "Otherwise"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "Subsequently marks the next stage in sequence.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 18,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The solution sounds simple. _____, implementing it would require years of planning.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "In practice"
+            },
+            {
+              "label": "B",
+              "text": "Likewise"
+            },
+            {
+              "label": "C",
+              "text": "Namely"
+            },
+            {
+              "label": "D",
+              "text": "As such"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "In practice contrasts theory with implementation.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 19,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "TRANSITIONS",
+          "difficulty": "CHUYEN",
+          "prompt": "The writer does not reject technology. _____, she argues for more responsible use.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "Rather"
+            },
+            {
+              "label": "B",
+              "text": "Therefore"
+            },
+            {
+              "label": "C",
+              "text": "For example"
+            },
+            {
+              "label": "D",
+              "text": "Similarly"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Rather corrects/clarifies the previous statement.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 20,
+            "pack": "002",
+            "focus": "transitions/discourse markers"
+          }
+        }
+      ]
+    }
+  ]
+}

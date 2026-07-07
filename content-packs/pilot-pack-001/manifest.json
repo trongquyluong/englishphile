@@ -1,0 +1,106 @@
+{
+  "packName": "Englishphile Pilot Database Pack 001",
+  "version": "0.1.0",
+  "copyrightPolicy": "All questions/passages are original pilot content, not copied verbatim from uploaded or third-party materials.",
+  "importNote": "Import either 00-all-in-one-pilot-pack-001.json OR the individual numbered pack files. Do not import both unless you want duplicate-skip warnings.",
+  "totalIndividualFiles": 10,
+  "totalProblems": 46,
+  "totalQuestions": 220,
+  "files": [
+    {
+      "file": "01-pronunciation-pack-001.json",
+      "sourceCollection": "Englishphile Pronunciation Pack 001",
+      "problems": 6,
+      "questions": 30,
+      "skills": [
+        "PRONUNCIATION"
+      ]
+    },
+    {
+      "file": "02-mcq-pack-001.json",
+      "sourceCollection": "Englishphile MCQ Pack 001",
+      "problems": 8,
+      "questions": 40,
+      "skills": [
+        "MULTIPLE_CHOICE"
+      ]
+    },
+    {
+      "file": "03-word-formation-pack-001.json",
+      "sourceCollection": "Englishphile Word Formation Pack 001",
+      "problems": 8,
+      "questions": 40,
+      "skills": [
+        "WORD_FORMATION"
+      ]
+    },
+    {
+      "file": "04-sentence-transformation-pack-001.json",
+      "sourceCollection": "Englishphile Sentence Transformation Pack 001",
+      "problems": 5,
+      "questions": 25,
+      "skills": [
+        "SENTENCE_TRANSFORMATION"
+      ]
+    },
+    {
+      "file": "05-guided-cloze-pack-001.json",
+      "sourceCollection": "Englishphile Guided Cloze Pack 001",
+      "problems": 4,
+      "questions": 15,
+      "skills": [
+        "GUIDED_CLOZE"
+      ]
+    },
+    {
+      "file": "06-open-cloze-pack-001.json",
+      "sourceCollection": "Englishphile Open Cloze Pack 001",
+      "problems": 4,
+      "questions": 15,
+      "skills": [
+        "OPEN_CLOZE"
+      ]
+    },
+    {
+      "file": "07-error-identification-pack-001.json",
+      "sourceCollection": "Englishphile Error Identification Pack 001",
+      "problems": 5,
+      "questions": 25,
+      "skills": [
+        "ERROR_IDENTIFICATION"
+      ]
+    },
+    {
+      "file": "08-trios-pack-001.json",
+      "sourceCollection": "Englishphile Trios Pack 001",
+      "problems": 3,
+      "questions": 15,
+      "skills": [
+        "TRIOS"
+      ]
+    },
+    {
+      "file": "09-reading-pack-001.json",
+      "sourceCollection": "Englishphile Reading Pack 001",
+      "problems": 2,
+      "questions": 10,
+      "skills": [
+        "READING"
+      ]
+    },
+    {
+      "file": "10-writing-pack-001.json",
+      "sourceCollection": "Englishphile Writing Pack 001",
+      "problems": 1,
+      "questions": 5,
+      "skills": [
+        "WRITING"
+      ]
+    }
+  ],
+  "allInOne": {
+    "file": "00-all-in-one-pilot-pack-001.json",
+    "problems": 46,
+    "questions": 220
+  }
+}

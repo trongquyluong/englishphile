@@ -1,0 +1,479 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Trios Pack 001",
+    "description": "Original trios/gapped sentences.",
+    "originalFileName": "englishphile-trios-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Trios / Gapped Sentences Set 01",
+      "slug": "trios-pack-001-trios-gapped-sentences-set-01",
+      "skillType": "TRIOS",
+      "questionType": "TRIOS_GAPPED_SENTENCES",
+      "difficulty": "CHUYEN",
+      "statement": "Mỗi câu hỏi gồm ba câu có cùng một từ bị khuyết.",
+      "instructions": "Điền một từ phù hợp với cả ba câu. Chú ý collocation và nghĩa khác nhau của cùng một từ.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Trios",
+        "Collocations"
+      ],
+      "questions": [
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The committee will _____ the proposal next week.\n2. You should _____ all the evidence before reaching a conclusion.\n3. I would never _____ such an irresponsible suggestion.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "consider"
+            ],
+            "display": "consider"
+          },
+          "explanation": "consider a proposal/evidence/suggestion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The committee will _____ the proposal next week.",
+              "You should _____ all the evidence before reaching a conclusion.",
+              "I would never _____ such an irresponsible suggestion."
+            ],
+            "sharedWord": "consider",
+            "questionNumber": 1
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The policy was introduced to _____ economic growth.\n2. A good teacher knows how to _____ curiosity.\n3. The article helped _____ a lively debate.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "stimulate"
+            ],
+            "display": "stimulate"
+          },
+          "explanation": "stimulate growth/curiosity/debate.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The policy was introduced to _____ economic growth.",
+              "A good teacher knows how to _____ curiosity.",
+              "The article helped _____ a lively debate."
+            ],
+            "sharedWord": "stimulate",
+            "questionNumber": 2
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The final paragraph should _____ the main argument.\n2. The new law will _____ existing regulations.\n3. Extra examples can _____ rather than replace analysis.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "support"
+            ],
+            "display": "support"
+          },
+          "explanation": "support argument/regulations/analysis.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The final paragraph should _____ the main argument.",
+              "The new law will _____ existing regulations.",
+              "Extra examples can _____ rather than replace analysis."
+            ],
+            "sharedWord": "support",
+            "questionNumber": 3
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The witness tried to _____ the facts.\n2. The fog began to _____ the outline of the hills.\n3. Technical terms can _____ meaning if used carelessly.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "obscure"
+            ],
+            "display": "obscure"
+          },
+          "explanation": "obscure facts/outline/meaning.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The witness tried to _____ the facts.",
+              "The fog began to _____ the outline of the hills.",
+              "Technical terms can _____ meaning if used carelessly."
+            ],
+            "sharedWord": "obscure",
+            "questionNumber": 4
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The writer uses contrast to _____ the weakness of the claim.\n2. The report will _____ several areas for improvement.\n3. The bright colour helps _____ the key information.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "highlight"
+            ],
+            "display": "highlight"
+          },
+          "explanation": "highlight weakness/areas/information.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The writer uses contrast to _____ the weakness of the claim.",
+              "The report will _____ several areas for improvement.",
+              "The bright colour helps _____ the key information."
+            ],
+            "sharedWord": "highlight",
+            "questionNumber": 5
+          }
+        }
+      ]
+    },
+    {
+      "title": "Trios / Gapped Sentences Set 02",
+      "slug": "trios-pack-001-trios-gapped-sentences-set-02",
+      "skillType": "TRIOS",
+      "questionType": "TRIOS_GAPPED_SENTENCES",
+      "difficulty": "CHUYEN",
+      "statement": "Mỗi câu hỏi gồm ba câu có cùng một từ bị khuyết.",
+      "instructions": "Điền một từ phù hợp với cả ba câu. Chú ý collocation và nghĩa khác nhau của cùng một từ.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Trios",
+        "Collocations"
+      ],
+      "questions": [
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The school decided to _____ the new timetable in September.\n2. The charity hopes to _____ a reading programme.\n3. The company will _____ stricter security measures.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "introduce"
+            ],
+            "display": "introduce"
+          },
+          "explanation": "introduce timetable/programme/measures.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The school decided to _____ the new timetable in September.",
+              "The charity hopes to _____ a reading programme.",
+              "The company will _____ stricter security measures."
+            ],
+            "sharedWord": "introduce",
+            "questionNumber": 6
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. His answer failed to _____ the main issue.\n2. The article will _____ the relationship between sleep and memory.\n3. The teacher asked us to _____ the question directly.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "address"
+            ],
+            "display": "address"
+          },
+          "explanation": "address issue/relationship/question.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "His answer failed to _____ the main issue.",
+              "The article will _____ the relationship between sleep and memory.",
+              "The teacher asked us to _____ the question directly."
+            ],
+            "sharedWord": "address",
+            "questionNumber": 7
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The editor asked her to _____ the introduction.\n2. We need to _____ our strategy after the poor results.\n3. The student promised to _____ the essay before submitting it.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "revise"
+            ],
+            "display": "revise"
+          },
+          "explanation": "revise introduction/strategy/essay.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The editor asked her to _____ the introduction.",
+              "We need to _____ our strategy after the poor results.",
+              "The student promised to _____ the essay before submitting it."
+            ],
+            "sharedWord": "revise",
+            "questionNumber": 8
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The rumour began to _____ quickly through the school.\n2. The disease can _____ from one area to another.\n3. Good ideas often _____ when students discuss them.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "spread"
+            ],
+            "display": "spread"
+          },
+          "explanation": "spread rumour/disease/ideas.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The rumour began to _____ quickly through the school.",
+              "The disease can _____ from one area to another.",
+              "Good ideas often _____ when students discuss them."
+            ],
+            "sharedWord": "spread",
+            "questionNumber": 9
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The article tries to _____ the causes of the problem.\n2. Could you _____ why the answer is wrong?\n3. The theory does not _____ every case.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "explain"
+            ],
+            "display": "explain"
+          },
+          "explanation": "explain causes/why/cases.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The article tries to _____ the causes of the problem.",
+              "Could you _____ why the answer is wrong?",
+              "The theory does not _____ every case."
+            ],
+            "sharedWord": "explain",
+            "questionNumber": 10
+          }
+        }
+      ]
+    },
+    {
+      "title": "Trios / Gapped Sentences Set 03",
+      "slug": "trios-pack-001-trios-gapped-sentences-set-03",
+      "skillType": "TRIOS",
+      "questionType": "TRIOS_GAPPED_SENTENCES",
+      "difficulty": "CHUYEN",
+      "statement": "Mỗi câu hỏi gồm ba câu có cùng một từ bị khuyết.",
+      "instructions": "Điền một từ phù hợp với cả ba câu. Chú ý collocation và nghĩa khác nhau của cùng một từ.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Trios",
+        "Collocations"
+      ],
+      "questions": [
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The committee reached a _____ after two hours of debate.\n2. Her sudden silence led me to the wrong _____.\n3. The evidence points to only one _____.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "conclusion"
+            ],
+            "display": "conclusion"
+          },
+          "explanation": "reach/lead to/point to conclusion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The committee reached a _____ after two hours of debate.",
+              "Her sudden silence led me to the wrong _____.",
+              "The evidence points to only one _____."
+            ],
+            "sharedWord": "conclusion",
+            "questionNumber": 11
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The athlete managed to _____ her composure.\n2. Students should _____ a record of recurring mistakes.\n3. The school hopes to _____ high academic standards.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "maintain"
+            ],
+            "display": "maintain"
+          },
+          "explanation": "maintain composure/record/standards.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The athlete managed to _____ her composure.",
+              "Students should _____ a record of recurring mistakes.",
+              "The school hopes to _____ high academic standards."
+            ],
+            "sharedWord": "maintain",
+            "questionNumber": 12
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The writer tone begins to _____ in the final paragraph.\n2. Public attitudes may _____ over time.\n3. You should _____ your focus from detail to inference.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "shift"
+            ],
+            "display": "shift"
+          },
+          "explanation": "tone/attitudes/focus shift.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The writer tone begins to _____ in the final paragraph.",
+              "Public attitudes may _____ over time.",
+              "You should _____ your focus from detail to inference."
+            ],
+            "sharedWord": "shift",
+            "questionNumber": 13
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The examples help to _____ the abstract idea.\n2. The incident will _____ the need for better planning.\n3. The diagram can _____ how the process works.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "illustrate"
+            ],
+            "display": "illustrate"
+          },
+          "explanation": "illustrate idea/need/process.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The examples help to _____ the abstract idea.",
+              "The incident will _____ the need for better planning.",
+              "The diagram can _____ how the process works."
+            ],
+            "sharedWord": "illustrate",
+            "questionNumber": 14
+          }
+        },
+        {
+          "type": "TRIOS_GAPPED_SENTENCES",
+          "skillType": "TRIOS",
+          "difficulty": "CHUYEN",
+          "prompt": "Điền một từ duy nhất phù hợp với cả ba câu.",
+          "passage": "1. The article will _____ the issue from several angles.\n2. The course aims to _____ all major exam skills.\n3. The insurance does not _____ accidental damage.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "cover"
+            ],
+            "display": "cover"
+          },
+          "explanation": "cover issue/skills/damage.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "sentences": [
+              "The article will _____ the issue from several angles.",
+              "The course aims to _____ all major exam skills.",
+              "The insurance does not _____ accidental damage."
+            ],
+            "sharedWord": "cover",
+            "questionNumber": 15
+          }
+        }
+      ]
+    }
+  ]
+}

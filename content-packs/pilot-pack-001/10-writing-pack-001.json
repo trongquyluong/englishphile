@@ -1,0 +1,187 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Writing Pack 001",
+    "description": "Original writing prompts and rubric metadata.",
+    "originalFileName": "englishphile-writing-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Writing Prompts Set 01",
+      "slug": "writing-pack-001-writing-prompts-set-01",
+      "skillType": "WRITING",
+      "questionType": "WRITING_PROMPT",
+      "difficulty": "CHUYEN",
+      "statement": "Viết essay theo đề bài.",
+      "instructions": "Lập dàn ý trước khi viết. Bài writing luôn cần giáo viên chấm.",
+      "estimatedMinutes": 45,
+      "topics": [
+        "Writing",
+        "Argumentative Essay"
+      ],
+      "questions": [
+        {
+          "type": "WRITING_PROMPT",
+          "skillType": "WRITING",
+          "difficulty": "CHUYEN",
+          "prompt": "Some students believe that doing many practice questions is more useful than studying theory. To what extent do you agree?",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "manualReview": true,
+            "rubric": [
+              "Task response",
+              "Coherence",
+              "Lexical resource",
+              "Grammar range and accuracy",
+              "Sophistication for chuyên Anh"
+            ]
+          },
+          "explanation": "Bài viết cần giáo viên chấm theo rubric.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "planningHints": [
+              "Discuss balance between practice and theory.",
+              "Give examples from exam preparation.",
+              "Mention how theory guides correction."
+            ],
+            "suggestedLength": "220-280 words",
+            "questionNumber": 1
+          }
+        },
+        {
+          "type": "WRITING_PROMPT",
+          "skillType": "WRITING",
+          "difficulty": "CHUYEN",
+          "prompt": "Many schools are considering replacing handwritten homework with digital submissions. Is this a positive development?",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "manualReview": true,
+            "rubric": [
+              "Task response",
+              "Coherence",
+              "Lexical resource",
+              "Grammar range and accuracy",
+              "Sophistication for chuyên Anh"
+            ]
+          },
+          "explanation": "Bài viết cần giáo viên chấm theo rubric.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "planningHints": [
+              "Consider convenience and distraction.",
+              "Discuss handwriting, feedback, access.",
+              "Give a balanced conclusion."
+            ],
+            "suggestedLength": "220-280 words",
+            "questionNumber": 2
+          }
+        },
+        {
+          "type": "WRITING_PROMPT",
+          "skillType": "WRITING",
+          "difficulty": "CHUYEN",
+          "prompt": "Competitions motivate students to improve, but they may also create unnecessary pressure. Discuss both views and give your opinion.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "manualReview": true,
+            "rubric": [
+              "Task response",
+              "Coherence",
+              "Lexical resource",
+              "Grammar range and accuracy",
+              "Sophistication for chuyên Anh"
+            ]
+          },
+          "explanation": "Bài viết cần giáo viên chấm theo rubric.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "planningHints": [
+              "Discuss motivation.",
+              "Discuss pressure and comparison.",
+              "State nuanced opinion."
+            ],
+            "suggestedLength": "220-280 words",
+            "questionNumber": 3
+          }
+        },
+        {
+          "type": "WRITING_PROMPT",
+          "skillType": "WRITING",
+          "difficulty": "CHUYEN",
+          "prompt": "Should students be allowed to use AI tools when preparing for English exams?",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "manualReview": true,
+            "rubric": [
+              "Task response",
+              "Coherence",
+              "Lexical resource",
+              "Grammar range and accuracy",
+              "Sophistication for chuyên Anh"
+            ]
+          },
+          "explanation": "Bài viết cần giáo viên chấm theo rubric.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "planningHints": [
+              "Define acceptable support.",
+              "Discuss risks of dependency.",
+              "Mention feedback and academic honesty."
+            ],
+            "suggestedLength": "220-280 words",
+            "questionNumber": 4
+          }
+        },
+        {
+          "type": "WRITING_PROMPT",
+          "skillType": "WRITING",
+          "difficulty": "CHUYEN",
+          "prompt": "Reading fiction is less practical than learning vocabulary lists. Do you agree?",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "manualReview": true,
+            "rubric": [
+              "Task response",
+              "Coherence",
+              "Lexical resource",
+              "Grammar range and accuracy",
+              "Sophistication for chuyên Anh"
+            ]
+          },
+          "explanation": "Bài viết cần giáo viên chấm theo rubric.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "planningHints": [
+              "Compare contextual learning and explicit learning.",
+              "Discuss motivation and retention.",
+              "Give examples."
+            ],
+            "suggestedLength": "220-280 words",
+            "questionNumber": 5
+          }
+        }
+      ]
+    }
+  ]
+}

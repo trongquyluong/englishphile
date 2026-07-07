@@ -1,0 +1,45 @@
+{
+  "sourceCollection": {
+    "name": "Example Word Formation Import",
+    "description": "Original sample JSON for testing the Englishphile import pipeline.",
+    "originalFileName": "word-formation-sample.json",
+    "sourceType": "JSON",
+    "copyrightNote": "Original sample content created for Englishphile."
+  },
+  "problems": [
+    {
+      "title": "Imported word formation sample",
+      "slug": "imported-word-formation-sample",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ trong ngoặc.",
+      "instructions": "Xác định loại từ trước khi chọn hậu tố.",
+      "estimatedMinutes": 6,
+      "topics": ["Word Class", "Suffixes"],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The speaker handled the interruption with remarkable ____. (CALM)",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": ["calmness"],
+            "display": "calmness"
+          },
+          "explanation": "Sau with remarkable cần danh từ.",
+          "rootWord": "CALM",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "note": "calm -> calmness"
+          }
+        }
+      ]
+    }
+  ]
+}

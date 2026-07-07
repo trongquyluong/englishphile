@@ -1,0 +1,1337 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Pronunciation Pack 001",
+    "description": "Original pronunciation odd-one-out practice.",
+    "originalFileName": "englishphile-pronunciation-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Pronunciation Odd-One-Out Set 01",
+      "slug": "pronunciation-pack-001-pronunciation-odd-one-out-set-01",
+      "skillType": "PRONUNCIATION",
+      "questionType": "PRONUNCIATION_ODD_ONE_OUT",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn từ có phần phát âm khác các từ còn lại.",
+      "instructions": "Mỗi câu có 4 lựa chọn A-D. Chọn đáp án có âm khác biệt rõ nhất theo phát âm chuẩn phổ biến.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Pronunciation",
+        "Vowel Sounds"
+      ],
+      "questions": [
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "wreath"
+            },
+            {
+              "label": "B",
+              "text": "breadth"
+            },
+            {
+              "label": "C",
+              "text": "heath"
+            },
+            {
+              "label": "D",
+              "text": "seethe"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "breadth has a different vowel/consonant pattern.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 1
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "thorough"
+            },
+            {
+              "label": "B",
+              "text": "although"
+            },
+            {
+              "label": "C",
+              "text": "dough"
+            },
+            {
+              "label": "D",
+              "text": "though"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "thorough ends with schwa; others have /əʊ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 2
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "comb"
+            },
+            {
+              "label": "B",
+              "text": "bomb"
+            },
+            {
+              "label": "C",
+              "text": "tomb"
+            },
+            {
+              "label": "D",
+              "text": "debt"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "tomb has /uːm/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 3
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "asked"
+            },
+            {
+              "label": "B",
+              "text": "played"
+            },
+            {
+              "label": "C",
+              "text": "laughed"
+            },
+            {
+              "label": "D",
+              "text": "watched"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "played ends /d/; others end /t/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 4
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "measure"
+            },
+            {
+              "label": "B",
+              "text": "pleasure"
+            },
+            {
+              "label": "C",
+              "text": "pressure"
+            },
+            {
+              "label": "D",
+              "text": "leisure"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "pressure has /ʃ/; others often have /ʒ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 5
+          }
+        }
+      ]
+    },
+    {
+      "title": "Pronunciation Odd-One-Out Set 02",
+      "slug": "pronunciation-pack-001-pronunciation-odd-one-out-set-02",
+      "skillType": "PRONUNCIATION",
+      "questionType": "PRONUNCIATION_ODD_ONE_OUT",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn từ có phần phát âm khác các từ còn lại.",
+      "instructions": "Mỗi câu có 4 lựa chọn A-D. Chọn đáp án có âm khác biệt rõ nhất theo phát âm chuẩn phổ biến.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Pronunciation",
+        "Consonant Sounds"
+      ],
+      "questions": [
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "choir"
+            },
+            {
+              "label": "B",
+              "text": "chemist"
+            },
+            {
+              "label": "C",
+              "text": "chaos"
+            },
+            {
+              "label": "D",
+              "text": "charity"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "charity begins /tʃ/; others use /k/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 6
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "recipe"
+            },
+            {
+              "label": "B",
+              "text": "archive"
+            },
+            {
+              "label": "C",
+              "text": "machine"
+            },
+            {
+              "label": "D",
+              "text": "police"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "archive has a different stressed vowel.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 7
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "sword"
+            },
+            {
+              "label": "B",
+              "text": "swore"
+            },
+            {
+              "label": "C",
+              "text": "swarm"
+            },
+            {
+              "label": "D",
+              "text": "swallow"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "sword has silent w.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 8
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "island"
+            },
+            {
+              "label": "B",
+              "text": "aisle"
+            },
+            {
+              "label": "C",
+              "text": "isle"
+            },
+            {
+              "label": "D",
+              "text": "issue"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "issue does not follow the silent-s pattern.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 9
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "genre"
+            },
+            {
+              "label": "B",
+              "text": "garage"
+            },
+            {
+              "label": "C",
+              "text": "giant"
+            },
+            {
+              "label": "D",
+              "text": "mirage"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "giant begins /dʒ/; others contain /ʒ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 10
+          }
+        }
+      ]
+    },
+    {
+      "title": "Pronunciation Odd-One-Out Set 03",
+      "slug": "pronunciation-pack-001-pronunciation-odd-one-out-set-03",
+      "skillType": "PRONUNCIATION",
+      "questionType": "PRONUNCIATION_ODD_ONE_OUT",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn từ có phần phát âm khác các từ còn lại.",
+      "instructions": "Mỗi câu có 4 lựa chọn A-D. Chọn đáp án có âm khác biệt rõ nhất theo phát âm chuẩn phổ biến.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Pronunciation",
+        "Vowel Sounds"
+      ],
+      "questions": [
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "colonel"
+            },
+            {
+              "label": "B",
+              "text": "college"
+            },
+            {
+              "label": "C",
+              "text": "collar"
+            },
+            {
+              "label": "D",
+              "text": "colon"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "colonel has irregular pronunciation /kɜːnəl/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 11
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "subtle"
+            },
+            {
+              "label": "B",
+              "text": "doubt"
+            },
+            {
+              "label": "C",
+              "text": "debris"
+            },
+            {
+              "label": "D",
+              "text": "plumber"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "debris has silent s; others feature silent b.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 12
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "height"
+            },
+            {
+              "label": "B",
+              "text": "weight"
+            },
+            {
+              "label": "C",
+              "text": "eight"
+            },
+            {
+              "label": "D",
+              "text": "neighbour"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "height has /aɪ/; others have /eɪ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 13
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "bury"
+            },
+            {
+              "label": "B",
+              "text": "busy"
+            },
+            {
+              "label": "C",
+              "text": "butcher"
+            },
+            {
+              "label": "D",
+              "text": "butter"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "butter has /ʌ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 14
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "cough"
+            },
+            {
+              "label": "B",
+              "text": "rough"
+            },
+            {
+              "label": "C",
+              "text": "tough"
+            },
+            {
+              "label": "D",
+              "text": "though"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "though has /əʊ/; others end /f/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 15
+          }
+        }
+      ]
+    },
+    {
+      "title": "Pronunciation Odd-One-Out Set 04",
+      "slug": "pronunciation-pack-001-pronunciation-odd-one-out-set-04",
+      "skillType": "PRONUNCIATION",
+      "questionType": "PRONUNCIATION_ODD_ONE_OUT",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn từ có phần phát âm khác các từ còn lại.",
+      "instructions": "Mỗi câu có 4 lựa chọn A-D. Chọn đáp án có âm khác biệt rõ nhất theo phát âm chuẩn phổ biến.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Pronunciation",
+        "Consonant Sounds"
+      ],
+      "questions": [
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "sergeant"
+            },
+            {
+              "label": "B",
+              "text": "germ"
+            },
+            {
+              "label": "C",
+              "text": "gesture"
+            },
+            {
+              "label": "D",
+              "text": "gear"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "gear has hard /g/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 16
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "vague"
+            },
+            {
+              "label": "B",
+              "text": "plague"
+            },
+            {
+              "label": "C",
+              "text": "league"
+            },
+            {
+              "label": "D",
+              "text": "fatigue"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "league has /iːg/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 17
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "said"
+            },
+            {
+              "label": "B",
+              "text": "paid"
+            },
+            {
+              "label": "C",
+              "text": "laid"
+            },
+            {
+              "label": "D",
+              "text": "maid"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "said has /e/; others have /eɪ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 18
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "heir"
+            },
+            {
+              "label": "B",
+              "text": "honest"
+            },
+            {
+              "label": "C",
+              "text": "hour"
+            },
+            {
+              "label": "D",
+              "text": "host"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "host pronounces h.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 19
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "crescent"
+            },
+            {
+              "label": "B",
+              "text": "scene"
+            },
+            {
+              "label": "C",
+              "text": "scent"
+            },
+            {
+              "label": "D",
+              "text": "science"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "scene has /siːn/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 20
+          }
+        }
+      ]
+    },
+    {
+      "title": "Pronunciation Odd-One-Out Set 05",
+      "slug": "pronunciation-pack-001-pronunciation-odd-one-out-set-05",
+      "skillType": "PRONUNCIATION",
+      "questionType": "PRONUNCIATION_ODD_ONE_OUT",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn từ có phần phát âm khác các từ còn lại.",
+      "instructions": "Mỗi câu có 4 lựa chọn A-D. Chọn đáp án có âm khác biệt rõ nhất theo phát âm chuẩn phổ biến.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Pronunciation",
+        "Vowel Sounds"
+      ],
+      "questions": [
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "quay"
+            },
+            {
+              "label": "B",
+              "text": "key"
+            },
+            {
+              "label": "C",
+              "text": "grey"
+            },
+            {
+              "label": "D",
+              "text": "they"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "quay is pronounced /kiː/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 21
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "draught"
+            },
+            {
+              "label": "B",
+              "text": "daughter"
+            },
+            {
+              "label": "C",
+              "text": "caught"
+            },
+            {
+              "label": "D",
+              "text": "taught"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "draught is /drɑːft/ or /dræft/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 22
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "mauve"
+            },
+            {
+              "label": "B",
+              "text": "laugh"
+            },
+            {
+              "label": "C",
+              "text": "calf"
+            },
+            {
+              "label": "D",
+              "text": "half"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "mauve ends /v/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 23
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "ache"
+            },
+            {
+              "label": "B",
+              "text": "chorus"
+            },
+            {
+              "label": "C",
+              "text": "champagne"
+            },
+            {
+              "label": "D",
+              "text": "scheme"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "champagne has /ʃ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 24
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "edged"
+            },
+            {
+              "label": "B",
+              "text": "marked"
+            },
+            {
+              "label": "C",
+              "text": "washed"
+            },
+            {
+              "label": "D",
+              "text": "missed"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "edged does not end /t/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 25
+          }
+        }
+      ]
+    },
+    {
+      "title": "Pronunciation Odd-One-Out Set 06",
+      "slug": "pronunciation-pack-001-pronunciation-odd-one-out-set-06",
+      "skillType": "PRONUNCIATION",
+      "questionType": "PRONUNCIATION_ODD_ONE_OUT",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn từ có phần phát âm khác các từ còn lại.",
+      "instructions": "Mỗi câu có 4 lựa chọn A-D. Chọn đáp án có âm khác biệt rõ nhất theo phát âm chuẩn phổ biến.",
+      "estimatedMinutes": 6,
+      "topics": [
+        "Pronunciation",
+        "Consonant Sounds"
+      ],
+      "questions": [
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "zealous"
+            },
+            {
+              "label": "B",
+              "text": "measure"
+            },
+            {
+              "label": "C",
+              "text": "treasure"
+            },
+            {
+              "label": "D",
+              "text": "vision"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "zealous has /z/, others have /ʒ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 26
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "quarantine"
+            },
+            {
+              "label": "B",
+              "text": "quilt"
+            },
+            {
+              "label": "C",
+              "text": "queen"
+            },
+            {
+              "label": "D",
+              "text": "queue"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "queue begins /kjuː/, not /kw/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 27
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "debris"
+            },
+            {
+              "label": "B",
+              "text": "debt"
+            },
+            {
+              "label": "C",
+              "text": "doubt"
+            },
+            {
+              "label": "D",
+              "text": "dumb"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "debris has silent s; others silent b.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 28
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "ballet"
+            },
+            {
+              "label": "B",
+              "text": "valet"
+            },
+            {
+              "label": "C",
+              "text": "wallet"
+            },
+            {
+              "label": "D",
+              "text": "chalet"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "wallet has /wɒl/ not final /eɪ/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 29
+          }
+        },
+        {
+          "type": "PRONUNCIATION_ODD_ONE_OUT",
+          "skillType": "PRONUNCIATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Chọn từ có phần phát âm khác các từ còn lại.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "lose"
+            },
+            {
+              "label": "B",
+              "text": "loose"
+            },
+            {
+              "label": "C",
+              "text": "choose"
+            },
+            {
+              "label": "D",
+              "text": "whose"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "loose has /s/; others /z/.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "focus": "pronunciation odd-one-out",
+            "questionNumber": 30
+          }
+        }
+      ]
+    }
+  ]
+}

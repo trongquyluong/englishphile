@@ -1,0 +1,681 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Production uses PostgreSQL (Neon). Local dev requires PostgreSQL too.
+// For local SQLite-only development, see README "Local Dev with SQLite (deprecated)".
+// IMPORTANT: Do not run prisma migrate dev on a production PostgreSQL database.
+// Use `npm run prisma:deploy` for production migrations.
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum SkillType {
+  PRONUNCIATION
+  MULTIPLE_CHOICE
+  OPEN_CLOZE
+  GUIDED_CLOZE
+  WORD_FORMATION
+  SENTENCE_TRANSFORMATION
+  ERROR_IDENTIFICATION
+  READING
+  WRITING
+  LISTENING
+  TRIOS
+  COLLOCATIONS
+  PHRASAL_VERBS
+  TRANSITIONS
+  GRAMMAR_FOCUS
+}
+
+enum QuestionType {
+  PRONUNCIATION_ODD_ONE_OUT
+  MCQ
+  OPEN_CLOZE
+  GUIDED_CLOZE
+  WORD_FORMATION
+  SENTENCE_TRANSFORMATION
+  ERROR_IDENTIFICATION
+  READING_MCQ
+  LISTENING_MCQ
+  LISTENING_SHORT_ANSWER
+  WRITING_PROMPT
+  TRIOS_GAPPED_SENTENCES
+  SHORT_ANSWER
+}
+
+enum Difficulty {
+  B2
+  C1
+  C2
+  CHUYEN
+  HSG
+}
+
+enum SubmissionMode {
+  SINGLE_PROBLEM
+  RANDOM_PRACTICE
+  MOCK_TEST
+}
+
+enum SubmissionStatus {
+  ACCEPTED
+  WRONG_ANSWER
+  PARTIAL
+  NEEDS_REVIEW
+}
+
+enum ProblemStatus {
+  NOT_ATTEMPTED
+  ATTEMPTED
+  SOLVED
+  WRONG
+  NEEDS_REVIEW
+}
+
+enum SourceType {
+  PDF
+  DOCX
+  CSV
+  JSON
+  MANUAL
+  OTHER
+}
+
+enum ImportType {
+  JSON
+  CSV
+}
+
+enum ImportStatus {
+  VALIDATED
+  IMPORTED
+  FAILED
+}
+
+enum ContentStatus {
+  DRAFT
+  NEEDS_REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentPackStatus {
+  DRAFT
+  VALIDATED
+  PARTIALLY_IMPORTED
+  IMPORTED
+  FAILED
+  ARCHIVED
+}
+
+enum ClassroomRole {
+  STUDENT
+  ASSISTANT
+  TEACHER
+}
+
+enum AssignmentType {
+  PRACTICE_SET
+  MOCK_TEST
+  HOMEWORK
+  REVIEW_SET
+}
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum AssignmentSubmissionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  LATE
+  NEEDS_REVIEW
+}
+
+enum ManualGradeCorrectness {
+  CORRECT
+  INCORRECT
+  PARTIAL
+  NEEDS_REVISION
+}
+
+enum DiagnosticAttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+  NEEDS_REVIEW
+}
+
+enum RecommendationType {
+  NEXT_PROBLEM
+  SKILL_FOCUS
+  TOPIC_REVIEW
+  WRONG_QUESTION_RETRY
+  CHALLENGE
+  DIAGNOSTIC_RETAKE
+}
+
+enum RecommendationStatus {
+  ACTIVE
+  DISMISSED
+  COMPLETED
+}
+
+enum ContestType {
+  PAST_EXAM
+  LIVE_CONTEST
+  PRACTICE_CONTEST
+}
+
+enum ContestStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDED
+  ARCHIVED
+}
+
+enum ContestVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+enum ContestAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  LATE
+  NEEDS_REVIEW
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  username           String?             @unique
+  passwordHash       String
+  displayName        String
+  fullName           String?
+  role               Role                @default(STUDENT)
+  profile            UserProfile?
+  submissions        Submission[]
+  problemStatuses    UserProblemStatus[]
+  importBatches      ImportBatch[]
+  reviewedProblems   Problem[]           @relation("ProblemReviewedBy")
+  reviewedQuestions  Question[]          @relation("QuestionReviewedBy")
+  contentAuditLogs   ContentAuditLog[]
+  classroomsTeaching Classroom[]          @relation("ClassroomTeacher")
+  classroomMemberships ClassroomMember[]
+  assignmentsCreated Assignment[]         @relation("AssignmentCreator")
+  assignmentSubmissions AssignmentSubmission[]
+  manualGradesGiven ManualGrade[]         @relation("ManualGradeGradedBy")
+  contentPacksImported ContentPack[]       @relation("ContentPackImportedBy")
+  diagnosticAttempts DiagnosticAttempt[]
+  skillProfiles     UserSkillProfile[]
+  topicProfiles     UserTopicProfile[]
+  learningRecommendations LearningRecommendation[]
+  contestsCreated   Contest[]            @relation("ContestCreatedBy")
+  contestAttempts   ContestAttempt[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model UserProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  targetExam   String?
+  schoolTarget String?
+  school       String?
+  province     String?
+  avatarUrl    String?
+  bio          String?
+  level        String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SourceCollection {
+  id               String     @id @default(cuid())
+  name             String
+  description      String
+  originalFileName String?
+  sourceType       SourceType @default(MANUAL)
+  copyrightNote    String?
+  problems         Problem[]
+  importBatches    ImportBatch[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Topic {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  description    String?
+  parentId       String?
+  parent         Topic?         @relation("TopicTree", fields: [parentId], references: [id])
+  children       Topic[]        @relation("TopicTree")
+  problemTopics  ProblemTopic[]
+  theoryNotes    TheoryNote[]
+  userTopicProfiles UserTopicProfile[]
+  learningRecommendations LearningRecommendation[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Problem {
+  id                 String              @id @default(cuid())
+  title              String
+  slug               String              @unique
+  skillType          SkillType
+  questionType       QuestionType
+  difficulty         Difficulty
+  sourceCollectionId String?
+  sourceCollection   SourceCollection?   @relation(fields: [sourceCollectionId], references: [id], onDelete: SetNull)
+  statement          String
+  instructions       String?
+  estimatedMinutes   Int?
+  acceptanceRate     Float?
+  isDiagnosticEligible Boolean            @default(false)
+  diagnosticWeight   Int                 @default(1)
+  recommendedMinLevel Difficulty?
+  recommendedMaxLevel Difficulty?
+  contentStatus      ContentStatus       @default(DRAFT)
+  publishedAt        DateTime?
+  reviewedAt         DateTime?
+  reviewedById       String?
+  reviewedBy         User?               @relation("ProblemReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  importedBatchId    String?
+  importedBatch      ImportBatch?        @relation("ProblemImportBatch", fields: [importedBatchId], references: [id], onDelete: SetNull)
+  contentPackId      String?
+  contentPack        ContentPack?        @relation(fields: [contentPackId], references: [id], onDelete: SetNull)
+  orderIndex         Int                 @default(0)
+  questions          Question[]
+  problemTopics      ProblemTopic[]
+  submissions        Submission[]
+  userStatuses       UserProblemStatus[]
+  assignmentProblems AssignmentProblem[]
+  assignmentProblemSubmissions AssignmentProblemSubmission[]
+  learningRecommendations LearningRecommendation[]
+  contestProblems   ContestProblem[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model Question {
+  id                String             @id @default(cuid())
+  problemId         String
+  problem           Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  type              QuestionType
+  skillType         SkillType
+  difficulty        Difficulty
+  prompt            String
+  passage           String?
+  options           Json?
+  answer            Json
+  explanation       String?
+  rootWord          String?
+  keyword           String?
+  targetSentence    String?
+  lineNumber        Int?
+  metadata          Json?
+  contentStatus     ContentStatus       @default(DRAFT)
+  reviewedAt        DateTime?
+  reviewedById      String?
+  reviewedBy        User?               @relation("QuestionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  orderIndex        Int                @default(0)
+  submissionAnswers SubmissionAnswer[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model ProblemTopic {
+  problemId String
+  topicId   String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  topic     Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, topicId])
+}
+
+model TheoryNote {
+  id         String     @id @default(cuid())
+  title      String
+  slug       String     @unique
+  skillType  SkillType?
+  topicId    String?
+  topic      Topic?     @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  content    String
+  orderIndex Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Submission {
+  id                String             @id @default(cuid())
+  userId            String
+  problemId         String
+  mode              SubmissionMode
+  status            SubmissionStatus
+  score             Float?
+  total             Float?
+  answers           Json
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem           Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  submissionAnswers SubmissionAnswer[]
+  assignmentProblemSubmissions AssignmentProblemSubmission[]
+  createdAt         DateTime           @default(now())
+}
+
+model SubmissionAnswer {
+  id            String     @id @default(cuid())
+  submissionId  String
+  questionId    String
+  studentAnswer Json
+  isCorrect     Boolean?
+  feedback      String?
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question      Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  manualGrade   ManualGrade?
+  createdAt     DateTime   @default(now())
+}
+
+model ManualGrade {
+  id                 String                 @id @default(cuid())
+  submissionAnswerId String                 @unique
+  gradedById         String
+  correctness        ManualGradeCorrectness
+  score              Float?
+  maxScore           Float?
+  feedback           String?
+  rubricJson         Json?
+  submissionAnswer   SubmissionAnswer       @relation(fields: [submissionAnswerId], references: [id], onDelete: Cascade)
+  gradedBy           User                   @relation("ManualGradeGradedBy", fields: [gradedById], references: [id], onDelete: Cascade)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+}
+
+model UserProblemStatus {
+  id            String        @id @default(cuid())
+  userId        String
+  problemId     String
+  status        ProblemStatus @default(NOT_ATTEMPTED)
+  bestScore     Float?
+  attempts      Int           @default(0)
+  lastAttemptAt DateTime?
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem       Problem       @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([userId, problemId])
+}
+
+model ImportBatch {
+  id                 String            @id @default(cuid())
+  userId             String
+  sourceCollectionId String?
+  importType         ImportType
+  status             ImportStatus
+  summary            Json
+  errorLog           Json?
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceCollection   SourceCollection? @relation(fields: [sourceCollectionId], references: [id], onDelete: SetNull)
+  problems           Problem[]         @relation("ProblemImportBatch")
+  contentPackId      String?
+  contentPack        ContentPack?      @relation(fields: [contentPackId], references: [id], onDelete: SetNull)
+  createdAt          DateTime          @default(now())
+}
+
+model ContentPack {
+  id             String            @id @default(cuid())
+  name           String
+  version        String?
+  description    String?
+  manifestJson   Json?
+  fileName       String?
+  status         ContentPackStatus @default(DRAFT)
+  importedById   String?
+  importedBy     User?             @relation("ContentPackImportedBy", fields: [importedById], references: [id], onDelete: SetNull)
+  importBatches  ImportBatch[]
+  problems       Problem[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model ContentAuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  entityType String
+  entityId   String
+  action     String
+  beforeJson Json?
+  afterJson  Json?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model DiagnosticAttempt {
+  id                     String                    @id @default(cuid())
+  userId                 String
+  status                 DiagnosticAttemptStatus   @default(IN_PROGRESS)
+  startedAt              DateTime                  @default(now())
+  completedAt            DateTime?
+  score                  Float?
+  total                  Float?
+  estimatedLevel         Difficulty?
+  skillBreakdownJson     Json?
+  topicBreakdownJson     Json?
+  recommendationJson     Json?
+  user                   User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+}
+
+model UserSkillProfile {
+  id             String     @id @default(cuid())
+  userId         String
+  skillType      SkillType
+  estimatedLevel Difficulty?
+  accuracy       Float?
+  attempted      Int        @default(0)
+  correct        Float      @default(0)
+  confidence     Float      @default(0)
+  lastUpdatedAt  DateTime   @default(now())
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([userId, skillType])
+}
+
+model UserTopicProfile {
+  id             String     @id @default(cuid())
+  userId         String
+  topicId        String
+  estimatedLevel Difficulty?
+  accuracy       Float?
+  attempted      Int        @default(0)
+  correct        Float      @default(0)
+  confidence     Float      @default(0)
+  lastUpdatedAt  DateTime   @default(now())
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic          Topic      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([userId, topicId])
+}
+
+model LearningRecommendation {
+  id                 String                @id @default(cuid())
+  userId             String
+  recommendationType RecommendationType
+  skillType          SkillType?
+  topicId            String?
+  problemId          String?
+  reason             String
+  priority           Int                   @default(0)
+  status             RecommendationStatus  @default(ACTIVE)
+  user               User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic              Topic?                @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  problem            Problem?              @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+}
+
+model Contest {
+  id              String              @id @default(cuid())
+  title           String
+  slug            String              @unique
+  description     String?
+  contestType     ContestType         @default(PRACTICE_CONTEST)
+  status          ContestStatus       @default(DRAFT)
+  visibility      ContestVisibility   @default(PUBLIC)
+  durationMinutes Int?
+  startsAt        DateTime?
+  endsAt          DateTime?
+  sourceName      String?
+  rules           String?
+  createdById     String?
+  createdBy       User?               @relation("ContestCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  problems        ContestProblem[]
+  attempts        ContestAttempt[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+model ContestProblem {
+  id          String   @id @default(cuid())
+  contestId   String
+  problemId   String
+  section     String
+  orderIndex  Int      @default(0)
+  points      Float?
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  problem     Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([contestId, problemId])
+}
+
+model ContestAttempt {
+  id               String               @id @default(cuid())
+  contestId        String
+  userId           String
+  status           ContestAttemptStatus @default(IN_PROGRESS)
+  startedAt        DateTime             @default(now())
+  submittedAt      DateTime?
+  score            Float?
+  total            Float?
+  timeSpentSeconds Int?
+  answersJson      Json?
+  contest          Contest              @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model Classroom {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  teacherId   String
+  joinCode    String            @unique
+  teacher     User              @relation("ClassroomTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  members     ClassroomMember[]
+  assignments Assignment[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model ClassroomMember {
+  id          String        @id @default(cuid())
+  classroomId String
+  userId      String
+  role        ClassroomRole @default(STUDENT)
+  classroom   Classroom     @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+
+  @@unique([classroomId, userId])
+}
+
+model Assignment {
+  id                    String                 @id @default(cuid())
+  title                 String
+  description           String?
+  classroomId           String?
+  classroom             Classroom?             @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  createdById           String
+  createdBy             User                   @relation("AssignmentCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignmentType        AssignmentType         @default(PRACTICE_SET)
+  status                AssignmentStatus       @default(DRAFT)
+  dueAt                 DateTime?
+  timeLimitMinutes      Int?
+  allowLateSubmission   Boolean                @default(true)
+  showAnswersAfterSubmit Boolean               @default(true)
+  problems              AssignmentProblem[]
+  submissions           AssignmentSubmission[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+}
+
+model AssignmentProblem {
+  id           String     @id @default(cuid())
+  assignmentId String
+  problemId    String
+  orderIndex   Int        @default(0)
+  points       Float?
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  problem      Problem    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, problemId])
+}
+
+model AssignmentSubmission {
+  id                        String                       @id @default(cuid())
+  assignmentId              String
+  userId                    String
+  status                    AssignmentSubmissionStatus   @default(NOT_STARTED)
+  startedAt                 DateTime?
+  submittedAt               DateTime?
+  score                     Float?
+  total                     Float?
+  timeSpentSeconds          Int?
+  answers                   Json?
+  resultJson                Json?
+  assignment                Assignment                   @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  user                      User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemSubmissions        AssignmentProblemSubmission[]
+  createdAt                 DateTime                     @default(now())
+  updatedAt                 DateTime                     @updatedAt
+
+  @@unique([assignmentId, userId])
+}
+
+model AssignmentProblemSubmission {
+  id                     String                 @id @default(cuid())
+  assignmentSubmissionId String
+  problemId              String
+  submissionId           String?
+  score                  Float?
+  total                  Float?
+  status                 SubmissionStatus?
+  assignmentSubmission   AssignmentSubmission   @relation(fields: [assignmentSubmissionId], references: [id], onDelete: Cascade)
+  problem                Problem                @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  submission             Submission?            @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+  createdAt              DateTime               @default(now())
+}

@@ -1,0 +1,31 @@
+
+> englishphile@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.16.0.2:3000
+- Environments: .env
+✓ Ready in 1342ms
+
+ GET / 200 in 1876ms (next.js: 629ms, application-code: 1247ms)
+ GET /contests 200 in 555ms (next.js: 137ms, application-code: 418ms)
+ GET /unauthorized 200 in 3.1s (next.js: 2.1s, application-code: 1026ms)
+ GET /admin 200 in 2.8s (next.js: 2.1s, application-code: 690ms)
+ GET /contests/no-such-contest/leaderboard 200 in 4.4s (next.js: 4.0s, application-code: 359ms)
+ HEAD /admin 200 in 348ms (next.js: 17ms, application-code: 331ms)
+ HEAD /contests 200 in 369ms (next.js: 26ms, application-code: 342ms)
+ HEAD /contests/no-such-contest/leaderboard 200 in 339ms (next.js: 112ms, application-code: 227ms)
+ HEAD /profile 200 in 2.5s (next.js: 2.3s, application-code: 248ms)
+ GET /admin 200 in 294ms (next.js: 8ms, application-code: 286ms)
+ GET /contests 200 in 521ms (next.js: 12ms, application-code: 509ms)
+ GET /profile 200 in 579ms (next.js: 79ms, application-code: 500ms)
+ GET /contests/no-such-contest/leaderboard 200 in 344ms (next.js: 68ms, application-code: 275ms)
+✓ Compiled in 1572ms
+✓ Compiled in 52ms
+✓ Compiled in 17.6s
+✓ Compiled in 1170ms
+✓ Compiled in 356ms
+✓ Compiled in 2.5s
+✓ Compiled in 296ms
+✓ Compiled in 343ms

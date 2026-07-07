@@ -1,0 +1,953 @@
+# Englishphile
+
+Englishphile is a personalized English practice platform for students preparing for specialized English exams. The product is diagnostic-first: learners check their level, receive recommended practice, work independently by ability, and track progress through Gym practice, Contests, Wiki notes, analytics, and wrong-question review.
+
+Important: this platform is not organized by “Day”. If uploaded files contain `DAY` in their names, treat that only as source metadata. The core structure is:
+
+`Gym mode → Skill → Topic → Difficulty → Problem / Exercise Set → Question`
+
+## Product Vision
+
+Englishphile helps students identify their current level, understand weak skills/topics, and practice from a curated bank of published exercises. Recommendations are deterministic and explainable, using diagnostic results, wrong answers, weak topics, and not-yet-solved published problems.
+
+Primary navigation:
+
+- Trang chủ
+- Gym
+- Contests
+- Wiki
+- Về Englishphile
+
+Gym contains Reading, Writing, Listening, and Use of English. Use of English contains pronunciation, MCQ, cloze, word formation, sentence transformation, error identification, trios, collocations, phrasal verbs, transitions, and grammar focus.
+
+Englishphile is operated by a site owner/admin. Public signup creates normal learner accounts only; users do not choose teacher/admin roles. Classroom and assignment routes exist as hidden legacy tools, but they are not the main student experience.
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- Prisma ORM with PostgreSQL (Neon) for production
+- SQLite for local development (deprecated — see below)
+- Local signed-cookie auth scaffold
+- Zod validation for imports
+- Lucide React icons
+
+## Setup
+
+```bash
+npm install
+npm run prisma:generate
+npm run prisma:migrate -- --name init
+# Optional only for a fresh demo database. Do not run on populated beta data.
+# npm run prisma:seed
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Environment Variables
+
+Create `.env` from `.env.example`:
+
+```env
+DATABASE_URL="file:./dev.db"
+SESSION_SECRET="replace-with-a-long-random-secret"
+AUTH_SECRET="replace-with-a-long-random-secret"
+OWNER_EMAIL="owner@example.com"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NEXT_PUBLIC_CONTACT_EMAIL=""
+NODE_ENV="development"
+```
+
+Generate a local session secret with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Never commit `.env`. Production must set `DATABASE_URL`, `SESSION_SECRET` or `AUTH_SECRET`, and `OWNER_EMAIL`.
+
+## Test Accounts And Signup
+
+After seeding:
+
+- Student: `student@example.com` / `password123`
+- Legacy admin-compatible account: `teacher@example.com` / `password123`
+
+Public signup asks for email, username, password, full name, school, and province/city, then creates a normal learner account. Site-owner/admin access is managed outside public signup. The legacy `teacher@example.com` seed remains for local admin-tool testing during transition.
+
+## Owner/Admin Setup
+
+Public signup never creates admin accounts. For local beta testing, create or sign up with the email configured in `OWNER_EMAIL`; that account is treated as the site owner for admin route access even if its stored role is still `STUDENT`.
+
+Recommended local flow:
+
+1. Set `OWNER_EMAIL` in `.env`.
+2. Sign up with that email through the normal learner signup.
+3. Open `/admin`.
+
+Existing `ADMIN` accounts and legacy `TEACHER` accounts can still access admin tools for compatibility, but the public UI does not offer teacher/admin signup.
+
+## Validation Commands
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate -- --name <migration-name>
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Do not run `npm run prisma:seed` on a populated local or production database unless you intentionally want to reset demo/imported data.
+
+## Database Schema Overview
+
+Main models:
+
+- `User`, `UserProfile`
+- `SourceCollection`
+- `Topic`, `ProblemTopic`
+- `Problem`, `Question`
+- `TheoryNote`
+- `Submission`, `SubmissionAnswer`
+- `UserProblemStatus`
+- `ImportBatch`
+- `Classroom`, `ClassroomMember`
+- `Assignment`, `AssignmentProblem`
+- `AssignmentSubmission`, `AssignmentProblemSubmission`
+- `ManualGrade`
+- `ContentPack`
+- `DiagnosticAttempt`
+- `UserSkillProfile`, `UserTopicProfile`
+- `LearningRecommendation`
+- `Contest`, `ContestProblem`, `ContestAttempt`
+
+Main enums:
+
+- `Role`
+- `SkillType`
+- `QuestionType`
+- `Difficulty`
+- `SubmissionMode`
+- `SubmissionStatus`
+- `ProblemStatus`
+- `SourceType`
+- `ImportType`
+- `ImportStatus`
+- `ClassroomRole`
+- `AssignmentType`
+- `AssignmentStatus`
+- `AssignmentSubmissionStatus`
+- `ManualGradeCorrectness`
+- `ContentStatus`
+- `ContentPackStatus`
+- `DiagnosticAttemptStatus`
+- `RecommendationType`
+- `RecommendationStatus`
+- `ContestType`
+- `ContestStatus`
+- `ContestVisibility`
+- `ContestAttemptStatus`
+
+## Phase 2 Import System
+
+Route: `/admin/import`
+
+Admin users can upload JSON/CSV files or use the advanced manual paste workflow, run dry-run validation, inspect previews, review Vietnamese errors/warnings, and then import valid data into the database.
+
+The import pipeline:
+
+1. Parse JSON or CSV.
+2. Validate enums, required fields, options, answers, and question-type-specific rules.
+3. Detect duplicates.
+4. Show dry-run summary.
+5. Create or reuse source collections and topics.
+6. Create new problems/questions.
+7. Save an `ImportBatch` history record.
+
+Real PDFs are not parsed yet. Convert PDF/DOCX content into approved JSON/CSV first. Admin should review imported questions before using them in real practice. Do not import copyrighted material unless you have the right to use it.
+
+## JSON Import Format
+
+```json
+{
+  "sourceCollection": {
+    "name": "Admin JSON Source",
+    "description": "Short source description",
+    "originalFileName": "source-file.json",
+    "sourceType": "JSON",
+    "copyrightNote": "Original or licensed content only."
+  },
+  "problems": [
+    {
+      "title": "Word formation set",
+      "slug": "word-formation-set",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Điền dạng đúng của từ trong ngoặc.",
+      "instructions": "Xác định loại từ trước.",
+      "estimatedMinutes": 10,
+      "topics": ["Word Class", "Suffixes"],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The answer showed real ____. (PRECISE)",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": ["precision"],
+            "display": "precision"
+          },
+          "explanation": "Sau real cần danh từ.",
+          "rootWord": "PRECISE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "note": "precise -> precision"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### JSON Examples By Question Type
+
+The `/admin/import` Templates tab contains copyable JSON examples for:
+
+- Multiple Choice JSON
+- Pronunciation JSON
+- Word Formation JSON
+- Sentence Transformation JSON
+- Guided Cloze JSON
+- Open Cloze JSON
+- Error Identification JSON
+- Trios / Gapped Sentences JSON
+- Reading MCQ JSON
+- Writing Prompt JSON
+
+Repo example:
+
+- `examples/import/word-formation-sample.json`
+
+## CSV Import Format
+
+Flat CSV format: each row is one question. Rows are grouped into problems by `problemSlug`, or by generated slug from `problemTitle` when `problemSlug` is empty.
+
+Required columns:
+
+```text
+sourceName,problemTitle,problemSlug,skillType,questionType,difficulty,topicTags,statement,instructions,prompt,passage,optionsJson,answerJson,explanation,rootWord,keyword,targetSentence,metadataJson
+```
+
+Rules:
+
+- `topicTags` can be comma-separated; quote the cell if it contains commas.
+- `optionsJson`, `answerJson`, and `metadataJson` must be valid JSON strings when present.
+- Empty optional fields are allowed.
+- MCQ-like questions require `optionsJson` and `answerJson.correctOptionId`.
+- Text-answer questions use `answerJson.accepted` or `answerJson.acceptedAnswers`.
+
+Repo example:
+
+- `examples/import/mcq-sample.csv`
+
+## Duplicate Behavior
+
+- Existing topics are reused by name or slug.
+- Existing source collections are reused by matching `name`.
+- Existing problem slugs are skipped.
+- Duplicate questions inside the same imported problem are skipped when prompt + answer match.
+- Exact duplicate database questions are skipped.
+- High-similarity duplicate questions (`>= 0.90`) are skipped automatically.
+- Possible duplicate questions (`0.75-0.89`) are imported as `NEEDS_REVIEW` and blocked by QA until reviewed.
+- Phase 2 does not support overwrite.
+
+## Phase 3 Content Lifecycle
+
+Englishphile separates admin content lifecycle from learner progress.
+
+`contentStatus` is an editorial/admin state:
+
+- `DRAFT` = Bản nháp
+- `NEEDS_REVIEW` = Cần duyệt
+- `PUBLISHED` = Đã xuất bản
+- `ARCHIVED` = Đã lưu trữ
+
+`UserProblemStatus` is a learner progress state:
+
+- `NOT_ATTEMPTED`
+- `ATTEMPTED`
+- `SOLVED`
+- `WRONG`
+- `NEEDS_REVIEW`
+
+Do not confuse these two concepts. A problem can be `PUBLISHED` while a student has `WRONG`, or a problem can be `ARCHIVED` while historical wrong-answer records remain visible.
+
+### Review Workflow
+
+Imported JSON/CSV content defaults to `NEEDS_REVIEW`. In `/admin/import`, admin users can check “Publish ngay sau khi import” only when the content has already been reviewed.
+
+Admin workflow:
+
+1. Import JSON/CSV from `/admin/import`.
+2. Open `/admin/review` to see draft or needs-review problems.
+3. Use “Chỉnh sửa” to fix metadata, JSON answer fields, topics, source, and question content.
+4. Use `/admin/problems/[id]/preview` to render the problem as a student without saving submissions.
+5. Publish only when all questions have valid answers/options.
+6. Archive content that should not appear in the student problem bank.
+
+Student-facing `/problems`, Gym pages, random practice, skill counts, and dashboard recommendations show only `PUBLISHED` problems by default. Admin-compatible accounts can toggle draft/review visibility in the problem bank.
+
+### Admin Management
+
+Phase 3 admin routes:
+
+- `/admin/review` - review queue for `DRAFT` and `NEEDS_REVIEW`
+- `/admin/problems` - filter, bulk publish/archive/needs-review/draft
+- `/admin/problems/[id]` - admin detail with answers and lifecycle actions
+- `/admin/problems/[id]/edit` - edit problem and question JSON fields
+- `/admin/problems/[id]/preview` - admin preview, no saved submission
+- `/admin/sources` and `/admin/sources/[id]` - source counts, lifecycle distribution, metadata edits
+- `/admin/topics` and `/admin/topics/[id]` - topic counts, parent topic, related problems
+
+## Phase 4 Classroom And Assignment System
+
+Phase 4 added class management, assignments, and a mock-test builder. These routes remain available as hidden legacy/admin-compatible tools, but after Phase 7.5 they are not the core product flow. The primary learner flow is diagnostic plus Gym recommendations and Contests.
+
+Legacy admin-compatible routes:
+
+- `/teacher/classes` - create and view classes, student counts, active assignments, and join codes.
+- `/teacher/classes/[id]` - class overview, students, assigned work, results matrix, and settings.
+- `/teacher/assignments/new` - create homework, practice sets, review sets, or mock tests from `PUBLISHED` problems.
+- `/teacher/classes/[id]/assignments/new` - starts the assignment builder with a class preselected.
+- `/teacher/assignments/[id]` - assignment detail, status actions, problem list, completion summary, and student submissions.
+
+Student routes:
+
+- `/classes/join` - join a legacy class with a provided join code.
+- `/classes` - view joined classes and active assignments.
+- `/classes/[id]` - view assigned work, submitted work, scores, and due dates.
+- `/assignments/[id]` - complete assigned work using the existing question renderers.
+- `/assignments/[id]/result` - view score, status, correct/wrong/needs-review counts, and answer review when enabled.
+
+### Creating A Class
+
+1. Sign in with a legacy admin-compatible seeded account.
+2. Open `/teacher/classes`.
+3. Use “Tạo lớp” to create a classroom.
+4. Share the generated `joinCode` with students.
+
+Seed data includes a demo classroom:
+
+- Class: `Chuyên Anh 9A`
+- Join code: `ANH9A`
+- Legacy admin-compatible account: `teacher@example.com`
+- Student: `student@example.com`
+
+### Student Join Flow
+
+Students sign in, open `/classes/join`, enter the join code, then see the class and its active assignments under `/classes`.
+
+### Assignments And Mock Tests
+
+Legacy assignment builders create assignments from existing `PUBLISHED` problems only. The builder supports:
+
+- Basic assignment info: title, description, class, due date, time limit, late-submission policy, answer visibility.
+- Problem filters: skill, difficulty, topic, source, and search.
+- Selected-problem ordering and total estimated time.
+- Mock-test presets such as “Mock cá nhân hóa 45 phút” and custom skill-count selection with “Tự chọn câu phù hợp”.
+
+Assignments can be saved as `DRAFT` or published immediately. Closed and archived assignments are not available for new student submissions.
+
+### Assignment Submissions
+
+`AssignmentSubmission` stores the overall assignment attempt and result. Each completed problem also creates a normal `Submission` record and `SubmissionAnswer` records, so existing wrong-question review and user problem progress continue to work.
+
+Writing and sentence-transformation answers that need manual judgment mark the assignment submission as `NEEDS_REVIEW`. Manual grading is still a future workflow.
+
+### Current Limitations
+
+- No email invitations yet; class joining uses join codes.
+- Classroom analytics are basic; weak-skill detection remains future work.
+- Timer enforcement is basic and records elapsed time on submit.
+- Manual grading for writing and non-exact sentence transformation is not implemented yet.
+- Assignment editing after creation is limited; admin-compatible users can duplicate assignments to revise a draft-style copy.
+
+## Phase 5 Analytics And Manual Grading
+
+Phase 5 adds request-time analytics, weakness detection, deterministic recommendations, and a manual grading workflow.
+
+Student routes:
+
+- `/analytics` - overall progress, skill/topic breakdowns, recent wrong answers, trends, and recommended practice.
+- `/analytics/skills/[skillType]` - detail view for one skill with related topics, wrong questions, recommendations, and recent submissions.
+
+Legacy/admin-compatible grading routes:
+
+- `/teacher/classes/[id]/analytics` - class average accuracy, assignment completion, weakest skills/topics, difficult problems, students needing support, and grading shortcut.
+- `/teacher/classes/[id]/students/[userId]` - student detail analytics inside a class.
+- `/teacher/assignments/[id]/analytics` - assignment completion, score distribution, problem/question performance, and student scores.
+- `/teacher/grading` - queue of writing, sentence transformation, and other needs-review answers.
+- `/teacher/grading/[submissionAnswerId]` - manual grading form with correctness, score, max score, rubric notes, and teacher feedback.
+
+### Accuracy Rules
+
+- Auto-markable answers count only when `SubmissionAnswer.isCorrect` is `true` or `false`.
+- Needs-review answers do not enter the accuracy denominator until manually graded.
+- Writing is not counted as correct/incorrect until an admin-compatible grader saves a `ManualGrade`.
+- Sentence transformation exact matches count automatically; non-exact variants stay needs-review until graded.
+- Partial manual grades count proportionally when `score` and `maxScore` are present.
+
+### Recommendation Logic
+
+Recommendations are deterministic, not AI-based:
+
+- Find weak skills/topics with enough attempts.
+- Prefer `PUBLISHED` problems only.
+- Prefer problems the student has not solved.
+- Include retry links for recent wrong answers.
+- Show Vietnamese reasons such as “Bạn đang sai nhiều ở Word Formation.” or “Topic Inversion có độ chính xác thấp.”
+
+### Manual Grading Workflow
+
+1. Admin-compatible grader opens `/teacher/grading`.
+2. Filter by class, assignment, skill, student, or date.
+3. Open an answer and save correctness, score, max score, rubric notes, and feedback.
+4. The app updates `ManualGrade`, `SubmissionAnswer`, parent `Submission`, related `AssignmentProblemSubmission`, related `AssignmentSubmission`, and `UserProblemStatus` where possible.
+5. Graded answers leave the default grading queue.
+
+### Phase 5 Limitations
+
+- Analytics are computed on request, not snapshotted.
+- Charts are simple Tailwind/CSS UI, not advanced charting.
+- Recommendations are deterministic and do not use AI.
+- Writing grading is manual.
+- Manual grading history is represented by the latest `ManualGrade`; a full grade audit timeline can be added later.
+
+## Phase 6 Content Packs And QA
+
+Phase 6 adds a scalable content-pack ingestion workflow for cleaned JSON/CSV database packs prepared outside the app. It does not implement OCR, PDF extraction, DOCX extraction, or AI parsing.
+
+Admin routes:
+
+- `/admin/import` - upload one/multiple `.json`/`.csv` files first; manual paste is available as an advanced/debug path.
+- `/admin/content-packs` - list imported packs, status, file counts, problem counts, question counts, and import history.
+- `/admin/content-packs/[id]` - manifest summary, related source collections, import batches, imported problems, distributions, QA summary, and bulk actions.
+- `/admin/content-qa` - quality report across all content or a selected content pack.
+
+### File Upload Workflow
+
+1. Open `/admin/import` as an admin-compatible account.
+2. Use the default “Tải gói dữ liệu lên” workflow.
+3. Select one or more `.json`/`.csv` files.
+4. Click “Kiểm tra dữ liệu”.
+5. Review per-file preview, global summary, warnings, skipped duplicates, and ignored files.
+6. Click “Import tất cả file hợp lệ”.
+7. Open the generated content pack, run QA, preview/edit content, then bulk publish safe problems.
+
+ZIP upload is intentionally left as a TODO. Use multi-file upload for now; if a pack is zipped, extract it first.
+
+### Manifest Format
+
+Content packs may include `manifest.json`:
+
+```json
+{
+  "packName": "Englishphile Pilot Database Pack 001",
+  "version": "1.0.0",
+  "description": "Original pilot content for Englishphile.",
+  "createdFor": "Englishphile",
+  "files": [
+    {
+      "fileName": "01-pronunciation-pack-001.json",
+      "skillType": "PRONUNCIATION",
+      "problemCount": 6,
+      "questionCount": 30
+    }
+  ],
+  "totals": {
+    "problemCount": 46,
+    "questionCount": 220
+  }
+}
+```
+
+The current pilot pack also contains legacy-friendly fields such as `file`, `problems`, and `questions`; the app stores the full manifest JSON for traceability.
+
+### Content Pack Folder Convention
+
+```text
+content-packs/
+  README.md
+  pilot-pack-001/
+    manifest.json
+    00-all-in-one-pilot-pack-001.json
+    01-pronunciation-pack-001.json
+    ...
+    10-writing-pack-001.json
+```
+
+Rules:
+
+- `manifest.json` is optional but recommended.
+- Files should already follow the Englishphile JSON/CSV import schema.
+- Do not place raw PDF/DOCX files here yet.
+- `00-all-in-one` is for one-shot import only.
+- If a folder contains both `00-all-in-one` and split `01-10` files, the app and CLI prefer split files and ignore `00-all-in-one` to avoid duplicates.
+
+### CLI Import
+
+Import the pilot pack locally:
+
+```bash
+npm run import:pack -- content-packs/pilot-pack-001
+```
+
+The script:
+
+- Reads `manifest.json` when present.
+- Prefers split files over `00-all-in-one`.
+- Reuses the same validation/import logic as `/admin/import`.
+- Creates a `ContentPack`.
+- Creates `ImportBatch` records per imported file.
+- Links imported problems to the content pack.
+- Defaults imported content to `NEEDS_REVIEW`.
+
+### Content QA
+
+The QA report checks common publishing risks:
+
+- Missing statement or instructions.
+- Problem has no questions, topics, or source collection.
+- Duplicate slug in the QA scope.
+- Missing estimated time.
+- Missing prompt/passage where needed.
+- Missing answer JSON for auto-markable questions.
+- Missing or invalid options for MCQ-like questions.
+- Missing explanation.
+- Word Formation missing `rootWord`.
+- Sentence Transformation missing model answer.
+- Writing Prompt missing rubric metadata.
+- Reading problem missing passage.
+- Trios missing shared word or not representing three sentences.
+- Cloze-style questions missing answer structures.
+- Possible duplicate risk from import metadata.
+
+Severity labels:
+
+- `ERROR` = “Lỗi nghiêm trọng”, blocks bulk publish.
+- `WARNING` = “Cảnh báo”, allowed but should be reviewed.
+- `INFO` = “Gợi ý”.
+
+Bulk publish from `/admin/content-packs/[id]` or `/admin/content-qa` only publishes problems with no QA `ERROR` and still uses the Phase 3 publish validation rules.
+
+## Phase 7 Product Realignment
+
+Phase 7 realigns Englishphile around personalized self-practice.
+
+Student routes:
+
+- `/diagnostic`, `/diagnostic/start`, `/diagnostic/result` - fixed mixed diagnostic test, deterministic scoring, skill/topic profile updates, and recommendations.
+- `/recommendations` - recommended published problems with Vietnamese reasons.
+- `/practice/adaptive` - choose time/focus/skill and receive a suggested practice set.
+- `/gym` - main practice hub.
+- `/gym/reading`, `/gym/writing`, `/gym/listening`, `/gym/use-of-english` - Gym skill areas.
+- `/contests` - old exam practice and timed contests.
+- `/wiki` - renamed theory area for future knowledge notes.
+- `/about` - student/parent explanation of diagnostic, recommendations, skills, and content review.
+
+Important rules:
+
+- Do not describe Englishphile using old coding-practice comparisons.
+- Main student navigation is Trang chủ, Gym, Contests, Wiki, and Về Englishphile.
+- Reading, Writing, Listening, and Use of English live inside Gym, not top-level navigation.
+- Student dashboard centers diagnostic, recommended practice, Gym entry, Contests, progress, analytics, and wrong questions.
+- Classroom/assignment routes stay hidden from primary student UX.
+- Recommendations only use `PUBLISHED` problems.
+- Upload-first import is the preferred admin workflow.
+- Manual paste import is advanced/debug only.
+- Imported content goes through exact and near-duplicate detection before review/publish.
+
+## Phase 7.5 Gym, Contests, Profile, And UI Cleanup
+
+Phase 7.5 clarifies the product model:
+
+- Public users are learners. Signup creates `STUDENT` accounts only and asks for email, username, password, full name, school, and province/city.
+- The site owner/admin manages content, imports, QA, contests, wiki content, and review/publish workflows.
+- `TEACHER` remains in the database only for compatibility with legacy local data and hidden legacy tools.
+- Gym is the primary practice hub. It contains Reading, Writing, Listening, and Use of English.
+- Contests are for past exam practice and occasional timed English contests created by the admin.
+- Wiki replaces Theory as the knowledge area. `/theory` redirects to `/wiki`.
+- Topic tags should be subtle metadata or deliberate filters. Avoid large chip-only sections like “Topic Reading” that make the UI feel generated or noisy.
+- Student-facing pages should prioritize title, skill/mode, difficulty, short description, reason for recommendation, and the next action.
+
+Contest routes:
+
+- `/contests` - public contest list.
+- `/contests/[id]` - contest overview, rules, duration, sections, and start/result link.
+- `/contests/[id]/start` - contest attempt screen.
+- `/contests/[id]/result` - score and answer review.
+- `/admin/contests` - admin contest management.
+- `/admin/contests/new` - create contest from `PUBLISHED` problems.
+- `/admin/contests/[id]` and `/admin/contests/[id]/edit` - manage, edit, publish/schedule/archive.
+
+Only `PUBLISHED` problems should be selected for public contests by default. Writing or other manually reviewed answers may mark a contest attempt as `NEEDS_REVIEW`.
+
+## Phase 8 Diagnostic Calibration
+
+Phase 8 turns diagnostic into a structured placement test instead of a random mixed quiz.
+
+Diagnostic blueprint:
+
+- Use of English Core: MCQ, Word Formation, Sentence Transformation, Cloze, Error Identification.
+- Reading: Reading MCQ from published reading problems.
+- Writing: optional/manual review, excluded from auto-level until graded.
+- Listening: future-ready; excluded from score when no published listening content exists.
+
+Selection rules:
+
+- Diagnostic uses `PUBLISHED` content only.
+- It prefers problems with `isDiagnosticEligible = true`.
+- If eligible content is incomplete, it falls back to other published problems by skill/question type.
+- It never uses `DRAFT`, `NEEDS_REVIEW`, or `ARCHIVED` problems.
+- Admin can mark published problems diagnostic-ready at `/admin/diagnostic`.
+
+Scoring model:
+
+- Weighted accuracy maps to levels: `<40% B2`, `40-59% C1`, `60-74% C2`, `75-87% CHUYEN`, `88%+ HSG`.
+- Difficulty weights: `B2 1.0`, `C1 1.1`, `C2 1.25`, `CHUYEN 1.4`, `HSG 1.6`.
+- Confidence is `Thấp` under 15 auto-markable questions, `Trung bình` from 15-29, and `Cao` at 30+.
+- Sentence transformation exact matches can be auto-scored; non-exact answers become needs-review.
+- Writing is saved as manual-review content and does not affect auto-level.
+
+Recommendation priority:
+
+1. Wrong-question retry.
+2. Weak skill from diagnostic.
+3. Weak topic from diagnostic/submissions.
+4. Not-yet-attempted problems at the current estimated level.
+5. Slightly harder challenge problems.
+6. Writing practice if writing data is sparse.
+7. Reading practice if reading data is sparse.
+
+Gym personalization:
+
+- `/gym` shows diagnostic status, recommended work, skill status, and adaptive-practice entry.
+- `/gym/reading`, `/gym/writing`, `/gym/listening`, and `/gym/use-of-english` show mode-specific status and recommendations.
+- `/problems` includes clean personalized filters for level fit, weak skill, weak topic, not attempted, wrong, and challenge.
+
+Important data note: do not run `npm run prisma:seed` on a populated local database unless intentionally resetting demo/imported data.
+
+## Phase 9 Public Beta Hardening
+
+Phase 9 prepares the app for public beta:
+
+- Public signup is learner-only. No role selector is shown.
+- Admin pages and admin import APIs use shared owner/admin guards.
+- `OWNER_EMAIL` enables the site owner to access `/admin` without exposing admin signup.
+- Normal learners who try admin routes see a friendly no-access page.
+- Main learner navigation stays Trang chủ, Gym, Contests, Wiki, and Về Englishphile.
+- Classroom/assignment routes remain hidden legacy tools and are not part of the main product flow.
+- Contests now include filters, availability states, in-progress attempt resume, timed attempt UI, result review, and a leaderboard route.
+- Admin contest builder validates that only `PUBLISHED` problems can be selected.
+- Global loading, not-found, and error states are present for beta polish.
+- Admin dashboard includes beta stats: total users, completed diagnostics, published/review content, active contests, content packs, and duplicate skips when available.
+
+Current beta limitations:
+
+- No email verification or password reset yet.
+- No external analytics service.
+- Contest leaderboard is score/time based and does not expose email.
+- Writing and non-exact sentence transformation still require manual review.
+- Do not run seed on a populated beta database unless intentionally resetting demo/imported content.
+
+## Phase 10 Beta Launch Readiness
+
+Phase 10 prepares Englishphile for safe public beta deployment and real-user testing. It focuses on configuration, owner/admin setup, backups, status checks, legal/support pages, and safe migration habits instead of adding large learning features.
+
+### Required Environment
+
+Use `.env.example` as the source of truth:
+
+- `DATABASE_URL` - SQLite locally or deployed database URL in production.
+- `SESSION_SECRET` - preferred signed-cookie secret.
+- `AUTH_SECRET` - compatibility fallback if `SESSION_SECRET` is not set.
+- `OWNER_EMAIL` - site-owner account email; public signup is still learner-only.
+- `NEXT_PUBLIC_APP_URL` - optional base URL for metadata and links.
+- `NEXT_PUBLIC_CONTACT_EMAIL` - optional support email shown on `/contact`.
+- `NODE_ENV` - normally set by the runtime.
+
+Production must not rely on the local development secret fallback. Generate a long secret before deployment.
+
+### Owner/Admin Bootstrap
+
+Public signup never creates admin accounts. To create the owner account locally:
+
+1. Set `OWNER_EMAIL` in `.env`.
+2. Sign up normally with that email.
+3. Restart the dev server.
+4. If you want the stored role to become `ADMIN`, run:
+
+```bash
+npm run admin:promote -- owner@example.com
+```
+
+The promotion script never creates a password. If the user does not exist, sign up first and rerun the script.
+
+### Database Safety
+
+Run a backup before migrations or large imports:
+
+```bash
+npm run db:backup
+```
+
+Inspect beta counts:
+
+```bash
+npm run db:stats
+```
+
+Export important content and safe user metadata without `passwordHash`:
+
+```bash
+npm run db:export
+```
+
+Exports go under `exports/`. Backups go under `backups/`. Do not commit real user exports or production backups.
+
+### Migration Workflow
+
+Development:
+
+```bash
+npm run prisma:migrate -- --name some_name
+```
+
+Production:
+
+```bash
+npm run prisma:deploy
+```
+
+Do not use `prisma migrate dev` in production. Do not run `npm run prisma:seed` on beta/production data unless you intentionally want a reset.
+
+### Health, Status, And Legal Pages
+
+- `/api/health` returns non-secret JSON with app/database status.
+- `/status` shows a public beta status page.
+- `/privacy`, `/terms`, and `/contact` provide beta-ready legal/support information.
+- `/admin/beta-checklist` shows owner/admin setup, content readiness, diagnostic coverage, backup status, duplicate warnings, contests, and legal-page checks.
+
+### Launch Checklist
+
+Before opening beta:
+
+- Configure `OWNER_EMAIL` and a strong `SESSION_SECRET`.
+- Create the owner account through normal signup.
+- Run `npm run admin:promote -- owner@example.com` if role-based admin storage is desired.
+- Run `npm run db:backup`.
+- Confirm `/admin/beta-checklist` has no blocking missing items.
+- Confirm enough `PUBLISHED` problems and diagnostic coverage exist.
+- Run content QA before publishing imported packs.
+- Confirm `/privacy`, `/terms`, `/contact`, and `/status` are visible.
+
+### Phase 6 Warnings
+
+- OCR/PDF/DOCX extraction is not implemented yet.
+- Convert content into approved JSON/CSV first.
+- Imported content defaults to `NEEDS_REVIEW` unless explicitly published during import.
+- Do not publish imported content until QA and preview are complete.
+- Do not import copyrighted material unless you have the right to use it.
+
+## Question Bank Structure
+
+Problems are grouped by:
+
+- Skill type
+- Topic tags
+- Difficulty
+- Source collection
+- User problem status
+
+Seed data and examples are original sample content only. Do not paste large copyrighted worksheet content into seed files.
+
+Supported MVP renderers:
+
+- Multiple Choice
+- Pronunciation
+- Word Formation
+- Sentence Transformation
+- Guided Cloze
+- Open Cloze
+- Error Identification
+- Trios / Gapped Sentences
+- Reading MCQ
+- Listening MCQ / short answer metadata scaffold
+- Writing Prompt
+
+## Future Phases
+
+- PDF/DOCX extraction with admin review.
+- Grade audit timeline, richer analytics snapshots, and deeper weak-skill modeling.
+- AI-assisted explanations and writing feedback when explicitly requested.
+
+---
+
+## Deploy miễn phí với Vercel + Neon
+
+Englishphile có thể được deploy miễn phí lên Vercel Hobby và sử dụng Neon Free PostgreSQL.
+
+### Giới hạn
+
+- **Vercel Hobby**: chỉ dùng cho mục đích phi thương mại / beta cá nhân / quy mô nhỏ.
+- **Neon Free**: giới hạn 0.5 GB storage và 0.1 vCPU. Không dùng cho dữ liệu lớn.
+
+### Các bước deploy
+
+#### 1. Tạo project Neon
+
+1. Đăng ký tài khoản tại [neon.tech](https://neon.tech).
+2. Tạo project mới (ví dụ: `englishphile-prod`).
+3. Trong **Connection Details**, copy hai connection string:
+   - **Pooled connection** → `DATABASE_URL`
+   - **Non-pooled (direct) connection** → `DIRECT_URL`
+
+#### 2. Push code lên GitHub
+
+1. Khởi tạo git repo và push lên GitHub:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial Englishphile setup"
+   git branch -M main
+   git remote add origin https://github.com/<username>/englishphile.git
+   git push -u origin main
+   ```
+
+#### 3. Import vào Vercel
+
+1. Đăng ký tài khoản tại [vercel.com](https://vercel.com).
+2. Import repo GitHub: **Add New → Project → Import Git Repository**.
+3. Chọn repo `englishphile`.
+4. Framework: **Next.js** (auto-detected).
+5. **Build Command**: `npm run build` (đã bao gồm `prisma generate`).
+6. **Environment Variables** — thêm các biến sau:
+
+   | Variable | Value |
+   |---|---|
+   | `DATABASE_URL` | Connection string pooled từ Neon |
+   | `DIRECT_URL` | Connection string direct/non-pooled từ Neon |
+   | `SESSION_SECRET` | Secret ngẫu nhiên (xem bên dưới) |
+   | `OWNER_EMAIL` | Email của người quản trị |
+   | `NEXT_PUBLIC_APP_URL` | URL Vercel sau khi deploy (ví dụ: `https://englishphile.vercel.app`) |
+   | `NODE_ENV` | `production` |
+
+   Generate `SESSION_SECRET`:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+7. Click **Deploy**.
+
+Vercel sẽ tự động chạy `prisma generate` và `next build` (nhờ script `npm run build`).
+
+#### 4. Chạy migration trên Neon
+
+Sau khi deploy, chạy migration để tạo schema trên Neon:
+
+```bash
+# Trên máy local, kết nối trực tiếp tới Neon
+npm run db:import:portable -- --input <export-dir> --url "postgresql://user:password@ep-xxx-123456.us-east-2.aws.neon.tech/neondb?sslmode=require"
+
+# Hoặc dùng prisma migrate deploy nếu chưa có data để migrate
+npm run prisma:deploy
+```
+
+**Lưu ý**: Chạy `npm run db:export:portable` trên local để export nội dung trước, sau đó import vào Neon.
+
+#### 5. Tạo tài khoản owner
+
+1. Mở app đã deploy (ví dụ: `https://englishphile.vercel.app`).
+2. Sign up với email đã đặt trong `OWNER_EMAIL`.
+3. Sau đó chạy promotion script nếu muốn lưu role ADMIN vào database:
+
+   ```bash
+   # Chạy promotion script với production DATABASE_URL
+   npm run admin:promote -- owner@example.com
+   ```
+
+#### 6. Import nội dung (nếu có)
+
+1. Chạy portable export trên local:
+   ```bash
+   npm run db:export:portable
+   ```
+2. Import vào Neon:
+   ```bash
+   npm run db:import:portable -- --input exports/englishphile-portable-<timestamp> --url "postgresql://..."
+   ```
+
+#### 7. Kiểm tra sau deploy
+
+- `/api/health` — kiểm tra kết nối database.
+- `/status` — trang trạng thái public.
+- `/admin/beta-checklist` — checklist vận hành.
+
+### Production checklist
+
+Trước khi mở cho người dùng thật, kiểm tra:
+
+- [ ] `DATABASE_URL` trỏ đến Neon PostgreSQL (không phải SQLite).
+- [ ] `SESSION_SECRET` là secret ngẫu nhiên thực sự.
+- [ ] `OWNER_EMAIL` được cấu hình.
+- [ ] `NEXT_PUBLIC_APP_URL` trỏ đến URL Vercel.
+- [ ] Đã chạy migration trên Neon (`npm run prisma:deploy`).
+- [ ] Đã import nội dung (nếu cần).
+- [ ] `/admin/beta-checklist` không có mục nào ở trạng thái `missing`.
+- [ ] Đã chạy QA trên content trước khi publish.
+- [ ] `/privacy`, `/terms`, `/contact` đã có nội dung.
+
+### Cảnh báo
+
+- **Không chạy `prisma seed` trên production** nếu database đã có dữ liệu thật.
+- **Luôn backup/export trước migration lớn**: `npm run db:backup` (SQLite) hoặc `npm run db:export:portable`.
+- **Không để lộ `passwordHash`** — export script không bao gồm password hash.
+- **Import content lớn nên chia thành content pack nhỏ** để tránh timeout.
+- **Vercel Hobby không dùng cho traffic cao** — nâng cấp nếu cần.
+- **Neon Free có giới hạn** — theo dõi storage và compute để tránh bị giới hạn.
+
+### Local dev với SQLite (deprecated)
+
+Prisma schema hiện dùng PostgreSQL provider. Để tiếp tục dev local với SQLite:
+
+1. Đảm bảo đã có PostgreSQL local (ví dụ: PostgreSQL app, Docker).
+2. Hoặc sử dụng một Neon branch/branch database cho local dev:
+   - Tạo branch database trong Neon (Free tier cho phép nhiều branch).
+   - Dùng branch connection string làm `DATABASE_URL` local.
+3. Chạy migration:
+   ```bash
+   npm run prisma:migrate -- --name local_dev_setup
+   ```
+
+### Database scripts
+
+```bash
+npm run db:backup              # Backup SQLite (chỉ dùng cho local SQLite)
+npm run db:export              # Export an toàn (users không có password hash)
+npm run db:export:portable     # Export đầy đủ cho migration Neon
+npm run db:import:portable     # Import vào target database
+npm run db:stats               # Thống kê nhanh database
+npm run prisma:deploy          # Chạy migration trên production
+npm run admin:promote          # Promote user thành admin
+```
+

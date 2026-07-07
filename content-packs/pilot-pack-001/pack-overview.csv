@@ -1,0 +1,12 @@
+file,sourceCollection,problems,questions,skills
+01-pronunciation-pack-001.json,Englishphile Pronunciation Pack 001,6,30,PRONUNCIATION
+02-mcq-pack-001.json,Englishphile MCQ Pack 001,8,40,MULTIPLE_CHOICE
+03-word-formation-pack-001.json,Englishphile Word Formation Pack 001,8,40,WORD_FORMATION
+04-sentence-transformation-pack-001.json,Englishphile Sentence Transformation Pack 001,5,25,SENTENCE_TRANSFORMATION
+05-guided-cloze-pack-001.json,Englishphile Guided Cloze Pack 001,4,15,GUIDED_CLOZE
+06-open-cloze-pack-001.json,Englishphile Open Cloze Pack 001,4,15,OPEN_CLOZE
+07-error-identification-pack-001.json,Englishphile Error Identification Pack 001,5,25,ERROR_IDENTIFICATION
+08-trios-pack-001.json,Englishphile Trios Pack 001,3,15,TRIOS
+09-reading-pack-001.json,Englishphile Reading Pack 001,2,10,READING
+10-writing-pack-001.json,Englishphile Writing Pack 001,1,5,WRITING
+00-all-in-one-pilot-pack-001.json,All-in-one combined pack,46,220,mixed

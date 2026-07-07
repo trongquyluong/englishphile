@@ -1,0 +1,1107 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Word Formation Pack 001",
+    "description": "Original word formation questions with explanations.",
+    "originalFileName": "englishphile-word-formation-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Word Formation Set 01",
+      "slug": "word-formation-pack-001-word-formation-set-01",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Suffixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The museum new wing is a stunning example of architectural _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "ingenuity"
+            ],
+            "display": "ingenuity"
+          },
+          "explanation": "ingenuity = cleverness/originality.",
+          "rootWord": "INGENIOUS",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 1,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Her answer was technically correct but rather _____ to the point.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "irrelevant"
+            ],
+            "display": "irrelevant"
+          },
+          "explanation": "Negative prefix ir-.",
+          "rootWord": "RELEVANT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 2,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee praised his _____ in dealing with a sensitive complaint.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "tactfulness"
+            ],
+            "display": "tactfulness"
+          },
+          "explanation": "tactfulness = quality of being tactful.",
+          "rootWord": "TACT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 3,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The charity works to improve the _____ of clean water in remote villages.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "availability"
+            ],
+            "display": "availability"
+          },
+          "explanation": "availability = state of being available.",
+          "rootWord": "AVAILABLE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 4,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The witness gave a _____ account of what had happened.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "contradictory"
+            ],
+            "display": "contradictory"
+          },
+          "explanation": "contradictory account.",
+          "rootWord": "CONTRADICT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 5,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 02",
+      "slug": "word-formation-pack-001-word-formation-set-02",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "There was an _____ silence after the results were announced.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "uncomfortable"
+            ],
+            "display": "uncomfortable"
+          },
+          "explanation": "Need negative adjective.",
+          "rootWord": "COMFORT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 6,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan was rejected because it was financially _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unviable"
+            ],
+            "display": "unviable"
+          },
+          "explanation": "unviable = not workable.",
+          "rootWord": "VIABLE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 7,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His _____ remarks made the discussion more tense.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "provocative"
+            ],
+            "display": "provocative"
+          },
+          "explanation": "provocative remarks.",
+          "rootWord": "PROVOKE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 8,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The report was criticised for its lack of _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "objectivity"
+            ],
+            "display": "objectivity"
+          },
+          "explanation": "objectivity = impartiality.",
+          "rootWord": "OBJECTIVE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 9,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher admired the student’s _____ to keep improving.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "resilience"
+            ],
+            "display": "resilience"
+          },
+          "explanation": "resilience = ability to recover.",
+          "rootWord": "RESILIENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 10,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 03",
+      "slug": "word-formation-pack-001-word-formation-set-03",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Suffixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The policy may have _____ consequences for smaller schools.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unintended"
+            ],
+            "display": "unintended"
+          },
+          "explanation": "unintended consequences.",
+          "rootWord": "INTEND",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 11,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The candidate spoke with quiet _____ rather than arrogance.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "confidence"
+            ],
+            "display": "confidence"
+          },
+          "explanation": "with confidence.",
+          "rootWord": "CONFIDENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 12,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The judges questioned the _____ of the experiment.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "reliability"
+            ],
+            "display": "reliability"
+          },
+          "explanation": "reliability = quality of being reliable.",
+          "rootWord": "RELIABLE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 13,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Her argument was persuasive but not entirely _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "irrefutable"
+            ],
+            "display": "irrefutable"
+          },
+          "explanation": "irrefutable = impossible to refute.",
+          "rootWord": "REFUTE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 14,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The town has changed beyond _____ in the last decade.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "recognition"
+            ],
+            "display": "recognition"
+          },
+          "explanation": "beyond recognition.",
+          "rootWord": "RECOGNISE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 15,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 04",
+      "slug": "word-formation-pack-001-word-formation-set-04",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "He was accused of _____ the figures to support his claim.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "misrepresenting"
+            ],
+            "display": "misrepresenting"
+          },
+          "explanation": "misrepresent = present inaccurately.",
+          "rootWord": "REPRESENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "gerund",
+            "questionNumber": 16,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The new timetable caused considerable _____ among parents.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "confusion"
+            ],
+            "display": "confusion"
+          },
+          "explanation": "cause confusion.",
+          "rootWord": "CONFUSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 17,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The article offers a _____ analysis of the education system.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "penetrating"
+            ],
+            "display": "penetrating"
+          },
+          "explanation": "penetrating analysis = deep.",
+          "rootWord": "PENETRATE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 18,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Such behaviour is completely _____ in a formal interview.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unacceptable"
+            ],
+            "display": "unacceptable"
+          },
+          "explanation": "negative adjective.",
+          "rootWord": "ACCEPT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 19,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The proposal was rejected on the grounds of _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "impracticality"
+            ],
+            "display": "impracticality"
+          },
+          "explanation": "impracticality = lack of practicality.",
+          "rootWord": "PRACTICAL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 20,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 05",
+      "slug": "word-formation-pack-001-word-formation-set-05",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Suffixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The old theatre has been _____ restored.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "sympathetically"
+            ],
+            "display": "sympathetically"
+          },
+          "explanation": "Adverb modifies restored.",
+          "rootWord": "SYMPATHY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "questionNumber": 21,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His ideas are _____ different from those of his classmates.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "fundamentally"
+            ],
+            "display": "fundamentally"
+          },
+          "explanation": "Adverb modifies different.",
+          "rootWord": "FUNDAMENTAL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "questionNumber": 22,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The witness’s story was full of _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "inconsistencies"
+            ],
+            "display": "inconsistencies"
+          },
+          "explanation": "full of + plural noun.",
+          "rootWord": "CONSISTENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "plural noun",
+            "questionNumber": 23,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "She showed remarkable _____ when challenged by the panel.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "composure"
+            ],
+            "display": "composure"
+          },
+          "explanation": "composure = calmness.",
+          "rootWord": "COMPOSE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 24,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The scheme is designed to encourage student _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "participation"
+            ],
+            "display": "participation"
+          },
+          "explanation": "student participation.",
+          "rootWord": "PARTICIPATE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 25,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 06",
+      "slug": "word-formation-pack-001-word-formation-set-06",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The sudden change in tone was _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "noticeable"
+            ],
+            "display": "noticeable"
+          },
+          "explanation": "noticeable = easy to notice.",
+          "rootWord": "NOTICE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 26,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "It would be _____ to ignore the long-term effects.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "irresponsible"
+            ],
+            "display": "irresponsible"
+          },
+          "explanation": "irresponsible = not responsible.",
+          "rootWord": "RESPONSIBILITY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 27,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The essay was weakened by several _____ claims.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unsubstantiated"
+            ],
+            "display": "unsubstantiated"
+          },
+          "explanation": "unsubstantiated claims.",
+          "rootWord": "SUBSTANCE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 28,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The athlete was praised for her _____ determination.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unshakable"
+            ],
+            "display": "unshakable"
+          },
+          "explanation": "unshakable determination.",
+          "rootWord": "SHAKE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 29,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The writer’s tone is _____ rather than openly hostile.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "dismissive"
+            ],
+            "display": "dismissive"
+          },
+          "explanation": "dismissive tone.",
+          "rootWord": "DISMISS",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 30,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 07",
+      "slug": "word-formation-pack-001-word-formation-set-07",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Suffixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The charity aims to reduce economic _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "inequality"
+            ],
+            "display": "inequality"
+          },
+          "explanation": "economic inequality.",
+          "rootWord": "EQUAL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "noun",
+            "questionNumber": 31,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The instructions were so _____ that several students misunderstood them.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "ambiguous"
+            ],
+            "display": "ambiguous"
+          },
+          "explanation": "ambiguous instructions.",
+          "rootWord": "AMBIGUITY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 32,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The lecture gave us a _____ overview of modern linguistics.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "comprehensive"
+            ],
+            "display": "comprehensive"
+          },
+          "explanation": "comprehensive overview.",
+          "rootWord": "COMPREHEND",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 33,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "Their refusal to cooperate was deeply _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "problematic"
+            ],
+            "display": "problematic"
+          },
+          "explanation": "problematic = causing problems.",
+          "rootWord": "PROBLEM",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 34,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The decision was made _____, without consulting the committee.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "unilaterally"
+            ],
+            "display": "unilaterally"
+          },
+          "explanation": "unilaterally = by one side alone.",
+          "rootWord": "LATERAL",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "questionNumber": 35,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    },
+    {
+      "title": "Word Formation Set 08",
+      "slug": "word-formation-pack-001-word-formation-set-08",
+      "skillType": "WORD_FORMATION",
+      "questionType": "WORD_FORMATION",
+      "difficulty": "CHUYEN",
+      "statement": "Hoàn thành câu bằng dạng đúng của từ cho sẵn.",
+      "instructions": "Viết một từ duy nhất. Chú ý loại từ, tiền tố/hậu tố và collocation.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Word Formation",
+        "Word Class",
+        "Negative Prefixes"
+      ],
+      "questions": [
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "She was _____ dressed for such a formal occasion.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "inappropriately"
+            ],
+            "display": "inappropriately"
+          },
+          "explanation": "negative adverb.",
+          "rootWord": "APPROPRIATE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adverb",
+            "questionNumber": 36,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The evidence is too _____ to support a firm conclusion.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "fragmentary"
+            ],
+            "display": "fragmentary"
+          },
+          "explanation": "fragmentary evidence.",
+          "rootWord": "FRAGMENT",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 37,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The professor’s explanation was refreshingly _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "concise"
+            ],
+            "display": "concise"
+          },
+          "explanation": "No change needed.",
+          "rootWord": "CONCISE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 38,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "The results were statistically _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "significant"
+            ],
+            "display": "significant"
+          },
+          "explanation": "statistically significant.",
+          "rootWord": "SIGNIFY",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 39,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        },
+        {
+          "type": "WORD_FORMATION",
+          "skillType": "WORD_FORMATION",
+          "difficulty": "CHUYEN",
+          "prompt": "His refusal to answer seemed rather _____.",
+          "passage": null,
+          "options": null,
+          "answer": {
+            "accepted": [
+              "evasive"
+            ],
+            "display": "evasive"
+          },
+          "explanation": "evasive = avoiding direct answer.",
+          "rootWord": "EVADE",
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "wordClass": "adjective",
+            "questionNumber": 40,
+            "trap": "Check part of speech, prefix/suffix, and collocation."
+          }
+        }
+      ]
+    }
+  ]
+}

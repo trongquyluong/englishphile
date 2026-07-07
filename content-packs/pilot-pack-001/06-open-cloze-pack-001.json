@@ -1,0 +1,424 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Open Cloze Pack 001",
+    "description": "Original open cloze passages.",
+    "originalFileName": "englishphile-open-cloze-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Open Cloze: The habit of review",
+      "slug": "open-cloze-pack-001-open-cloze-the-habit-of-review",
+      "skillType": "OPEN_CLOZE",
+      "questionType": "OPEN_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Điền một từ thích hợp vào mỗi chỗ trống.",
+      "instructions": "Mỗi chỗ trống chỉ điền một từ. Chú ý liên từ, giới từ, đại từ và cấu trúc cố định.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Open Cloze",
+        "Grammar Focus",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Students often believe that learning ends (1) _____ they understand a lesson. In reality, understanding is only the first step. Without review, new knowledge can fade (2) _____ quickly than expected. A short review session the next day helps the brain strengthen connections and identify (3) _____ is still unclear. This is why effective learners return to old mistakes instead (4) _____ simply moving on to new exercises.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "when"
+            ],
+            "display": "when"
+          },
+          "explanation": "time clause",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "The habit of review"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Students often believe that learning ends (1) _____ they understand a lesson. In reality, understanding is only the first step. Without review, new knowledge can fade (2) _____ quickly than expected. A short review session the next day helps the brain strengthen connections and identify (3) _____ is still unclear. This is why effective learners return to old mistakes instead (4) _____ simply moving on to new exercises.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "more"
+            ],
+            "display": "more"
+          },
+          "explanation": "comparative",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "The habit of review"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Students often believe that learning ends (1) _____ they understand a lesson. In reality, understanding is only the first step. Without review, new knowledge can fade (2) _____ quickly than expected. A short review session the next day helps the brain strengthen connections and identify (3) _____ is still unclear. This is why effective learners return to old mistakes instead (4) _____ simply moving on to new exercises.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "what"
+            ],
+            "display": "what"
+          },
+          "explanation": "noun clause",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "The habit of review"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 4",
+          "passage": "Students often believe that learning ends (1) _____ they understand a lesson. In reality, understanding is only the first step. Without review, new knowledge can fade (2) _____ quickly than expected. A short review session the next day helps the brain strengthen connections and identify (3) _____ is still unclear. This is why effective learners return to old mistakes instead (4) _____ simply moving on to new exercises.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "of"
+            ],
+            "display": "of"
+          },
+          "explanation": "instead of",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 4,
+            "passageTitle": "The habit of review"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Open Cloze: A balanced argument",
+      "slug": "open-cloze-pack-001-open-cloze-a-balanced-argument",
+      "skillType": "OPEN_CLOZE",
+      "questionType": "OPEN_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Điền một từ thích hợp vào mỗi chỗ trống.",
+      "instructions": "Mỗi chỗ trống chỉ điền một từ. Chú ý liên từ, giới từ, đại từ và cấu trúc cố định.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Open Cloze",
+        "Grammar Focus",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "A persuasive essay does not ignore opposing views. Instead, it recognises them and then explains why they are less convincing. This approach makes the writer sound fair-minded rather (1) _____ defensive. However, the rebuttal must be specific. It is not enough to say that the other side is wrong; the writer must show (2) _____ its reasoning is incomplete. Done well, concession and rebuttal can make an argument much (3) _____ powerful.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "than"
+            ],
+            "display": "than"
+          },
+          "explanation": "rather than",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "A balanced argument"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "A persuasive essay does not ignore opposing views. Instead, it recognises them and then explains why they are less convincing. This approach makes the writer sound fair-minded rather (1) _____ defensive. However, the rebuttal must be specific. It is not enough to say that the other side is wrong; the writer must show (2) _____ its reasoning is incomplete. Done well, concession and rebuttal can make an argument much (3) _____ powerful.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "why"
+            ],
+            "display": "why"
+          },
+          "explanation": "show why",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "A balanced argument"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "A persuasive essay does not ignore opposing views. Instead, it recognises them and then explains why they are less convincing. This approach makes the writer sound fair-minded rather (1) _____ defensive. However, the rebuttal must be specific. It is not enough to say that the other side is wrong; the writer must show (2) _____ its reasoning is incomplete. Done well, concession and rebuttal can make an argument much (3) _____ powerful.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "more"
+            ],
+            "display": "more"
+          },
+          "explanation": "comparative",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "A balanced argument"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Open Cloze: Digital distraction",
+      "slug": "open-cloze-pack-001-open-cloze-digital-distraction",
+      "skillType": "OPEN_CLOZE",
+      "questionType": "OPEN_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Điền một từ thích hợp vào mỗi chỗ trống.",
+      "instructions": "Mỗi chỗ trống chỉ điền một từ. Chú ý liên từ, giới từ, đại từ và cấu trúc cố định.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Open Cloze",
+        "Grammar Focus",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Many students check their phones whenever they feel bored, even (1) _____ there is no message to answer. Once attention has been interrupted, it may take several minutes to return (2) _____ the original task. The goal is not to reject technology, but to use it (3) _____ purpose rather than impulse. A simple boundary can make a surprising difference (4) _____ focus.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "when"
+            ],
+            "display": "when"
+          },
+          "explanation": "even when",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "Digital distraction"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Many students check their phones whenever they feel bored, even (1) _____ there is no message to answer. Once attention has been interrupted, it may take several minutes to return (2) _____ the original task. The goal is not to reject technology, but to use it (3) _____ purpose rather than impulse. A simple boundary can make a surprising difference (4) _____ focus.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "to"
+            ],
+            "display": "to"
+          },
+          "explanation": "return to",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "Digital distraction"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Many students check their phones whenever they feel bored, even (1) _____ there is no message to answer. Once attention has been interrupted, it may take several minutes to return (2) _____ the original task. The goal is not to reject technology, but to use it (3) _____ purpose rather than impulse. A simple boundary can make a surprising difference (4) _____ focus.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "on"
+            ],
+            "display": "on"
+          },
+          "explanation": "on purpose",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "Digital distraction"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 4",
+          "passage": "Many students check their phones whenever they feel bored, even (1) _____ there is no message to answer. Once attention has been interrupted, it may take several minutes to return (2) _____ the original task. The goal is not to reject technology, but to use it (3) _____ purpose rather than impulse. A simple boundary can make a surprising difference (4) _____ focus.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "to"
+            ],
+            "display": "to"
+          },
+          "explanation": "difference to",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 4,
+            "passageTitle": "Digital distraction"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Open Cloze: The role of examples",
+      "slug": "open-cloze-pack-001-open-cloze-the-role-of-examples",
+      "skillType": "OPEN_CLOZE",
+      "questionType": "OPEN_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Điền một từ thích hợp vào mỗi chỗ trống.",
+      "instructions": "Mỗi chỗ trống chỉ điền một từ. Chú ý liên từ, giới từ, đại từ và cấu trúc cố định.",
+      "estimatedMinutes": 8,
+      "topics": [
+        "Open Cloze",
+        "Grammar Focus",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Examples help turn abstract claims (1) _____ concrete ideas. A good example should be relevant, concise and clearly connected (2) _____ the topic sentence. It should not replace analysis; rather, it should support (3) _____. After giving an example, the writer needs to explain how it proves the point. This final step is what many essays are missing (4) _____.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "into"
+            ],
+            "display": "into"
+          },
+          "explanation": "turn into",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "The role of examples"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Examples help turn abstract claims (1) _____ concrete ideas. A good example should be relevant, concise and clearly connected (2) _____ the topic sentence. It should not replace analysis; rather, it should support (3) _____. After giving an example, the writer needs to explain how it proves the point. This final step is what many essays are missing (4) _____.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "to"
+            ],
+            "display": "to"
+          },
+          "explanation": "connected to",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "The role of examples"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Examples help turn abstract claims (1) _____ concrete ideas. A good example should be relevant, concise and clearly connected (2) _____ the topic sentence. It should not replace analysis; rather, it should support (3) _____. After giving an example, the writer needs to explain how it proves the point. This final step is what many essays are missing (4) _____.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "it"
+            ],
+            "display": "it"
+          },
+          "explanation": "support it",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "The role of examples"
+          }
+        },
+        {
+          "type": "OPEN_CLOZE",
+          "skillType": "OPEN_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 4",
+          "passage": "Examples help turn abstract claims (1) _____ concrete ideas. A good example should be relevant, concise and clearly connected (2) _____ the topic sentence. It should not replace analysis; rather, it should support (3) _____. After giving an example, the writer needs to explain how it proves the point. This final step is what many essays are missing (4) _____.",
+          "options": null,
+          "answer": {
+            "accepted": [
+              "most"
+            ],
+            "display": "most"
+          },
+          "explanation": "missing most",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 4,
+            "passageTitle": "The role of examples"
+          }
+        }
+      ]
+    }
+  ]
+}

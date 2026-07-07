@@ -1,0 +1,453 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Reading Pack 001",
+    "description": "Original reading passages and MCQs.",
+    "originalFileName": "englishphile-reading-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Reading MCQ: Why difficulty helps learning",
+      "slug": "reading-pack-001-reading-mcq-why-difficulty-helps-learning",
+      "skillType": "READING",
+      "questionType": "READING_MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Đọc đoạn văn và trả lời câu hỏi.",
+      "instructions": "Tập trung vào main idea, inference, vocabulary in context, detail và tone.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Reading",
+        "Reading Inference"
+      ],
+      "questions": [
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "What is the main idea of the passage?",
+          "passage": "Students often prefer exercises that feel smooth and familiar. Yet classroom practice suggests that a certain amount of difficulty can make learning stronger. When a task is slightly beyond a learner comfort zone, the brain has to retrieve, compare and adjust information rather than merely recognise it. This effort may feel inefficient at first, but it often leads to longer-lasting understanding. The key word, however, is slightly. If a task is far too hard, students may stop trying and simply guess. Good practice therefore creates productive struggle: enough challenge to demand thought, but enough support to make success possible.",
+          "options": [
+            {
+              "label": "A",
+              "text": "Easy tasks are always better for confidence."
+            },
+            {
+              "label": "B",
+              "text": "Moderate difficulty can strengthen learning."
+            },
+            {
+              "label": "C",
+              "text": "Students should avoid guessing in exams."
+            },
+            {
+              "label": "D",
+              "text": "Teachers should make every task extremely hard."
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "The passage argues for productive struggle.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "Why difficulty helps learning",
+            "questionNumber": 1
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "The word retrieve is closest in meaning to:",
+          "passage": "Students often prefer exercises that feel smooth and familiar. Yet classroom practice suggests that a certain amount of difficulty can make learning stronger. When a task is slightly beyond a learner comfort zone, the brain has to retrieve, compare and adjust information rather than merely recognise it. This effort may feel inefficient at first, but it often leads to longer-lasting understanding. The key word, however, is slightly. If a task is far too hard, students may stop trying and simply guess. Good practice therefore creates productive struggle: enough challenge to demand thought, but enough support to make success possible.",
+          "options": [
+            {
+              "label": "A",
+              "text": "bring back"
+            },
+            {
+              "label": "B",
+              "text": "throw away"
+            },
+            {
+              "label": "C",
+              "text": "write down"
+            },
+            {
+              "label": "D",
+              "text": "look over"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "retrieve = bring back from memory.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "Why difficulty helps learning",
+            "questionNumber": 2
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "According to the passage, excessive difficulty may cause students to:",
+          "passage": "Students often prefer exercises that feel smooth and familiar. Yet classroom practice suggests that a certain amount of difficulty can make learning stronger. When a task is slightly beyond a learner comfort zone, the brain has to retrieve, compare and adjust information rather than merely recognise it. This effort may feel inefficient at first, but it often leads to longer-lasting understanding. The key word, however, is slightly. If a task is far too hard, students may stop trying and simply guess. Good practice therefore creates productive struggle: enough challenge to demand thought, but enough support to make success possible.",
+          "options": [
+            {
+              "label": "A",
+              "text": "become more independent"
+            },
+            {
+              "label": "B",
+              "text": "stop trying and guess"
+            },
+            {
+              "label": "C",
+              "text": "remember more effectively"
+            },
+            {
+              "label": "D",
+              "text": "recognise patterns faster"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "The text says far too hard tasks may make students stop trying and guess.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "Why difficulty helps learning",
+            "questionNumber": 3
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "What does productive struggle mean here?",
+          "passage": "Students often prefer exercises that feel smooth and familiar. Yet classroom practice suggests that a certain amount of difficulty can make learning stronger. When a task is slightly beyond a learner comfort zone, the brain has to retrieve, compare and adjust information rather than merely recognise it. This effort may feel inefficient at first, but it often leads to longer-lasting understanding. The key word, however, is slightly. If a task is far too hard, students may stop trying and simply guess. Good practice therefore creates productive struggle: enough challenge to demand thought, but enough support to make success possible.",
+          "options": [
+            {
+              "label": "A",
+              "text": "Challenge with enough support"
+            },
+            {
+              "label": "B",
+              "text": "Failure without feedback"
+            },
+            {
+              "label": "C",
+              "text": "Memorisation under time pressure"
+            },
+            {
+              "label": "D",
+              "text": "Competition between students"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "Enough challenge plus enough support.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "Why difficulty helps learning",
+            "questionNumber": 4
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "The writer tone is best described as:",
+          "passage": "Students often prefer exercises that feel smooth and familiar. Yet classroom practice suggests that a certain amount of difficulty can make learning stronger. When a task is slightly beyond a learner comfort zone, the brain has to retrieve, compare and adjust information rather than merely recognise it. This effort may feel inefficient at first, but it often leads to longer-lasting understanding. The key word, however, is slightly. If a task is far too hard, students may stop trying and simply guess. Good practice therefore creates productive struggle: enough challenge to demand thought, but enough support to make success possible.",
+          "options": [
+            {
+              "label": "A",
+              "text": "balanced"
+            },
+            {
+              "label": "B",
+              "text": "hostile"
+            },
+            {
+              "label": "C",
+              "text": "humorous"
+            },
+            {
+              "label": "D",
+              "text": "dismissive"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "The writer acknowledges both benefits and limits.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "Why difficulty helps learning",
+            "questionNumber": 5
+          }
+        }
+      ]
+    },
+    {
+      "title": "Reading MCQ: The problem with perfect notes",
+      "slug": "reading-pack-001-reading-mcq-the-problem-with-perfect-notes",
+      "skillType": "READING",
+      "questionType": "READING_MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Đọc đoạn văn và trả lời câu hỏi.",
+      "instructions": "Tập trung vào main idea, inference, vocabulary in context, detail và tone.",
+      "estimatedMinutes": 12,
+      "topics": [
+        "Reading",
+        "Reading Inference"
+      ],
+      "questions": [
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "What is the writer main warning?",
+          "passage": "Beautiful notes can give students a sense of control, but they do not always lead to better learning. Copying explanations neatly is different from being able to use them. A learner may spend an hour highlighting rules about inversion and still fail to notice an inversion trigger in a sentence transformation task. This does not mean notes are useless. They are valuable when they become tools for active recall: covering examples, predicting answers, explaining traps, and rewriting rules in one own words. The problem begins when the appearance of learning replaces the act of thinking.",
+          "options": [
+            {
+              "label": "A",
+              "text": "Notes should never be used."
+            },
+            {
+              "label": "B",
+              "text": "Neat notes can create a false sense of learning."
+            },
+            {
+              "label": "C",
+              "text": "Highlighting is better than active recall."
+            },
+            {
+              "label": "D",
+              "text": "Inversion is the hardest grammar topic."
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "The passage warns against appearance replacing thinking.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "The problem with perfect notes",
+            "questionNumber": 1
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "According to the passage, notes are useful when they:",
+          "passage": "Beautiful notes can give students a sense of control, but they do not always lead to better learning. Copying explanations neatly is different from being able to use them. A learner may spend an hour highlighting rules about inversion and still fail to notice an inversion trigger in a sentence transformation task. This does not mean notes are useless. They are valuable when they become tools for active recall: covering examples, predicting answers, explaining traps, and rewriting rules in one own words. The problem begins when the appearance of learning replaces the act of thinking.",
+          "options": [
+            {
+              "label": "A",
+              "text": "are copied from the teacher exactly"
+            },
+            {
+              "label": "B",
+              "text": "are made colourful"
+            },
+            {
+              "label": "C",
+              "text": "support active recall"
+            },
+            {
+              "label": "D",
+              "text": "avoid difficult examples"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "Notes become tools for active recall.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "The problem with perfect notes",
+            "questionNumber": 2
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "The phrase appearance of learning refers to:",
+          "passage": "Beautiful notes can give students a sense of control, but they do not always lead to better learning. Copying explanations neatly is different from being able to use them. A learner may spend an hour highlighting rules about inversion and still fail to notice an inversion trigger in a sentence transformation task. This does not mean notes are useless. They are valuable when they become tools for active recall: covering examples, predicting answers, explaining traps, and rewriting rules in one own words. The problem begins when the appearance of learning replaces the act of thinking.",
+          "options": [
+            {
+              "label": "A",
+              "text": "looking like one is studying without deep processing"
+            },
+            {
+              "label": "B",
+              "text": "studying in a public place"
+            },
+            {
+              "label": "C",
+              "text": "using visual diagrams"
+            },
+            {
+              "label": "D",
+              "text": "learning grammar through examples"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "It means surface-level activity that feels like learning.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "The problem with perfect notes",
+            "questionNumber": 3
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "Which activity best matches the writer advice?",
+          "passage": "Beautiful notes can give students a sense of control, but they do not always lead to better learning. Copying explanations neatly is different from being able to use them. A learner may spend an hour highlighting rules about inversion and still fail to notice an inversion trigger in a sentence transformation task. This does not mean notes are useless. They are valuable when they become tools for active recall: covering examples, predicting answers, explaining traps, and rewriting rules in one own words. The problem begins when the appearance of learning replaces the act of thinking.",
+          "options": [
+            {
+              "label": "A",
+              "text": "Covering examples and predicting answers"
+            },
+            {
+              "label": "B",
+              "text": "Copying every rule twice"
+            },
+            {
+              "label": "C",
+              "text": "Highlighting all keywords"
+            },
+            {
+              "label": "D",
+              "text": "Avoiding sentence transformation tasks"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "This is explicitly listed.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "The problem with perfect notes",
+            "questionNumber": 4
+          }
+        },
+        {
+          "type": "READING_MCQ",
+          "skillType": "READING",
+          "difficulty": "CHUYEN",
+          "prompt": "The passage implies that students should:",
+          "passage": "Beautiful notes can give students a sense of control, but they do not always lead to better learning. Copying explanations neatly is different from being able to use them. A learner may spend an hour highlighting rules about inversion and still fail to notice an inversion trigger in a sentence transformation task. This does not mean notes are useless. They are valuable when they become tools for active recall: covering examples, predicting answers, explaining traps, and rewriting rules in one own words. The problem begins when the appearance of learning replaces the act of thinking.",
+          "options": [
+            {
+              "label": "A",
+              "text": "make notes shorter than one page"
+            },
+            {
+              "label": "B",
+              "text": "connect notes to problem-solving"
+            },
+            {
+              "label": "C",
+              "text": "stop using grammar terminology"
+            },
+            {
+              "label": "D",
+              "text": "focus only on reading tasks"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "Notes should help use knowledge in tasks.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "passageTitle": "The problem with perfect notes",
+            "questionNumber": 5
+          }
+        }
+      ]
+    }
+  ]
+}

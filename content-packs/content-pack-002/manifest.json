@@ -1,0 +1,57 @@
+{
+  "packName": "Englishphile Content Pack 002",
+  "version": "1.0.0",
+  "description": "Original intensive content pack focused on Word Formation, Sentence Transformation, MCQ/Collocations, Phrasal Verbs, Transitions, Grammar Focus and Error Identification.",
+  "createdFor": "Englishphile",
+  "contentPolicy": "Original educational content generated for internal practice; not copied verbatim from uploaded worksheets or third-party books.",
+  "recommendedImport": "Use split files 01-07. Do not import 00-all-in-one together with split files.",
+  "files": [
+    {
+      "fileName": "01-word-formation-pack-002.json",
+      "skillType": "WORD_FORMATION",
+      "problemCount": 12,
+      "questionCount": 60
+    },
+    {
+      "fileName": "02-sentence-transformation-pack-002.json",
+      "skillType": "SENTENCE_TRANSFORMATION",
+      "problemCount": 10,
+      "questionCount": 50
+    },
+    {
+      "fileName": "03-collocation-mcq-pack-002.json",
+      "skillType": "MULTIPLE_CHOICE",
+      "problemCount": 11,
+      "questionCount": 55
+    },
+    {
+      "fileName": "04-phrasal-verbs-pack-002.json",
+      "skillType": "PHRASAL_VERBS",
+      "problemCount": 8,
+      "questionCount": 40
+    },
+    {
+      "fileName": "05-transitions-pack-002.json",
+      "skillType": "TRANSITIONS",
+      "problemCount": 4,
+      "questionCount": 20
+    },
+    {
+      "fileName": "06-grammar-focus-pack-002.json",
+      "skillType": "GRAMMAR_FOCUS",
+      "problemCount": 4,
+      "questionCount": 20
+    },
+    {
+      "fileName": "07-error-identification-pack-002.json",
+      "skillType": "ERROR_IDENTIFICATION",
+      "problemCount": 6,
+      "questionCount": 30
+    }
+  ],
+  "totals": {
+    "problemCount": 55,
+    "questionCount": 275,
+    "fileCount": 7
+  }
+}

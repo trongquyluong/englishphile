@@ -1,0 +1,2508 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Collocation MCQ Pack 002",
+    "description": "Original MCQ practice for advanced collocations, lexical precision and vocabulary patterns.",
+    "originalFileName": "03-collocation-mcq-pack-002.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile Content Pack 002 generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 01",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-01",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee decided to _____ a compromise after hours of debate.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "reach"
+            },
+            {
+              "label": "B",
+              "text": "arrive"
+            },
+            {
+              "label": "C",
+              "text": "touch"
+            },
+            {
+              "label": "D",
+              "text": "meet"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "The collocation is 'reach a compromise'.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 1,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The new evidence casts serious _____ on his original account.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "doubt"
+            },
+            {
+              "label": "B",
+              "text": "suspicion"
+            },
+            {
+              "label": "C",
+              "text": "shadow"
+            },
+            {
+              "label": "D",
+              "text": "question"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "cast doubt on = make something seem uncertain.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 2,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "She has a remarkable _____ for remembering names.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "talent"
+            },
+            {
+              "label": "B",
+              "text": "gift"
+            },
+            {
+              "label": "C",
+              "text": "skill"
+            },
+            {
+              "label": "D",
+              "text": "power"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "a gift for + -ing/noun is the natural collocation.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 3,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The company is trying to _____ its reputation after the scandal.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "repair"
+            },
+            {
+              "label": "B",
+              "text": "mend"
+            },
+            {
+              "label": "C",
+              "text": "restore"
+            },
+            {
+              "label": "D",
+              "text": "correct"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "restore one's reputation is the strongest collocation.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 4,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The principal paid _____ to the students who volunteered after the flood.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "compliment"
+            },
+            {
+              "label": "B",
+              "text": "tribute"
+            },
+            {
+              "label": "C",
+              "text": "respect"
+            },
+            {
+              "label": "D",
+              "text": "honour"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "pay tribute to = publicly praise.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 5,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 02",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-02",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "His comments gave _____ to rumours that he was planning to resign.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "rise"
+            },
+            {
+              "label": "B",
+              "text": "birth"
+            },
+            {
+              "label": "C",
+              "text": "life"
+            },
+            {
+              "label": "D",
+              "text": "fuel"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "give fuel to rumours = make rumours stronger.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 6,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan was rejected on the _____ that it was too costly.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "basis"
+            },
+            {
+              "label": "B",
+              "text": "ground"
+            },
+            {
+              "label": "C",
+              "text": "reason"
+            },
+            {
+              "label": "D",
+              "text": "cause"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "on the grounds that = because.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 7,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "She took _____ with the suggestion that the work was easy.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "offence"
+            },
+            {
+              "label": "B",
+              "text": "anger"
+            },
+            {
+              "label": "C",
+              "text": "annoyance"
+            },
+            {
+              "label": "D",
+              "text": "rage"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "take offence at/with = feel offended.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 8,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The two countries finally _____ diplomatic relations after a decade of tension.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "repaired"
+            },
+            {
+              "label": "B",
+              "text": "restored"
+            },
+            {
+              "label": "C",
+              "text": "renewed"
+            },
+            {
+              "label": "D",
+              "text": "returned"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "restore diplomatic relations.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 9,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "His speech struck a _____ with many young voters.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "chord"
+            },
+            {
+              "label": "B",
+              "text": "note"
+            },
+            {
+              "label": "C",
+              "text": "tone"
+            },
+            {
+              "label": "D",
+              "text": "sound"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "strike a chord = cause agreement/emotion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 10,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 03",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-03",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The article makes a _____ case for reform.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "strong"
+            },
+            {
+              "label": "B",
+              "text": "heavy"
+            },
+            {
+              "label": "C",
+              "text": "large"
+            },
+            {
+              "label": "D",
+              "text": "deep"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "make a strong case for something.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 11,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The city has seen a sharp _____ in petty crime.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "increase"
+            },
+            {
+              "label": "B",
+              "text": "growth"
+            },
+            {
+              "label": "C",
+              "text": "rise"
+            },
+            {
+              "label": "D",
+              "text": "expansion"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "a sharp rise in crime is natural.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 12,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The charity relies _____ on donations from the public.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "heavily"
+            },
+            {
+              "label": "B",
+              "text": "strongly"
+            },
+            {
+              "label": "C",
+              "text": "deeply"
+            },
+            {
+              "label": "D",
+              "text": "firmly"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "rely heavily on.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 13,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The scandal dealt a severe _____ to public confidence.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "hit"
+            },
+            {
+              "label": "B",
+              "text": "blow"
+            },
+            {
+              "label": "C",
+              "text": "damage"
+            },
+            {
+              "label": "D",
+              "text": "strike"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "deal a blow to.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 14,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "He has a _____ knowledge of local history.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "deep"
+            },
+            {
+              "label": "B",
+              "text": "wide"
+            },
+            {
+              "label": "C",
+              "text": "broad"
+            },
+            {
+              "label": "D",
+              "text": "vast"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "vast knowledge is idiomatic.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 15,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 04",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-04",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The judge drew a clear _____ between mistake and deliberate deception.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "line"
+            },
+            {
+              "label": "B",
+              "text": "border"
+            },
+            {
+              "label": "C",
+              "text": "limit"
+            },
+            {
+              "label": "D",
+              "text": "edge"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "draw a line/distinction; here 'line' fits best.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 16,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The issue should be given _____ priority.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "high"
+            },
+            {
+              "label": "B",
+              "text": "top"
+            },
+            {
+              "label": "C",
+              "text": "upper"
+            },
+            {
+              "label": "D",
+              "text": "main"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "give top priority.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 17,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "Her parents _____ great importance to academic success.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "attach"
+            },
+            {
+              "label": "B",
+              "text": "set"
+            },
+            {
+              "label": "C",
+              "text": "place"
+            },
+            {
+              "label": "D",
+              "text": "give"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "attach great importance to = consider very important.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 18,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The government came under _____ pressure to change the law.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "mounting"
+            },
+            {
+              "label": "B",
+              "text": "climbing"
+            },
+            {
+              "label": "C",
+              "text": "rising"
+            },
+            {
+              "label": "D",
+              "text": "lifting"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "mounting pressure = increasing pressure.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 19,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "His apology rang _____ to everyone in the room.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "false"
+            },
+            {
+              "label": "B",
+              "text": "wrong"
+            },
+            {
+              "label": "C",
+              "text": "empty"
+            },
+            {
+              "label": "D",
+              "text": "hollow"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "ring hollow = sound insincere.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 20,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 05",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-05",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The discovery opened _____ new avenues of research.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "up"
+            },
+            {
+              "label": "B",
+              "text": "out"
+            },
+            {
+              "label": "C",
+              "text": "away"
+            },
+            {
+              "label": "D",
+              "text": "off"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "open up avenues.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 21,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher drew our _____ to a subtle error in the paragraph.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "attention"
+            },
+            {
+              "label": "B",
+              "text": "notice"
+            },
+            {
+              "label": "C",
+              "text": "focus"
+            },
+            {
+              "label": "D",
+              "text": "regard"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "draw attention to.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 22,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan is still in its _____ and may change completely.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "childhood"
+            },
+            {
+              "label": "B",
+              "text": "infancy"
+            },
+            {
+              "label": "C",
+              "text": "youth"
+            },
+            {
+              "label": "D",
+              "text": "beginning"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "in its infancy = at an early stage.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 23,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The evidence is _____ from conclusive.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "far"
+            },
+            {
+              "label": "B",
+              "text": "away"
+            },
+            {
+              "label": "C",
+              "text": "long"
+            },
+            {
+              "label": "D",
+              "text": "distant"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "far from conclusive.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 24,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "She refused to _____ defeat even when the situation looked hopeless.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "accept"
+            },
+            {
+              "label": "B",
+              "text": "admit"
+            },
+            {
+              "label": "C",
+              "text": "concede"
+            },
+            {
+              "label": "D",
+              "text": "receive"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "concede defeat is the strongest collocation.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 25,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 06",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-06",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The policy has attracted _____ criticism from experts.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "wide"
+            },
+            {
+              "label": "B",
+              "text": "widespread"
+            },
+            {
+              "label": "C",
+              "text": "large"
+            },
+            {
+              "label": "D",
+              "text": "broad"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "widespread criticism.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 26,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The problem lies _____ the way the data was collected.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "on"
+            },
+            {
+              "label": "B",
+              "text": "in"
+            },
+            {
+              "label": "C",
+              "text": "at"
+            },
+            {
+              "label": "D",
+              "text": "with"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "lie in = be found in/consist in.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 27,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "They reached a _____ after months of negotiation.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "settlement"
+            },
+            {
+              "label": "B",
+              "text": "solution"
+            },
+            {
+              "label": "C",
+              "text": "resolution"
+            },
+            {
+              "label": "D",
+              "text": "decision"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "reach a settlement.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 28,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The accident brought traffic to a complete _____.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "stop"
+            },
+            {
+              "label": "B",
+              "text": "halt"
+            },
+            {
+              "label": "C",
+              "text": "pause"
+            },
+            {
+              "label": "D",
+              "text": "break"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "bring something to a halt.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 29,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The speech was intended to _____ support for the campaign.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "drum up"
+            },
+            {
+              "label": "B",
+              "text": "beat up"
+            },
+            {
+              "label": "C",
+              "text": "raise up"
+            },
+            {
+              "label": "D",
+              "text": "call up"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "drum up support.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 30,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 07",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-07",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "He is widely _____ as one of the best young debaters.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "regarded"
+            },
+            {
+              "label": "B",
+              "text": "believed"
+            },
+            {
+              "label": "C",
+              "text": "considered"
+            },
+            {
+              "label": "D",
+              "text": "thought"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "be widely regarded as.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 31,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The teacher's patience was beginning to wear _____.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "off"
+            },
+            {
+              "label": "B",
+              "text": "down"
+            },
+            {
+              "label": "C",
+              "text": "thin"
+            },
+            {
+              "label": "D",
+              "text": "out"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "wear thin = become less strong/effective.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 32,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The principal made it _____ clear that cheating would not be tolerated.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "perfectly"
+            },
+            {
+              "label": "B",
+              "text": "fully"
+            },
+            {
+              "label": "C",
+              "text": "totally"
+            },
+            {
+              "label": "D",
+              "text": "highly"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "perfectly clear.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 33,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The report sheds _____ on the causes of the accident.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "light"
+            },
+            {
+              "label": "B",
+              "text": "truth"
+            },
+            {
+              "label": "C",
+              "text": "clarity"
+            },
+            {
+              "label": "D",
+              "text": "sense"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "shed light on.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 34,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The new rules came _____ effect last Monday.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "into"
+            },
+            {
+              "label": "B",
+              "text": "to"
+            },
+            {
+              "label": "C",
+              "text": "for"
+            },
+            {
+              "label": "D",
+              "text": "with"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "come into effect.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 35,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 08",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-08",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "She has no _____ of changing her decision.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "intention"
+            },
+            {
+              "label": "B",
+              "text": "purpose"
+            },
+            {
+              "label": "C",
+              "text": "aim"
+            },
+            {
+              "label": "D",
+              "text": "plan"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "have no intention of + -ing.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 36,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The company suffered a _____ loss in the first quarter.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "heavy"
+            },
+            {
+              "label": "B",
+              "text": "large"
+            },
+            {
+              "label": "C",
+              "text": "strong"
+            },
+            {
+              "label": "D",
+              "text": "wide"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "suffer a heavy loss.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 37,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "His explanation left much to be _____.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "wanted"
+            },
+            {
+              "label": "B",
+              "text": "desired"
+            },
+            {
+              "label": "C",
+              "text": "needed"
+            },
+            {
+              "label": "D",
+              "text": "expected"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "leave much to be desired = be unsatisfactory.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 38,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The announcement took everyone by _____.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "shock"
+            },
+            {
+              "label": "B",
+              "text": "surprise"
+            },
+            {
+              "label": "C",
+              "text": "storm"
+            },
+            {
+              "label": "D",
+              "text": "suddenness"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "take someone by surprise.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 39,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "They are _____ aware of the risks involved.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "fully"
+            },
+            {
+              "label": "B",
+              "text": "strongly"
+            },
+            {
+              "label": "C",
+              "text": "perfectly"
+            },
+            {
+              "label": "D",
+              "text": "deeply"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "fully aware.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 40,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 09",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-09",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The mayor pledged to _____ the problem of homelessness.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "address"
+            },
+            {
+              "label": "B",
+              "text": "answer"
+            },
+            {
+              "label": "C",
+              "text": "reply"
+            },
+            {
+              "label": "D",
+              "text": "settle"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "address a problem.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 41,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "His confidence borders _____ arrogance.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "on"
+            },
+            {
+              "label": "B",
+              "text": "with"
+            },
+            {
+              "label": "C",
+              "text": "to"
+            },
+            {
+              "label": "D",
+              "text": "at"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "border on = be almost.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 42,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The debate gave _____ to several important questions.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "rise"
+            },
+            {
+              "label": "B",
+              "text": "start"
+            },
+            {
+              "label": "C",
+              "text": "origin"
+            },
+            {
+              "label": "D",
+              "text": "source"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "give rise to.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 43,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The results are _____ with our earlier findings.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "constant"
+            },
+            {
+              "label": "B",
+              "text": "consistent"
+            },
+            {
+              "label": "C",
+              "text": "stable"
+            },
+            {
+              "label": "D",
+              "text": "same"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "consistent with.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 44,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The committee is _____ to reject the application.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "likely"
+            },
+            {
+              "label": "B",
+              "text": "possible"
+            },
+            {
+              "label": "C",
+              "text": "probable"
+            },
+            {
+              "label": "D",
+              "text": "maybe"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "be likely to + verb.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 45,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 10",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-10",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The article is _____ with factual errors.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "full"
+            },
+            {
+              "label": "B",
+              "text": "filled"
+            },
+            {
+              "label": "C",
+              "text": "riddled"
+            },
+            {
+              "label": "D",
+              "text": "crowded"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "riddled with errors.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 46,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The new law will place a heavy _____ on small businesses.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "load"
+            },
+            {
+              "label": "B",
+              "text": "burden"
+            },
+            {
+              "label": "C",
+              "text": "weight"
+            },
+            {
+              "label": "D",
+              "text": "pressure"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "place a burden on.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 47,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The student's answer was _____ the point.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "beside"
+            },
+            {
+              "label": "B",
+              "text": "outside"
+            },
+            {
+              "label": "C",
+              "text": "away"
+            },
+            {
+              "label": "D",
+              "text": "off"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "beside the point = irrelevant.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 48,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The school puts strong _____ on independent learning.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "emphasis"
+            },
+            {
+              "label": "B",
+              "text": "stress"
+            },
+            {
+              "label": "C",
+              "text": "attention"
+            },
+            {
+              "label": "D",
+              "text": "weight"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "put emphasis on.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 49,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The evidence points _____ a different conclusion.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "to"
+            },
+            {
+              "label": "B",
+              "text": "at"
+            },
+            {
+              "label": "C",
+              "text": "for"
+            },
+            {
+              "label": "D",
+              "text": "towards"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "point to a conclusion.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 50,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Collocation and Vocabulary MCQ 002 Set 11",
+      "slug": "pack-002-collocation-and-vocabulary-mcq-002-set-11",
+      "skillType": "MULTIPLE_CHOICE",
+      "questionType": "MCQ",
+      "difficulty": "CHUYEN",
+      "statement": "Chọn đáp án đúng nhất để hoàn thành câu.",
+      "instructions": "Tập trung vào collocation, preposition pattern, idiom và lexical precision.",
+      "estimatedMinutes": 7,
+      "topics": [
+        "Collocations",
+        "Vocabulary",
+        "Idiomatic Usage"
+      ],
+      "questions": [
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "Her remarks were open _____ misinterpretation.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "for"
+            },
+            {
+              "label": "B",
+              "text": "to"
+            },
+            {
+              "label": "C",
+              "text": "with"
+            },
+            {
+              "label": "D",
+              "text": "by"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "open to misinterpretation.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 51,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The plan failed to take _____ of local conditions.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "notice"
+            },
+            {
+              "label": "B",
+              "text": "account"
+            },
+            {
+              "label": "C",
+              "text": "attention"
+            },
+            {
+              "label": "D",
+              "text": "care"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "take account of.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 52,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The witness was _____ to tears by the lawyer's questions.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "moved"
+            },
+            {
+              "label": "B",
+              "text": "reduced"
+            },
+            {
+              "label": "C",
+              "text": "brought"
+            },
+            {
+              "label": "D",
+              "text": "taken"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "be reduced to tears.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 53,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The findings will have far-reaching _____.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "results"
+            },
+            {
+              "label": "B",
+              "text": "consequences"
+            },
+            {
+              "label": "C",
+              "text": "outcomes"
+            },
+            {
+              "label": "D",
+              "text": "effects"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "far-reaching consequences.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 54,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        },
+        {
+          "type": "MCQ",
+          "skillType": "MULTIPLE_CHOICE",
+          "difficulty": "CHUYEN",
+          "prompt": "The team made a _____ effort to finish before the deadline.",
+          "passage": null,
+          "options": [
+            {
+              "label": "A",
+              "text": "concerted"
+            },
+            {
+              "label": "B",
+              "text": "combined"
+            },
+            {
+              "label": "C",
+              "text": "gathered"
+            },
+            {
+              "label": "D",
+              "text": "joined"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "concerted effort = determined joint effort.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "questionNumber": 55,
+            "pack": "002",
+            "focus": "collocation/vocabulary"
+          }
+        }
+      ]
+    }
+  ]
+}

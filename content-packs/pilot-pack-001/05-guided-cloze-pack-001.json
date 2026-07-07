@@ -1,0 +1,694 @@
+{
+  "sourceCollection": {
+    "name": "Englishphile Guided Cloze Pack 001",
+    "description": "Original guided cloze passages.",
+    "originalFileName": "englishphile-guided-cloze-pack-001.json",
+    "sourceType": "MANUAL",
+    "copyrightNote": "Original Englishphile pilot content generated for internal educational use; not copied verbatim from uploaded worksheets or third-party books."
+  },
+  "problems": [
+    {
+      "title": "Guided Cloze: The quiet power of routines",
+      "slug": "guided-cloze-pack-001-guided-cloze-the-quiet-power-of-routines",
+      "skillType": "GUIDED_CLOZE",
+      "questionType": "GUIDED_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Đọc đoạn văn và chọn đáp án phù hợp nhất cho từng chỗ trống.",
+      "instructions": "Tập trung vào collocation, logic đoạn văn và sắc thái nghĩa.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Guided Cloze",
+        "Collocations",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Routines are often dismissed as dull, but they can be a powerful (0) _____ of mental energy. When repeated actions become automatic, the mind is (1) _____ to focus on decisions that genuinely matter. This is why many successful students keep a fixed study schedule. They are not trying to remove freedom from their lives; rather, they are trying to (2) _____ distractions. A routine also makes progress more (3) _____, because small actions are repeated before motivation has time to fade. Of course, a routine that is too rigid can become (4) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "released"
+            },
+            {
+              "label": "B",
+              "text": "allowed"
+            },
+            {
+              "label": "C",
+              "text": "enabled"
+            },
+            {
+              "label": "D",
+              "text": "freed"
+            }
+          ],
+          "answer": {
+            "correctOption": "D",
+            "accepted": [
+              "D"
+            ],
+            "display": "D"
+          },
+          "explanation": "free mental energy.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "The quiet power of routines"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Routines are often dismissed as dull, but they can be a powerful (0) _____ of mental energy. When repeated actions become automatic, the mind is (1) _____ to focus on decisions that genuinely matter. This is why many successful students keep a fixed study schedule. They are not trying to remove freedom from their lives; rather, they are trying to (2) _____ distractions. A routine also makes progress more (3) _____, because small actions are repeated before motivation has time to fade. Of course, a routine that is too rigid can become (4) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "cut off"
+            },
+            {
+              "label": "B",
+              "text": "cut down on"
+            },
+            {
+              "label": "C",
+              "text": "cut out for"
+            },
+            {
+              "label": "D",
+              "text": "cut across"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "cut down on distractions.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "The quiet power of routines"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Routines are often dismissed as dull, but they can be a powerful (0) _____ of mental energy. When repeated actions become automatic, the mind is (1) _____ to focus on decisions that genuinely matter. This is why many successful students keep a fixed study schedule. They are not trying to remove freedom from their lives; rather, they are trying to (2) _____ distractions. A routine also makes progress more (3) _____, because small actions are repeated before motivation has time to fade. Of course, a routine that is too rigid can become (4) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "sustainable"
+            },
+            {
+              "label": "B",
+              "text": "sustaining"
+            },
+            {
+              "label": "C",
+              "text": "sustained"
+            },
+            {
+              "label": "D",
+              "text": "sustain"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "make progress sustainable.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "The quiet power of routines"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 4",
+          "passage": "Routines are often dismissed as dull, but they can be a powerful (0) _____ of mental energy. When repeated actions become automatic, the mind is (1) _____ to focus on decisions that genuinely matter. This is why many successful students keep a fixed study schedule. They are not trying to remove freedom from their lives; rather, they are trying to (2) _____ distractions. A routine also makes progress more (3) _____, because small actions are repeated before motivation has time to fade. Of course, a routine that is too rigid can become (4) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "productive"
+            },
+            {
+              "label": "B",
+              "text": "counterproductive"
+            },
+            {
+              "label": "C",
+              "text": "reproductive"
+            },
+            {
+              "label": "D",
+              "text": "producing"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "too rigid = counterproductive.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 4,
+            "passageTitle": "The quiet power of routines"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Guided Cloze: The value of mistakes",
+      "slug": "guided-cloze-pack-001-guided-cloze-the-value-of-mistakes",
+      "skillType": "GUIDED_CLOZE",
+      "questionType": "GUIDED_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Đọc đoạn văn và chọn đáp án phù hợp nhất cho từng chỗ trống.",
+      "instructions": "Tập trung vào collocation, logic đoạn văn và sắc thái nghĩa.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Guided Cloze",
+        "Collocations",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Many students treat mistakes as proof of failure, but in language learning they are often signs of (0) _____. A wrong answer can reveal a hidden assumption about grammar, collocation or meaning. The important thing is not simply to correct the answer, but to (1) _____ the reason behind the mistake. Students who keep a record of recurring errors are more likely to notice patterns and (2) _____ them over time. In this sense, a mistake is not an obstacle to progress but a useful (3) _____ for improvement.",
+          "options": [
+            {
+              "label": "A",
+              "text": "progress"
+            },
+            {
+              "label": "B",
+              "text": "process"
+            },
+            {
+              "label": "C",
+              "text": "programme"
+            },
+            {
+              "label": "D",
+              "text": "product"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "signs of progress.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "The value of mistakes"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Many students treat mistakes as proof of failure, but in language learning they are often signs of (0) _____. A wrong answer can reveal a hidden assumption about grammar, collocation or meaning. The important thing is not simply to correct the answer, but to (1) _____ the reason behind the mistake. Students who keep a record of recurring errors are more likely to notice patterns and (2) _____ them over time. In this sense, a mistake is not an obstacle to progress but a useful (3) _____ for improvement.",
+          "options": [
+            {
+              "label": "A",
+              "text": "investigate"
+            },
+            {
+              "label": "B",
+              "text": "invent"
+            },
+            {
+              "label": "C",
+              "text": "invest"
+            },
+            {
+              "label": "D",
+              "text": "invite"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "investigate the reason.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "The value of mistakes"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Many students treat mistakes as proof of failure, but in language learning they are often signs of (0) _____. A wrong answer can reveal a hidden assumption about grammar, collocation or meaning. The important thing is not simply to correct the answer, but to (1) _____ the reason behind the mistake. Students who keep a record of recurring errors are more likely to notice patterns and (2) _____ them over time. In this sense, a mistake is not an obstacle to progress but a useful (3) _____ for improvement.",
+          "options": [
+            {
+              "label": "A",
+              "text": "overcome"
+            },
+            {
+              "label": "B",
+              "text": "overlook"
+            },
+            {
+              "label": "C",
+              "text": "overhear"
+            },
+            {
+              "label": "D",
+              "text": "overstate"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "overcome errors.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "The value of mistakes"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 4",
+          "passage": "Many students treat mistakes as proof of failure, but in language learning they are often signs of (0) _____. A wrong answer can reveal a hidden assumption about grammar, collocation or meaning. The important thing is not simply to correct the answer, but to (1) _____ the reason behind the mistake. Students who keep a record of recurring errors are more likely to notice patterns and (2) _____ them over time. In this sense, a mistake is not an obstacle to progress but a useful (3) _____ for improvement.",
+          "options": [
+            {
+              "label": "A",
+              "text": "resource"
+            },
+            {
+              "label": "B",
+              "text": "source"
+            },
+            {
+              "label": "C",
+              "text": "origin"
+            },
+            {
+              "label": "D",
+              "text": "cause"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "resource for improvement.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 4,
+            "passageTitle": "The value of mistakes"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Guided Cloze: Reading beyond the line",
+      "slug": "guided-cloze-pack-001-guided-cloze-reading-beyond-the-line",
+      "skillType": "GUIDED_CLOZE",
+      "questionType": "GUIDED_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Đọc đoạn văn và chọn đáp án phù hợp nhất cho từng chỗ trống.",
+      "instructions": "Tập trung vào collocation, logic đoạn văn và sắc thái nghĩa.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Guided Cloze",
+        "Collocations",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Good readers do more than identify facts. They notice how ideas are connected, why examples are included, and what the writer may be (0) _____. Inference questions are difficult because the answer is rarely stated (1) _____. Instead, it must be built from clues in the text. A useful strategy is to separate evidence from personal opinion, since an answer may sound reasonable but still lack textual (2) _____. Careful readers slow down at contrast markers because these words often signal a shift in (3) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "implying"
+            },
+            {
+              "label": "B",
+              "text": "implicating"
+            },
+            {
+              "label": "C",
+              "text": "inferring"
+            },
+            {
+              "label": "D",
+              "text": "involving"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "writer implies; reader infers.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "Reading beyond the line"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Good readers do more than identify facts. They notice how ideas are connected, why examples are included, and what the writer may be (0) _____. Inference questions are difficult because the answer is rarely stated (1) _____. Instead, it must be built from clues in the text. A useful strategy is to separate evidence from personal opinion, since an answer may sound reasonable but still lack textual (2) _____. Careful readers slow down at contrast markers because these words often signal a shift in (3) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "openly"
+            },
+            {
+              "label": "B",
+              "text": "directly"
+            },
+            {
+              "label": "C",
+              "text": "plainly"
+            },
+            {
+              "label": "D",
+              "text": "frankly"
+            }
+          ],
+          "answer": {
+            "correctOption": "B",
+            "accepted": [
+              "B"
+            ],
+            "display": "B"
+          },
+          "explanation": "stated directly.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "Reading beyond the line"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Good readers do more than identify facts. They notice how ideas are connected, why examples are included, and what the writer may be (0) _____. Inference questions are difficult because the answer is rarely stated (1) _____. Instead, it must be built from clues in the text. A useful strategy is to separate evidence from personal opinion, since an answer may sound reasonable but still lack textual (2) _____. Careful readers slow down at contrast markers because these words often signal a shift in (3) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "support"
+            },
+            {
+              "label": "B",
+              "text": "supply"
+            },
+            {
+              "label": "C",
+              "text": "service"
+            },
+            {
+              "label": "D",
+              "text": "substance"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "textual support.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "Reading beyond the line"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 4",
+          "passage": "Good readers do more than identify facts. They notice how ideas are connected, why examples are included, and what the writer may be (0) _____. Inference questions are difficult because the answer is rarely stated (1) _____. Instead, it must be built from clues in the text. A useful strategy is to separate evidence from personal opinion, since an answer may sound reasonable but still lack textual (2) _____. Careful readers slow down at contrast markers because these words often signal a shift in (3) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "position"
+            },
+            {
+              "label": "B",
+              "text": "direction"
+            },
+            {
+              "label": "C",
+              "text": "attitude"
+            },
+            {
+              "label": "D",
+              "text": "meaning"
+            }
+          ],
+          "answer": {
+            "correctOption": "C",
+            "accepted": [
+              "C"
+            ],
+            "display": "C"
+          },
+          "explanation": "shift in attitude.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 4,
+            "passageTitle": "Reading beyond the line"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Guided Cloze: Why transitions matter",
+      "slug": "guided-cloze-pack-001-guided-cloze-why-transitions-matter",
+      "skillType": "GUIDED_CLOZE",
+      "questionType": "GUIDED_CLOZE",
+      "difficulty": "CHUYEN",
+      "statement": "Đọc đoạn văn và chọn đáp án phù hợp nhất cho từng chỗ trống.",
+      "instructions": "Tập trung vào collocation, logic đoạn văn và sắc thái nghĩa.",
+      "estimatedMinutes": 10,
+      "topics": [
+        "Guided Cloze",
+        "Collocations",
+        "Discourse Markers"
+      ],
+      "questions": [
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 1",
+          "passage": "Transitions are not decorative words. They show the (0) _____ between ideas and help readers follow the writer reasoning. However, transitions must be chosen carefully. For example, therefore signals a result, whereas nevertheless introduces a contrast. Using the wrong connector can (1) _____ the logic of an argument. Strong writers vary their language while keeping the relationship between ideas (2) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "relationship"
+            },
+            {
+              "label": "B",
+              "text": "relativity"
+            },
+            {
+              "label": "C",
+              "text": "relation"
+            },
+            {
+              "label": "D",
+              "text": "relative"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "relationship between ideas.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 1,
+            "passageTitle": "Why transitions matter"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 2",
+          "passage": "Transitions are not decorative words. They show the (0) _____ between ideas and help readers follow the writer reasoning. However, transitions must be chosen carefully. For example, therefore signals a result, whereas nevertheless introduces a contrast. Using the wrong connector can (1) _____ the logic of an argument. Strong writers vary their language while keeping the relationship between ideas (2) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "distort"
+            },
+            {
+              "label": "B",
+              "text": "distract"
+            },
+            {
+              "label": "C",
+              "text": "disturb"
+            },
+            {
+              "label": "D",
+              "text": "dismiss"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "distort the logic.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 2,
+            "passageTitle": "Why transitions matter"
+          }
+        },
+        {
+          "type": "GUIDED_CLOZE",
+          "skillType": "GUIDED_CLOZE",
+          "difficulty": "CHUYEN",
+          "prompt": "Blank 3",
+          "passage": "Transitions are not decorative words. They show the (0) _____ between ideas and help readers follow the writer reasoning. However, transitions must be chosen carefully. For example, therefore signals a result, whereas nevertheless introduces a contrast. Using the wrong connector can (1) _____ the logic of an argument. Strong writers vary their language while keeping the relationship between ideas (2) _____.",
+          "options": [
+            {
+              "label": "A",
+              "text": "clear"
+            },
+            {
+              "label": "B",
+              "text": "clearly"
+            },
+            {
+              "label": "C",
+              "text": "clearness"
+            },
+            {
+              "label": "D",
+              "text": "clarity"
+            }
+          ],
+          "answer": {
+            "correctOption": "A",
+            "accepted": [
+              "A"
+            ],
+            "display": "A"
+          },
+          "explanation": "keep relationship clear.",
+          "rootWord": null,
+          "keyword": null,
+          "targetSentence": null,
+          "lineNumber": null,
+          "metadata": {
+            "blankNumber": 3,
+            "passageTitle": "Why transitions matter"
+          }
+        }
+      ]
+    }
+  ]
+}
