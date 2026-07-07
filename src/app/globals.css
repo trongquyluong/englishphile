@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
+/*
+ * Lush forest design tokens.
+ * Raw palette hex values live here only — components use the semantic
+ * tokens below (background, foreground, panel, accent, leaf, ...).
+ */
 :root {
-  --background: #f6f3ec;
-  --foreground: #17211b;
-  --panel: #fffdfa;
-  --panel-muted: #efebe1;
-  --ink-soft: #526054;
-  --line: rgba(23, 33, 27, 0.1);
-  --line-strong: rgba(23, 33, 27, 0.18);
-  --accent: #1f7a4d;
-  --accent-strong: #155d3a;
-  --accent-soft: #e4f1e9;
-  --warning: #b96a12;
+  /* Raw palette */
+  --lush-deep-forest: #253d2c;
+  --lush-forest-green: #2e6f40;
+  --lush-leaf-green: #68ba7f;
+  --lush-mint-light: #cfffdc;
+
+  /* Semantic tokens */
+  --background: #f4faf5;
+  --foreground: var(--lush-deep-forest);
+  --panel: #ffffff;
+  --panel-muted: #e9f6ec;
+  --ink-soft: #4d6857;
+  --line: rgba(37, 61, 44, 0.12);
+  --line-strong: rgba(37, 61, 44, 0.22);
+  --accent: var(--lush-forest-green);
+  --accent-strong: var(--lush-deep-forest);
+  --accent-soft: var(--lush-mint-light);
+  --leaf: var(--lush-leaf-green);
+  --on-accent: #f2fff6;
+  --warning: #9c5c0f;
+  --warning-soft: #fdf3e2;
   --danger: #b42318;
+  --danger-soft: #fdecea;
   --shadow-border:
-    0 0 0 1px rgba(23, 33, 27, 0.08),
-    0 1px 2px -1px rgba(23, 33, 27, 0.08),
-    0 4px 10px -8px rgba(23, 33, 27, 0.24);
+    0 0 0 1px rgba(46, 111, 64, 0.1),
+    0 1px 2px -1px rgba(37, 61, 44, 0.06),
+    0 6px 16px -12px rgba(37, 61, 44, 0.18);
   --shadow-border-hover:
-    0 0 0 1px rgba(23, 33, 27, 0.14),
-    0 1px 2px -1px rgba(23, 33, 27, 0.1),
-    0 8px 18px -12px rgba(23, 33, 27, 0.28);
+    0 0 0 1px rgba(46, 111, 64, 0.2),
+    0 2px 4px -2px rgba(37, 61, 44, 0.08),
+    0 14px 30px -18px rgba(37, 61, 44, 0.28);
+  --shadow-float: 0 18px 50px -28px rgba(37, 61, 44, 0.4);
 }
 
 @theme inline {
@@ -34,25 +51,26 @@
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
+  --color-leaf: var(--leaf);
+  --color-on-accent: var(--on-accent);
   --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-lexend);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-lexend), "Segoe UI", Arial, Helvetica, sans-serif;
   min-height: 100vh;
 }
 
-button,
-a,
-input,
-select,
-textarea {
-  outline-color: var(--accent);
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 h1,
@@ -66,21 +84,123 @@ li {
   text-wrap: pretty;
 }
 
-.surface {
-  background: var(--panel);
-  box-shadow: var(--shadow-border);
-}
+@layer components {
+  /* Cards / panels */
+  .surface {
+    background: var(--panel);
+    box-shadow: var(--shadow-border);
+  }
 
-.surface-hover {
-  transition-property: box-shadow, transform;
-  transition-duration: 160ms;
-  transition-timing-function: ease-out;
-}
+  .surface-hover {
+    transition-property: box-shadow, transform;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+  }
 
-.surface-hover:hover {
-  box-shadow: var(--shadow-border-hover);
+  .surface-hover:hover {
+    box-shadow: var(--shadow-border-hover);
+  }
+
+  .surface-mint {
+    background: linear-gradient(160deg, var(--panel) 0%, var(--panel-muted) 100%);
+    box-shadow: var(--shadow-border);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding-inline: 1.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    text-align: center;
+    transition:
+      background-color 160ms ease-out,
+      color 160ms ease-out,
+      box-shadow 160ms ease-out,
+      transform 160ms ease-out;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 10px 24px -14px rgba(46, 111, 64, 0.55);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-strong);
+  }
+
+  .btn-secondary {
+    background: var(--panel);
+    color: var(--accent-strong);
+    box-shadow: inset 0 0 0 1px rgba(104, 186, 127, 0.55);
+  }
+
+  .btn-secondary:hover {
+    background: var(--panel-muted);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--foreground);
+  }
+
+  .btn-ghost:hover {
+    background: var(--panel-muted);
+  }
+
+  .btn-sm {
+    min-height: 2.5rem;
+    padding-inline: 1rem;
+  }
+
+  /* Form fields */
+  .field {
+    border-radius: 0.875rem;
+    background: var(--panel);
+    padding-inline: 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    transition: box-shadow 160ms ease-out;
+  }
+
+  .field:hover {
+    box-shadow: inset 0 0 0 1px rgba(104, 186, 127, 0.7);
+  }
+
+  .field::placeholder {
+    color: color-mix(in srgb, var(--ink-soft) 72%, transparent);
+  }
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

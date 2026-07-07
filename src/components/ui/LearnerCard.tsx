@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * LearnerCard — consistent card for learner-facing content sections.
- * Uses the existing `surface` class for background + shadow, rounded-2xl for containers.
+ * Uses the `surface` class for background + soft green border, rounded-3xl for containers.
  */
 export function LearnerCard({
 	children,
@@ -12,7 +12,7 @@ export function LearnerCard({
 	children: ReactNode;
 	className?: string;
 }) {
-	return <div className={cn("surface rounded-2xl p-5", className)}>{children}</div>;
+	return <div className={cn("surface rounded-3xl p-6", className)}>{children}</div>;
 }
 
 /**
@@ -77,7 +77,7 @@ export function ActionRow({
 	return (
 		<div
 			className={cn(
-				"flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-panel/95 p-3 shadow-[0_18px_60px_-32px_rgba(23,33,27,0.45)] backdrop-blur-sm",
+				"flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-panel/95 p-3 shadow-[var(--shadow-float)] backdrop-blur-sm",
 				sticky ? "sticky bottom-4 z-10" : "",
 				className,
 			)}
@@ -102,7 +102,7 @@ export function EmptyState({
 	icon?: React.ComponentType<{ className?: string; "aria-hidden"?: "true" }>;
 }) {
 	return (
-		<div className="surface rounded-2xl p-8 text-center">
+		<div className="surface rounded-3xl p-8 text-center">
 			{Icon ? (
 				<Icon className="mx-auto size-8 text-ink-soft" aria-hidden="true" />
 			) : null}

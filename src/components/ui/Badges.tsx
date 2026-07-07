@@ -24,9 +24,9 @@ export function SkillBadge({ skill, className }: { skill: SkillType; className?:
 export function DifficultyBadge({ difficulty, className }: { difficulty: Difficulty; className?: string }) {
   const tone =
     difficulty === "HSG" || difficulty === "CHUYEN"
-      ? "bg-amber-100 text-amber-800"
+      ? "bg-warning-soft text-warning"
       : difficulty === "C2"
-        ? "bg-red-100 text-red-800"
+        ? "bg-danger-soft text-danger"
         : "bg-panel-muted text-foreground";
 
   return (
@@ -41,7 +41,7 @@ export function TopicTag({ name, className }: { name: string; className?: string
     <span
       role="status"
       className={cn(
-        "inline-flex items-center rounded-md bg-panel px-2 py-1 text-xs font-medium text-ink-soft shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]",
+        "inline-flex items-center rounded-md bg-panel px-2 py-1 text-xs font-medium text-ink-soft shadow-[inset_0_0_0_1px_var(--line)]",
         className,
       )}
     >
@@ -79,7 +79,7 @@ export function ContentStatusBadge({ status, className }: { status: ContentStatu
     status === "PUBLISHED"
       ? "bg-accent-soft text-accent-strong"
       : status === "NEEDS_REVIEW"
-        ? "bg-amber-100 text-amber-800"
+        ? "bg-warning-soft text-warning"
         : status === "ARCHIVED"
           ? "bg-panel-muted text-ink-soft"
           : "bg-panel-muted text-foreground";
@@ -96,9 +96,9 @@ export function ContentPackStatusBadge({ status, className }: { status: ContentP
     status === "IMPORTED" || status === "VALIDATED"
       ? "bg-accent-soft text-accent-strong"
       : status === "FAILED"
-        ? "bg-red-100 text-red-800"
+        ? "bg-danger-soft text-danger"
         : status === "PARTIALLY_IMPORTED"
-          ? "bg-amber-100 text-amber-800"
+          ? "bg-warning-soft text-warning"
           : status === "ARCHIVED"
             ? "bg-panel-muted text-ink-soft"
             : "bg-panel-muted text-foreground";
@@ -115,7 +115,7 @@ export function AssignmentStatusBadge({ status, className }: { status: Assignmen
     status === "PUBLISHED"
       ? "bg-accent-soft text-accent-strong"
       : status === "CLOSED"
-        ? "bg-amber-100 text-amber-800"
+        ? "bg-warning-soft text-warning"
         : status === "ARCHIVED"
           ? "bg-panel-muted text-ink-soft"
           : "bg-panel-muted text-foreground";
@@ -140,7 +140,7 @@ export function AssignmentSubmissionStatusBadge({ status, className }: { status:
     status === "SUBMITTED"
       ? "bg-accent-soft text-accent-strong"
       : status === "LATE" || status === "NEEDS_REVIEW"
-        ? "bg-amber-100 text-amber-800"
+        ? "bg-warning-soft text-warning"
         : "bg-panel-muted text-foreground";
 
   return (
