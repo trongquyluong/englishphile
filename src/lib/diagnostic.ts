@@ -13,6 +13,7 @@ import {
   skillStatusLabel,
   type DiagnosticScoreSummary,
 } from "@/lib/diagnostic-scoring";
+import { diagnosticQuestionDataWhere, hasRequiredDiagnosticQuestionData } from "@/lib/diagnostic-question-readiness";
 import { skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -83,6 +84,7 @@ async function findQuestionsForBlueprintItem(
     type: { in: item.questionTypes },
     contentStatus: "PUBLISHED" as const,
     problem: { contentStatus: "PUBLISHED" as const },
+    AND: [diagnosticQuestionDataWhere],
   };
 
   const [eligible, fallback] = await Promise.all([
@@ -109,6 +111,7 @@ async function findQuestionsForBlueprintItem(
 
   const candidates = [...eligible, ...fallback]
     .filter((question, index, array) => array.findIndex((item) => item.id === question.id) === index)
+    .filter(hasRequiredDiagnosticQuestionData)
     .filter((question) => isAutoMarkableDiagnosticType(question.type) || question.type === "WRITING_PROMPT")
     .sort((left, right) => {
       const eligibleDelta = Number(right.problem.isDiagnosticEligible) - Number(left.problem.isDiagnosticEligible);
@@ -172,6 +175,7 @@ export async function selectDiagnosticQuestions() {
       contentStatus: "PUBLISHED",
       problem: { contentStatus: "PUBLISHED" },
       type: { in: ["MCQ", "WORD_FORMATION", "OPEN_CLOZE", "GUIDED_CLOZE", "READING_MCQ", "ERROR_IDENTIFICATION"] },
+      AND: [diagnosticQuestionDataWhere],
     },
     include: questionInclude(),
     orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
@@ -179,7 +183,7 @@ export async function selectDiagnosticQuestions() {
   });
 
   const fallbackSection = sections.find((section) => section.id === "use-of-english-core");
-  for (const question of fallback) {
+  for (const question of fallback.filter(hasRequiredDiagnosticQuestionData)) {
     if (used.has(question.id)) continue;
     selected.push(question);
     used.add(question.id);

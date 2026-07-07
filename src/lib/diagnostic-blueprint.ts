@@ -1,4 +1,5 @@
 import type { Difficulty, QuestionType, SkillType } from "@prisma/client";
+import { hasRequiredDiagnosticQuestionData } from "@/lib/diagnostic-question-readiness";
 import { difficultyLabels, skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -223,7 +224,7 @@ export function getSectionForQuestion(skillType: SkillType, type: QuestionType):
 }
 
 export async function getDiagnosticCoverage(): Promise<DiagnosticCoverage> {
-  const [problemGroups, eligibleProblemGroups, difficultyGroups, eligibleDifficultyGroups, questionGroups, eligibleQuestionGroups] =
+  const [problemGroups, eligibleProblemGroups, difficultyGroups, eligibleDifficultyGroups, questionRows] =
     await Promise.all([
       prisma.problem.groupBy({
         by: ["skillType"],
@@ -245,24 +246,31 @@ export async function getDiagnosticCoverage(): Promise<DiagnosticCoverage> {
         where: { contentStatus: "PUBLISHED", isDiagnosticEligible: true },
         _count: { _all: true },
       }),
-      prisma.question.groupBy({
-        by: ["skillType"],
+      prisma.question.findMany({
         where: { contentStatus: "PUBLISHED", problem: { contentStatus: "PUBLISHED" } },
-        _count: { _all: true },
-      }),
-      prisma.question.groupBy({
-        by: ["skillType"],
-        where: { contentStatus: "PUBLISHED", problem: { contentStatus: "PUBLISHED", isDiagnosticEligible: true } },
-        _count: { _all: true },
+        select: {
+          skillType: true,
+          type: true,
+          rootWord: true,
+          problem: { select: { isDiagnosticEligible: true } },
+        },
       }),
     ]);
 
   const publishedProblemsBySkill = new Map(problemGroups.map((item) => [item.skillType, item._count._all]));
   const eligibleProblemsBySkill = new Map(eligibleProblemGroups.map((item) => [item.skillType, item._count._all]));
-  const publishedQuestionsBySkill = new Map(questionGroups.map((item) => [item.skillType, item._count._all]));
-  const eligibleQuestionsBySkill = new Map(eligibleQuestionGroups.map((item) => [item.skillType, item._count._all]));
+  const publishedQuestionsBySkill = new Map<SkillType, number>();
+  const eligibleQuestionsBySkill = new Map<SkillType, number>();
   const publishedProblemsByDifficulty = new Map(difficultyGroups.map((item) => [item.difficulty, item._count._all]));
   const eligibleProblemsByDifficulty = new Map(eligibleDifficultyGroups.map((item) => [item.difficulty, item._count._all]));
+
+  for (const question of questionRows) {
+    if (!hasRequiredDiagnosticQuestionData(question)) continue;
+    publishedQuestionsBySkill.set(question.skillType, (publishedQuestionsBySkill.get(question.skillType) ?? 0) + 1);
+    if (question.problem.isDiagnosticEligible) {
+      eligibleQuestionsBySkill.set(question.skillType, (eligibleQuestionsBySkill.get(question.skillType) ?? 0) + 1);
+    }
+  }
 
   const sections = diagnosticBlueprint.map((section) => {
     const targetCount = section.items.filter((item) => item.scored && !item.optional).reduce((sum, item) => sum + item.targetCount, 0);

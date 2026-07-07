@@ -19,6 +19,8 @@
     "db:export:portable": "tsx -r tsconfig-paths/register scripts/db-export-portable.ts",
     "db:import:portable": "tsx -r tsconfig-paths/register scripts/db-import-portable.ts",
     "db:stats": "tsx -r tsconfig-paths/register scripts/db-stats.ts",
+    "audit:word-formation-roots": "tsx -r tsconfig-paths/register scripts/audit-word-formation-roots.ts",
+    "fix:word-formation-roots": "tsx -r tsconfig-paths/register scripts/fix-word-formation-roots.ts",
     "import:pack": "tsx -r tsconfig-paths/register scripts/import-pack.ts",
     "import:json": "tsx -r tsconfig-paths/register scripts/import-pack.ts"
   },
