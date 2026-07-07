@@ -108,7 +108,11 @@ export function Navbar({ user }: NavbarProps) {
               <span className="sr-only">Mở menu</span>
             </summary>
             <div className="surface absolute right-0 mt-2 grid w-60 gap-1 rounded-2xl p-2">
-              {[...mainLinks, ...(user ? userLinks : []), ...(canAdmin ? adminLinks : [])].map((link) => (
+              {[
+                ...mainLinks,
+                ...(user ? userLinks : [{ href: "/auth/sign-in", label: "Đăng nhập" }]),
+                ...(canAdmin ? adminLinks : []),
+              ].map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2.5 text-sm hover:bg-panel-muted">
                   {link.label}
                 </Link>
@@ -137,7 +141,7 @@ export function Navbar({ user }: NavbarProps) {
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/auth/sign-in" className="btn btn-sm btn-ghost text-ink-soft">
+              <Link href="/auth/sign-in" className="btn btn-sm btn-ghost hidden text-ink-soft sm:inline-flex">
                 Đăng nhập
               </Link>
               <Link href="/auth/sign-up" className="btn btn-sm btn-primary">

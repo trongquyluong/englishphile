@@ -1,8 +1,9 @@
-import { SkeletonCard, SkeletonHeroCard } from "@/components/ui/SkeletonCards";
+import { LoadingNotice, SkeletonCard, SkeletonHeroCard } from "@/components/ui/SkeletonCards";
 
 export default function GymLoading() {
   return (
     <div className="grid gap-6">
+      <LoadingNotice label="Đang chuẩn bị bài luyện..." />
       <SkeletonHeroCard />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
