@@ -60,6 +60,18 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
     (section) => !section.targetCount || section.eligibleQuestions >= section.targetCount,
   );
 
+  // Derive booleans for CTA states
+  const isInProgress = latest?.status === "IN_PROGRESS";
+  const canViewResult = latest && latest.status !== "IN_PROGRESS";
+
+  const latestStatusLabel: Record<string, string> = {
+    IN_PROGRESS: "Đang làm dở",
+    COMPLETED: "Đã hoàn thành",
+    NEEDS_REVIEW: "Cần chấm tay",
+    ABANDONED: "Đã bỏ dở",
+  };
+  const statusLabel = latest ? (latestStatusLabel[latest.status] ?? "Chưa rõ") : null;
+
   const totalScoredQuestions = diagnosticBlueprint
     .flatMap((s) => s.items)
     .filter((item) => item.scored && !item.optional)
@@ -95,13 +107,21 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
           <span className="rounded-xl bg-white/10 px-3 py-2">Dùng kho bài đã xuất bản</span>
         </div>
 
-        {canStart ? (
+        {isInProgress ? (
+          <Link
+            href="/diagnostic/start"
+            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-accent px-6 text-sm font-semibold text-background shadow-md"
+          >
+            Làm tiếp bài đang làm
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        ) : canStart ? (
           <form action={startDiagnosticAction} className="mt-6">
             <FormSubmitButton
               pendingLabel="Đang tạo bài..."
               className="gap-2 bg-background text-foreground"
             >
-              {latest ? "Làm lại diagnostic" : "Làm bài kiểm tra đầu vào"}
+              {latest ? "Làm lại bài kiểm tra" : "Làm bài kiểm tra đầu vào"}
               <ArrowRight className="size-4" aria-hidden="true" />
             </FormSubmitButton>
           </form>
@@ -153,25 +173,19 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
                   <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
                     Trạng thái
                   </p>
-                  <p className="mt-2 text-sm font-semibold">
-                    {latest.status === "NEEDS_REVIEW"
-                      ? "Cần chấm tay"
-                      : latest.status === "COMPLETED"
-                        ? "Hoàn thành"
-                        : latest.status === "ABANDONED"
-                          ? "Đã bỏ dở"
-                          : latest.status}
-                  </p>
+                  <p className="mt-2 text-sm font-semibold">{statusLabel}</p>
                 </div>
               </div>
 
-              <Link
-                href={`/diagnostic/result?attempt=${latest.id}`}
-                className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
-              >
-                Xem kết quả chi tiết
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
+              {canViewResult ? (
+                <Link
+                  href={`/diagnostic/result?attempt=${latest.id}`}
+                  className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
+                >
+                  Xem kết quả chi tiết
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              ) : null}
             </div>
 
             <div className="lg:w-72">
@@ -217,22 +231,45 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
         <h2 className="text-lg font-semibold">Nội dung bài kiểm tra</h2>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {coverage.sections.map((section) => (
-            <div
-              key={section.id}
-              className="rounded-xl bg-panel-muted p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold">{section.title}</h3>
-                  <p className="mt-1 text-sm text-ink-soft">{section.message}</p>
+          {coverage.sections.map((section) => {
+            // Determine display message based on targetCount and section type
+            let displayMessage: string;
+            if (section.targetCount === 0 && section.publishedQuestions === 0) {
+              // Optional section with no questions
+              displayMessage =
+                section.id === "listening"
+                  ? "Chưa có dữ liệu, chưa tính điểm."
+                  : section.id === "writing"
+                    ? "Không bắt buộc, không tính điểm."
+                    : "Chưa có dữ liệu";
+            } else if (section.targetCount === 0) {
+              // Optional section with questions available
+              displayMessage = section.id === "listening"
+                ? "Có dữ liệu, không bắt buộc."
+                : "Không bắt buộc.";
+            } else {
+              displayMessage = section.message;
+            }
+
+            return (
+              <div
+                key={section.id}
+                className="rounded-xl bg-panel-muted p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">{section.title}</h3>
+                    <p className="mt-1 text-sm text-ink-soft">{displayMessage}</p>
+                  </div>
+                  <span className="shrink-0 rounded-lg bg-panel px-2 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
+                    {section.targetCount > 0
+                      ? `${section.eligibleQuestions}/${section.targetCount}`
+                      : "Tùy chọn"}
+                  </span>
                 </div>
-                <span className="shrink-0 rounded-lg bg-panel px-2 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
-                  {section.eligibleQuestions}/{section.targetCount}
-                </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {coverage.warnings.length ? (
