@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, BookOpenText, Dumbbell, Medal, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpenText, Dumbbell, Mail, Medal, ShieldCheck, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Về Englishphile",
@@ -15,6 +15,8 @@ const steps = [
 ];
 
 export default function AboutPage() {
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
+
   return (
     <div className="grid gap-6">
       <section className="surface rounded-2xl p-6 md:p-8">
@@ -63,6 +65,31 @@ export default function AboutPage() {
           <p className="mt-3 text-sm leading-7 text-ink-soft text-pretty">
             Quản trị viên đưa dữ liệu vào bằng file JSON/CSV, chạy duplicate check, QA và review trước khi publish. Bài nháp hoặc cần duyệt không xuất hiện trong luồng học viên.
           </p>
+        </div>
+      </section>
+
+      <section className="surface rounded-2xl p-5" aria-labelledby="about-contact">
+        <div className="flex items-center gap-2">
+          <Mail className="size-5 text-accent" aria-hidden="true" />
+          <h2 id="about-contact" className="text-lg font-semibold">Liên hệ</h2>
+        </div>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-ink-soft text-pretty">
+          Nếu bạn gặp lỗi, cần hỗ trợ tài khoản, muốn báo nội dung chưa chính xác hoặc yêu cầu chỉnh sửa/xóa dữ liệu, hãy liên hệ qua
+          email dưới đây.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          {contactEmail ? (
+            <a
+              href={`mailto:${contactEmail}`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
+            >
+              <Mail className="size-4" aria-hidden="true" />
+              {contactEmail}
+            </a>
+          ) : null}
+          <Link href="/contact" className="inline-flex min-h-11 items-center rounded-lg bg-panel-muted px-4 text-sm font-semibold">
+            Xem hướng dẫn liên hệ
+          </Link>
         </div>
       </section>
 
