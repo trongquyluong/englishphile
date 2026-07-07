@@ -6,7 +6,7 @@ import { DifficultyBadge, QuestionNumberBadge, SkillBadge } from "@/components/u
 import { LearnerCard } from "@/components/ui/LearnerCard";
 import { FormSubmitButton } from "@/components/ui/FormSubmitButton";
 import { requireUser } from "@/lib/auth/session";
-import { getDiagnosticQuestionsForAttempt } from "@/lib/diagnostic";
+import { getDiagnosticQuestionsForAttempt, getLatestDiagnosticAttempt } from "@/lib/diagnostic";
 import { getVisibleRootWord } from "@/components/questions/QuestionRootWord";
 
 type PageProps = {
@@ -37,10 +37,19 @@ const TEXT_QUESTION_TYPES = [
 export default async function DiagnosticStartPage({ searchParams }: PageProps) {
   const user = await requireUser();
   const params = await searchParams;
-  const attemptId = typeof params.attempt === "string" ? params.attempt : "";
   const error = typeof params.error === "string" ? params.error : "";
 
-  if (!attemptId) redirect("/diagnostic");
+  let attemptId = typeof params.attempt === "string" ? params.attempt : "";
+
+  // Auto-find IN_PROGRESS attempt if none provided
+  if (!attemptId) {
+    const inProgress = await getLatestDiagnosticAttempt(user.id, "IN_PROGRESS");
+    if (inProgress) {
+      attemptId = inProgress.id;
+    } else {
+      redirect("/diagnostic");
+    }
+  }
 
   const data = await getDiagnosticQuestionsForAttempt(attemptId, user.id);
   if (!data) redirect("/diagnostic");

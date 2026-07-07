@@ -446,9 +446,9 @@ async function createDiagnosticRecommendations(userId: string, scoreSummary: Dia
   }
 }
 
-export async function getLatestDiagnosticAttempt(userId: string) {
+export async function getLatestDiagnosticAttempt(userId: string, status?: "IN_PROGRESS" | "COMPLETED" | "NEEDS_REVIEW" | "ABANDONED") {
   return prisma.diagnosticAttempt.findFirst({
-    where: { userId },
+    where: { userId, ...(status ? { status } : {}) },
     orderBy: { createdAt: "desc" },
   });
 }

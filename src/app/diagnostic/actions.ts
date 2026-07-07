@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createDiagnosticAttempt, scoreDiagnosticAttempt } from "@/lib/diagnostic";
+import { createDiagnosticAttempt, getLatestDiagnosticAttempt, scoreDiagnosticAttempt } from "@/lib/diagnostic";
 import { requireUser } from "@/lib/auth/session";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -9,6 +9,11 @@ export async function startDiagnosticAction() {
   const user = await requireUser();
   const limit = checkRateLimit({ key: `diagnostic-start:${user.id}`, limit: 6, windowMs: 10 * 60 * 1000 });
   if (!limit.ok) redirect(`/diagnostic?error=${encodeURIComponent(`Bạn tạo diagnostic quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`)}`);
+
+  // Resume existing IN_PROGRESS attempt if one exists
+  const existing = await getLatestDiagnosticAttempt(user.id, "IN_PROGRESS");
+  if (existing) redirect(`/diagnostic/start?attempt=${existing.id}`);
+
   const attempt = await createDiagnosticAttempt(user.id);
   redirect(`/diagnostic/start?attempt=${attempt.id}`);
 }
