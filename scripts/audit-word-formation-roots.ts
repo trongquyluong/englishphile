@@ -10,6 +10,37 @@ function stringify(value: unknown) {
 }
 
 async function main() {
+  const targetQuestions = await prisma.question.findMany({
+    where: {
+      prompt: { contains: "director's", mode: "insensitive" },
+    },
+    include: {
+      problem: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          contentStatus: true,
+          isDiagnosticEligible: true,
+        },
+      },
+    },
+    orderBy: [{ problemId: "asc" }, { orderIndex: "asc" }],
+  });
+
+  console.log(`Found ${targetQuestions.length} question(s) matching prompt fragment "director's".`);
+  for (const question of targetQuestions) {
+    console.log("\n=== Target prompt match ===");
+    console.log(`Question: ${question.id}`);
+    console.log(`Type: ${question.type}`);
+    console.log(`Skill: ${question.skillType}`);
+    console.log(`Root word: ${question.rootWord ?? "(null)"}`);
+    console.log(`Problem: ${question.problem.title} (${question.problem.slug}, ${question.problem.id})`);
+    console.log(`Status: question=${question.contentStatus}, problem=${question.problem.contentStatus}`);
+    console.log(`Diagnostic eligible: ${question.problem.isDiagnosticEligible}`);
+    console.log(`Prompt: ${question.prompt}`);
+  }
+
   const questions = await prisma.question.findMany({
     where: { type: "WORD_FORMATION" },
     include: {

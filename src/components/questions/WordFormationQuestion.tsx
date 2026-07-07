@@ -1,7 +1,7 @@
 "use client";
 
+import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import type { ClientQuestion } from "@/lib/problem-types";
-import { getAnswerNote } from "@/components/questions/question-utils";
 
 type Props = {
   question: ClientQuestion;
@@ -11,14 +11,10 @@ type Props = {
 };
 
 export function WordFormationQuestion({ question, value, onChange, disabled }: Props) {
-  const note = getAnswerNote(question.answer);
-
   return (
     <label className="grid gap-3">
       <span className="text-sm font-semibold leading-6">{question.prompt}</span>
-      <span className="inline-flex w-fit rounded-md bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">
-        Root word: {question.rootWord ?? note?.correctForm ?? "—"}
-      </span>
+      <QuestionRootWord question={question} />
       <input
         value={typeof value === "string" ? value : ""}
         disabled={disabled}

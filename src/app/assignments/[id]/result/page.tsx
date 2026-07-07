@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import { AssignmentSubmissionStatusBadge, ContentStatusBadge, DifficultyBadge, SkillBadge } from "@/components/ui/Badges";
 import { requireUser } from "@/lib/auth/session";
 import { summarizeCorrectAnswer } from "@/lib/answer-checking";
@@ -101,7 +102,10 @@ export default async function AssignmentResultPage({ params }: PageProps) {
                 {item.submission?.submissionAnswers.map((answer) => (
                   <div key={answer.id} className="rounded-md bg-white p-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="font-semibold">{answer.question.prompt}</p>
+                      <div>
+                        <p className="font-semibold">{answer.question.prompt}</p>
+                        <QuestionRootWord question={answer.question} className="mt-2" />
+                      </div>
                       <span className="rounded-md bg-panel-muted px-2 py-1 text-xs font-semibold">
                         {answer.isCorrect === true ? "Đúng" : answer.isCorrect === false ? "Sai" : "Cần chấm"}
                       </span>

@@ -134,7 +134,9 @@ export function scoreContest(contest: ContestWithProblems, answersByProblem: Rec
       }
       return {
         questionId: question.id,
+        type: question.type,
         prompt: question.prompt,
+        rootWord: question.rootWord,
         studentAnswer,
         isCorrect: checked.isCorrect,
         feedback: checked.feedback,

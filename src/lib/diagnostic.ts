@@ -1,4 +1,4 @@
-import type { Difficulty, Question, QuestionType, SkillType } from "@prisma/client";
+import type { Difficulty, Prisma, QuestionType, SkillType } from "@prisma/client";
 import { checkQuestionAnswer } from "@/lib/answer-checking";
 import {
   diagnosticBlueprint,
@@ -17,18 +17,38 @@ import { diagnosticQuestionDataWhere, hasRequiredDiagnosticQuestionData } from "
 import { skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
-export type DiagnosticQuestion = Question & {
+const diagnosticQuestionSelect = {
+  id: true,
+  problemId: true,
+  type: true,
+  skillType: true,
+  difficulty: true,
+  prompt: true,
+  passage: true,
+  options: true,
+  answer: true,
+  explanation: true,
+  rootWord: true,
+  keyword: true,
+  targetSentence: true,
+  lineNumber: true,
+  metadata: true,
+  orderIndex: true,
   problem: {
-    id: string;
-    title: string;
-    slug: string;
-    statement: string;
-    skillType: SkillType;
-    isDiagnosticEligible: boolean;
-    diagnosticWeight: number;
-    problemTopics: Array<{ topic: { id: string; name: string; slug: string } }>;
-  };
-};
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      statement: true,
+      skillType: true,
+      isDiagnosticEligible: true,
+      diagnosticWeight: true,
+      problemTopics: { include: { topic: { select: { id: true, name: true, slug: true } } } },
+    },
+  },
+} as const;
+
+export type DiagnosticQuestion = Prisma.QuestionGetPayload<{ select: typeof diagnosticQuestionSelect }>;
 
 export type DiagnosticAttemptMetadata = {
   questionIds?: string[];
@@ -50,23 +70,6 @@ export type DiagnosticAttemptMetadata = {
     levelExplanation: string;
   };
 };
-
-function questionInclude() {
-  return {
-    problem: {
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        statement: true,
-        skillType: true,
-        isDiagnosticEligible: true,
-        diagnosticWeight: true,
-        problemTopics: { include: { topic: { select: { id: true, name: true, slug: true } } } },
-      },
-    },
-  } as const;
-}
 
 function parseAttemptMetadata(value: unknown): DiagnosticAttemptMetadata {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -94,7 +97,7 @@ async function findQuestionsForBlueprintItem(
         id: { notIn: [...usedQuestionIds] },
         problem: { ...baseWhere.problem, isDiagnosticEligible: true },
       },
-      include: questionInclude(),
+      select: diagnosticQuestionSelect,
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
       take: item.targetCount * 3,
     }),
@@ -103,7 +106,7 @@ async function findQuestionsForBlueprintItem(
         ...baseWhere,
         id: { notIn: [...usedQuestionIds] },
       },
-      include: questionInclude(),
+      select: diagnosticQuestionSelect,
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
       take: item.targetCount * 4,
     }),
@@ -177,7 +180,7 @@ export async function selectDiagnosticQuestions() {
       type: { in: ["MCQ", "WORD_FORMATION", "OPEN_CLOZE", "GUIDED_CLOZE", "READING_MCQ", "ERROR_IDENTIFICATION"] },
       AND: [diagnosticQuestionDataWhere],
     },
-    include: questionInclude(),
+    select: diagnosticQuestionSelect,
     orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
     take: 20 - scoredCount,
   });
@@ -229,7 +232,7 @@ export async function getDiagnosticQuestionsForAttempt(attemptId: string, userId
 
   const questions = await prisma.question.findMany({
     where: { id: { in: questionIds }, problem: { contentStatus: "PUBLISHED" } },
-    include: questionInclude(),
+    select: diagnosticQuestionSelect,
   });
   const order = new Map(questionIds.map((id, index) => [id, index]));
   const sortedQuestions = questions.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0));

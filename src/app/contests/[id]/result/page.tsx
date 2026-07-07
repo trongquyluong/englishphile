@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { QuestionType } from "@prisma/client";
+import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import { contestAttemptStatusLabels } from "@/lib/labels";
 import { requireUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug } from "@/lib/contests";
@@ -18,7 +20,9 @@ type StoredContestResult = {
     section: string;
     results: Array<{
       questionId: string;
+      type?: QuestionType;
       prompt?: string;
+      rootWord?: string | null;
       studentAnswer?: unknown;
       isCorrect: boolean | null;
       feedback?: string | null;
@@ -106,6 +110,9 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
                         </span>
                       </div>
                       {item.prompt ? <p className="mt-2 leading-6 text-ink-soft">{item.prompt}</p> : null}
+                      {item.type && item.prompt ? (
+                        <QuestionRootWord question={{ type: item.type, prompt: item.prompt, rootWord: item.rootWord ?? null }} className="mt-2 bg-white" />
+                      ) : null}
                       <p className="mt-2 text-ink-soft">Bài làm: <span className="font-semibold text-foreground">{answerText(item.studentAnswer)}</span></p>
                       {item.isCorrect === false || item.isCorrect === null ? (
                         <p className="mt-1 text-ink-soft">Đáp án/model: <span className="font-semibold text-foreground">{answerText(item.correctAnswer)}</span></p>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AccuracyBar, MetricCard, StatusPill } from "@/components/analytics/AnalyticsCards";
+import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import { DifficultyBadge, SkillBadge, TopicTag } from "@/components/ui/Badges";
 import { requireUser } from "@/lib/auth/session";
 import { getSkillAnalyticsForStudent } from "@/lib/analytics/skills";
@@ -119,6 +120,7 @@ export default async function SkillAnalyticsPage({ params }: PageProps) {
             <article key={answer.id} className="rounded-md bg-white p-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
               <h3 className="font-semibold">{answer.problemTitle}</h3>
               <p className="mt-1 leading-6 text-ink-soft">{answer.prompt}</p>
+              <QuestionRootWord question={{ type: answer.questionType, prompt: answer.prompt, rootWord: answer.rootWord }} className="mt-2" />
               <p className="mt-2 text-ink-soft">Câu trả lời: {formatAnswer(answer.studentAnswer)}</p>
               <p className="text-ink-soft">Đáp án: {answer.correctAnswer}</p>
             </article>

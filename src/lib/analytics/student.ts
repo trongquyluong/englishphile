@@ -187,6 +187,7 @@ export async function getStudentWrongQuestionStats(userId: string, take = 8) {
     skillType: answer.question.skillType,
     questionType: answer.question.type,
     prompt: answer.question.prompt,
+    rootWord: answer.question.rootWord,
     topics: answer.question.problem.problemTopics.map(({ topic }) => topic.name),
     studentAnswer: answer.studentAnswer,
     correctAnswer: summarizeCorrectAnswer(answer.question),

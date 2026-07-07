@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { submitDiagnosticAction } from "@/app/diagnostic/actions";
 import { DifficultyBadge, SkillBadge } from "@/components/ui/Badges";
 import { FormSubmitButton } from "@/components/ui/FormSubmitButton";
+import { getVisibleRootWord } from "@/components/questions/QuestionRootWord";
 import { requireUser } from "@/lib/auth/session";
 import { getDiagnosticQuestionsForAttempt } from "@/lib/diagnostic";
 
@@ -91,6 +92,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
               <div className="divide-y divide-line">
                 {section.questions.map((question, sectionIndex) => {
                   const options = getOptions(question.options);
+                  const rootWord = getVisibleRootWord(question);
                   return (
                     <article key={question.id} className="p-5">
                       <div className="flex flex-wrap items-center gap-2">
@@ -103,6 +105,11 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                         <div className="mt-4 rounded-xl bg-panel-muted p-4 text-sm leading-7 text-ink-soft">{question.passage}</div>
                       ) : null}
                       <p className="mt-4 text-sm font-semibold leading-7">{question.prompt}</p>
+                      {rootWord ? (
+                        <span className="mt-2 inline-flex w-fit rounded-md bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">
+                          Từ gốc: {rootWord}
+                        </span>
+                      ) : null}
                       {options.length ? (
                         <div className="mt-4 grid gap-2">
                           {options.map((option) => (

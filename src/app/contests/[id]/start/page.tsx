@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Clock } from "lucide-react";
 import { submitContestAction } from "@/app/contests/actions";
 import { ContestSubmitBar } from "@/components/contests/ContestSubmitBar";
+import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import { requireUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug } from "@/lib/contests";
 import { prisma } from "@/lib/prisma";
@@ -75,6 +76,7 @@ export default async function ContestStartPage({ params, searchParams }: PagePro
                     <p className="text-sm font-semibold">Câu {questionIndex + 1}</p>
                     {question.passage ? <div className="mt-3 rounded-lg bg-white p-3 text-sm leading-7 text-ink-soft shadow-[var(--shadow-border)]">{question.passage}</div> : null}
                     <p className="mt-3 text-sm font-semibold leading-7">{question.prompt}</p>
+                    <QuestionRootWord question={question} className="mt-2 bg-white" />
                     {options.length ? (
                       <div className="mt-3 grid gap-2">
                         {options.map((option) => (
