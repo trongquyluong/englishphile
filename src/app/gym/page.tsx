@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, BarChart3, BookOpen, Dumbbell, Headphones, PenTool, Sparkles, Target } from "lucide-react";
 import { DifficultyBadge, SkillBadge } from "@/components/ui/Badges";
+import { AccuracyBar, LearnerCard } from "@/components/ui/LearnerCard";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRecommendedProblemsForStudent } from "@/lib/analytics/recommendations";
 import { getStudentSkillStats } from "@/lib/analytics/student";
@@ -69,16 +70,46 @@ export default async function GymPage() {
     <div className="grid gap-6">
       <section className="rounded-2xl bg-foreground p-6 text-background shadow-[0_24px_70px_-40px_rgba(23,33,27,0.55)]">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-background/60">Gym</p>
-        <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-balance">Luyện kỹ năng theo trình độ hiện tại</h1>
+        <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-balance">
+          {recommendations.length > 0
+            ? "Hôm nay nên luyện gì?"
+            : "Luyện kỹ năng theo trình độ hiện tại"}
+        </h1>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-background/72">
-          Gym là trung tâm luyện tập của Englishphile: chọn kỹ năng, làm bài phù hợp, xem lỗi sai và quay lại đúng phần cần cải thiện.
+          {recommendations.length > 0
+            ? "Bài dưới đây được gợi ý dựa trên diagnostic và lỗi sai gần đây. Chọn một bài để bắt đầu."
+            : "Chọn kỹ năng, làm bài phù hợp, xem lỗi sai và quay lại đúng phần cần cải thiện."}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href={user ? "/recommendations" : "/auth/sign-up"} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-4 text-sm font-semibold text-foreground transition-transform duration-150 ease-out active:scale-[0.96]">
-            Bài nên luyện
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
-          <Link href={user ? "/practice/adaptive" : "/auth/sign-in"} className="inline-flex min-h-11 items-center rounded-lg bg-white/10 px-4 text-sm font-semibold text-background">
+          {recommendations.length > 0 ? (
+            <Link
+              href={`/problems/${recommendations[0].slug}`}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-5 text-sm font-semibold text-foreground shadow-[0_8px_24px_-4px_rgba(23,33,27,0.25)] transition-transform duration-150 ease-out active:scale-[0.96]"
+            >
+              Luyện bài đầu tiên
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          ) : user ? (
+            <Link
+              href="/diagnostic"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-5 text-sm font-semibold text-foreground shadow-[0_8px_24px_-4px_rgba(23,33,27,0.25)] transition-transform duration-150 ease-out active:scale-[0.96]"
+            >
+              <Target className="size-4" aria-hidden="true" />
+              Làm diagnostic
+            </Link>
+          ) : (
+            <Link
+              href="/auth/sign-up"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-5 text-sm font-semibold text-foreground shadow-[0_8px_24px_-4px_rgba(23,33,27,0.25)] transition-transform duration-150 ease-out active:scale-[0.96]"
+            >
+              Bắt đầu miễn phí
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          )}
+          <Link
+            href={user ? "/practice/adaptive" : "/auth/sign-in"}
+            className="inline-flex min-h-11 items-center rounded-lg bg-white/10 px-4 text-sm font-semibold text-background"
+          >
             Luyện thích ứng
           </Link>
         </div>
@@ -118,7 +149,7 @@ export default async function GymPage() {
       </section>
 
       {user ? (
-        <section className="surface rounded-2xl p-5">
+        <LearnerCard>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Trạng thái kỹ năng</h2>
@@ -126,16 +157,11 @@ export default async function GymPage() {
             </div>
             <Link href="/analytics" className="text-sm font-semibold text-accent-strong">Xem thống kê</Link>
           </div>
-          <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {skillStats.slice(0, 8).map((skill) => (
-              <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="rounded-xl bg-white p-3 shadow-[var(--shadow-border)]">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-semibold">{skill.label}</p>
-                  <span className="text-xs font-semibold text-ink-soft">{skill.statusLabel}</span>
-                </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-panel-muted">
-                  <div className="h-full rounded-full bg-accent" style={{ width: `${Math.round((skill.accuracy ?? 0) * 100)}%` }} />
-                </div>
+              <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="rounded-xl bg-panel-muted p-4">
+                <AccuracyBar accuracy={skill.accuracy} label={skill.label} />
+                <p className="mt-2 text-xs text-ink-soft">{skill.statusLabel}</p>
               </Link>
             ))}
             {!skillStats.some((skill) => skill.attempted > 0) ? (
@@ -144,21 +170,25 @@ export default async function GymPage() {
               </p>
             ) : null}
           </div>
-        </section>
+        </LearnerCard>
       ) : null}
 
       <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="surface rounded-2xl p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold">Gợi ý hôm nay</h2>
-              <p className="mt-1 text-sm text-ink-soft">Dựa trên diagnostic, lỗi sai và phần còn yếu.</p>
-            </div>
+        <LearnerCard>
+          <div className="flex items-center gap-2">
             <Sparkles className="size-5 text-accent" aria-hidden="true" />
+            <h2 className="text-lg font-semibold">Gợi ý hôm nay</h2>
           </div>
+          {user && (
+            <p className="mt-1 text-sm text-ink-soft">Dựa trên diagnostic, lỗi sai và phần còn yếu.</p>
+          )}
           <div className="mt-4 grid gap-3">
             {recommendations.map((problem) => (
-              <Link key={problem.id} href={`/problems/${problem.slug}`} className="rounded-xl bg-white p-4 shadow-[var(--shadow-border)] transition-[box-shadow,transform] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]">
+              <Link
+                key={problem.id}
+                href={`/problems/${problem.slug}`}
+                className="rounded-xl bg-panel-muted p-4 transition-shadow hover:shadow-[var(--shadow-border-hover)]"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold text-balance">{problem.title}</h3>
                   <ArrowRight className="size-4 shrink-0 text-ink-soft" aria-hidden="true" />
@@ -181,7 +211,7 @@ export default async function GymPage() {
               </div>
             ) : null}
           </div>
-        </div>
+        </LearnerCard>
 
         <aside className="surface rounded-2xl p-5">
           <div className="flex items-center gap-2">

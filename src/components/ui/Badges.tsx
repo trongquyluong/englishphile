@@ -10,97 +10,142 @@ import {
 } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
-export function SkillBadge({ skill }: { skill: SkillType }) {
+/** Consistent learner-facing badge size: text-xs + font-semibold + rounded-md + px-2 py-1 */
+const badgeBase = "inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold";
+
+export function SkillBadge({ skill, className }: { skill: SkillType; className?: string }) {
   return (
-    <span className="inline-flex items-center rounded-md bg-accent-soft px-2 py-1 text-xs font-semibold text-accent-strong">
+    <span role="status" className={cn(badgeBase, "bg-accent-soft text-accent-strong", className)}>
       {skillLabels[skill]}
     </span>
   );
 }
 
-export function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
+export function DifficultyBadge({ difficulty, className }: { difficulty: Difficulty; className?: string }) {
   const tone =
     difficulty === "HSG" || difficulty === "CHUYEN"
-      ? "bg-amber-100 text-amber-900"
+      ? "bg-amber-100 text-amber-800"
       : difficulty === "C2"
-        ? "bg-red-50 text-red-800"
+        ? "bg-red-100 text-red-800"
         : "bg-panel-muted text-foreground";
 
   return (
-    <span className={cn("inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold", tone)}>
+    <span role="status" className={cn(badgeBase, tone, className)}>
       {difficultyLabels[difficulty]}
     </span>
   );
 }
 
-export function TopicTag({ name }: { name: string }) {
+export function TopicTag({ name, className }: { name: string; className?: string }) {
   return (
-    <span className="inline-flex items-center rounded bg-white px-2 py-1 text-xs font-medium text-ink-soft shadow-[0_0_0_1px_rgba(23,33,27,0.1)]">
+    <span
+      role="status"
+      className={cn(
+        "inline-flex items-center rounded-md bg-panel px-2 py-1 text-xs font-medium text-ink-soft shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]",
+        className,
+      )}
+    >
       {name}
     </span>
   );
 }
 
-export function SourceBadge({ name }: { name: string }) {
-  return <span className="text-xs font-medium text-ink-soft">{name}</span>;
+export function SourceBadge({ name, className }: { name: string; className?: string }) {
+  return (
+    <span role="status" className={cn("text-xs font-medium text-ink-soft", className)}>
+      {name}
+    </span>
+  );
 }
 
-export function ContentStatusBadge({ status }: { status: ContentStatus }) {
+/** Question number badge: "Câu 12" */
+export function QuestionNumberBadge({ number, className }: { number: number; className?: string }) {
+  return (
+    <span
+      role="status"
+      aria-label={`Câu ${number}`}
+      className={cn(
+        "inline-flex items-center rounded-md bg-foreground px-2 py-1 text-xs font-semibold text-background",
+        className,
+      )}
+    >
+      Câu {number}
+    </span>
+  );
+}
+
+export function ContentStatusBadge({ status, className }: { status: ContentStatus; className?: string }) {
   const tone =
     status === "PUBLISHED"
       ? "bg-accent-soft text-accent-strong"
       : status === "NEEDS_REVIEW"
-        ? "bg-amber-100 text-amber-900"
+        ? "bg-amber-100 text-amber-800"
         : status === "ARCHIVED"
-          ? "bg-slate-100 text-slate-700"
+          ? "bg-panel-muted text-ink-soft"
           : "bg-panel-muted text-foreground";
 
   return (
-    <span className={cn("inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold", tone)}>
+    <span role="status" className={cn(badgeBase, tone, className)}>
       {contentStatusLabels[status]}
     </span>
   );
 }
 
-export function ContentPackStatusBadge({ status }: { status: ContentPackStatus }) {
+export function ContentPackStatusBadge({ status, className }: { status: ContentPackStatus; className?: string }) {
   const tone =
     status === "IMPORTED" || status === "VALIDATED"
       ? "bg-accent-soft text-accent-strong"
       : status === "FAILED"
-        ? "bg-red-50 text-danger"
+        ? "bg-red-100 text-red-800"
         : status === "PARTIALLY_IMPORTED"
-          ? "bg-amber-100 text-amber-900"
+          ? "bg-amber-100 text-amber-800"
           : status === "ARCHIVED"
-            ? "bg-slate-100 text-slate-700"
+            ? "bg-panel-muted text-ink-soft"
             : "bg-panel-muted text-foreground";
 
-  return <span className={cn("inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold", tone)}>{contentPackStatusLabels[status]}</span>;
+  return (
+    <span role="status" className={cn(badgeBase, tone, className)}>
+      {contentPackStatusLabels[status]}
+    </span>
+  );
 }
 
-export function AssignmentStatusBadge({ status }: { status: AssignmentStatus }) {
+export function AssignmentStatusBadge({ status, className }: { status: AssignmentStatus; className?: string }) {
   const tone =
     status === "PUBLISHED"
       ? "bg-accent-soft text-accent-strong"
       : status === "CLOSED"
-        ? "bg-amber-100 text-amber-900"
+        ? "bg-amber-100 text-amber-800"
         : status === "ARCHIVED"
-          ? "bg-slate-100 text-slate-700"
+          ? "bg-panel-muted text-ink-soft"
           : "bg-panel-muted text-foreground";
 
-  return <span className={cn("inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold", tone)}>{assignmentStatusLabels[status]}</span>;
+  return (
+    <span role="status" className={cn(badgeBase, tone, className)}>
+      {assignmentStatusLabels[status]}
+    </span>
+  );
 }
 
-export function AssignmentTypeBadge({ type }: { type: AssignmentType }) {
-  return <span className="inline-flex items-center rounded-md bg-panel-muted px-2 py-1 text-xs font-semibold text-foreground">{assignmentTypeLabels[type]}</span>;
+export function AssignmentTypeBadge({ type, className }: { type: AssignmentType; className?: string }) {
+  return (
+    <span role="status" className={cn(badgeBase, "bg-panel-muted text-foreground", className)}>
+      {assignmentTypeLabels[type]}
+    </span>
+  );
 }
 
-export function AssignmentSubmissionStatusBadge({ status }: { status: AssignmentSubmissionStatus }) {
+export function AssignmentSubmissionStatusBadge({ status, className }: { status: AssignmentSubmissionStatus; className?: string }) {
   const tone =
     status === "SUBMITTED"
       ? "bg-accent-soft text-accent-strong"
       : status === "LATE" || status === "NEEDS_REVIEW"
-        ? "bg-amber-100 text-amber-900"
+        ? "bg-amber-100 text-amber-800"
         : "bg-panel-muted text-foreground";
 
-  return <span className={cn("inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold", tone)}>{assignmentSubmissionStatusLabels[status]}</span>;
+  return (
+    <span role="status" className={cn(badgeBase, tone, className)}>
+      {assignmentSubmissionStatusLabels[status]}
+    </span>
+  );
 }
