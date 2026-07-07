@@ -30,9 +30,10 @@ const TEXT_QUESTION_TYPES = [
   "OPEN_CLOZE",
   "SHORT_ANSWER",
   "TRIOS_GAPPED_SENTENCES",
-  "SENTENCE_TRANSFORMATION",
   "LISTENING_SHORT_ANSWER",
 ];
+
+const SENTENCE_TRANSFORMATION_TYPES = ["SENTENCE_TRANSFORMATION"];
 
 export default async function DiagnosticStartPage({ searchParams }: PageProps) {
   const user = await requireUser();
@@ -165,6 +166,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                 const options = getOptions(question.options);
                 const rootWord = getVisibleRootWord(question);
                 const isText = TEXT_QUESTION_TYPES.includes(question.type);
+                const isSentenceTransformation = SENTENCE_TRANSFORMATION_TYPES.includes(question.type);
 
                 return (
                   <fieldset
@@ -187,101 +189,142 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                       </div>
                     ) : null}
 
-                    {/* Prompt */}
-                    <p id={`q-prompt-${question.id}`} className="text-sm font-semibold leading-7">
-                      {question.prompt}
-                    </p>
-
-                    {/* Root word for word formation */}
-                    {rootWord ? (
-                      <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
-                        <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Từ gốc</span>
-                        <span className="font-semibold text-foreground">{rootWord}</span>
-                      </div>
-                    ) : null}
-
-                    {/* Answer input */}
-                    <div className="mt-4">
-                      {options.length > 0 ? (
-                        /* Multiple choice */
-                        <div className="grid gap-2">
-                          {options.map((option) => (
-                            <label
-                              key={option.id}
-                              className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl bg-white px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)] transition-colors hover:bg-accent-soft/40"
-                            >
-                              <input
-                                type="radio"
-                                name={`answer:${question.id}`}
-                                value={option.id}
-                                className="mt-0.5 size-4 accent-[var(--accent)]"
-                              />
-                              <span>
-                                <span className="mr-1 font-semibold">{option.id}.</span>
-                                {option.text}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      ) : question.type === "ERROR_IDENTIFICATION" ? (
-                        /* Error identification: two inputs */
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="grid gap-1.5">
-                            <label htmlFor={`err-part-${question.id}`} className="text-xs font-semibold text-ink-soft">
-                              Dòng sai
-                            </label>
-                            <input
-                              id={`err-part-${question.id}`}
-                              name={`answer:${question.id}:part`}
-                              placeholder="Ghi số dòng"
-                              className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
-                            />
-                          </div>
-                          <div className="grid gap-1.5">
-                            <label htmlFor={`err-corr-${question.id}`} className="text-xs font-semibold text-ink-soft">
-                              Sửa thành
-                            </label>
-                            <input
-                              id={`err-corr-${question.id}`}
-                              name={`answer:${question.id}:correction`}
-                              placeholder="Đáp án đúng"
-                              className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
-                            />
-                          </div>
-                        </div>
-                      ) : question.type === "WRITING_PROMPT" ? (
-                        /* Writing */
-                        <div className="grid gap-1.5">
-                          <label htmlFor={`write-${question.id}`} className="text-xs font-semibold text-ink-soft">
-                            Viết câu trả lời
-                          </label>
-                          <textarea
-                            id={`write-${question.id}`}
-                            name={`answer:${question.id}`}
-                            rows={5}
-                            placeholder="Viết dàn ý hoặc đoạn trả lời. Phần này không tính vào điểm tự động."
-                            className="min-h-36 w-full rounded-xl border border-line bg-white p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
-                          />
-                        </div>
-                      ) : isText ? (
-                        /* Text answer */
-                        <div className="grid gap-1.5">
-                          <label htmlFor={`text-${question.id}`} className="text-xs font-semibold text-ink-soft">
-                            Câu trả lời
-                          </label>
-                          <input
-                            id={`text-${question.id}`}
-                            name={`answer:${question.id}`}
-                            placeholder="Nhập câu trả lời"
-                            className="min-h-11 w-full rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
-                          />
-                        </div>
-                      ) : (
-                        <p className="rounded-xl bg-panel-muted p-3 text-sm text-ink-soft">
-                          Dạng này sẽ được kiểm tra thủ công.
+                    {/* Sentence Transformation: enhanced layout */}
+                    {isSentenceTransformation ? (
+                      <div className="grid gap-3">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-accent">
+                          Viết lại câu — giữ nghĩa, không thêm thông tin
+                        </span>
+                        <p id={`q-prompt-${question.id}`} className="text-sm font-semibold leading-7">
+                          {question.prompt}
                         </p>
-                      )}
-                    </div>
+                        {question.keyword ? (
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
+                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Từ bắt buộc</span>
+                            <span className="font-bold text-foreground">{question.keyword}</span>
+                          </span>
+                        ) : null}
+                        {question.targetSentence ? (
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
+                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Bắt đầu bằng</span>
+                            <span className="font-normal italic text-foreground">{question.targetSentence}</span>
+                          </span>
+                        ) : null}
+                        {!question.keyword && !question.targetSentence ? (
+                          <p className="text-xs leading-5 text-ink-soft">
+                            Nếu đề không cho từ bắt buộc hoặc phần mở đầu, hãy nhập cả câu hoàn chỉnh sao cho nghĩa tương đương.
+                          </p>
+                        ) : null}
+                        <textarea
+                          name={`answer:${question.id}`}
+                          rows={3}
+                          placeholder={
+                            question.keyword || question.targetSentence
+                              ? "Nhập câu viết lại hoàn chỉnh, dùng từ cho sẵn."
+                              : "Nhập câu viết lại hoàn chỉnh, đảm bảo nghĩa tương đương."
+                          }
+                          className="min-h-24 rounded-xl border border-line bg-white p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        {/* Prompt */}
+                        <p id={`q-prompt-${question.id}`} className="text-sm font-semibold leading-7">
+                          {question.prompt}
+                        </p>
+
+                        {/* Root word for word formation */}
+                        {rootWord ? (
+                          <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
+                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Từ gốc</span>
+                            <span className="font-semibold text-foreground">{rootWord}</span>
+                          </div>
+                        ) : null}
+
+                        {/* Answer input */}
+                        <div className="mt-4">
+                          {options.length > 0 ? (
+                            /* Multiple choice */
+                            <div className="grid gap-2">
+                              {options.map((option) => (
+                                <label
+                                  key={option.id}
+                                  className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl bg-white px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)] transition-colors hover:bg-accent-soft/40"
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`answer:${question.id}`}
+                                    value={option.id}
+                                    className="mt-0.5 size-4 accent-[var(--accent)]"
+                                  />
+                                  <span>
+                                    <span className="mr-1 font-semibold">{option.id}.</span>
+                                    {option.text}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          ) : question.type === "ERROR_IDENTIFICATION" ? (
+                            /* Error identification: two inputs */
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <div className="grid gap-1.5">
+                                <label htmlFor={`err-part-${question.id}`} className="text-xs font-semibold text-ink-soft">
+                                  Dòng sai
+                                </label>
+                                <input
+                                  id={`err-part-${question.id}`}
+                                  name={`answer:${question.id}:part`}
+                                  placeholder="Ghi số dòng"
+                                  className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                                />
+                              </div>
+                              <div className="grid gap-1.5">
+                                <label htmlFor={`err-corr-${question.id}`} className="text-xs font-semibold text-ink-soft">
+                                  Sửa thành
+                                </label>
+                                <input
+                                  id={`err-corr-${question.id}`}
+                                  name={`answer:${question.id}:correction`}
+                                  placeholder="Đáp án đúng"
+                                  className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                                />
+                              </div>
+                            </div>
+                          ) : question.type === "WRITING_PROMPT" ? (
+                            /* Writing */
+                            <div className="grid gap-1.5">
+                              <label htmlFor={`write-${question.id}`} className="text-xs font-semibold text-ink-soft">
+                                Viết câu trả lời
+                              </label>
+                              <textarea
+                                id={`write-${question.id}`}
+                                name={`answer:${question.id}`}
+                                rows={5}
+                                placeholder="Viết dàn ý hoặc đoạn trả lời. Phần này không tính vào điểm tự động."
+                                className="min-h-36 w-full rounded-xl border border-line bg-white p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                              />
+                            </div>
+                          ) : isText ? (
+                            /* Text answer */
+                            <div className="grid gap-1.5">
+                              <label htmlFor={`text-${question.id}`} className="text-xs font-semibold text-ink-soft">
+                                Câu trả lời
+                              </label>
+                              <input
+                                id={`text-${question.id}`}
+                                name={`answer:${question.id}`}
+                                placeholder="Nhập câu trả lời"
+                                className="min-h-11 w-full rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                              />
+                            </div>
+                          ) : (
+                            <p className="rounded-xl bg-panel-muted p-3 text-sm text-ink-soft">
+                              Dạng này sẽ được kiểm tra thủ công.
+                            </p>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </fieldset>
                 );
               })}

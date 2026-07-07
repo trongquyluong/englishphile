@@ -71,26 +71,59 @@ export default async function ContestStartPage({ params, searchParams }: PagePro
             <div className="mt-5 grid gap-4">
               {contestProblem.problem.questions.map((question, questionIndex) => {
                 const options = getOptions(question.options);
+                const isSentenceTransformation = question.type === "SENTENCE_TRANSFORMATION";
+
                 return (
                   <article key={question.id} className="rounded-xl bg-panel-muted p-4">
                     <p className="text-sm font-semibold">Câu {questionIndex + 1}</p>
                     {question.passage ? <div className="mt-3 rounded-lg bg-white p-3 text-sm leading-7 text-ink-soft shadow-[var(--shadow-border)]">{question.passage}</div> : null}
-                    <p className="mt-3 text-sm font-semibold leading-7">{question.prompt}</p>
-                    <QuestionRootWord question={question} className="mt-2 bg-white" />
-                    {options.length ? (
+
+                    {isSentenceTransformation ? (
                       <div className="mt-3 grid gap-2">
-                        {options.map((option) => (
-                          <label key={option.id} className="flex min-h-11 items-center gap-3 rounded-lg bg-white px-3 text-sm shadow-[var(--shadow-border)]">
-                            <input type="radio" name={`answer:${contestProblem.problemId}:${question.id}`} value={option.id} className="accent-[var(--accent)]" />
-                            <span className="font-semibold">{option.id}.</span>
-                            <span>{option.text}</span>
-                          </label>
-                        ))}
+                        <span className="text-xs font-semibold uppercase tracking-wide text-accent">Viết lại câu — giữ nghĩa, không thêm thông tin</span>
+                        <p className="text-sm font-semibold leading-7">{question.prompt}</p>
+                        {question.keyword ? (
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm shadow-[var(--shadow-border)]">
+                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Từ bắt buộc</span>
+                            <span className="font-bold">{question.keyword}</span>
+                          </span>
+                        ) : null}
+                        {question.targetSentence ? (
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-sm shadow-[var(--shadow-border)]">
+                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Bắt đầu bằng</span>
+                            <span className="font-normal italic">{question.targetSentence}</span>
+                          </span>
+                        ) : null}
+                        {!question.keyword && !question.targetSentence ? (
+                          <p className="text-xs leading-5 text-ink-soft">Nếu đề không cho từ bắt buộc hoặc phần mở đầu, hãy nhập cả câu hoàn chỉnh sao cho nghĩa tương đương.</p>
+                        ) : null}
+                        <textarea
+                          name={`answer:${contestProblem.problemId}:${question.id}`}
+                          rows={3}
+                          placeholder={question.keyword || question.targetSentence ? "Nhập câu viết lại hoàn chỉnh, dùng từ cho sẵn." : "Nhập câu viết lại hoàn chỉnh, đảm bảo nghĩa tương đương."}
+                          className="mt-2 min-h-24 w-full rounded-lg bg-white p-3 text-sm shadow-[var(--shadow-border)]"
+                        />
                       </div>
-                    ) : textQuestion(question.type) ? (
-                      <input name={`answer:${contestProblem.problemId}:${question.id}`} className="mt-3 min-h-11 w-full rounded-lg bg-white px-3 text-sm shadow-[var(--shadow-border)]" placeholder="Nhập câu trả lời" />
                     ) : (
-                      <textarea name={`answer:${contestProblem.problemId}:${question.id}`} className="mt-3 min-h-32 w-full rounded-lg bg-white p-3 text-sm leading-6 shadow-[var(--shadow-border)]" placeholder="Viết câu trả lời" />
+                      <>
+                        <p className="mt-3 text-sm font-semibold leading-7">{question.prompt}</p>
+                        <QuestionRootWord question={question} className="mt-2 bg-white" />
+                        {options.length ? (
+                          <div className="mt-3 grid gap-2">
+                            {options.map((option) => (
+                              <label key={option.id} className="flex min-h-11 items-center gap-3 rounded-lg bg-white px-3 text-sm shadow-[var(--shadow-border)]">
+                                <input type="radio" name={`answer:${contestProblem.problemId}:${question.id}`} value={option.id} className="accent-[var(--accent)]" />
+                                <span className="font-semibold">{option.id}.</span>
+                                <span>{option.text}</span>
+                              </label>
+                            ))}
+                          </div>
+                        ) : textQuestion(question.type) ? (
+                          <input name={`answer:${contestProblem.problemId}:${question.id}`} className="mt-3 min-h-11 w-full rounded-lg bg-white px-3 text-sm shadow-[var(--shadow-border)]" placeholder="Nhập câu trả lời" />
+                        ) : (
+                          <textarea name={`answer:${contestProblem.problemId}:${question.id}`} className="mt-3 min-h-32 w-full rounded-lg bg-white p-3 text-sm leading-6 shadow-[var(--shadow-border)]" placeholder="Viết câu trả lời" />
+                        )}
+                      </>
                     )}
                   </article>
                 );
