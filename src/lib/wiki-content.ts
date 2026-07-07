@@ -1,5 +1,44 @@
 export type WikiCategoryId = "use-of-english" | "reading" | "writing" | "listening" | "exam-strategy";
 
+/**
+ * Wiki article template — copy this as a starting point for new articles.
+ *
+ * ```ts
+ * {
+ *   slug: "your-article-slug-here",
+ *   title: "Bài viết mới",
+ *   description: "Một hoặc hai câu mô tả ngắn gọn nội dung bài viết.",
+ *   category: "use-of-english", // use-of-english | reading | writing | listening | exam-strategy
+ *   readingTime: "5 phút",
+ *   level: "C1 – Chuyên", // optional, omit if applicable to all levels
+ *   updatedAt: "2026-07-08",
+ *   sections: [
+ *     {
+ *       // Optional intro paragraph (no heading)
+ *       paragraphs: ["Dẫn nhập ngắn gọn 1–2 câu."],
+ *     },
+ *     {
+ *       heading: "Tiêu đề phần 1",
+ *       paragraphs: ["Đoạn văn 1.", "Đoạn văn 2."],
+ *       items: [
+ *         "Mục 1 trong danh sách.",
+ *         "Mục 2 trong danh sách.",
+ *       ],
+ *       tip: "Mẹo hoặc lưu ý quan trọng cho phần này.",
+ *     },
+ *   ],
+ * },
+ * ```
+ *
+ * Rules:
+ * - slug must be URL-safe (hyphens, no spaces, lowercase)
+ * - readingTime is a string like "5 phút" — estimate based on ~200 words/minute
+ * - level is optional; omit if article applies to all levels
+ * - updatedAt uses ISO date format: YYYY-MM-DD
+ * - Do not invent facts or data. Use source materials provided by the user.
+ * - tip is optional per section; use sparingly for genuinely useful shortcuts
+ */
+
 export type WikiSection = {
   heading?: string;
   paragraphs?: string[];
@@ -325,6 +364,33 @@ export const wikiArticles: WikiArticle[] = [
     ],
   },
 ];
+
+// Draft slot — replace with real content when materials are provided.
+// This article is not linked anywhere; remove this comment block once published.
+/*
+{
+  slug: "placeholder-draft-title",
+  title: "[DRAFT] Tên bài viết mới",
+  description: "Mô tả ngắn 1–2 câu sẽ hiển thị trên trang Wiki.",
+  category: "use-of-english",
+  readingTime: "5 phút",
+  level: "B2 – C1",
+  updatedAt: "2026-07-08",
+  sections: [
+    {
+      paragraphs: [
+        "Dẫn nhập: ngữ cảnh hoặc lý do bài này hữu ích.",
+      ],
+    },
+    {
+      heading: "Phần 1",
+      paragraphs: [],
+      items: [],
+      tip: "Mẹo ngắn gọn.",
+    },
+  ],
+},
+*/
 
 export function getWikiArticles(): WikiArticle[] {
   return [...wikiArticles].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));

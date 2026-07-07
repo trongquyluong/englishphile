@@ -1,31 +1,25 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, BookOpenText, Dumbbell, Mail, Medal, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpenText, Dumbbell, Mail, Medal, ShieldCheck, Sparkles, User } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Về Englishphile",
-  description: "Englishphile là nền tảng luyện chuyên Anh cá nhân hóa theo diagnostic, Gym, Contests và Wiki.",
+  description: "Englishphile là nơi luyện tiếng Anh nâng cao cho học sinh chuyên Anh, với diagnostic, Gym, Contests và Wiki.",
 };
-
-const steps = [
-  ["Diagnostic", "Làm bài kiểm tra ngắn để ước lượng trình độ và điểm yếu ban đầu."],
-  ["Gym", "Luyện Reading, Writing, Listening và Use of English bằng bài đã xuất bản."],
-  ["Contests", "Thử đề cũ hoặc contest theo thời gian khi muốn kiểm tra sức bền."],
-  ["Wiki", "Ôn chiến thuật và ghi chú nền tảng khi cần củng cố lý thuyết."],
-];
 
 export default function AboutPage() {
   const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim();
 
   return (
     <div className="grid gap-6">
+      {/* Hero — Về Englishphile */}
       <section className="surface rounded-2xl p-6 md:p-8">
         <p className="text-sm font-semibold text-accent">Về Englishphile</p>
         <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-          Nền tảng luyện tiếng Anh cá nhân hóa cho học sinh chuẩn bị kỳ thi chuyên sâu
+          Nơi học sinh luyện tiếng Anh nâng cao một cách đều đặn
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-ink-soft text-pretty">
-          Englishphile giúp học viên kiểm tra trình độ, luyện tập trong Gym, thử sức với Contests và dùng Wiki để củng cố kiến thức. Nội dung được quản trị viên import, kiểm tra chất lượng và publish trước khi hiển thị cho học viên.
+          Englishphile được làm để học sinh có chỗ luyện tiếng Anh nâng cao mà không cần tìm đề rời rạc trên internet. Mình muốn biến việc luyện đề, sửa lỗi và đọc chiến thuật thành một thói quen rõ ràng hơn — phù hợp với lịch bận và mục tiêu của từng người.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/diagnostic" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
@@ -38,44 +32,70 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="grid gap-3 md:grid-cols-4">
-        {steps.map(([title, description]) => (
-          <article key={title} className="surface rounded-2xl p-5">
-            <h2 className="font-semibold">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-ink-soft text-pretty">{description}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-2">
-        <div className="surface rounded-2xl p-5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-5 text-accent" aria-hidden="true" />
-            <h2 className="text-lg font-semibold">Gợi ý hoạt động như thế nào?</h2>
-          </div>
-          <p className="mt-3 text-sm leading-7 text-ink-soft text-pretty">
-            Hệ thống dùng kết quả diagnostic, lịch sử làm bài, lỗi sai và kỹ năng yếu để đề xuất bài luyện. Gợi ý luôn ưu tiên nội dung đã xuất bản.
-          </p>
+      {/* Về mình */}
+      <section className="surface rounded-2xl p-6 md:p-8">
+        <div className="flex items-center gap-2">
+          <User className="size-5 text-accent" aria-hidden="true" />
+          <p className="text-sm font-semibold text-accent">Về mình</p>
         </div>
-        <div className="surface rounded-2xl p-5">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="size-5 text-accent" aria-hidden="true" />
-            <h2 className="text-lg font-semibold">Nội dung được kiểm soát ra sao?</h2>
-          </div>
-          <p className="mt-3 text-sm leading-7 text-ink-soft text-pretty">
-            Quản trị viên đưa dữ liệu vào bằng file JSON/CSV, chạy duplicate check, QA và review trước khi publish. Bài nháp hoặc cần duyệt không xuất hiện trong luồng học viên.
+        <div className="mt-4 grid gap-4 max-w-3xl text-sm leading-7 text-ink-soft text-pretty">
+          <p>
+            Mình là người viết và vận hành Englishphile. Trước đây mình cũng là học sinh chuẩn bị thi chuyên Anh, và mình biết cảm giác khi kho tài liệu luyện thi trên mạng thì nhiều nhưng không biết bắt đầu từ đâu.
+          </p>
+          <p>
+            Englishphile ra đời vì mình muốn có một nơi mà mình có thể quay lại thường xuyên — làm diagnostic, xem lỗi sai, đọc chiến thuật — mà không phải tự sắp xếp lại từ đầu mỗi lần.
+          </p>
+          <p>
+            Nếu bạn thấy có gì chưa đúng — đề bài sai, gợi ý không hợp lý, hoặc giao diện gây nhầm lẫn — hãy báo lại. Mình sẽ sửa.
           </p>
         </div>
       </section>
 
+      {/* How it works — kept from original, simplified */}
+      <section className="surface rounded-2xl p-5" aria-labelledby="how-it-works">
+        <div className="flex items-center gap-2">
+          <Sparkles className="size-5 text-accent" aria-hidden="true" />
+          <h2 id="how-it-works" className="text-lg font-semibold">Cách Englishphile hoạt động</h2>
+        </div>
+        <div className="mt-4 grid gap-5 md:grid-cols-2">
+          <div className="rounded-xl bg-panel-muted p-4">
+            <h3 className="font-semibold">Diagnostic</h3>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              Làm bài kiểm tra ngắn để hệ thống ước lượng trình độ và xác định phần cần ưu tiên luyện trước.
+            </p>
+          </div>
+          <div className="rounded-xl bg-panel-muted p-4">
+            <h3 className="font-semibold">Gym</h3>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              Luyện từng kỹ năng riêng với bài đã xuất bản. Hệ thống gợi ý bài phù hợp với trình độ và lỗi sai cá nhân.
+            </p>
+          </div>
+          <div className="rounded-xl bg-panel-muted p-4">
+            <h3 className="font-semibold">Wiki</h3>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              Đọc chiến thuật làm dạng bài, cách tránh lỗi thường gặp và mẹo khi thi.
+            </p>
+          </div>
+          <div className="rounded-xl bg-panel-muted p-4">
+            <h3 className="font-semibold">Contests</h3>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              Thử làm đề cũ hoặc contest theo thời gian để kiểm tra sức bền trong điều kiện gần thi thật.
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 text-sm leading-6 text-ink-soft">
+          Nội dung được kiểm tra chất lượng trước khi hiển thị. Bài nháp hoặc cần duyệt không xuất hiện trong luồng học viên.
+        </p>
+      </section>
+
+      {/* Contact */}
       <section className="surface rounded-2xl p-5" aria-labelledby="about-contact">
         <div className="flex items-center gap-2">
           <Mail className="size-5 text-accent" aria-hidden="true" />
           <h2 id="about-contact" className="text-lg font-semibold">Liên hệ</h2>
         </div>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-ink-soft text-pretty">
-          Nếu bạn gặp lỗi, cần hỗ trợ tài khoản, muốn báo nội dung chưa chính xác hoặc yêu cầu chỉnh sửa/xóa dữ liệu, hãy liên hệ qua
-          email dưới đây.
+          Nếu bạn gặp lỗi, cần hỗ trợ tài khoản, hoặc muốn báo nội dung chưa chính xác, hãy liên hệ qua email dưới đây.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {contactEmail ? (
@@ -93,12 +113,13 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Quick links */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           ["Gym", Dumbbell, "/gym"],
           ["Contests", Medal, "/contests"],
           ["Wiki", BookOpenText, "/wiki"],
-          ["Content QA", ShieldCheck, "/admin/content-qa"],
+          ["Nội dung", ShieldCheck, "/admin/content-qa"],
         ].map(([title, Icon, href]) => (
           <Link key={String(title)} href={String(href)} className="surface surface-hover rounded-2xl p-5">
             <Icon className="size-5 text-accent" aria-hidden="true" />
