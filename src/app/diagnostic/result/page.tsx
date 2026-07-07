@@ -78,22 +78,22 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 
 					{/* Score metrics */}
 					<div className="grid w-fit gap-3 sm:grid-cols-2 lg:grid-cols-4">
-						<div className="rounded-xl bg-panel-muted p-4">
-							<p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
+						<div className="rounded-2xl bg-panel-muted p-4">
+							<p className="text-xs font-semibold text-ink-soft">
 								Điểm có trọng số
 							</p>
 							<p className="mt-2 text-3xl font-semibold tabular-nums">
 								{attempt.score ?? "—"}/{attempt.total ?? "—"}
 							</p>
 						</div>
-						<div className="rounded-xl bg-panel-muted p-4">
-							<p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
+						<div className="rounded-2xl bg-panel-muted p-4">
+							<p className="text-xs font-semibold text-ink-soft">
 								Độ chính xác
 							</p>
 							<p className="mt-2 text-3xl font-semibold tabular-nums">{pct(accuracy)}</p>
 						</div>
-						<div className="rounded-xl bg-panel-muted p-4">
-							<p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
+						<div className="rounded-2xl bg-panel-muted p-4">
+							<p className="text-xs font-semibold text-ink-soft">
 								Độ tin cậy
 							</p>
 							<p className="mt-2 text-2xl font-semibold">
@@ -101,8 +101,8 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 							</p>
 							<p className="mt-1 text-xs text-ink-soft">{scoring?.confidenceReason}</p>
 						</div>
-						<div className="rounded-xl bg-panel-muted p-4">
-							<p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
+						<div className="rounded-2xl bg-panel-muted p-4">
+							<p className="text-xs font-semibold text-ink-soft">
 								Ngày hoàn thành
 							</p>
 							<p className="mt-2 text-base font-semibold">
@@ -125,7 +125,7 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 							const val = item.accuracy ?? 0;
 							const tone = val >= 0.75 ? "bg-accent" : val >= 0.45 ? "bg-warning" : "bg-danger";
 							return (
-								<div key={item.label} className="rounded-xl bg-panel-muted p-3">
+								<div key={item.label} className="rounded-2xl bg-panel-muted p-3">
 									<div className="mb-2 flex items-center justify-between gap-3 text-sm">
 										<span className="font-semibold">{item.label}</span>
 										<span className="text-ink-soft tabular-nums">
@@ -141,7 +141,7 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 							);
 						})}
 						{!skillBreakdown.length ? (
-							<p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+							<p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft">
 								Chưa có dữ liệu kỹ năng.
 							</p>
 						) : null}
@@ -157,7 +157,7 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 						{topicBreakdown.slice(0, 8).map((item) => (
 							<div
 								key={item.topicName}
-								className="flex items-center justify-between gap-3 rounded-xl bg-panel-muted px-3 py-2.5 text-sm"
+								className="flex items-center justify-between gap-3 rounded-2xl bg-panel-muted px-3 py-2.5 text-sm"
 							>
 								<span className="font-semibold">{item.topicName}</span>
 								<span className="tabular-nums text-ink-soft">
@@ -166,7 +166,7 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 							</div>
 						))}
 						{!topicBreakdown.length ? (
-							<p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+							<p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft">
 								Chưa có đủ dữ liệu topic.
 							</p>
 						) : null}
@@ -186,14 +186,14 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 							scoring.strengths.map((item) => (
 								<div
 									key={item.skillType}
-									className="flex items-center justify-between gap-3 rounded-xl bg-accent-soft px-3 py-2.5 text-sm font-semibold text-accent-strong"
+									className="flex items-center justify-between gap-3 rounded-2xl bg-accent-soft px-3 py-2.5 text-sm font-semibold text-accent-strong"
 								>
 									<span>{item.label}</span>
 									<span className="tabular-nums">{pct(item.accuracy)}</span>
 								</div>
 							))
 						) : (
-							<p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+							<p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft">
 								Chưa đủ dữ liệu để gọi là điểm mạnh.
 							</p>
 						)}
@@ -210,14 +210,14 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 							scoring.weakAreas.map((item) => (
 								<div
 									key={item.skillType}
-									className="flex items-center justify-between gap-3 rounded-xl bg-amber-50 px-3 py-2.5 text-sm font-semibold text-warning"
+									className="flex items-center justify-between gap-3 rounded-2xl bg-warning-soft px-3 py-2.5 text-sm font-semibold text-warning"
 								>
 									<span>{item.label}</span>
 									<span className="tabular-nums">{item.statusLabel}</span>
 								</div>
 							))
 						) : (
-							<p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+							<p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft">
 								Chưa phát hiện điểm yếu rõ ràng.
 							</p>
 						)}
@@ -230,17 +230,11 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 				<div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<h2 className="text-lg font-semibold">Gợi ý hôm nay</h2>
 					<div className="flex flex-wrap gap-2">
-						<Link
-							href="/gym"
-							className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
-						>
+						<Link href="/gym" className="btn btn-sm btn-primary">
 							<Dumbbell className="size-4" aria-hidden="true" />
 							Vào Gym
 						</Link>
-						<Link
-							href="/recommendations"
-							className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-panel-muted px-4 text-sm font-semibold"
-						>
+						<Link href="/recommendations" className="btn btn-sm btn-secondary">
 							Luyện bài được gợi ý
 						</Link>
 					</div>
@@ -251,7 +245,7 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 						<Link
 							key={rec.id}
 							href={rec.problem ? `/problems/${rec.problem.slug}` : "/recommendations"}
-							className="rounded-xl bg-panel-muted p-4 transition-shadow hover:shadow-[var(--shadow-border-hover)]"
+							className="rounded-2xl bg-panel-muted p-4 transition-shadow hover:shadow-[var(--shadow-border-hover)]"
 						>
 							<div className="flex items-start justify-between gap-3">
 								<h3 className="text-sm font-semibold">{rec.problem?.title ?? "Bài luyện"}</h3>
@@ -261,7 +255,7 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 						</Link>
 					))}
 					{!recommendations.length ? (
-						<p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft md:col-span-2">
+						<p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft md:col-span-2">
 							Chưa có gợi ý. Hãy hoàn thành diagnostic để nhận bài luyện phù hợp.
 						</p>
 					) : null}

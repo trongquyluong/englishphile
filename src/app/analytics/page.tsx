@@ -91,7 +91,7 @@ export default async function StudentAnalyticsPage() {
           <div className="mt-4 grid gap-3">
             {weakestSkills.length ? (
               weakestSkills.map((skill) => (
-                <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="grid gap-2 rounded-md bg-white p-3 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+                <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="grid gap-2 rounded-md bg-white p-3 shadow-[inset_0_0_0_1px_var(--line)]">
                   <div className="flex items-center justify-between gap-3">
                     <SkillBadge skill={skill.skillType} />
                     <StatusPill label={skill.statusLabel} />
@@ -113,7 +113,7 @@ export default async function StudentAnalyticsPage() {
           <div className="mt-4 grid gap-3">
             {strongestSkills.length ? (
               strongestSkills.map((skill) => (
-                <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="grid gap-2 rounded-md bg-white p-3 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+                <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="grid gap-2 rounded-md bg-white p-3 shadow-[inset_0_0_0_1px_var(--line)]">
                   <div className="flex items-center justify-between gap-3">
                     <SkillBadge skill={skill.skillType} />
                     <StatusPill label={skill.statusLabel} />
@@ -156,7 +156,7 @@ export default async function StudentAnalyticsPage() {
         <h2 className="text-lg font-semibold">Theo topic</h2>
         <div className="mt-4 grid gap-3">
           {topicStats.slice(0, 10).map((topic) => (
-            <div key={topic.topicId} className="grid gap-2 rounded-md bg-white p-3 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+            <div key={topic.topicId} className="grid gap-2 rounded-md bg-white p-3 shadow-[inset_0_0_0_1px_var(--line)]">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <TopicTag name={topic.topicName} />
                 <span className="text-sm font-semibold">{percent(topic.accuracy)}</span>
@@ -175,7 +175,7 @@ export default async function StudentAnalyticsPage() {
         <h2 className="text-lg font-semibold">Lỗi sai gần đây</h2>
         <div className="mt-4 grid gap-3">
           {wrongQuestions.map((question) => (
-            <article key={question.id} className="rounded-md bg-white p-4 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+            <article key={question.id} className="rounded-md bg-white p-4 shadow-[inset_0_0_0_1px_var(--line)]">
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <SkillBadge skill={question.skillType} />
@@ -204,7 +204,7 @@ export default async function StudentAnalyticsPage() {
         </div>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {recommendations.map((problem) => (
-            <Link key={problem.id} href={`/problems/${problem.slug}`} className="grid gap-3 rounded-md bg-white p-4 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+            <Link key={problem.id} href={`/problems/${problem.slug}`} className="grid gap-3 rounded-md bg-white p-4 shadow-[inset_0_0_0_1px_var(--line)]">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="font-semibold">{problem.title}</h3>
                 <ArrowRight className="size-4 text-ink-soft" aria-hidden="true" />

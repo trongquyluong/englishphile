@@ -20,7 +20,7 @@ export function SentenceTransformationQuestion({ question, value, onChange, disa
   return (
     <label className="grid gap-3">
       {/* Task label */}
-      <span className="text-xs font-semibold uppercase tracking-wide text-accent">Viết lại câu — giữ nghĩa, không thêm thông tin</span>
+      <span className="text-xs font-semibold text-accent">Viết lại câu — giữ nghĩa, không thêm thông tin</span>
 
       {/* Original sentence */}
       <span className="text-sm font-semibold leading-6 whitespace-pre-line">{question.prompt}</span>
@@ -28,18 +28,18 @@ export function SentenceTransformationQuestion({ question, value, onChange, disa
       {/* Keyword */}
       {keyword ? (
         <span className={cn(
-          "inline-flex w-fit items-center gap-1.5 rounded-md bg-panel-muted px-3 py-1.5 text-sm font-semibold text-ink-soft",
+          "inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft/60 px-3 py-1.5 text-sm",
         )}>
-          <span className="text-xs font-normal uppercase tracking-wide">Từ bắt buộc</span>
-          <span className="font-bold">{keyword}</span>
+          <span className="text-xs font-normal text-ink-soft">Từ bắt buộc</span>
+          <span className="font-bold text-foreground">{keyword}</span>
         </span>
       ) : null}
 
       {/* Given beginning / target sentence */}
       {targetSentence ? (
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-panel-muted px-3 py-1.5 text-sm font-semibold text-ink-soft">
-          <span className="text-xs font-normal uppercase tracking-wide">Bắt đầu bằng</span>
-          <span className="font-normal italic">{targetSentence}</span>
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft/60 px-3 py-1.5 text-sm">
+          <span className="text-xs font-normal text-ink-soft">Bắt đầu bằng</span>
+          <span className="font-normal italic text-foreground">{targetSentence}</span>
         </span>
       ) : null}
 
@@ -54,7 +54,7 @@ export function SentenceTransformationQuestion({ question, value, onChange, disa
         value={typeof value === "string" ? value : ""}
         disabled={disabled}
         onChange={(event) => onChange(question.id, event.target.value)}
-        className="min-h-28 rounded-md bg-white p-3 text-sm leading-6 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+        className="field min-h-28 p-3"
         placeholder={placeholder}
       />
     </label>

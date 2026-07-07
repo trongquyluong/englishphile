@@ -19,7 +19,7 @@ export function WordFormationQuestion({ question, value, onChange, disabled }: P
         value={typeof value === "string" ? value : ""}
         disabled={disabled}
         onChange={(event) => onChange(question.id, event.target.value)}
-        className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+        className="field min-h-11"
         placeholder="Nhập dạng từ đúng"
       />
     </label>

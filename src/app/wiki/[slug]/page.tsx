@@ -43,13 +43,13 @@ export default async function WikiArticlePage({ params }: PageProps) {
       </Link>
 
       <article className="mt-2 grid gap-5">
-        <header className="surface rounded-2xl p-6 md:p-8">
+        <header className="surface-mint rounded-[2rem] p-6 md:p-8">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-lg bg-accent-soft px-2 py-1 text-xs font-semibold text-accent-strong">
+            <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent-strong">
               {wikiCategoryLabels[article.category]}
             </span>
             {article.level ? (
-              <span className="rounded-lg bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">{article.level}</span>
+              <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">{article.level}</span>
             ) : null}
           </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance md:text-4xl">{article.title}</h1>
@@ -63,7 +63,7 @@ export default async function WikiArticlePage({ params }: PageProps) {
           </div>
         </header>
 
-        <div className="surface rounded-2xl p-6 md:p-8">
+        <div className="surface rounded-3xl p-6 md:p-8">
           <div className="grid gap-7">
             {article.sections.map((section, index) => (
               <section key={index}>
@@ -83,7 +83,7 @@ export default async function WikiArticlePage({ params }: PageProps) {
                   </ul>
                 ) : null}
                 {section.tip ? (
-                  <p className="mt-4 flex gap-2.5 rounded-xl bg-accent-soft p-4 text-sm leading-6 text-accent-strong">
+                  <p className="mt-4 flex gap-2.5 rounded-2xl bg-accent-soft/70 p-4 text-sm leading-6 text-accent-strong">
                     <Lightbulb className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     <span>
                       <span className="font-semibold">Mẹo: </span>
@@ -102,8 +102,8 @@ export default async function WikiArticlePage({ params }: PageProps) {
           <h2 className="text-lg font-semibold">Đọc tiếp</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {relatedArticles.map((related) => (
-              <Link key={related.slug} href={`/wiki/${related.slug}`} className="surface surface-hover flex flex-col rounded-2xl p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">
+              <Link key={related.slug} href={`/wiki/${related.slug}`} className="surface surface-hover flex flex-col rounded-3xl p-5">
+                <p className="text-xs font-semibold text-accent">
                   {wikiCategoryLabels[related.category]}
                 </p>
                 <h3 className="mt-2 text-sm font-semibold leading-5 text-balance">{related.title}</h3>

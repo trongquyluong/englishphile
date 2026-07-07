@@ -38,7 +38,7 @@ export function QuestionRootWord({ question, className }: Props) {
   if (!rootWord) return null;
 
   return (
-    <span className={cn("inline-flex w-fit rounded-md bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft", className)}>
+    <span className={cn("inline-flex w-fit rounded-full bg-accent-soft/60 px-2.5 py-1 text-xs font-semibold text-accent-strong", className)}>
       Từ gốc: {rootWord}
     </span>
   );

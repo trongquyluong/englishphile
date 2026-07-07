@@ -88,7 +88,7 @@ export default async function RecommendationsPage() {
         </div>
         <div className="mt-4 grid gap-2">
           {wrongQuestions.map((question) => (
-            <Link key={question.id} href={retryById.get(question.problemId) ? `/problems/${retryById.get(question.problemId)}` : "/wrong-questions"} className="rounded-xl bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
+            <Link key={question.id} href={retryById.get(question.problemId) ? `/problems/${retryById.get(question.problemId)}` : "/wrong-questions"} className="rounded-xl bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
               <span className="font-semibold">{question.problemTitle}</span>
               <span className="text-ink-soft"> · Ôn lại câu từng làm sai.</span>
             </Link>

@@ -73,15 +73,15 @@ export default async function ContestsPage({ searchParams }: PageProps) {
 
   return (
     <div className="grid gap-6">
-      <section className="surface rounded-2xl p-6">
+      <section className="surface-mint rounded-[2rem] p-6 sm:p-10">
         <div className="flex items-start gap-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-strong">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-accent-strong">
             <Medal className="size-5" aria-hidden="true" />
           </span>
           <div>
             <p className="text-sm font-semibold text-accent">Contests</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Đề thi cũ và contest theo thời gian</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft text-pretty">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Đề thi cũ và contest theo thời gian</h1>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-ink-soft text-pretty">
               Luyện đề theo thời gian, làm bài theo từng section. Nộp xong bạn xem được điểm và những câu cần sửa.
             </p>
           </div>
@@ -97,8 +97,8 @@ export default async function ContestsPage({ searchParams }: PageProps) {
               key={tab.id}
               href={tab.id === "all" ? "/contests" : `/contests?tab=${tab.id}`}
               aria-current={activeTab === tab.id ? "page" : undefined}
-              className={`inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition-[background-color,color] duration-150 ${
-                activeTab === tab.id ? "bg-foreground text-background" : "bg-panel-muted text-ink-soft hover:text-foreground"
+              className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold transition-[background-color,color] duration-150 ${
+                activeTab === tab.id ? "bg-accent text-on-accent" : "bg-panel-muted text-ink-soft hover:text-foreground"
               }`}
             >
               {tab.label}
@@ -111,13 +111,13 @@ export default async function ContestsPage({ searchParams }: PageProps) {
             const attempt = Array.isArray(contest.attempts) ? contest.attempts[0] : null;
             const availability = getContestAvailability(contest, now);
             return (
-              <Link key={contest.id} href={`/contests/${contest.slug}`} className="surface surface-hover rounded-2xl p-5">
+              <Link key={contest.id} href={`/contests/${contest.slug}`} className="surface surface-hover flex flex-col rounded-3xl p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">{contestTypeLabels[contest.contestType]}</p>
+                    <p className="text-xs font-semibold text-accent">{contestTypeLabels[contest.contestType]}</p>
                     <h3 className="mt-2 font-semibold text-balance">{contest.title}</h3>
                   </div>
-                  <span className="rounded-lg bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">{contestStatusLabels[contest.status]}</span>
+                  <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">{contestStatusLabels[contest.status]}</span>
                 </div>
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink-soft">{contest.description ?? "Contest luyện tập từ nội dung đã xuất bản."}</p>
                 <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-ink-soft">
@@ -129,7 +129,7 @@ export default async function ContestsPage({ searchParams }: PageProps) {
                   {attempt ? <span>{attempt.status === "IN_PROGRESS" ? "Đang làm" : "Đã làm"}</span> : <span>Chưa làm</span>}
                 </div>
                 <p className="mt-3 text-xs font-medium text-ink-soft">{availability.reason}</p>
-                <div className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
+                <div className="btn btn-sm btn-secondary mt-5 self-start">
                   {attempt?.status === "IN_PROGRESS" ? "Tiếp tục" : attempt?.submittedAt ? "Xem kết quả" : "Mở contest"}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </div>
@@ -137,15 +137,12 @@ export default async function ContestsPage({ searchParams }: PageProps) {
             );
           })}
           {!filteredContests.length ? (
-            <div className="surface rounded-2xl p-6 md:col-span-2 xl:col-span-3">
+            <div className="surface rounded-3xl p-6 md:col-span-2 xl:col-span-3">
               <h3 className="text-xl font-semibold">
                 {activeTab === "all" || activeTab === "open" ? "Chưa có contest đang mở" : "Chưa có contest trong mục này"}
               </h3>
               <p className="mt-2 text-sm leading-6 text-ink-soft">Bạn có thể quay lại sau hoặc luyện trong Gym trước.</p>
-              <Link
-                href="/gym"
-                className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
-              >
+              <Link href="/gym" className="btn btn-primary mt-4">
                 Vào Gym
               </Link>
             </div>
@@ -164,12 +161,12 @@ export default async function ContestsPage({ searchParams }: PageProps) {
           {upcomingExamSets.map((examSet) => {
             const Icon = examSet.icon;
             return (
-              <article key={examSet.title} className="surface rounded-2xl p-5">
+              <article key={examSet.title} className="surface rounded-3xl p-6">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-panel-muted text-ink-soft">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-accent-soft/70 text-accent-strong">
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
-                  <span className="rounded-lg bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">Sắp có</span>
+                  <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">Sắp có</span>
                 </div>
                 <h3 className="mt-3 font-semibold">{examSet.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-ink-soft text-pretty">{examSet.description}</p>

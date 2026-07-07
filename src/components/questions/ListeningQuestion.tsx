@@ -31,7 +31,7 @@ export function ListeningQuestion({ question, value, onChange, disabled }: Props
   const metadata = getMetadata(question.metadata);
 
   return (
-    <div className="grid gap-4 rounded-lg bg-panel-muted p-4">
+    <div className="grid gap-4 rounded-2xl bg-panel-muted p-4">
       <div className="flex items-center gap-2">
         <Headphones className="size-5 text-accent" aria-hidden="true" />
         <div>
@@ -45,7 +45,7 @@ export function ListeningQuestion({ question, value, onChange, disabled }: Props
           Trình duyệt không hỗ trợ audio.
         </audio>
       ) : (
-        <div className="rounded-md bg-white px-3 py-3 text-sm text-ink-soft shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)]">
+        <div className="rounded-2xl bg-panel px-3 py-3 text-sm text-ink-soft shadow-[inset_0_0_0_1px_var(--line)]">
           Audio sẽ được gắn ở metadata khi có nội dung nghe chính thức.
         </div>
       )}
@@ -59,14 +59,14 @@ export function ListeningQuestion({ question, value, onChange, disabled }: Props
             value={typeof value === "string" ? value : ""}
             disabled={disabled}
             onChange={(event) => onChange(question.id, event.target.value)}
-            className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+            className="field min-h-11"
             placeholder="Nhập câu trả lời"
           />
         </label>
       )}
 
       {metadata.transcript ? (
-        <details className="rounded-md bg-white px-3 py-2 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)]">
+        <details className="rounded-2xl bg-panel px-3 py-2 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
           <summary className="cursor-pointer font-semibold">Xem transcript</summary>
           <p className="mt-2 whitespace-pre-line leading-6 text-ink-soft">{metadata.transcript}</p>
         </details>

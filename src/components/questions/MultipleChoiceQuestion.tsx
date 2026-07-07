@@ -20,7 +20,7 @@ export function MultipleChoiceQuestion({ question, value, onChange, disabled }: 
         {options.map((option) => (
           <label
             key={option.id}
-            className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)] transition-[background-color,box-shadow] duration-150 hover:bg-accent-soft/55"
+            className="flex min-h-12 cursor-pointer items-start gap-3 rounded-2xl bg-panel px-4 py-3 text-sm shadow-[inset_0_0_0_1px_var(--line-strong)] transition-[background-color,box-shadow] duration-150 hover:bg-accent-soft/40"
           >
             <input
               type="radio"

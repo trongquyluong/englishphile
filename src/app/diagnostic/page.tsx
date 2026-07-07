@@ -80,47 +80,42 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
   return (
     <div className="grid gap-6">
       {error ? (
-        <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-danger">
+        <div role="alert" className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">
           {error}
         </div>
       ) : null}
 
-      {/* Hero — dark banner with primary CTA */}
-      <section className="relative overflow-hidden rounded-2xl bg-foreground p-6 text-background shadow-[0_24px_70px_-40px_rgba(23,33,27,0.55)] md:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-background/60">
-          Kiểm tra trình độ
-        </p>
+      {/* Hero — light mint panel with primary CTA */}
+      <section className="surface-mint rounded-[2rem] p-6 sm:p-10">
+        <p className="text-sm font-semibold text-accent">Kiểm tra trình độ</p>
 
-        <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight md:text-5xl">
-          Bài placement test có cấu trúc
+        <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight md:text-5xl">
+          Bài kiểm tra đầu vào
         </h1>
 
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-background/72">
-          Bài kiểm tra đầu vào gồm Use of English và Reading. Kết quả ước lượng trình độ và giúp Gym đề xuất bài luyện phù hợp. Viết và phần nghe không tính vào điểm tự động.
+        <p className="mt-4 max-w-2xl text-base leading-8 text-ink-soft">
+          Bài gồm Use of English và Reading. Kết quả ước lượng trình độ và giúp Gym đề xuất bài luyện phù hợp. Viết và
+          phần nghe không tính vào điểm tự động.
         </p>
 
-        <div className="mt-5 grid gap-2 text-sm sm:grid-cols-3">
-          <span className="rounded-xl bg-white/10 px-3 py-2">
+        <div className="mt-6 flex flex-wrap gap-2 text-sm font-medium text-accent-strong">
+          <span className="rounded-full bg-panel px-4 py-2 shadow-[inset_0_0_0_1px_var(--line)]">
             {totalScoredQuestions} câu tự chấm
           </span>
-          <span className="rounded-xl bg-white/10 px-3 py-2">20-30 phút</span>
-          <span className="rounded-xl bg-white/10 px-3 py-2">Dùng kho bài đã xuất bản</span>
+          <span className="rounded-full bg-panel px-4 py-2 shadow-[inset_0_0_0_1px_var(--line)]">20-30 phút</span>
+          <span className="rounded-full bg-panel px-4 py-2 shadow-[inset_0_0_0_1px_var(--line)]">
+            Dùng kho bài đã xuất bản
+          </span>
         </div>
 
         {isInProgress ? (
-          <Link
-            href="/diagnostic/start"
-            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-accent px-6 text-sm font-semibold text-background shadow-md"
-          >
+          <Link href="/diagnostic/start" className="btn btn-primary mt-7">
             Làm tiếp bài đang làm
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         ) : canStart ? (
-          <form action={startDiagnosticAction} className="mt-6">
-            <FormSubmitButton
-              pendingLabel="Đang tạo bài..."
-              className="gap-2 bg-background text-foreground"
-            >
+          <form action={startDiagnosticAction} className="mt-7">
+            <FormSubmitButton pendingLabel="Đang tạo bài...">
               {latest ? "Làm lại bài kiểm tra" : "Làm bài kiểm tra đầu vào"}
               <ArrowRight className="size-4" aria-hidden="true" />
             </FormSubmitButton>
@@ -128,7 +123,7 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
         ) : (
           <div
             role="alert"
-            className="mt-6 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-background/80"
+            className="mt-7 max-w-xl rounded-2xl bg-panel px-4 py-3 text-sm font-semibold text-ink-soft shadow-[inset_0_0_0_1px_var(--line)]"
           >
             Chưa đủ câu hỏi để bắt đầu. Admin cần thêm nội dung vào kho.
           </div>
@@ -153,35 +148,26 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-xl bg-panel-muted p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
-                    Điểm
-                  </p>
+                <div className="rounded-2xl bg-panel-muted p-4">
+                  <p className="text-xs font-semibold text-ink-soft">Điểm</p>
                   <p className="mt-2 text-2xl font-semibold tabular-nums">
                     {latest.score ?? "—"}/{latest.total ?? "—"}
                   </p>
                 </div>
-                <div className="rounded-xl bg-panel-muted p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
-                    Ngày làm
-                  </p>
+                <div className="rounded-2xl bg-panel-muted p-4">
+                  <p className="text-xs font-semibold text-ink-soft">Ngày làm</p>
                   <p className="mt-2 text-sm font-semibold">
                     {latest.completedAt?.toLocaleDateString("vi-VN") ?? "Đang làm dở"}
                   </p>
                 </div>
-                <div className="rounded-xl bg-panel-muted p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">
-                    Trạng thái
-                  </p>
+                <div className="rounded-2xl bg-panel-muted p-4">
+                  <p className="text-xs font-semibold text-ink-soft">Trạng thái</p>
                   <p className="mt-2 text-sm font-semibold">{statusLabel}</p>
                 </div>
               </div>
 
               {canViewResult ? (
-                <Link
-                  href={`/diagnostic/result?attempt=${latest.id}`}
-                  className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
-                >
+                <Link href={`/diagnostic/result?attempt=${latest.id}`} className="btn btn-sm btn-secondary mt-5">
                   Xem kết quả chi tiết
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
@@ -198,7 +184,7 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
                   breakdown.map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center justify-between gap-3 rounded-xl bg-panel-muted px-3 py-2.5 text-sm"
+                      className="flex items-center justify-between gap-3 rounded-2xl bg-panel-muted px-3 py-2.5 text-sm"
                     >
                       <span className="font-semibold">{item.label}</span>
                       <span className="text-ink-soft">{item.statusLabel}</span>
@@ -254,14 +240,14 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
             return (
               <div
                 key={section.id}
-                className="rounded-xl bg-panel-muted p-4"
+                className="rounded-2xl bg-panel-muted p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-semibold">{section.title}</h3>
                     <p className="mt-1 text-sm text-ink-soft">{displayMessage}</p>
                   </div>
-                  <span className="shrink-0 rounded-lg bg-panel px-2 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
+                  <span className="shrink-0 rounded-full bg-panel px-2.5 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_var(--line)]">
                     {section.targetCount > 0
                       ? `${section.eligibleQuestions}/${section.targetCount}`
                       : "Tùy chọn"}
@@ -273,7 +259,7 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
         </div>
 
         {coverage.warnings.length ? (
-          <div role="alert" className="mt-4 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-warning">
+          <div role="alert" className="mt-4 rounded-2xl bg-warning-soft p-4 text-sm leading-6 text-warning">
             {coverage.warnings.slice(0, 3).map((warning) => (
               <p key={warning}>{warning}</p>
             ))}

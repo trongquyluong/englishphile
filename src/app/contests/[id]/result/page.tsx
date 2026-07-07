@@ -132,10 +132,10 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
         <Link href="/contests" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
           Quay lại Contests
         </Link>
-        <Link href="/gym" className="inline-flex min-h-10 items-center rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
+        <Link href="/gym" className="btn btn-sm btn-primary">
           Vào Gym
         </Link>
-        <Link href={`/contests/${contest.slug}/leaderboard`} className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
+        <Link href={`/contests/${contest.slug}/leaderboard`} className="btn btn-sm btn-secondary">
           Leaderboard
         </Link>
       </div>

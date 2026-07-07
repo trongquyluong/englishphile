@@ -67,16 +67,16 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
           <Trophy className="size-6 text-accent" aria-hidden="true" />
           <h2 className="mt-3 text-lg font-semibold">Sẵn sàng làm bài?</h2>
           <p className="mt-2 text-sm leading-6 text-ink-soft">{contest.rules ?? "Làm bài nghiêm túc, nộp một lần khi hoàn thành. Writing có thể cần chấm tay."}</p>
-          {error ? <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
+          {error ? <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
           <p className="mt-3 rounded-lg bg-panel-muted px-3 py-2 text-sm text-ink-soft">{availability.reason}</p>
           <div className="mt-5 grid gap-2">
             {activeAttempt ? (
-              <Link href={`/contests/${contest.slug}/start?attempt=${activeAttempt.id}`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
+              <Link href={`/contests/${contest.slug}/start?attempt=${activeAttempt.id}`} className="btn btn-primary">
                 Tiếp tục lượt đang làm
               </Link>
             ) : null}
             {latestAttempt?.submittedAt ? (
-              <Link href={`/contests/${contest.slug}/result?attempt=${latestAttempt.id}`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
+              <Link href={`/contests/${contest.slug}/result?attempt=${latestAttempt.id}`} className="btn btn-primary">
                 Xem kết quả gần nhất
               </Link>
             ) : null}

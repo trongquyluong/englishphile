@@ -16,7 +16,7 @@ export function GuidedClozeQuestion({ questions, answers, onChange, disabled }: 
   return (
     <div className="grid gap-5">
       {passage ? (
-        <article className="rounded-lg bg-panel-muted p-4 text-sm leading-7 text-foreground">{passage}</article>
+        <article className="rounded-2xl bg-panel-muted p-4 text-sm leading-7 text-foreground">{passage}</article>
       ) : null}
       <div className="grid gap-5">
         {questions.map((question) => (

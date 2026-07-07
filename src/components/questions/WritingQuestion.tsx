@@ -25,23 +25,23 @@ export function WritingQuestion({ question, value, onChange, disabled }: Props) 
 
   return (
     <div className="grid gap-4">
-      <article className="rounded-lg bg-panel-muted p-4 text-sm leading-7">{question.prompt}</article>
+      <article className="rounded-2xl bg-panel-muted p-4 text-sm leading-7">{question.prompt}</article>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-medium">
           Thesis
-          <input value={current.thesis ?? ""} disabled={disabled} onChange={(event) => update({ thesis: event.target.value })} className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)]" />
+          <input value={current.thesis ?? ""} disabled={disabled} onChange={(event) => update({ thesis: event.target.value })} className="field min-h-11" />
         </label>
         <label className="grid gap-2 text-sm font-medium">
           Main idea 1
-          <input value={current.mainIdea1 ?? ""} disabled={disabled} onChange={(event) => update({ mainIdea1: event.target.value })} className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)]" />
+          <input value={current.mainIdea1 ?? ""} disabled={disabled} onChange={(event) => update({ mainIdea1: event.target.value })} className="field min-h-11" />
         </label>
         <label className="grid gap-2 text-sm font-medium">
           Main idea 2
-          <input value={current.mainIdea2 ?? ""} disabled={disabled} onChange={(event) => update({ mainIdea2: event.target.value })} className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)]" />
+          <input value={current.mainIdea2 ?? ""} disabled={disabled} onChange={(event) => update({ mainIdea2: event.target.value })} className="field min-h-11" />
         </label>
         <label className="grid gap-2 text-sm font-medium">
           Useful vocabulary
-          <input value={current.vocabulary ?? ""} disabled={disabled} onChange={(event) => update({ vocabulary: event.target.value })} className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)]" />
+          <input value={current.vocabulary ?? ""} disabled={disabled} onChange={(event) => update({ vocabulary: event.target.value })} className="field min-h-11" />
         </label>
       </div>
       <label className="grid gap-2 text-sm font-medium">
@@ -50,11 +50,11 @@ export function WritingQuestion({ question, value, onChange, disabled }: Props) 
           value={current.essay ?? ""}
           disabled={disabled}
           onChange={(event) => update({ essay: event.target.value })}
-          className="min-h-56 rounded-md bg-white p-3 text-sm leading-6 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+          className="field min-h-56 p-3"
           placeholder="Viết bài luận ở đây"
         />
       </label>
-      <div className="rounded-lg bg-white p-4 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)]">
+      <div className="rounded-2xl bg-panel p-4 shadow-[inset_0_0_0_1px_var(--line)]">
         <p className="text-sm font-semibold">Rubric checklist</p>
         <ul className="mt-3 grid gap-2 text-sm text-ink-soft sm:grid-cols-2">
           {(note?.rubric.length ? note.rubric : ["Task response", "Coherence", "Lexical resource", "Grammar range and accuracy", "Academic sophistication"]).map((item) => (

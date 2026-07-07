@@ -185,7 +185,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold">Import gần đây</h2>
           <div className="mt-4 grid gap-2">
             {recentImports.map((batch) => (
-              <Link key={batch.id} href={batch.contentPack ? `/admin/content-packs/${batch.contentPack.id}` : "/admin/import"} className="rounded-xl bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
+              <Link key={batch.id} href={batch.contentPack ? `/admin/content-packs/${batch.contentPack.id}` : "/admin/import"} className="rounded-xl bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
                 <span className="font-semibold">{batch.contentPack?.name ?? batch.sourceCollection?.name ?? batch.importType}</span>
                 <span className="text-ink-soft"> · {batch.createdAt.toLocaleString("vi-VN")}</span>
               </Link>
@@ -262,7 +262,7 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {todayRecommendations.map((problem) => (
-              <Link key={problem.id} href={`/problems/${problem.slug}`} className="grid gap-3 rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)] transition-[box-shadow,transform] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]">
+              <Link key={problem.id} href={`/problems/${problem.slug}`} className="grid gap-3 rounded-xl bg-white p-4 shadow-[inset_0_0_0_1px_var(--line)] transition-[box-shadow,transform] duration-150 ease-out hover:shadow-[var(--shadow-border-hover)]">
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold text-balance">{problem.title}</h3>
                   <ArrowRight className="size-4 text-ink-soft" aria-hidden="true" />
@@ -325,7 +325,7 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-4 grid gap-2">
             {recentSubmissions.map((submission) => (
-              <Link key={submission.id} href={`/problems/${submission.problem.slug}`} className="rounded-xl bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
+              <Link key={submission.id} href={`/problems/${submission.problem.slug}`} className="rounded-xl bg-white px-3 py-3 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
                 <span className="font-semibold">{submission.problem.title}</span>
                 <span className="text-ink-soft">
                   {" "}· {submissionStatusLabels[submission.status]} · {submission.score ?? "—"}/{submission.total ?? "—"}

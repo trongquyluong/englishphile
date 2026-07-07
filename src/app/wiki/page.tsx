@@ -40,8 +40,8 @@ function ArticleMeta({ article }: { article: WikiArticle }) {
 
 function ArticleCard({ article }: { article: WikiArticle }) {
   return (
-    <Link href={`/wiki/${article.slug}`} className="surface surface-hover flex flex-col rounded-2xl p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">{wikiCategoryLabels[article.category]}</p>
+    <Link href={`/wiki/${article.slug}`} className="surface surface-hover flex flex-col rounded-3xl p-6">
+      <p className="text-xs font-semibold text-accent">{wikiCategoryLabels[article.category]}</p>
       <h3 className="mt-2 font-semibold text-balance">{article.title}</h3>
       <p className="mt-2 text-sm leading-6 text-ink-soft text-pretty">{article.description}</p>
       <div className="mt-auto pt-4">
@@ -66,10 +66,10 @@ export default async function WikiPage({ searchParams }: PageProps) {
 
   return (
     <div className="grid gap-6">
-      <section className="surface rounded-2xl p-6">
+      <section className="surface-mint rounded-[2rem] p-6 sm:p-10">
         <p className="text-sm font-semibold text-accent">Wiki</p>
         <h1 className="mt-2 max-w-4xl text-4xl font-semibold tracking-tight text-balance">Kiến thức và chiến thuật ôn tập</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-ink-soft text-pretty">
+        <p className="mt-3 max-w-3xl text-base leading-7 text-ink-soft text-pretty">
           Đọc nhanh cách làm dạng bài, lỗi thường gặp và chiến thuật luyện đề.
         </p>
       </section>
@@ -78,8 +78,8 @@ export default async function WikiPage({ searchParams }: PageProps) {
         <Link
           href="/wiki"
           aria-current={activeCategory === "all" ? "page" : undefined}
-          className={`inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition-[background-color,color] duration-150 ${
-            activeCategory === "all" ? "bg-foreground text-background" : "bg-panel-muted text-ink-soft hover:text-foreground"
+          className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold transition-[background-color,color] duration-150 ${
+            activeCategory === "all" ? "bg-accent text-on-accent" : "bg-panel-muted text-ink-soft hover:text-foreground"
           }`}
         >
           Tất cả
@@ -89,8 +89,8 @@ export default async function WikiPage({ searchParams }: PageProps) {
             key={categoryId}
             href={`/wiki?category=${categoryId}`}
             aria-current={activeCategory === categoryId ? "page" : undefined}
-            className={`inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-semibold transition-[background-color,color] duration-150 ${
-              activeCategory === categoryId ? "bg-foreground text-background" : "bg-panel-muted text-ink-soft hover:text-foreground"
+            className={`inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold transition-[background-color,color] duration-150 ${
+              activeCategory === categoryId ? "bg-accent text-on-accent" : "bg-panel-muted text-ink-soft hover:text-foreground"
             }`}
           >
             {wikiCategoryLabels[categoryId]}
@@ -100,10 +100,10 @@ export default async function WikiPage({ searchParams }: PageProps) {
 
       {featuredArticle ? (
         <section aria-label="Bài viết mới cập nhật">
-          <Link href={`/wiki/${featuredArticle.slug}`} className="surface surface-hover flex flex-col rounded-2xl p-6 md:p-8">
+          <Link href={`/wiki/${featuredArticle.slug}`} className="surface-mint surface-hover flex flex-col rounded-[2rem] p-6 md:p-8">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-lg bg-accent-soft px-2 py-1 text-xs font-semibold text-accent-strong">Mới cập nhật</span>
-              <span className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">
+              <span className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent-strong">Mới cập nhật</span>
+              <span className="text-xs font-semibold text-accent">
                 {wikiCategoryLabels[featuredArticle.category]}
               </span>
             </div>
@@ -112,7 +112,7 @@ export default async function WikiPage({ searchParams }: PageProps) {
             <div className="mt-4">
               <ArticleMeta article={featuredArticle} />
             </div>
-            <span className="mt-5 inline-flex min-h-11 items-center gap-2 self-start rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
+            <span className="btn btn-primary mt-5 self-start">
               Đọc bài
               <ArrowRight className="size-4" aria-hidden="true" />
             </span>
@@ -134,15 +134,12 @@ export default async function WikiPage({ searchParams }: PageProps) {
       ) : null}
 
       {!filteredArticles.length ? (
-        <section className="surface rounded-2xl p-6">
+        <section className="surface rounded-3xl p-6">
           <h2 className="text-lg font-semibold">Chưa có bài viết trong mục này</h2>
           <p className="mt-2 text-sm leading-6 text-ink-soft">
             Bài viết mới sẽ được thêm dần. Trong lúc chờ, bạn có thể luyện dạng bài tương ứng trong Gym.
           </p>
-          <Link
-            href="/gym"
-            className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
-          >
+          <Link href="/gym" className="btn btn-primary mt-4">
             Vào Gym
           </Link>
         </section>

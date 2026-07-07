@@ -5,7 +5,7 @@ export default function UnauthorizedPage() {
   return (
     <main className="mx-auto grid min-h-[60vh] max-w-2xl place-items-center px-4 py-16">
       <section className="surface rounded-2xl p-6 text-center">
-        <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-red-50 text-danger">
+        <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-danger-soft text-danger">
           <ShieldAlert className="size-6" aria-hidden="true" />
         </span>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-balance">Bạn không có quyền truy cập khu vực này.</h1>

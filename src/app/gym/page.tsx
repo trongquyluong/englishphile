@@ -68,55 +68,48 @@ export default async function GymPage() {
 
   return (
     <div className="grid gap-6">
-      <section className="rounded-2xl bg-foreground p-6 text-background shadow-[0_24px_70px_-40px_rgba(23,33,27,0.55)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-background/60">Gym</p>
+      <section className="surface-mint rounded-[2rem] p-6 sm:p-10">
+        <p className="text-sm font-semibold text-accent">Gym</p>
         <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-balance">
           {recommendations.length > 0
             ? "Hôm nay nên luyện gì?"
             : "Luyện kỹ năng theo trình độ hiện tại"}
         </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-background/72">
+        <p className="mt-3 max-w-3xl text-base leading-7 text-ink-soft">
           {recommendations.length > 0
             ? "Bài dưới đây được gợi ý dựa trên diagnostic và lỗi sai gần đây. Chọn một bài để bắt đầu."
             : "Chọn kỹ năng, làm bài phù hợp, xem lỗi sai và quay lại đúng phần cần cải thiện."}
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-7 flex flex-wrap gap-3">
           {recommendations.length > 0 ? (
-            <Link
-              href={`/problems/${recommendations[0].slug}`}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-5 text-sm font-semibold text-foreground shadow-[0_8px_24px_-4px_rgba(23,33,27,0.25)] transition-transform duration-150 ease-out active:scale-[0.96]"
-            >
-              Luyện bài đầu tiên
+            <Link href={`/problems/${recommendations[0].slug}`} className="btn btn-primary">
+              Luyện bài tiếp theo
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           ) : user ? (
-            <Link
-              href="/diagnostic"
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-5 text-sm font-semibold text-foreground shadow-[0_8px_24px_-4px_rgba(23,33,27,0.25)] transition-transform duration-150 ease-out active:scale-[0.96]"
-            >
+            <Link href="/diagnostic" className="btn btn-primary">
               <Target className="size-4" aria-hidden="true" />
-              Làm diagnostic
+              Làm bài kiểm tra đầu vào
             </Link>
           ) : (
-            <Link
-              href="/auth/sign-up"
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-background px-5 text-sm font-semibold text-foreground shadow-[0_8px_24px_-4px_rgba(23,33,27,0.25)] transition-transform duration-150 ease-out active:scale-[0.96]"
-            >
+            <Link href="/auth/sign-up" className="btn btn-primary">
               Bắt đầu miễn phí
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           )}
-          <Link
-            href={user ? "/practice/adaptive" : "/auth/sign-in"}
-            className="inline-flex min-h-11 items-center rounded-lg bg-white/10 px-4 text-sm font-semibold text-background"
-          >
-            Luyện thích ứng
+          <Link href={user ? "/practice/adaptive" : "/auth/sign-in"} className="btn btn-secondary">
+            Tạo buổi luyện theo mục tiêu
           </Link>
+          {user ? (
+            <Link href="/wrong-questions" className="btn btn-ghost">
+              Ôn lại câu sai
+            </Link>
+          ) : null}
         </div>
       </section>
 
       {!diagnostic ? (
-        <section className="surface rounded-2xl p-5">
+        <section className="surface rounded-3xl p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-accent">Kiểm tra trình độ</p>
@@ -127,9 +120,9 @@ export default async function GymPage() {
                   : "Tạo tài khoản để lưu kết quả diagnostic, nhận gợi ý cá nhân và theo dõi tiến bộ."}
               </p>
             </div>
-            <Link href={user ? "/diagnostic" : "/auth/sign-up"} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
+            <Link href={user ? "/diagnostic" : "/auth/sign-up"} className="btn btn-primary">
               <Target className="size-4" aria-hidden="true" />
-              {user ? "Kiểm tra trình độ" : "Tạo tài khoản"}
+              {user ? "Làm bài kiểm tra đầu vào" : "Tạo tài khoản"}
             </Link>
           </div>
         </section>
@@ -139,7 +132,7 @@ export default async function GymPage() {
         {gymCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.href} href={card.href} className="surface surface-hover rounded-2xl p-5">
+            <Link key={card.href} href={card.href} className="surface surface-hover rounded-3xl p-6">
               <Icon className="size-5 text-accent" aria-hidden="true" />
               <h2 className="mt-4 text-lg font-semibold">{card.title}</h2>
               <p className="mt-2 text-sm leading-6 text-ink-soft text-pretty">{card.description}</p>
@@ -159,13 +152,13 @@ export default async function GymPage() {
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {skillStats.slice(0, 8).map((skill) => (
-              <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="rounded-xl bg-panel-muted p-4">
+              <Link key={skill.skillType} href={`/analytics/skills/${skill.skillType}`} className="rounded-2xl bg-panel-muted p-4">
                 <AccuracyBar accuracy={skill.accuracy} label={skill.label} />
                 <p className="mt-2 text-xs text-ink-soft">{skill.statusLabel}</p>
               </Link>
             ))}
             {!skillStats.some((skill) => skill.attempted > 0) ? (
-              <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft md:col-span-2 xl:col-span-4">
+              <p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft md:col-span-2 xl:col-span-4">
                 Chưa đủ dữ liệu. Làm diagnostic để mở khóa trạng thái kỹ năng.
               </p>
             ) : null}
@@ -187,7 +180,7 @@ export default async function GymPage() {
               <Link
                 key={problem.id}
                 href={`/problems/${problem.slug}`}
-                className="rounded-xl bg-panel-muted p-4 transition-shadow hover:shadow-[var(--shadow-border-hover)]"
+                className="rounded-2xl bg-panel-muted p-4 transition-shadow hover:shadow-[var(--shadow-border-hover)]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-semibold text-balance">{problem.title}</h3>
@@ -201,10 +194,10 @@ export default async function GymPage() {
               </Link>
             ))}
             {!recommendations.length ? (
-              <div className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+              <div className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft">
                 <p>{user ? "Chưa có gợi ý. Hãy làm diagnostic hoặc một bài luyện ngắn." : "Đăng nhập để Englishphile đề xuất bài luyện theo trình độ và lỗi sai của bạn."}</p>
                 {!user ? (
-                  <Link href="/auth/sign-in" className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
+                  <Link href="/auth/sign-in" className="btn btn-sm btn-primary mt-3">
                     Đăng nhập
                   </Link>
                 ) : null}
@@ -213,21 +206,28 @@ export default async function GymPage() {
           </div>
         </LearnerCard>
 
-        <aside className="surface rounded-2xl p-5">
+        <aside className="surface rounded-3xl p-6">
           <div className="flex items-center gap-2">
             <BarChart3 className="size-5 text-accent" aria-hidden="true" />
             <h2 className="text-lg font-semibold">Tiến độ nhanh</h2>
           </div>
           <dl className="mt-4 grid gap-3">
-            <div className="rounded-xl bg-panel-muted p-4">
+            <div className="rounded-2xl bg-panel-muted p-4">
               <dt className="text-sm text-ink-soft">Kỹ năng cần chú ý</dt>
               <dd className="mt-1 font-semibold">{weakestSkill?.label ?? "Chưa đủ dữ liệu"}</dd>
             </div>
-            <div className="rounded-xl bg-panel-muted p-4">
+            <div className="rounded-2xl bg-panel-muted p-4">
               <dt className="text-sm text-ink-soft">Câu đang sai</dt>
               <dd className="tabular-nums mt-1 text-2xl font-semibold">{wrongCount}</dd>
+              <Link
+                href="/wrong-questions"
+                className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-accent transition-colors duration-150 hover:text-accent-strong"
+              >
+                Ôn lại câu sai
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
             </div>
-            <div className="rounded-xl bg-panel-muted p-4">
+            <div className="rounded-2xl bg-panel-muted p-4">
               <dt className="text-sm text-ink-soft">Submission gần đây</dt>
               <dd className="mt-2 grid gap-2">
                 {recentSubmissions.map((submission) => (

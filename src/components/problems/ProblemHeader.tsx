@@ -6,16 +6,16 @@ import { formatPercent } from "@/lib/utils";
 
 export function ProblemHeader({ problem }: { problem: ClientProblem }) {
   return (
-    <header className="surface rounded-lg p-5">
+    <header className="surface rounded-3xl p-6">
       <div className="flex flex-wrap items-center gap-2">
         <SkillBadge skill={problem.skillType} />
         <DifficultyBadge difficulty={problem.difficulty} />
-        <span className="rounded-md bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">
+        <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">
           {questionTypeLabels[problem.questionType]}
         </span>
       </div>
       <h1 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{problem.title}</h1>
-      <p className="mt-3 max-w-3xl text-sm leading-6 text-ink-soft">{problem.statement}</p>
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-ink-soft">{problem.statement}</p>
       <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-ink-soft">
         {problem.estimatedMinutes ? (
           <span className="inline-flex items-center gap-1">

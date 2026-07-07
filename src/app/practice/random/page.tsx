@@ -54,7 +54,7 @@ export default async function RandomPracticePage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold">Skill types</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {skillOrder.map((skill) => (
-                <label key={skill} className="flex min-h-10 items-center gap-2 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+                <label key={skill} className="flex min-h-10 items-center gap-2 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
                   <input type="checkbox" name="skill" value={skill} className="accent-[var(--accent)]" />
                   {skillLabels[skill]}
                 </label>
@@ -65,7 +65,7 @@ export default async function RandomPracticePage({ searchParams }: PageProps) {
             <p className="text-sm font-semibold">Difficulty</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {difficultyOrder.map((difficulty) => (
-                <label key={difficulty} className="flex min-h-10 items-center gap-2 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+                <label key={difficulty} className="flex min-h-10 items-center gap-2 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
                   <input type="checkbox" name="difficulty" value={difficulty} className="accent-[var(--accent)]" />
                   {difficultyLabels[difficulty]}
                 </label>
@@ -74,7 +74,7 @@ export default async function RandomPracticePage({ searchParams }: PageProps) {
           </div>
           <label className="grid gap-2 text-sm font-semibold">
             Số câu
-            <select name="count" defaultValue="5" className="min-h-11 rounded-md bg-white px-3 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)]">
+            <select name="count" defaultValue="5" className="min-h-11 rounded-md bg-white px-3 shadow-[inset_0_0_0_1px_var(--line-strong)]">
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="20">20</option>

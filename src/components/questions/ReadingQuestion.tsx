@@ -16,7 +16,7 @@ export function ReadingQuestion({ questions, answers, onChange, disabled }: Prop
   return (
     <div className="grid gap-5">
       {passage ? (
-        <article className="rounded-lg bg-white p-4 text-sm leading-7 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)]">
+        <article className="rounded-2xl bg-panel p-4 text-sm leading-7 shadow-[inset_0_0_0_1px_var(--line)]">
           {passage}
         </article>
       ) : null}

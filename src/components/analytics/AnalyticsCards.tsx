@@ -26,9 +26,9 @@ export function StatusPill({ label }: { label: string }) {
       : label === "Ổn"
         ? "bg-blue-50 text-blue-800"
         : label === "Cần luyện thêm"
-          ? "bg-amber-100 text-amber-900"
+          ? "bg-warning-soft text-warning"
           : label === "Yếu"
-            ? "bg-red-50 text-danger"
+            ? "bg-danger-soft text-danger"
             : "bg-panel-muted text-ink-soft";
   return <span className={cn("inline-flex rounded-md px-2 py-1 text-xs font-semibold", tone)}>{label}</span>;
 }

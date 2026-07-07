@@ -82,11 +82,11 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
       {previewMode ? (
-        <div className="rounded-lg bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-900 lg:col-span-2">
+        <div className="rounded-2xl bg-warning-soft px-4 py-3 text-sm font-semibold text-warning lg:col-span-2">
           Chế độ xem trước dành cho quản trị — không lưu kết quả.
         </div>
       ) : null}
-      <section className="surface rounded-lg">
+      <section className="surface rounded-3xl">
         <div className="flex gap-1 overflow-x-auto border-b border-line p-2">
           {tabs.map((tab) => (
             <button
@@ -94,8 +94,8 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
               type="button"
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "min-h-10 shrink-0 rounded-md px-3 text-sm font-semibold transition-[background-color,color] duration-150",
-                activeTab === tab ? "bg-foreground text-background" : "text-ink-soft hover:bg-panel-muted hover:text-foreground",
+                "min-h-11 shrink-0 rounded-full px-3.5 text-sm font-semibold transition-[background-color,color] duration-150",
+                activeTab === tab ? "bg-accent text-on-accent" : "text-ink-soft hover:bg-panel-muted hover:text-foreground",
               )}
             >
               {tab}
@@ -103,11 +103,11 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
           ))}
         </div>
 
-        <div className="p-5">
+        <div className="p-5 sm:p-6">
           {activeTab === "Đề bài" ? (
             <div className="grid gap-5">
               {problem.instructions ? (
-                <div className="rounded-md bg-accent-soft px-3 py-2 text-sm text-accent-strong">
+                <div className="rounded-2xl bg-accent-soft/70 px-4 py-3 text-sm leading-6 text-accent-strong">
                   {problem.instructions}
                 </div>
               ) : null}
@@ -116,7 +116,7 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
           ) : null}
 
           {activeTab === "Gợi ý" ? (
-            <div className="rounded-lg bg-panel-muted p-5 text-sm leading-7 text-ink-soft">
+            <div className="rounded-2xl bg-panel-muted p-5 text-sm leading-7 text-ink-soft">
               <p className="font-semibold text-foreground">Gợi ý luyện tập</p>
               <p className="mt-2">
                 Xác định dạng bài trước khi chọn đáp án. Với câu có nhiều chỗ trống, đọc toàn đoạn để nắm mạch ý rồi
@@ -130,14 +130,14 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
             result ? (
               <SubmissionResult result={result} />
             ) : (
-              <div className="rounded-lg bg-panel-muted p-5 text-sm leading-7 text-ink-soft">
+              <div className="rounded-2xl bg-panel-muted p-5 text-sm leading-7 text-ink-soft">
                 Hãy nộp bài để mở kết quả, đáp án đúng và giải thích cho từng câu.
               </div>
             )
           ) : null}
 
           {activeTab === "Thảo luận" ? (
-            <div className="rounded-lg bg-panel-muted p-5 text-sm leading-7 text-ink-soft">
+            <div className="rounded-2xl bg-panel-muted p-5 text-sm leading-7 text-ink-soft">
               <div className="flex items-center gap-2 font-semibold text-foreground">
                 <MessageSquare className="size-4" aria-hidden="true" />
                 Thảo luận
@@ -150,7 +150,7 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
             <div className="grid gap-2">
               {history.length > 0 ? (
                 history.map((item) => (
-                  <div key={item.id} className="rounded-md bg-white px-3 py-2 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.1)]">
+                  <div key={item.id} className="rounded-2xl bg-panel px-3 py-2 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
                     <span className="font-semibold">{item.status}</span>
                     <span className="text-ink-soft">
                       {" "}
@@ -159,40 +159,37 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
                   </div>
                 ))
               ) : (
-                <p className="rounded-lg bg-panel-muted p-5 text-sm text-ink-soft">Chưa có submission cho bài này.</p>
+                <p className="rounded-2xl bg-panel-muted p-5 text-sm text-ink-soft">Chưa có submission cho bài này.</p>
               )}
             </div>
           ) : null}
         </div>
       </section>
 
-      <aside className="surface h-fit rounded-lg p-5 lg:sticky lg:top-24">
+      <aside className="surface h-fit rounded-3xl p-6 lg:sticky lg:top-24">
         <div className="flex items-center gap-2">
           <Sparkles className="size-5 text-accent" aria-hidden="true" />
-          <h2 className="text-lg font-semibold">Answer panel</h2>
+          <h2 className="text-lg font-semibold">Bảng trả lời</h2>
         </div>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
           Đã trả lời <span className="tabular font-semibold text-foreground">{answeredCount}</span>/
           <span className="tabular">{problem.questions.length}</span> câu.
         </p>
 
-        {error ? <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-danger">{error}</p> : null}
+        {error ? <p className="mt-4 rounded-2xl bg-danger-soft px-3 py-2 text-sm font-medium text-danger">{error}</p> : null}
 
         {isAuthenticated ? (
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-foreground px-4 text-sm font-semibold text-background transition-transform duration-150 ease-out active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-60"
+            className="btn btn-primary mt-5 w-full"
           >
             <Send className="size-4" aria-hidden="true" />
             {previewMode ? "Không lưu kết quả ở chế độ xem trước" : isSubmitting ? "Đang nộp..." : "Nộp bài"}
           </button>
         ) : (
-          <Link
-            href="/auth/sign-in"
-            className="mt-5 flex min-h-11 w-full items-center justify-center rounded-md bg-foreground px-4 text-sm font-semibold text-background"
-          >
+          <Link href="/auth/sign-in" className="btn btn-primary mt-5 w-full">
             Đăng nhập để nộp bài
           </Link>
         )}

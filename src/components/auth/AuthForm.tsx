@@ -13,7 +13,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
   return (
     <section className="mx-auto grid w-full max-w-md gap-5">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.08em] text-accent">
+        <p className="text-sm font-semibold text-accent">
           {isSignUp ? "Tạo hồ sơ luyện thi" : "Quay lại luyện tập"}
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">
@@ -26,9 +26,9 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
         </p>
       </div>
 
-      <form action={action} className="surface grid gap-4 rounded-lg p-5">
+      <form action={action} className="surface grid gap-4 rounded-3xl p-6">
         {error ? (
-          <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-danger">{error}</div>
+          <div className="rounded-2xl bg-danger-soft px-3 py-2 text-sm font-medium text-danger">{error}</div>
         ) : null}
 
         {isSignUp ? (
@@ -38,7 +38,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
               required
               name="fullName"
               autoComplete="name"
-              className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+              className="field min-h-11"
               placeholder="Ví dụ: Minh Anh"
             />
           </label>
@@ -51,7 +51,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
               required
               name="username"
               autoComplete="username"
-              className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+              className="field min-h-11"
               placeholder="minhanh09"
             />
           </label>
@@ -64,7 +64,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
             name="email"
             type="email"
             autoComplete="email"
-            className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+            className="field min-h-11"
             placeholder="student@example.com"
           />
         </label>
@@ -76,7 +76,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
             name="password"
             type="password"
             autoComplete={isSignUp ? "new-password" : "current-password"}
-            className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+            className="field min-h-11"
             placeholder="Ít nhất 8 ký tự"
           />
         </label>
@@ -89,7 +89,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
               name="confirmPassword"
               type="password"
               autoComplete="new-password"
-              className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+              className="field min-h-11"
               placeholder="Nhập lại mật khẩu"
             />
           </label>
@@ -101,7 +101,7 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
               Trường
               <input
                 name="school"
-                className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+                className="field min-h-11"
                 placeholder="Tên trường"
               />
             </label>
@@ -109,14 +109,14 @@ export function AuthForm({ mode, action, error }: AuthFormProps) {
               Tỉnh / thành phố
               <input
                 name="province"
-                className="min-h-11 rounded-md bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.16)] focus-visible:outline-2"
+                className="field min-h-11"
                 placeholder="Hà Nội"
               />
             </label>
           </div>
         ) : null}
 
-        <FormSubmitButton className="mt-1 rounded-md" pendingLabel={isSignUp ? "Đang tạo tài khoản..." : "Đang đăng nhập..."}>
+        <FormSubmitButton className="mt-1" pendingLabel={isSignUp ? "Đang tạo tài khoản..." : "Đang đăng nhập..."}>
           {isSignUp ? "Tạo tài khoản" : "Đăng nhập"}
         </FormSubmitButton>
       </form>

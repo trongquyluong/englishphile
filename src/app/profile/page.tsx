@@ -9,7 +9,7 @@ type PageProps = {
 };
 
 function fieldClass() {
-  return "min-h-11 rounded-lg bg-white px-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.14)] focus-visible:outline-2";
+  return "min-h-11 rounded-lg bg-white px-3 text-sm shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:outline-2";
 }
 
 export default async function ProfilePage({ searchParams }: PageProps) {
@@ -37,7 +37,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
       </header>
 
       {message ? <p className="rounded-lg bg-accent-soft px-3 py-2 text-sm font-semibold text-accent-strong">{message}</p> : null}
-      {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
+      {error ? <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
 
       <form action={updateProfileAction} className="surface grid gap-4 rounded-2xl p-5">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -74,7 +74,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
 
         <label className="grid gap-1.5 text-sm font-semibold">
           Bio
-          <textarea name="bio" defaultValue={profile?.bio ?? ""} className="min-h-28 rounded-lg bg-white p-3 text-sm leading-6 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.14)] focus-visible:outline-2" />
+          <textarea name="bio" defaultValue={profile?.bio ?? ""} className="min-h-28 rounded-lg bg-white p-3 text-sm leading-6 shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:outline-2" />
         </label>
 
         <FormSubmitButton pendingLabel="Đang lưu hồ sơ...">Lưu hồ sơ</FormSubmitButton>

@@ -78,10 +78,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
         <p className="mt-2 text-sm text-ink-soft">
           Hãy publish một số bài trong kho trước khi chạy diagnostic.
         </p>
-        <Link
-          href="/diagnostic"
-          className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
-        >
+        <Link href="/diagnostic" className="btn btn-sm btn-secondary mt-5">
           <ArrowLeft className="size-4" aria-hidden="true" />
           Quay lại
         </Link>
@@ -92,10 +89,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
   return (
     <div className="grid gap-5">
       {/* Back link */}
-      <Link
-        href="/diagnostic"
-        className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-panel-muted px-4 text-sm font-semibold text-ink-soft transition-colors hover:bg-line"
-      >
+      <Link href="/diagnostic" className="btn btn-sm btn-ghost justify-self-start bg-panel-muted text-ink-soft">
         <ArrowLeft className="size-4" aria-hidden="true" />
         Rời bài
       </Link>
@@ -112,7 +106,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
               Làm từ đầu đến cuối, không cần nhanh. Viết và Sentence Transformation cần chấm tay, không ảnh hưởng điểm tự động.
             </p>
           </div>
-          <div className="rounded-xl bg-panel-muted px-4 py-3 text-sm tabular-nums">
+          <div className="rounded-2xl bg-panel-muted px-4 py-3 text-sm tabular-nums">
             <p className="font-semibold">{totalQuestions} câu</p>
             <p className="text-ink-soft">{visibleSections.length} section</p>
           </div>
@@ -131,7 +125,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
         <input type="hidden" name="attemptId" value={attemptId} />
 
         {error ? (
-          <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-danger">
+          <div role="alert" className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger">
             {error}
           </div>
         ) : null}
@@ -145,12 +139,12 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                   <p className="text-sm font-semibold text-accent">{section.title}</p>
                   <h2 className="mt-1 text-xl font-semibold tracking-tight">{section.description}</h2>
                 </div>
-                <span className="shrink-0 rounded-lg bg-panel px-2 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_rgba(23,33,27,0.08)]">
+                <span className="shrink-0 rounded-full bg-panel px-2.5 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_var(--line)]">
                   {section.questions.length}/{section.targetCount || "?"} câu
                 </span>
               </div>
               {section.warning ? (
-                <div role="note" className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-warning">
+                <div role="note" className="mt-3 flex items-start gap-2 rounded-xl bg-warning-soft px-3 py-2 text-sm text-warning">
                   <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                   <span>{section.warning}</span>
                 </div>
@@ -184,7 +178,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
 
                     {/* Passage */}
                     {question.passage ? (
-                      <div className="mb-4 rounded-xl bg-panel-muted p-4 text-sm leading-7 text-ink-soft">
+                      <div className="mb-4 rounded-2xl bg-panel-muted p-4 text-sm leading-7 text-ink-soft">
                         {question.passage}
                       </div>
                     ) : null}
@@ -192,21 +186,21 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                     {/* Sentence Transformation: enhanced layout */}
                     {isSentenceTransformation ? (
                       <div className="grid gap-3">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-accent">
+                        <span className="text-xs font-semibold text-accent">
                           Viết lại câu — giữ nghĩa, không thêm thông tin
                         </span>
                         <p id={`q-prompt-${question.id}`} className="text-sm font-semibold leading-7">
                           {question.prompt}
                         </p>
                         {question.keyword ? (
-                          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
-                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Từ bắt buộc</span>
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft/60 px-3 py-1.5 text-sm">
+                            <span className="text-xs font-normal text-ink-soft">Từ bắt buộc</span>
                             <span className="font-bold text-foreground">{question.keyword}</span>
                           </span>
                         ) : null}
                         {question.targetSentence ? (
-                          <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
-                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Bắt đầu bằng</span>
+                          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent-soft/60 px-3 py-1.5 text-sm">
+                            <span className="text-xs font-normal text-ink-soft">Bắt đầu bằng</span>
                             <span className="font-normal italic text-foreground">{question.targetSentence}</span>
                           </span>
                         ) : null}
@@ -223,7 +217,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                               ? "Nhập câu viết lại hoàn chỉnh, dùng từ cho sẵn."
                               : "Nhập câu viết lại hoàn chỉnh, đảm bảo nghĩa tương đương."
                           }
-                          className="min-h-24 rounded-xl border border-line bg-white p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                          className="field min-h-24 p-3"
                         />
                       </div>
                     ) : (
@@ -235,8 +229,8 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
 
                         {/* Root word for word formation */}
                         {rootWord ? (
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-panel-muted px-3 py-1.5 text-sm">
-                            <span className="text-xs font-normal uppercase tracking-wide text-ink-soft">Từ gốc</span>
+                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-accent-soft/60 px-3 py-1.5 text-sm">
+                            <span className="text-xs font-normal text-ink-soft">Từ gốc</span>
                             <span className="font-semibold text-foreground">{rootWord}</span>
                           </div>
                         ) : null}
@@ -249,7 +243,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                               {options.map((option) => (
                                 <label
                                   key={option.id}
-                                  className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl bg-white px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)] transition-colors hover:bg-accent-soft/40"
+                                  className="flex min-h-12 cursor-pointer items-start gap-3 rounded-2xl bg-panel px-4 py-3 text-sm shadow-[inset_0_0_0_1px_var(--line-strong)] transition-colors hover:bg-accent-soft/40"
                                 >
                                   <input
                                     type="radio"
@@ -275,7 +269,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                                   id={`err-part-${question.id}`}
                                   name={`answer:${question.id}:part`}
                                   placeholder="Ghi số dòng"
-                                  className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                                  className="field min-h-11"
                                 />
                               </div>
                               <div className="grid gap-1.5">
@@ -286,7 +280,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                                   id={`err-corr-${question.id}`}
                                   name={`answer:${question.id}:correction`}
                                   placeholder="Đáp án đúng"
-                                  className="min-h-11 rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                                  className="field min-h-11"
                                 />
                               </div>
                             </div>
@@ -301,7 +295,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                                 name={`answer:${question.id}`}
                                 rows={5}
                                 placeholder="Viết dàn ý hoặc đoạn trả lời. Phần này không tính vào điểm tự động."
-                                className="min-h-36 w-full rounded-xl border border-line bg-white p-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                                className="field min-h-36 w-full p-3"
                               />
                             </div>
                           ) : isText ? (
@@ -314,11 +308,11 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                                 id={`text-${question.id}`}
                                 name={`answer:${question.id}`}
                                 placeholder="Nhập câu trả lời"
-                                className="min-h-11 w-full rounded-xl border border-line bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+                                className="field min-h-11 w-full"
                               />
                             </div>
                           ) : (
-                            <p className="rounded-xl bg-panel-muted p-3 text-sm text-ink-soft">
+                            <p className="rounded-2xl bg-panel-muted p-3 text-sm text-ink-soft">
                               Dạng này sẽ được kiểm tra thủ công.
                             </p>
                           )}
@@ -333,15 +327,12 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
         ))}
 
         {/* Sticky submit bar */}
-        <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-panel/95 p-3 shadow-[0_18px_60px_-32px_rgba(23,33,27,0.45)] backdrop-blur-sm">
-          <Link
-            href="/diagnostic"
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-panel-muted px-4 text-sm font-semibold transition-colors hover:bg-line"
-          >
+        <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-panel/95 p-3 shadow-[var(--shadow-float)] backdrop-blur-sm">
+          <Link href="/diagnostic" className="btn btn-ghost bg-panel-muted">
             <ArrowLeft className="size-4" aria-hidden="true" />
             Rời bài
           </Link>
-          <FormSubmitButton pendingLabel="Đang nộp..." className="gap-2 bg-accent hover:bg-accent-strong">
+          <FormSubmitButton pendingLabel="Đang nộp...">
             <CheckCircle2 className="size-4" aria-hidden="true" />
             Nộp bài
           </FormSubmitButton>

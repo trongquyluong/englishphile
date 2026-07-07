@@ -13,7 +13,7 @@ export function SubmissionResult({ result }: { result: SubmissionResultPayload }
             answer.isCorrect === true ? "text-accent" : answer.isCorrect === false ? "text-danger" : "text-warning";
 
           return (
-            <article key={answer.questionId} className="rounded-lg bg-white p-4 shadow-[inset_0_0_0_1px_rgba(23,33,27,0.12)]">
+            <article key={answer.questionId} className="rounded-2xl bg-panel p-4 shadow-[inset_0_0_0_1px_var(--line)]">
               <div className="flex items-start gap-2">
                 <Icon className={`mt-0.5 size-5 ${color}`} aria-hidden="true" />
                 <div>
