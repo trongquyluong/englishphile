@@ -39,6 +39,9 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
     .flatMap((section) => section.items)
     .filter((item) => item.scored && !item.optional)
     .reduce((sum, item) => sum + item.targetCount, 0);
+  const canStart = coverage.sections.every(
+    (section) => !section.targetCount || section.eligibleQuestions >= section.targetCount,
+);
 
   return (
     <div className="grid gap-6">
@@ -55,12 +58,18 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
             <span className="rounded-xl bg-white/10 px-3 py-2">20-30 phút</span>
             <span className="rounded-xl bg-white/10 px-3 py-2">Không dùng nội dung nháp</span>
           </div>
-          <form action={startDiagnosticAction} className="mt-6">
-            <FormSubmitButton pendingLabel="Đang tạo bài..." className="gap-2 bg-background text-foreground">
-              {latest ? "Làm lại diagnostic" : "Làm bài kiểm tra đầu vào"}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </FormSubmitButton>
-          </form>
+          {canStart ? (
+  <form action={startDiagnosticAction} className="mt-6">
+    <FormSubmitButton pendingLabel="Đang tạo bài..." className="gap-2 bg-background text-foreground">
+      {latest ? "Làm lại diagnostic" : "Làm bài kiểm tra đầu vào"}
+      <ArrowRight className="size-4" aria-hidden="true" />
+    </FormSubmitButton>
+  </form>
+) : (
+  <p className="mt-6 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-background/80">
+    Chưa đủ câu hỏi bắt buộc để bắt đầu diagnostic.
+  </p>
+)}
         </div>
       </section>
 
@@ -127,31 +136,55 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
         </section>
       )}
 
-      <section className="surface rounded-2xl p-5">
-        <h2 className="text-lg font-semibold">Section trong diagnostic</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {coverage.sections.map((section) => (
-            <article key={section.id} className="rounded-xl bg-white p-4 shadow-[var(--shadow-border)]">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold">{section.title}</h3>
-                  <p className="mt-1 text-sm text-ink-soft">{section.message}</p>
-                </div>
-                <span className="tabular-nums rounded-lg bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">
-                  {section.eligibleQuestions}/{section.targetCount || "optional"}
-                </span>
-              </div>
-            </article>
-          ))}
-        </div>
-        {coverage.warnings.length ? (
-          <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-warning">
-            {coverage.warnings.slice(0, 3).map((warning) => (
-              <p key={warning}>{warning}</p>
-            ))}
+<section className="surface rounded-2xl p-5">
+  <h2 className="text-lg font-semibold">Section trong diagnostic</h2>
+
+  <div className="mt-4 grid gap-3 md:grid-cols-2">
+    {coverage.sections.map((section) => (
+      <article key={section.id} className="rounded-xl bg-white p-4 shadow-[var(--shadow-border)]">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-semibold">{section.title}</h3>
+            <p className="mt-1 text-sm text-ink-soft">{section.message}</p>
           </div>
-        ) : null}
-      </section>
+          <span className="tabular-nums rounded-lg bg-panel-muted px-2 py-1 text-xs font-semibold text-ink-soft">
+            {section.eligibleQuestions}/{section.targetCount || "optional"}
+          </span>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  {coverage.warnings.length ? (
+    <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-warning">
+      {coverage.warnings.slice(0, 3).map((warning) => (
+        <p key={warning}>{warning}</p>
+      ))}
+    </div>
+  ) : null}
+
+    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+    {canStart ? (
+      <form action={startDiagnosticAction}>
+        <FormSubmitButton pendingLabel="Đang tạo bài...">
+          Bắt đầu làm placement test
+        </FormSubmitButton>
+      </form>
+    ) : (
+      <button
+        type="button"
+        disabled
+        className="inline-flex cursor-not-allowed items-center justify-center rounded-xl bg-panel-muted px-6 py-3 text-sm font-semibold text-ink-soft"
+      >
+        Chưa đủ câu hỏi để bắt đầu
+      </button>
+    )}
+
+    <p className="text-sm text-ink-soft">
+      Bài test sẽ lấy ngẫu nhiên câu hỏi đã publish và đủ điều kiện diagnostic.
+    </p>
+  </div>
+</section>
     </div>
   );
 }
