@@ -14,6 +14,7 @@ import {
   type AnswerKeyBlock,
   type StudyPlanBlock,
 } from "@/lib/wiki-content";
+import { renderInlineText } from "@/components/wiki/InlineText";
 
 // Quote block renderer
 function QuoteBox({ quote }: { quote: QuoteBlock }) {
@@ -42,8 +43,8 @@ function QuoteBox({ quote }: { quote: QuoteBlock }) {
           <span className="font-semibold">{labels[quote.type]}: </span>
         ) : null}
         {quote.content.split("\n\n").map((line, i) => (
-          <p key={i} className={i > 0 || quote.type === "note" ? "mt-2" : ""}>
-            {line}
+          <p key={i} className={`whitespace-pre-line ${i > 0 || quote.type === "note" ? "mt-2" : ""}`}>
+            {renderInlineText(line)}
           </p>
         ))}
       </div>
@@ -70,7 +71,7 @@ function TableBox({ table }: { table: TableBlock }) {
             <tr key={rowIndex} className="border-b border-line last:border-b-0">
               {row.map((cell, cellIndex) => (
                 <td key={cellIndex} className="px-4 py-3 text-ink-soft">
-                  {cell}
+                  {renderInlineText(cell)}
                 </td>
               ))}
             </tr>
@@ -92,12 +93,12 @@ function PracticeBox({ practice }: { practice: PracticeBlock }) {
       <div className="mt-4 space-y-4">
         {practice.questions.map((q, qi) => (
           <div key={qi}>
-            <p className="text-[15px] leading-7">{q.question}</p>
+            <p className="text-[15px] leading-7">{renderInlineText(q.question)}</p>
             {q.options?.length ? (
               <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                 {q.options.map((opt, oi) => (
                   <p key={oi} className="rounded-xl bg-panel px-3 py-2 text-sm">
-                    {opt}
+                    {renderInlineText(opt)}
                   </p>
                 ))}
               </div>
@@ -121,9 +122,9 @@ function AnswerKeyBox({ answerKey }: { answerKey: AnswerKeyBlock }) {
               {item.number}
             </span>
             <div>
-              <p className="font-medium">{item.answer}</p>
+              <p className="font-medium">{renderInlineText(item.answer)}</p>
               {item.explanation ? (
-                <p className="mt-0.5 text-ink-soft">{item.explanation}</p>
+                <p className="mt-0.5 text-ink-soft">{renderInlineText(item.explanation)}</p>
               ) : null}
             </div>
           </div>
@@ -143,7 +144,7 @@ function StudyPlanBox({ studyPlan }: { studyPlan: StudyPlanBlock }) {
             <span className="flex h-6 min-w-[70px] shrink-0 items-center justify-center rounded-lg bg-accent px-2 text-xs font-semibold text-on-accent">
               {day.day}
             </span>
-            <span className="text-ink-soft">{day.task}</span>
+            <span className="text-ink-soft">{renderInlineText(day.task)}</span>
           </div>
         ))}
       </div>
@@ -164,7 +165,7 @@ function StudyPlanBox({ studyPlan }: { studyPlan: StudyPlanBlock }) {
                 <tr key={ri} className="border-b border-line last:border-b-0">
                   {row.map((cell, ci) => (
                     <td key={ci} className="px-3 py-2">
-                      {cell || <span className="text-ink-muted">—</span>}
+                      {cell ? renderInlineText(cell) : <span className="text-ink-muted">—</span>}
                     </td>
                   ))}
                 </tr>
@@ -230,35 +231,37 @@ export default async function WikiArticlePage({ params }: PageProps) {
           </div>
         </header>
 
-        <div className="surface rounded-3xl p-6 md:p-8">
+        {/* min-w-0 lets grid items shrink below the tables' min width so
+            the overflow-x-auto wrappers scroll instead of the whole page. */}
+        <div className="surface min-w-0 rounded-3xl p-6 md:p-8">
           <div className="grid gap-7">
             {article.sections.map((section, index) => (
-              <section key={index}>
+              <section key={index} className="min-w-0">
                 {section.heading ? (
                   <h2 className="text-xl font-semibold tracking-tight text-balance">{section.heading}</h2>
                 ) : null}
                 {section.paragraphs?.map((paragraph, pi) => (
                   <p key={pi} className="mt-3 text-[15px] leading-7 text-ink-soft text-pretty">
-                    {paragraph}
+                    {renderInlineText(paragraph)}
                   </p>
                 ))}
                 {section.items?.length ? (
                   <ul className="mt-3 grid list-disc gap-2 pl-5 text-[15px] leading-7 text-ink-soft marker:text-accent">
                     {section.items.map((item) => (
-                      <li key={item}>{item}</li>
+                      <li key={item}>{renderInlineText(item)}</li>
                     ))}
                   </ul>
                 ) : null}
                 {section.items2?.length ? (
                   <ul className="mt-3 grid list-disc gap-2 pl-5 text-[15px] leading-7 text-ink-soft marker:text-accent">
                     {section.items2.map((item) => (
-                      <li key={item}>{item}</li>
+                      <li key={item}>{renderInlineText(item)}</li>
                     ))}
                   </ul>
                 ) : null}
                 {section.paragraphs2?.map((paragraph, pi) => (
                   <p key={pi} className="mt-3 text-[15px] leading-7 text-ink-soft text-pretty">
-                    {paragraph}
+                    {renderInlineText(paragraph)}
                   </p>
                 ))}
                 {section.quote ? <QuoteBox quote={section.quote} /> : null}
@@ -271,7 +274,7 @@ export default async function WikiArticlePage({ params }: PageProps) {
                     <Lightbulb className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                     <span>
                       <span className="font-semibold">Mẹo: </span>
-                      {section.tip}
+                      {renderInlineText(section.tip)}
                     </span>
                   </p>
                 ) : null}

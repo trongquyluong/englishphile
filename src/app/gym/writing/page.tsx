@@ -40,6 +40,27 @@ export default async function GymWritingPage() {
         </div>
       </section>
 
+      <section className="surface-mint rounded-2xl p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-strong">
+              <Sparkles className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold">Chấm bài Writing bằng AI</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-soft text-pretty">
+                Dán bài luận của bạn để nhận điểm ước lượng và nhận xét chi tiết theo tiêu chí chuyên Anh: nội dung, bố cục,
+                ngôn ngữ và lỗi diễn đạt.
+              </p>
+            </div>
+          </div>
+          <Link href="/gym/writing/grader" className="btn btn-primary shrink-0 self-start sm:self-center">
+            Chấm bài ngay
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+
       <section className="grid gap-3 md:grid-cols-3">
         <div className="surface rounded-2xl p-5">
           <FilePenLine className="size-5 text-accent" aria-hidden="true" />

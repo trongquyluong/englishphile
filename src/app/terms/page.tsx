@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Điều khoản sử dụng Englishphile trong giai đoạn beta: tài khoản, nội dung, điểm số và giới hạn trách nhiệm.",
 };
 
-const lastUpdated = "07/07/2026";
+const lastUpdated = "08/07/2026";
 
 export default function TermsPage() {
   return (
@@ -42,6 +42,10 @@ export default function TermsPage() {
             đơn vị tổ chức thi chính thức nào.
           </li>
           <li>Điểm số và mức trình độ là ước lượng để định hướng luyện tập, không phải chứng chỉ hay kết quả thi chính thức.</li>
+          <li>
+            Nhận xét và điểm từ tính năng chấm bài Writing bằng AI chỉ nhằm hỗ trợ việc học và có thể thiếu chính xác. Đó là điểm ước
+            lượng, không phải kết quả thi chính thức.
+          </li>
           <li>
             Trong giai đoạn beta, đề luyện và contest có thể còn sai sót. Nếu bạn phát hiện lỗi, hãy báo qua thông tin liên hệ trong
             trang{" "}

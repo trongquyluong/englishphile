@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Cách Englishphile lưu và sử dụng dữ liệu tài khoản, diagnostic và luyện tập trong giai đoạn beta.",
 };
 
-const lastUpdated = "07/07/2026";
+const lastUpdated = "08/07/2026";
 
 export default function PrivacyPage() {
   return (
@@ -53,6 +53,13 @@ export default function PrivacyPage() {
           Englishphile chạy trên hạ tầng của các nhà cung cấp bên thứ ba: ứng dụng được host trên Vercel và dữ liệu được lưu trong cơ sở
           dữ liệu PostgreSQL trên Neon. Dữ liệu của bạn nằm trên các hệ thống này để dịch vụ hoạt động; các nhà cung cấp có chính sách
           bảo mật riêng của họ.
+        </p>
+
+        <h2 className="mt-6 text-lg font-semibold text-foreground">Nhận xét Writing bằng AI</h2>
+        <p className="mt-2">
+          Khi bạn dùng tính năng chấm bài Writing bằng AI, đề bài và bài viết bạn gửi sẽ được chuyển tới nhà cung cấp AI bên thứ ba để
+          tạo nhận xét, theo chính sách dữ liệu riêng của nhà cung cấp đó. Vì vậy, đừng đưa thông tin cá nhân hoặc nội dung nhạy cảm vào
+          bài viết. Tính năng chỉ chạy khi bạn chủ động gửi bài và xác nhận đồng ý trong form.
         </p>
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Cookie và phiên đăng nhập</h2>
