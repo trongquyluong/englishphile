@@ -4,7 +4,7 @@ import { ArrowRight, ClipboardList, Sparkles, TriangleAlert } from "lucide-react
 import { DifficultyBadge, SkillBadge } from "@/components/ui/Badges";
 import { requireUser } from "@/lib/auth/session";
 import { getRecommendedProblemsForStudent } from "@/lib/analytics/recommendations";
-import { getActiveLearningRecommendations } from "@/lib/diagnostic";
+import { getActiveLearningRecommendations, hasCompletedDiagnostic } from "@/lib/diagnostic";
 import { getStudentWrongQuestionStats } from "@/lib/analytics/student";
 import { prisma } from "@/lib/prisma";
 
@@ -15,10 +15,11 @@ export const metadata: Metadata = {
 
 export default async function RecommendationsPage() {
   const user = await requireUser();
-  const [profileRecommendations, fallbackProblems, wrongQuestions] = await Promise.all([
+  const [profileRecommendations, fallbackProblems, wrongQuestions, diagnosticCompleted] = await Promise.all([
     getActiveLearningRecommendations(user.id, 8),
     getRecommendedProblemsForStudent(user.id, 8),
     getStudentWrongQuestionStats(user.id, 5),
+    hasCompletedDiagnostic(user.id),
   ]);
   const profileProblemIds = new Set(profileRecommendations.map((item) => item.problemId).filter(Boolean));
   const mergedProblems = [
@@ -48,7 +49,7 @@ export default async function RecommendationsPage() {
             <p className="text-sm font-semibold text-accent">Bài nên luyện hôm nay</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Gợi ý cá nhân hóa</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">
-              Các gợi ý dựa trên diagnostic, kỹ năng yếu, topic yếu, câu sai và các bài đã xuất bản bạn chưa giải.
+              Các gợi ý dựa trên bài kiểm tra đầu vào, kỹ năng yếu, chủ đề yếu và những câu bạn từng làm sai.
             </p>
           </div>
         </div>
@@ -73,9 +74,16 @@ export default async function RecommendationsPage() {
         {!mergedProblems.length ? (
           <div className="surface rounded-2xl p-6 md:col-span-2 xl:col-span-3">
             <h2 className="text-xl font-semibold">Chưa có gợi ý đủ dữ liệu</h2>
-            <p className="mt-2 text-sm text-ink-soft">Hãy làm diagnostic hoặc luyện một vài bài để hệ thống hiểu bạn hơn.</p>
-            <Link href="/diagnostic" className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
-              Làm diagnostic
+            <p className="mt-2 text-sm text-ink-soft">
+              {diagnosticCompleted
+                ? "Hãy luyện một vài bài trong Gym để hệ thống hiểu bạn hơn."
+                : "Hãy làm bài kiểm tra đầu vào hoặc luyện một vài bài để hệ thống hiểu bạn hơn."}
+            </p>
+            <Link
+              href={diagnosticCompleted ? "/gym" : "/diagnostic"}
+              className="mt-4 inline-flex min-h-10 items-center rounded-lg bg-foreground px-3 text-sm font-semibold text-background"
+            >
+              {diagnosticCompleted ? "Vào Gym" : "Làm bài kiểm tra đầu vào"}
             </Link>
           </div>
         ) : null}

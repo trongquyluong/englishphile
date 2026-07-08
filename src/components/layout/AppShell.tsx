@@ -13,12 +13,13 @@ type AppShellProps = {
     fullName: string | null;
     role: Role;
   } | null;
+  showDiagnosticLink?: boolean;
 };
 
-export function AppShell({ children, user }: AppShellProps) {
+export function AppShell({ children, user, showDiagnosticLink = true }: AppShellProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar user={user} />
+      <Navbar user={user} showDiagnosticLink={showDiagnosticLink} />
       <main className="mx-auto flex w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
         {children}
       </main>

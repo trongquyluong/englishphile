@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Info } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { submitDiagnosticAction } from "@/app/diagnostic/actions";
 import { DifficultyBadge, QuestionNumberBadge, SkillBadge } from "@/components/ui/Badges";
 import { LearnerCard } from "@/components/ui/LearnerCard";
@@ -67,20 +67,20 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
         return question ? [question] : [];
       }),
     }))
-    .filter((section) => section.questions.length > 0 || section.warning);
+    .filter((section) => section.questions.length > 0);
 
   const totalQuestions = visibleSections.reduce((sum, s) => sum + s.questions.length, 0);
 
   if (!data.questions.length) {
     return (
       <LearnerCard className="p-6">
-        <h2 className="text-xl font-semibold">Chưa có câu hỏi phù hợp</h2>
+        <h2 className="text-xl font-semibold">Bài kiểm tra đang được chuẩn bị</h2>
         <p className="mt-2 text-sm text-ink-soft">
-          Hãy publish một số bài trong kho trước khi chạy diagnostic.
+          Chưa có đủ câu hỏi cho bài kiểm tra. Trong lúc chờ, bạn có thể vào Gym luyện trước.
         </p>
-        <Link href="/diagnostic" className="btn btn-sm btn-secondary mt-5">
+        <Link href="/gym" className="btn btn-sm btn-secondary mt-5">
           <ArrowLeft className="size-4" aria-hidden="true" />
-          Quay lại
+          Vào Gym
         </Link>
       </LearnerCard>
     );
@@ -96,20 +96,14 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
 
       {/* Progress header */}
       <LearnerCard className="p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-accent">Bài kiểm tra đầu vào</p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-balance">
-              {totalQuestions} câu hỏi — làm theo thứ tự
-            </h1>
-            <p className="mt-1 text-sm text-ink-soft">
-              Làm từ đầu đến cuối, không cần nhanh. Viết và Sentence Transformation cần chấm tay, không ảnh hưởng điểm tự động.
-            </p>
-          </div>
-          <div className="rounded-2xl bg-panel-muted px-4 py-3 text-sm tabular-nums">
-            <p className="font-semibold">{totalQuestions} câu</p>
-            <p className="text-ink-soft">{visibleSections.length} section</p>
-          </div>
+        <div>
+          <p className="text-sm font-semibold text-accent">Bài kiểm tra đầu vào</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-balance">
+            {totalQuestions} câu hỏi — làm theo thứ tự
+          </h1>
+          <p className="mt-1 text-sm text-ink-soft">
+            Làm từ đầu đến cuối, không cần nhanh. Một số câu tự luận sẽ được xem lại sau, không tính vào điểm tự động.
+          </p>
         </div>
         <div
           className="mt-5 h-2 overflow-hidden rounded-full bg-panel-muted"
@@ -140,15 +134,9 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                   <h2 className="mt-1 text-xl font-semibold tracking-tight">{section.description}</h2>
                 </div>
                 <span className="shrink-0 rounded-full bg-panel px-2.5 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_var(--line)]">
-                  {section.questions.length}/{section.targetCount || "?"} câu
+                  {section.questions.length} câu
                 </span>
               </div>
-              {section.warning ? (
-                <div role="note" className="mt-3 flex items-start gap-2 rounded-xl bg-warning-soft px-3 py-2 text-sm text-warning">
-                  <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                  <span>{section.warning}</span>
-                </div>
-              ) : null}
             </div>
 
             {/* Questions */}

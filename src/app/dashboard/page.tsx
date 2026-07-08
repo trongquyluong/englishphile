@@ -17,7 +17,11 @@ import { ContentStatusBadge, DifficultyBadge, SkillBadge } from "@/components/ui
 import { isAdminUser, requireUser } from "@/lib/auth/session";
 import { getRecommendedProblemsForStudent } from "@/lib/analytics/recommendations";
 import { getStudentSkillStats } from "@/lib/analytics/student";
-import { getActiveLearningRecommendations, getLatestDiagnosticAttempt } from "@/lib/diagnostic";
+import {
+  getActiveLearningRecommendations,
+  getLatestDiagnosticAttempt,
+  getLatestFinishedDiagnosticAttempt,
+} from "@/lib/diagnostic";
 import { submissionStatusLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -38,24 +42,36 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const canManageContent = isAdminUser(user);
 
-  const [statuses, recentSubmissions, answerStats, skillStats, fallbackRecommendations, diagnostic, profileRecommendations] =
-    await Promise.all([
-      prisma.userProblemStatus.findMany({ where: { userId: user.id } }),
-      prisma.submission.findMany({
-        where: { userId: user.id },
-        include: { problem: true },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-      prisma.submissionAnswer.findMany({
-        where: { submission: { userId: user.id }, isCorrect: { not: null } },
-        select: { isCorrect: true },
-      }),
-      canManageContent ? Promise.resolve([]) : getStudentSkillStats(user.id),
-      canManageContent ? Promise.resolve([]) : getRecommendedProblemsForStudent(user.id, 6),
-      canManageContent ? Promise.resolve(null) : getLatestDiagnosticAttempt(user.id),
-      canManageContent ? Promise.resolve([]) : getActiveLearningRecommendations(user.id, 6),
-    ]);
+  const [
+    statuses,
+    recentSubmissions,
+    answerStats,
+    skillStats,
+    fallbackRecommendations,
+    diagnostic,
+    finishedDiagnostic,
+    profileRecommendations,
+  ] = await Promise.all([
+    prisma.userProblemStatus.findMany({ where: { userId: user.id } }),
+    prisma.submission.findMany({
+      where: { userId: user.id },
+      include: { problem: true },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.submissionAnswer.findMany({
+      where: { submission: { userId: user.id }, isCorrect: { not: null } },
+      select: { isCorrect: true },
+    }),
+    canManageContent ? Promise.resolve([]) : getStudentSkillStats(user.id),
+    canManageContent ? Promise.resolve([]) : getRecommendedProblemsForStudent(user.id, 6),
+    canManageContent ? Promise.resolve(null) : getLatestDiagnosticAttempt(user.id),
+    canManageContent ? Promise.resolve(null) : getLatestFinishedDiagnosticAttempt(user.id),
+    canManageContent ? Promise.resolve([]) : getActiveLearningRecommendations(user.id, 6),
+  ]);
+
+  const diagnosticCompleted = Boolean(finishedDiagnostic);
+  const diagnosticInProgress = diagnostic?.status === "IN_PROGRESS";
 
   const attempted = statuses.reduce((sum, item) => sum + item.attempts, 0);
   const solved = statuses.filter((item) => item.status === "SOLVED").length;
@@ -199,58 +215,76 @@ export default async function DashboardPage() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[240px_1fr]">
-      <Sidebar />
+      <Sidebar showDiagnosticLink={!diagnosticCompleted} />
       <div className="grid gap-6">
         <section className="relative overflow-hidden rounded-2xl bg-foreground p-6 text-background shadow-[0_24px_70px_-40px_rgba(23,33,27,0.55)]">
           <p className="text-sm font-semibold uppercase tracking-[0.14em] text-background/60">Luyện tập cá nhân hóa</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance md:text-4xl">Chào {user.displayName}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-background/72">
-            Bắt đầu bằng diagnostic, nhận gợi ý theo điểm yếu, vào Gym để luyện kỹ năng và thử Contests khi muốn kiểm tra sức bền.
+            {diagnosticCompleted
+              ? "Vào Gym để luyện kỹ năng theo gợi ý, ôn lại câu sai và thử Contests khi muốn kiểm tra sức bền."
+              : "Bắt đầu bằng bài kiểm tra đầu vào, nhận gợi ý theo điểm yếu, vào Gym để luyện kỹ năng và thử Contests khi muốn kiểm tra sức bền."}
           </p>
         </section>
 
-        <section className="surface rounded-2xl p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-accent">Kiểm tra trình độ</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                {diagnostic ? "Diagnostic gần nhất" : "Làm bài kiểm tra đầu vào"}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
-                {diagnostic
-                  ? "Kết quả diagnostic đang được dùng để ưu tiên bài luyện hôm nay."
-                  : "Englishphile sẽ ước lượng trình độ và gợi ý bài luyện phù hợp."}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/diagnostic" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
-                <Target className="size-4" aria-hidden="true" />
-                {diagnostic ? "Làm lại diagnostic" : "Làm bài kiểm tra đầu vào"}
+        {diagnosticCompleted && finishedDiagnostic ? (
+          <section className="surface rounded-2xl p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-accent">Trình độ hiện tại</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">Tiếp tục luyện trong Gym</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
+                  Kết quả bài kiểm tra đầu vào đang được dùng để gợi ý bài luyện phù hợp với bạn.
+                </p>
+              </div>
+              <Link href="/gym" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
+                <Dumbbell className="size-4" aria-hidden="true" />
+                Vào Gym luyện tập
               </Link>
-              {diagnostic ? (
-                <Link href={`/diagnostic/result?attempt=${diagnostic.id}`} className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
-                  Xem kết quả
-                </Link>
-              ) : null}
             </div>
-          </div>
-          {diagnostic ? (
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <div className="rounded-xl bg-panel-muted p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">Level</p>
-                <p className="mt-2 text-xl font-semibold">{diagnostic.estimatedLevel ?? "—"}</p>
+                <p className="mt-2 text-xl font-semibold">{finishedDiagnostic.estimatedLevel ?? "—"}</p>
               </div>
               <div className="rounded-xl bg-panel-muted p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">Điểm</p>
-                <p className="tabular-nums mt-2 text-xl font-semibold">{diagnostic.score ?? "—"}/{diagnostic.total ?? "—"}</p>
+                <p className="tabular-nums mt-2 text-xl font-semibold">
+                  {finishedDiagnostic.score ?? "—"}/{finishedDiagnostic.total ?? "—"}
+                </p>
               </div>
               <div className="rounded-xl bg-panel-muted p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">Ngày làm</p>
-                <p className="mt-2 text-sm font-semibold">{diagnostic.completedAt?.toLocaleDateString("vi-VN") ?? "Đang làm"}</p>
+                <p className="mt-2 text-sm font-semibold">
+                  {finishedDiagnostic.completedAt?.toLocaleDateString("vi-VN") ?? "—"}
+                </p>
               </div>
             </div>
-          ) : null}
-        </section>
+          </section>
+        ) : (
+          <section className="surface rounded-2xl p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-accent">Kiểm tra trình độ</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                  {diagnosticInProgress ? "Làm tiếp bài kiểm tra đầu vào" : "Làm bài kiểm tra đầu vào"}
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
+                  {diagnosticInProgress
+                    ? "Bạn đang làm dở bài kiểm tra. Hoàn thành để nhận gợi ý bài luyện phù hợp."
+                    : "Englishphile sẽ ước lượng trình độ và gợi ý bài luyện phù hợp."}
+                </p>
+              </div>
+              <Link
+                href={diagnosticInProgress ? "/diagnostic/start" : "/diagnostic"}
+                className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-3 text-sm font-semibold text-background"
+              >
+                <Target className="size-4" aria-hidden="true" />
+                {diagnosticInProgress ? "Làm tiếp bài kiểm tra" : "Làm bài kiểm tra đầu vào"}
+              </Link>
+            </div>
+          </section>
+        )}
 
         <section className="surface rounded-2xl p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -275,7 +309,11 @@ export default async function DashboardPage() {
               </Link>
             ))}
             {!todayRecommendations.length ? (
-              <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có gợi ý. Hãy làm diagnostic để bắt đầu.</p>
+              <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+                {diagnosticCompleted
+                  ? "Chưa có gợi ý mới. Hãy luyện một bài trong Gym để hệ thống hiểu bạn hơn."
+                  : "Chưa có gợi ý. Hãy làm bài kiểm tra đầu vào để bắt đầu."}
+              </p>
             ) : null}
           </div>
         </section>
@@ -332,7 +370,13 @@ export default async function DashboardPage() {
                 </span>
               </Link>
             ))}
-            {!recentSubmissions.length ? <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có submission. Hãy bắt đầu bằng diagnostic hoặc một bài ngắn.</p> : null}
+            {!recentSubmissions.length ? (
+              <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+                {diagnosticCompleted
+                  ? "Chưa có submission. Hãy bắt đầu bằng một bài trong Gym."
+                  : "Chưa có submission. Hãy bắt đầu bằng bài kiểm tra đầu vào hoặc một bài ngắn."}
+              </p>
+            ) : null}
           </div>
         </section>
       </div>

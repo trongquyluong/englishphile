@@ -3,7 +3,7 @@ import { BarChart3, Dumbbell, Gauge, RotateCcw, Sparkles, Trophy, TriangleAlert,
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Tổng quan", icon: Gauge },
-  { href: "/diagnostic", label: "Diagnostic", icon: Sparkles },
+  { href: "/diagnostic", label: "Kiểm tra đầu vào", icon: Sparkles },
   { href: "/recommendations", label: "Gợi ý luyện tập", icon: RotateCcw },
   { href: "/gym", label: "Gym", icon: Dumbbell },
   { href: "/contests", label: "Contests", icon: Trophy },
@@ -13,11 +13,19 @@ const sidebarLinks = [
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
-export function Sidebar() {
+type SidebarProps = {
+  showDiagnosticLink?: boolean;
+};
+
+export function Sidebar({ showDiagnosticLink = true }: SidebarProps) {
+  const links = showDiagnosticLink
+    ? sidebarLinks
+    : sidebarLinks.filter((item) => item.href !== "/diagnostic");
+
   return (
     <aside className="surface hidden rounded-lg p-2 lg:block">
       <nav className="grid gap-1">
-        {sidebarLinks.map((item) => {
+        {links.map((item) => {
           const Icon = item.icon;
           return (
             <Link

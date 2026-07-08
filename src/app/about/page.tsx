@@ -56,6 +56,7 @@ const founderHighlights = [
     title: "Học thuật",
     items: [
       "Cựu học sinh chuyên Anh Quốc Học Huế",
+      "Du học sinh tại National Junior College, Singapore",
       "Học sinh trao đổi với Đại học Jeju, Hàn Quốc",
       "Học sinh trao đổi với Học viện Raffles, Singapore",
     ],
@@ -80,7 +81,9 @@ const otherExperience = {
     "Huy chương Đồng Southeast Asian Mathematical Olympiad",
     "Giải Khuyến khích Vietnam Science and Engineering Fair",
   ],
-  leadership: [
+  activities: [
+    "Chủ tịch cộng đồng Đường lên đỉnh Olympia năm thứ 24",
+    "Đảm nhiệm vai trò chuyên môn, cố vấn cho các dự án liên quan tới cuộc thi Đường lên đỉnh Olympia",
     "Tổng thư kí Ancient Capital of Hue Model United Nations",
     "Co-founder sự kiện The Junior High Compass",
   ],
@@ -221,11 +224,11 @@ export default function AboutPage() {
                 ))}
               </ul>
             </div>
-            {/* Leadership */}
+            {/* Activities */}
             <div>
-              <p className="mb-2 text-sm font-medium text-accent-strong">Leadership</p>
+              <p className="mb-2 text-sm font-medium text-accent-strong">Hoạt động</p>
               <ul className="space-y-1.5 text-sm text-ink-soft">
-                {otherExperience.leadership.map((item) => (
+                {otherExperience.activities.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>

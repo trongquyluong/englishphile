@@ -453,6 +453,25 @@ export async function getLatestDiagnosticAttempt(userId: string, status?: "IN_PR
   });
 }
 
+// A finished attempt = the learner submitted the test. NEEDS_REVIEW counts as
+// finished: the auto-scored result exists, only manual grading is pending.
+const FINISHED_DIAGNOSTIC_STATUSES = ["COMPLETED", "NEEDS_REVIEW"] as const;
+
+export async function getLatestFinishedDiagnosticAttempt(userId: string) {
+  return prisma.diagnosticAttempt.findFirst({
+    where: { userId, status: { in: [...FINISHED_DIAGNOSTIC_STATUSES] } },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function hasCompletedDiagnostic(userId: string) {
+  const attempt = await prisma.diagnosticAttempt.findFirst({
+    where: { userId, status: { in: [...FINISHED_DIAGNOSTIC_STATUSES] } },
+    select: { id: true },
+  });
+  return Boolean(attempt);
+}
+
 export async function getActiveLearningRecommendations(userId: string, take = 6) {
   return prisma.learningRecommendation.findMany({
     where: {

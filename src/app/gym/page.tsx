@@ -6,7 +6,11 @@ import { AccuracyBar, LearnerCard } from "@/components/ui/LearnerCard";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRecommendedProblemsForStudent } from "@/lib/analytics/recommendations";
 import { getStudentSkillStats } from "@/lib/analytics/student";
-import { getActiveLearningRecommendations, getLatestDiagnosticAttempt } from "@/lib/diagnostic";
+import {
+  getActiveLearningRecommendations,
+  getLatestDiagnosticAttempt,
+  hasCompletedDiagnostic,
+} from "@/lib/diagnostic";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -43,9 +47,10 @@ const gymCards = [
 
 export default async function GymPage() {
   const user = await getCurrentUser();
-  const [diagnostic, profileRecommendations, fallbackRecommendations, skillStats, recentSubmissions, wrongCount] = user
+  const [diagnostic, diagnosticCompleted, profileRecommendations, fallbackRecommendations, skillStats, recentSubmissions, wrongCount] = user
     ? await Promise.all([
         getLatestDiagnosticAttempt(user.id),
+        hasCompletedDiagnostic(user.id),
         getActiveLearningRecommendations(user.id, 4),
         getRecommendedProblemsForStudent(user.id, 4),
         getStudentSkillStats(user.id),
@@ -57,7 +62,9 @@ export default async function GymPage() {
         }),
         prisma.userProblemStatus.count({ where: { userId: user.id, status: "WRONG" } }),
       ])
-    : [null, [], [], [], [], 0] as const;
+    : [null, false, [], [], [], [], 0] as const;
+
+  const diagnosticInProgress = diagnostic?.status === "IN_PROGRESS";
 
   const profileProblemIds = new Set(profileRecommendations.map((item) => item.problemId).filter(Boolean));
   const recommendations = [
@@ -77,7 +84,7 @@ export default async function GymPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-base leading-7 text-ink-soft">
           {recommendations.length > 0
-            ? "Bài dưới đây được gợi ý dựa trên diagnostic và lỗi sai gần đây. Chọn một bài để bắt đầu."
+            ? "Bài dưới đây được gợi ý dựa trên bài kiểm tra đầu vào và lỗi sai gần đây. Chọn một bài để bắt đầu."
             : "Chọn kỹ năng, làm bài phù hợp, xem lỗi sai và quay lại đúng phần cần cải thiện."}
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
@@ -87,10 +94,17 @@ export default async function GymPage() {
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           ) : user ? (
-            <Link href="/diagnostic" className="btn btn-primary">
-              <Target className="size-4" aria-hidden="true" />
-              Làm bài kiểm tra đầu vào
-            </Link>
+            diagnosticCompleted ? (
+              <Link href="/gym/use-of-english" className="btn btn-primary">
+                Luyện Use of English
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            ) : (
+              <Link href={diagnosticInProgress ? "/diagnostic/start" : "/diagnostic"} className="btn btn-primary">
+                <Target className="size-4" aria-hidden="true" />
+                {diagnosticInProgress ? "Làm tiếp bài kiểm tra đầu vào" : "Làm bài kiểm tra đầu vào"}
+              </Link>
+            )
           ) : (
             <Link href="/auth/sign-up" className="btn btn-primary">
               Bắt đầu miễn phí
@@ -108,21 +122,28 @@ export default async function GymPage() {
         </div>
       </section>
 
-      {!diagnostic ? (
+      {!diagnosticCompleted ? (
         <section className="surface rounded-3xl p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold text-accent">Kiểm tra trình độ</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight">Bắt đầu bằng diagnostic</h2>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                {diagnosticInProgress ? "Hoàn thành bài kiểm tra đầu vào" : "Bắt đầu bằng bài kiểm tra đầu vào"}
+              </h2>
               <p className="mt-2 text-sm leading-6 text-ink-soft">
                 {user
-                  ? "Englishphile sẽ ước lượng level và ưu tiên bài luyện phù hợp hơn."
-                  : "Tạo tài khoản để lưu kết quả diagnostic, nhận gợi ý cá nhân và theo dõi tiến bộ."}
+                  ? diagnosticInProgress
+                    ? "Bạn đang làm dở bài kiểm tra. Hoàn thành để nhận gợi ý bài luyện phù hợp hơn."
+                    : "Englishphile sẽ ước lượng trình độ và ưu tiên bài luyện phù hợp hơn."
+                  : "Tạo tài khoản để lưu kết quả kiểm tra đầu vào, nhận gợi ý cá nhân và theo dõi tiến bộ."}
               </p>
             </div>
-            <Link href={user ? "/diagnostic" : "/auth/sign-up"} className="btn btn-primary">
+            <Link
+              href={user ? (diagnosticInProgress ? "/diagnostic/start" : "/diagnostic") : "/auth/sign-up"}
+              className="btn btn-primary"
+            >
               <Target className="size-4" aria-hidden="true" />
-              {user ? "Làm bài kiểm tra đầu vào" : "Tạo tài khoản"}
+              {user ? (diagnosticInProgress ? "Làm tiếp bài kiểm tra" : "Làm bài kiểm tra đầu vào") : "Tạo tài khoản"}
             </Link>
           </div>
         </section>
@@ -146,7 +167,7 @@ export default async function GymPage() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold">Trạng thái kỹ năng</h2>
-              <p className="mt-1 text-sm text-ink-soft">Dựa trên diagnostic và các submission đã chấm được.</p>
+              <p className="mt-1 text-sm text-ink-soft">Dựa trên bài kiểm tra đầu vào và các bài đã chấm được.</p>
             </div>
             <Link href="/analytics" className="text-sm font-semibold text-accent-strong">Xem thống kê</Link>
           </div>
@@ -159,7 +180,9 @@ export default async function GymPage() {
             ))}
             {!skillStats.some((skill) => skill.attempted > 0) ? (
               <p className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft md:col-span-2 xl:col-span-4">
-                Chưa đủ dữ liệu. Làm diagnostic để mở khóa trạng thái kỹ năng.
+                {diagnosticCompleted
+                  ? "Chưa đủ dữ liệu. Hãy luyện thêm vài bài để cập nhật trạng thái kỹ năng."
+                  : "Chưa đủ dữ liệu. Làm bài kiểm tra đầu vào để mở khóa trạng thái kỹ năng."}
               </p>
             ) : null}
           </div>
@@ -173,7 +196,7 @@ export default async function GymPage() {
             <h2 className="text-lg font-semibold">Gợi ý hôm nay</h2>
           </div>
           {user && (
-            <p className="mt-1 text-sm text-ink-soft">Dựa trên diagnostic, lỗi sai và phần còn yếu.</p>
+            <p className="mt-1 text-sm text-ink-soft">Dựa trên bài kiểm tra đầu vào, lỗi sai và phần còn yếu.</p>
           )}
           <div className="mt-4 grid gap-3">
             {recommendations.map((problem) => (
@@ -195,7 +218,13 @@ export default async function GymPage() {
             ))}
             {!recommendations.length ? (
               <div className="rounded-2xl bg-panel-muted p-4 text-sm text-ink-soft">
-                <p>{user ? "Chưa có gợi ý. Hãy làm diagnostic hoặc một bài luyện ngắn." : "Đăng nhập để Englishphile đề xuất bài luyện theo trình độ và lỗi sai của bạn."}</p>
+                <p>
+                  {user
+                    ? diagnosticCompleted
+                      ? "Chưa có gợi ý mới. Hãy luyện một bài bất kỳ trong Gym."
+                      : "Chưa có gợi ý. Hãy làm bài kiểm tra đầu vào hoặc một bài luyện ngắn."
+                    : "Đăng nhập để Englishphile đề xuất bài luyện theo trình độ và lỗi sai của bạn."}
+                </p>
                 {!user ? (
                   <Link href="/auth/sign-in" className="btn btn-sm btn-primary mt-3">
                     Đăng nhập

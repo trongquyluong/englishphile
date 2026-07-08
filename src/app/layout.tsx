@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Lexend } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { getCurrentUser } from "@/lib/auth/session";
+import { hasCompletedDiagnostic } from "@/lib/diagnostic";
 import "./globals.css";
 
 const lexend = Lexend({
@@ -47,6 +48,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await getCurrentUser();
+  const diagnosticCompleted = user ? await hasCompletedDiagnostic(user.id) : false;
 
   return (
     <html
@@ -54,7 +56,9 @@ export default async function RootLayout({
       className={`${lexend.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <AppShell user={user}>{children}</AppShell>
+        <AppShell user={user} showDiagnosticLink={!diagnosticCompleted}>
+          {children}
+        </AppShell>
       </body>
     </html>
   );

@@ -16,6 +16,7 @@ type NavbarProps = {
     fullName: string | null;
     role: Role;
   } | null;
+  showDiagnosticLink?: boolean;
 };
 
 const mainLinks = [
@@ -52,8 +53,12 @@ const adminLinks = [
 const summaryPillClass =
   "flex min-h-11 cursor-pointer list-none items-center gap-1 rounded-full px-3.5 text-sm font-medium text-ink-soft transition-[background-color,color] duration-150 hover:bg-panel-muted hover:text-foreground";
 
-export function Navbar({ user }: NavbarProps) {
+export function Navbar({ user, showDiagnosticLink = true }: NavbarProps) {
   const canAdmin = isAdminUser(user);
+  // Diagnostic is onboarding-only: once finished, it leaves the main nav.
+  const visibleUserLinks = showDiagnosticLink
+    ? userLinks
+    : userLinks.filter((link) => link.href !== "/diagnostic");
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
@@ -72,7 +77,7 @@ export function Navbar({ user }: NavbarProps) {
                 <ChevronDown className="size-4" aria-hidden="true" />
               </summary>
               <div className="surface absolute left-0 mt-2 grid w-56 gap-1 rounded-2xl p-2">
-                {userLinks.map((link) => (
+                {visibleUserLinks.map((link) => (
                   <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2 text-sm hover:bg-panel-muted">
                     {link.label}
                   </Link>
@@ -109,7 +114,7 @@ export function Navbar({ user }: NavbarProps) {
             <div className="surface absolute right-0 mt-2 grid w-60 gap-1 rounded-2xl p-2">
               {[
                 ...mainLinks,
-                ...(user ? userLinks : [{ href: "/auth/sign-in", label: "Đăng nhập" }]),
+                ...(user ? visibleUserLinks : [{ href: "/auth/sign-in", label: "Đăng nhập" }]),
                 ...(canAdmin ? adminLinks : []),
               ].map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2.5 text-sm hover:bg-panel-muted">

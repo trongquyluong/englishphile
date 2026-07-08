@@ -2,17 +2,19 @@ import Link from "next/link";
 import { Headphones, Radio, ScrollText } from "lucide-react";
 import { DifficultyBadge } from "@/components/ui/Badges";
 import { getCurrentUser } from "@/lib/auth/session";
+import { hasCompletedDiagnostic } from "@/lib/diagnostic";
 import { prisma } from "@/lib/prisma";
 
 export default async function GymListeningPage() {
   const user = await getCurrentUser();
-  const [problems, profile] = await Promise.all([
+  const [problems, profile, diagnosticCompleted] = await Promise.all([
     prisma.problem.findMany({
       where: { contentStatus: "PUBLISHED", skillType: "LISTENING" },
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
       take: 36,
     }),
     user ? prisma.userSkillProfile.findUnique({ where: { userId_skillType: { userId: user.id, skillType: "LISTENING" } } }) : Promise.resolve(null),
+    user ? hasCompletedDiagnostic(user.id) : Promise.resolve(false),
   ]);
 
   return (
@@ -38,7 +40,7 @@ export default async function GymListeningPage() {
           <p className="mt-2 text-sm leading-6 text-ink-soft">
             {profile?.attempted
               ? `Bạn đã có ${profile.attempted} câu Listening trong hồ sơ.`
-              : "Chưa có dữ liệu Listening. Diagnostic sẽ bỏ qua phần này cho đến khi có nội dung đã publish."}
+              : "Chưa có dữ liệu Listening. Phần nghe sẽ được luyện riêng trong Gym khi nội dung sẵn sàng."}
           </p>
         </section>
       ) : null}
@@ -63,10 +65,19 @@ export default async function GymListeningPage() {
             Trang này không bị bỏ trống: hệ thống đã sẵn sàng nhận nội dung Listening qua import/QA, nhưng chưa cần audio thật ở giai đoạn này.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/diagnostic" className="inline-flex min-h-10 items-center rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
-              Làm diagnostic
-            </Link>
-            <Link href="/gym/use-of-english" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-panel-muted px-4 text-sm font-semibold">
+            {!diagnosticCompleted ? (
+              <Link href="/diagnostic" className="inline-flex min-h-10 items-center rounded-lg bg-foreground px-4 text-sm font-semibold text-background">
+                Làm bài kiểm tra đầu vào
+              </Link>
+            ) : null}
+            <Link
+              href="/gym/use-of-english"
+              className={
+                diagnosticCompleted
+                  ? "inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
+                  : "inline-flex min-h-10 items-center gap-2 rounded-lg bg-panel-muted px-4 text-sm font-semibold"
+              }
+            >
               <ScrollText className="size-4" aria-hidden="true" />
               Luyện Use of English
             </Link>

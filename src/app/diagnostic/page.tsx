@@ -1,43 +1,48 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { Activity, ArrowRight, CheckCircle2, ClipboardList, RotateCcw } from "lucide-react";
+import { ArrowRight, Sparkles, Target, Timer } from "lucide-react";
 
 import { startDiagnosticAction } from "@/app/diagnostic/actions";
-import { DifficultyBadge } from "@/components/ui/Badges";
 import { LearnerCard } from "@/components/ui/LearnerCard";
 import { FormSubmitButton } from "@/components/ui/FormSubmitButton";
 import { requireUser } from "@/lib/auth/session";
-import { getLatestDiagnosticAttempt } from "@/lib/diagnostic";
-import { diagnosticBlueprint, getDiagnosticCoverage } from "@/lib/diagnostic-blueprint";
+import { getLatestDiagnosticAttempt, hasCompletedDiagnostic } from "@/lib/diagnostic";
+import { getDiagnosticCoverage } from "@/lib/diagnostic-blueprint";
 
 export const metadata: Metadata = {
-  title: "Diagnostic",
-  description: "Làm bài kiểm tra đầu vào để biết trình độ và phần nào cần luyện trước.",
+  title: "Bài kiểm tra đầu vào",
+  description: "Làm bài kiểm tra đầu vào để ước lượng trình độ và nhận gợi ý bài luyện phù hợp trong Gym.",
 };
 
-const benefitCards = [
+const introCards = [
   {
-    title: "15-25 phút",
-    description: "Ngắn gọn, đủ để ước lượng sơ bộ.",
-    icon: Activity,
+    title: "Ước lượng trình độ",
+    description: "Biết bạn đang ở đâu với Use of English và Reading.",
+    icon: Target,
   },
   {
-    title: "Dùng kho bài đã xuất bản",
-    description: "Câu hỏi được chọn từ bài đã được admin kiểm tra.",
-    icon: ClipboardList,
+    title: "Làm một lần khi bắt đầu",
+    description: "Bài ngắn khoảng 20 phút, không cần chuẩn bị trước.",
+    icon: Timer,
   },
   {
-    title: "Có thể làm lại",
-    description: "Kết quả mới sẽ cập nhật lại gợi ý trong Gym.",
-    icon: RotateCcw,
+    title: "Gợi ý bài luyện",
+    description: "Kết quả được dùng để đề xuất bài phù hợp trong Gym.",
+    icon: Sparkles,
   },
 ];
 
-function parseBreakdown(value: unknown) {
-  return Array.isArray(value)
-    ? (value as Array<{ label?: string; statusLabel?: string; accuracy?: number | null; attempted?: number }>)
-    : [];
-}
+const testSections = [
+  {
+    title: "Use of English",
+    description: "Ngữ pháp, từ vựng, cloze, word formation và viết lại câu.",
+  },
+  {
+    title: "Reading",
+    description: "Đọc hiểu, suy luận và từ vựng trong ngữ cảnh.",
+  },
+];
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -49,33 +54,23 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
 
   const error = typeof params.error === "string" ? params.error : "";
 
-  const [latest, coverage] = await Promise.all([
+  const [latest, completed] = await Promise.all([
     getLatestDiagnosticAttempt(user.id),
-    getDiagnosticCoverage(),
+    hasCompletedDiagnostic(user.id),
   ]);
 
-  const breakdown = parseBreakdown(latest?.skillBreakdownJson).slice(0, 4);
-
-  const canStart = coverage.sections.every(
-    (section) => !section.targetCount || section.eligibleQuestions >= section.targetCount,
-  );
-
-  // Derive booleans for CTA states
   const isInProgress = latest?.status === "IN_PROGRESS";
-  const canViewResult = latest && latest.status !== "IN_PROGRESS";
 
-  const latestStatusLabel: Record<string, string> = {
-    IN_PROGRESS: "Đang làm dở",
-    COMPLETED: "Đã hoàn thành",
-    NEEDS_REVIEW: "Cần chấm tay",
-    ABANDONED: "Đã bỏ dở",
-  };
-  const statusLabel = latest ? (latestStatusLabel[latest.status] ?? "Chưa rõ") : null;
+  // Diagnostic is onboarding-only: once finished, learners practice in Gym.
+  if (completed && !isInProgress) redirect("/gym");
 
-  const totalScoredQuestions = diagnosticBlueprint
-    .flatMap((s) => s.items)
-    .filter((item) => item.scored && !item.optional)
-    .reduce((sum, item) => sum + item.targetCount, 0);
+  let canStart = true;
+  if (!isInProgress) {
+    const coverage = await getDiagnosticCoverage();
+    canStart = coverage.sections.every(
+      (section) => !section.targetCount || section.eligibleQuestions >= section.targetCount,
+    );
+  }
 
   return (
     <div className="grid gap-6">
@@ -94,19 +89,13 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
         </h1>
 
         <p className="mt-4 max-w-2xl text-base leading-8 text-ink-soft">
-          Bài gồm Use of English và Reading. Kết quả ước lượng trình độ và giúp Gym đề xuất bài luyện phù hợp. Viết và
-          phần nghe không tính vào điểm tự động.
+          Bài kiểm tra đầu vào gồm Use of English và Reading. Kết quả giúp ước lượng trình độ ban đầu và gợi ý bài
+          luyện phù hợp trong Gym.
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-2 text-sm font-medium text-accent-strong">
-          <span className="rounded-full bg-panel px-4 py-2 shadow-[inset_0_0_0_1px_var(--line)]">
-            {totalScoredQuestions} câu tự chấm
-          </span>
-          <span className="rounded-full bg-panel px-4 py-2 shadow-[inset_0_0_0_1px_var(--line)]">20-30 phút</span>
-          <span className="rounded-full bg-panel px-4 py-2 shadow-[inset_0_0_0_1px_var(--line)]">
-            Dùng kho bài đã xuất bản
-          </span>
-        </div>
+        <p className="mt-2 max-w-2xl text-sm leading-7 text-ink-soft">
+          Writing và Listening sẽ được luyện riêng trong Gym.
+        </p>
 
         {isInProgress ? (
           <Link href="/diagnostic/start" className="btn btn-primary mt-7">
@@ -116,155 +105,45 @@ export default async function DiagnosticPage({ searchParams }: PageProps) {
         ) : canStart ? (
           <form action={startDiagnosticAction} className="mt-7">
             <FormSubmitButton pendingLabel="Đang tạo bài...">
-              {latest ? "Làm lại bài kiểm tra" : "Làm bài kiểm tra đầu vào"}
+              Làm bài kiểm tra đầu vào
               <ArrowRight className="size-4" aria-hidden="true" />
             </FormSubmitButton>
           </form>
         ) : (
-          <div
-            role="alert"
-            className="mt-7 max-w-xl rounded-2xl bg-panel px-4 py-3 text-sm font-semibold text-ink-soft shadow-[inset_0_0_0_1px_var(--line)]"
-          >
-            Chưa đủ câu hỏi để bắt đầu. Admin cần thêm nội dung vào kho.
+          <div className="mt-7 grid max-w-xl gap-3">
+            <p className="rounded-2xl bg-panel px-4 py-3 text-sm font-semibold text-ink-soft shadow-[inset_0_0_0_1px_var(--line)]">
+              Bài kiểm tra đang được chuẩn bị. Trong lúc chờ, bạn có thể vào Gym luyện trước.
+            </p>
+            <Link href="/gym" className="btn btn-secondary justify-self-start">
+              Vào Gym
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
         )}
       </section>
 
-      {/* Previous result */}
-      {latest ? (
-        <LearnerCard>
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-accent">Kết quả gần nhất</p>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                    Trình độ ước lượng
-                  </h2>
-                </div>
-                {latest.estimatedLevel ? (
-                  <DifficultyBadge difficulty={latest.estimatedLevel} />
-                ) : null}
-              </div>
+      {/* Why take the test */}
+      <div className="grid gap-3 md:grid-cols-3">
+        {introCards.map(({ title, description, icon: Icon }) => (
+          <LearnerCard key={title}>
+            <Icon className="size-5 text-accent" aria-hidden="true" />
+            <h2 className="mt-4 font-semibold">{title}</h2>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">{description}</p>
+          </LearnerCard>
+        ))}
+      </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl bg-panel-muted p-4">
-                  <p className="text-xs font-semibold text-ink-soft">Điểm</p>
-                  <p className="mt-2 text-2xl font-semibold tabular-nums">
-                    {latest.score ?? "—"}/{latest.total ?? "—"}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-panel-muted p-4">
-                  <p className="text-xs font-semibold text-ink-soft">Ngày làm</p>
-                  <p className="mt-2 text-sm font-semibold">
-                    {latest.completedAt?.toLocaleDateString("vi-VN") ?? "Đang làm dở"}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-panel-muted p-4">
-                  <p className="text-xs font-semibold text-ink-soft">Trạng thái</p>
-                  <p className="mt-2 text-sm font-semibold">{statusLabel}</p>
-                </div>
-              </div>
-
-              {canViewResult ? (
-                <Link href={`/diagnostic/result?attempt=${latest.id}`} className="btn btn-sm btn-secondary mt-5">
-                  Xem kết quả chi tiết
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              ) : null}
-            </div>
-
-            <div className="lg:w-72">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="size-5 text-accent" aria-hidden="true" />
-                <h3 className="font-semibold">Phần cần chú ý</h3>
-              </div>
-              <div className="mt-4 grid gap-2">
-                {breakdown.length ? (
-                  breakdown.map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between gap-3 rounded-2xl bg-panel-muted px-3 py-2.5 text-sm"
-                    >
-                      <span className="font-semibold">{item.label}</span>
-                      <span className="text-ink-soft">{item.statusLabel}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
-                    Chưa có breakdown kỹ năng.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </LearnerCard>
-      ) : (
-        /* No previous result — show benefit cards */
-        <div className="grid gap-3 md:grid-cols-3">
-          {benefitCards.map(({ title, description, icon: Icon }) => (
-            <LearnerCard key={title}>
-              <Icon className="size-5 text-accent" aria-hidden="true" />
-              <h2 className="mt-4 font-semibold">{title}</h2>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">{description}</p>
-            </LearnerCard>
-          ))}
-        </div>
-      )}
-
-      {/* Coverage section */}
+      {/* What the test covers */}
       <LearnerCard>
         <h2 className="text-lg font-semibold">Nội dung bài kiểm tra</h2>
-
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {coverage.sections.map((section) => {
-            // Determine display message based on targetCount and section type
-            let displayMessage: string;
-            if (section.targetCount === 0 && section.publishedQuestions === 0) {
-              // Optional section with no questions
-              displayMessage =
-                section.id === "listening"
-                  ? "Chưa có dữ liệu, chưa tính điểm."
-                  : section.id === "writing"
-                    ? "Không bắt buộc, không tính điểm."
-                    : "Chưa có dữ liệu";
-            } else if (section.targetCount === 0) {
-              // Optional section with questions available
-              displayMessage = section.id === "listening"
-                ? "Có dữ liệu, không bắt buộc."
-                : "Không bắt buộc.";
-            } else {
-              displayMessage = section.message;
-            }
-
-            return (
-              <div
-                key={section.id}
-                className="rounded-2xl bg-panel-muted p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-semibold">{section.title}</h3>
-                    <p className="mt-1 text-sm text-ink-soft">{displayMessage}</p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-panel px-2.5 py-1 text-xs font-semibold text-ink-soft tabular-nums shadow-[inset_0_0_0_1px_var(--line)]">
-                    {section.targetCount > 0
-                      ? `${section.eligibleQuestions}/${section.targetCount}`
-                      : "Tùy chọn"}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+          {testSections.map((section) => (
+            <div key={section.title} className="rounded-2xl bg-panel-muted p-4">
+              <h3 className="font-semibold">{section.title}</h3>
+              <p className="mt-1 text-sm leading-6 text-ink-soft">{section.description}</p>
+            </div>
+          ))}
         </div>
-
-        {coverage.warnings.length ? (
-          <div role="alert" className="mt-4 rounded-2xl bg-warning-soft p-4 text-sm leading-6 text-warning">
-            {coverage.warnings.slice(0, 3).map((warning) => (
-              <p key={warning}>{warning}</p>
-            ))}
-          </div>
-        ) : null}
       </LearnerCard>
     </div>
   );

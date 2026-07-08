@@ -2,12 +2,13 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, Target } from "lucide-react";
 import { DifficultyBadge } from "@/components/ui/Badges";
 import { getCurrentUser } from "@/lib/auth/session";
+import { hasCompletedDiagnostic } from "@/lib/diagnostic";
 import { getPersonalizedRecommendations } from "@/lib/recommendations";
 import { prisma } from "@/lib/prisma";
 
 export default async function GymReadingPage() {
   const user = await getCurrentUser();
-  const [problems, profile, recommendations] = await Promise.all([
+  const [problems, profile, recommendations, diagnosticCompleted] = await Promise.all([
     prisma.problem.findMany({
       where: { contentStatus: "PUBLISHED", skillType: "READING" },
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
@@ -15,6 +16,7 @@ export default async function GymReadingPage() {
     }),
     user ? prisma.userSkillProfile.findUnique({ where: { userId_skillType: { userId: user.id, skillType: "READING" } } }) : Promise.resolve(null),
     user ? getPersonalizedRecommendations(user.id, 8) : Promise.resolve([]),
+    user ? hasCompletedDiagnostic(user.id) : Promise.resolve(false),
   ]);
   const readingRecommendations = recommendations.filter((problem) => problem.skillType === "READING").slice(0, 3);
 
@@ -31,12 +33,14 @@ export default async function GymReadingPage() {
             <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft text-pretty">
               Luyện passage, inference, vocabulary in context, tone và purpose. Bắt đầu bằng bài vừa sức, sau đó nâng độ khó theo kết quả.
             </p>
-            <div className="mt-5">
-              <Link href="/diagnostic" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-panel-muted px-3 text-sm font-semibold">
-                <Target className="size-4" aria-hidden="true" />
-                Kiểm tra trình độ
-              </Link>
-            </div>
+            {!diagnosticCompleted ? (
+              <div className="mt-5">
+                <Link href="/diagnostic" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-panel-muted px-3 text-sm font-semibold">
+                  <Target className="size-4" aria-hidden="true" />
+                  Kiểm tra trình độ
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
@@ -59,7 +63,13 @@ export default async function GymReadingPage() {
                   <span className="text-ink-soft"> · {problem.reason}</span>
                 </Link>
               ))}
-              {!readingRecommendations.length ? <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có gợi ý Reading riêng. Hãy làm diagnostic hoặc một bài đọc ngắn.</p> : null}
+              {!readingRecommendations.length ? (
+                <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">
+                  {diagnosticCompleted
+                    ? "Chưa có gợi ý Reading riêng. Hãy làm một bài đọc ngắn bên dưới."
+                    : "Chưa có gợi ý Reading riêng. Hãy làm bài kiểm tra đầu vào hoặc một bài đọc ngắn."}
+                </p>
+              ) : null}
             </div>
           </div>
         </section>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
+  BarChart3,
   BookOpenText,
   CalendarDays,
   Dumbbell,
@@ -11,6 +12,8 @@ import {
   Target,
   Trophy,
 } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasCompletedDiagnostic } from "@/lib/diagnostic";
 
 export const metadata: Metadata = {
   title: "Trang chủ",
@@ -36,14 +39,41 @@ const heroPreviewCards = [
   },
 ];
 
-const routeSteps = [
+const heroPreviewCardsAfterDiagnostic = [
   {
-    title: "Kiểm tra đầu vào",
-    description: "Làm một bài ngắn để ước lượng trình độ và biết mình đang yếu phần nào.",
-    icon: Target,
-    href: "/diagnostic",
-    linkLabel: "Làm bài kiểm tra đầu vào",
+    title: "Gym",
+    description: "Luyện Reading, Use of English, Word Formation…",
+    icon: Dumbbell,
   },
+  {
+    title: "Contests",
+    description: "Làm đề theo thời gian như thi thật",
+    icon: Trophy,
+  },
+  {
+    title: "Wiki",
+    description: "Đọc chiến thuật làm bài",
+    icon: BookOpenText,
+  },
+];
+
+const diagnosticRouteStep = {
+  title: "Kiểm tra đầu vào",
+  description: "Làm một bài ngắn để ước lượng trình độ và biết mình đang yếu phần nào.",
+  icon: Target,
+  href: "/diagnostic",
+  linkLabel: "Làm bài kiểm tra đầu vào",
+};
+
+const contestsRouteStep = {
+  title: "Thử sức với Contests",
+  description: "Làm đề theo thời gian như thi thật khi muốn kiểm tra sức bền.",
+  icon: Medal,
+  href: "/contests",
+  linkLabel: "Xem Contests",
+};
+
+const baseRouteSteps = [
   {
     title: "Luyện trong Gym",
     description: "Luyện từng dạng bài Reading, Use of English… theo đúng phần cần cải thiện.",
@@ -67,7 +97,25 @@ const routeSteps = [
   },
 ];
 
-const learningModes = [
+const diagnosticLearningMode = {
+  title: "Kiểm tra đầu vào",
+  purpose: "Bài kiểm tra ngắn để ước lượng trình độ và tìm điểm yếu.",
+  suggestion: "Chỉ cần làm một lần khi mới bắt đầu.",
+  icon: Target,
+  href: "/diagnostic",
+  linkLabel: "Làm bài kiểm tra đầu vào",
+};
+
+const analyticsLearningMode = {
+  title: "Thống kê",
+  purpose: "Xem độ chính xác theo kỹ năng và tiến bộ theo thời gian.",
+  suggestion: "Ghé lại sau mỗi buổi luyện để biết phần nào cần ưu tiên.",
+  icon: BarChart3,
+  href: "/analytics",
+  linkLabel: "Xem thống kê",
+};
+
+const baseLearningModes = [
   {
     title: "Gym",
     purpose: "Trung tâm luyện tập chính: chọn kỹ năng, làm bài theo dạng và độ khó.",
@@ -92,14 +140,6 @@ const learningModes = [
     href: "/wiki",
     linkLabel: "Đọc Wiki",
   },
-  {
-    title: "Kiểm tra đầu vào",
-    purpose: "Bài kiểm tra ngắn để ước lượng trình độ và tìm điểm yếu.",
-    suggestion: "Làm lại sau một thời gian luyện để xem mình tiến bộ ở đâu.",
-    icon: Target,
-    href: "/diagnostic",
-    linkLabel: "Làm bài kiểm tra đầu vào",
-  },
 ];
 
 const audienceItems = [
@@ -120,7 +160,18 @@ const audienceItems = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+  const diagnosticCompleted = user ? await hasCompletedDiagnostic(user.id) : false;
+
+  const previewCards = diagnosticCompleted ? heroPreviewCardsAfterDiagnostic : heroPreviewCards;
+  const routeSteps = diagnosticCompleted
+    ? [...baseRouteSteps, contestsRouteStep]
+    : [diagnosticRouteStep, ...baseRouteSteps];
+  const learningModes = diagnosticCompleted
+    ? [...baseLearningModes, analyticsLearningMode]
+    : [...baseLearningModes, diagnosticLearningMode];
+
   return (
     <div className="grid gap-14 py-4 sm:gap-16 sm:py-6">
       {/* Hero */}
@@ -135,16 +186,32 @@ export default function Home() {
               Luyện tiếng Anh nâng cao rõ ràng hơn mỗi ngày
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-ink-soft sm:text-lg">
-              Làm bài kiểm tra đầu vào, xem điểm yếu cần luyện, rồi vào Gym để luyện từng dạng bài chuyên Anh/HSG.
+              {diagnosticCompleted
+                ? "Vào Gym để luyện từng dạng bài chuyên Anh/HSG theo gợi ý, rồi ôn lại câu sai đến khi chắc."
+                : "Làm bài kiểm tra đầu vào, xem điểm yếu cần luyện, rồi vào Gym để luyện từng dạng bài chuyên Anh/HSG."}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/diagnostic" className="btn btn-primary">
-                Làm bài kiểm tra đầu vào
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-              <Link href="/gym" className="btn btn-secondary">
-                Vào Gym luyện tập
-              </Link>
+              {diagnosticCompleted ? (
+                <>
+                  <Link href="/gym" className="btn btn-primary">
+                    Vào Gym luyện tập
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
+                  <Link href="/wrong-questions" className="btn btn-secondary">
+                    Ôn lại câu sai
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/diagnostic" className="btn btn-primary">
+                    Làm bài kiểm tra đầu vào
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
+                  <Link href="/gym" className="btn btn-secondary">
+                    Vào Gym luyện tập
+                  </Link>
+                </>
+              )}
             </div>
             <p className="mt-6 text-sm text-ink-soft">
               Miễn phí trong giai đoạn beta. Chỉ cần một tài khoản học viên.
@@ -152,7 +219,7 @@ export default function Home() {
           </div>
 
           <div className="grid gap-3">
-            {heroPreviewCards.map((card) => {
+            {previewCards.map((card) => {
               const Icon = card.icon;
               return (
                 <div key={card.title} className="surface flex items-start gap-4 rounded-3xl p-5">
@@ -180,7 +247,9 @@ export default function Home() {
             Học theo lộ trình rõ ràng
           </h2>
           <p className="mt-3 text-base leading-7 text-ink-soft">
-            Bắt đầu bằng một bài kiểm tra ngắn, sau đó luyện đúng phần đang yếu và ôn lại lỗi cũ.
+            {diagnosticCompleted
+              ? "Luyện đúng phần đang yếu trong Gym, ôn lại lỗi cũ và thử sức với đề khi đã sẵn sàng."
+              : "Bắt đầu bằng một bài kiểm tra ngắn, sau đó luyện đúng phần đang yếu và ôn lại lỗi cũ."}
           </p>
         </div>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
