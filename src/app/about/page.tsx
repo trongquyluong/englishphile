@@ -1,15 +1,17 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, ArrowUpRight, GraduationCap, Mail, PenLine, Users } from "lucide-react";
+import { GraduationCap, PenLine, Users, Mail, ExternalLink } from "lucide-react";
 import { FounderPortrait } from "@/components/about/FounderPortrait";
+import { EnglishphileLogo } from "@/components/about/EnglishphileLogo";
 
 export const metadata: Metadata = {
   title: "Về Englishphile",
   description:
-    "Câu chuyện Englishphile: bắt đầu từ một blog ôn chuyên Anh năm 2022, nay mở rộng thành website luyện tập cho học sinh muốn vào lớp chuyên Anh.",
+    "Câu chuyện Englishphile: bắt đầu từ một blog ôn chuyên Anh năm 2022, nay mở rộng thành website ôn thi chuyên Anh với bài luyện và cách chữa lỗi có hệ thống.",
 };
 
 const CONTACT_EMAIL = "trongquy.forwork@gmail.com";
+const FACEBOOK_URL = "https://www.facebook.com/makoto.is.me";
+const INSTAGRAM_URL = "https://www.instagram.com/h.makoto_/";
 const LINKEDIN_URL = "https://www.linkedin.com/in/quy-luong-trong/";
 
 const milestones = [
@@ -20,38 +22,48 @@ const milestones = [
   {
     period: "2023–2025",
     detail:
-      "Cộng đồng lớn dần quanh các bài viết, hai mùa thi thử và một sự kiện chia sẻ kinh nghiệm ôn thi vào trường chuyên.",
+      "Cộng đồng lớn dần quanh các bài viết, ba mùa thi thử và hai sự kiện ôn thi vào trường chuyên.",
   },
   {
     period: "2026",
-    detail: "Englishphile mở rộng thành website luyện tập: đọc, làm bài và xem lại lỗi ở cùng một chỗ.",
+    detail:
+      "Englishphile chuyển lên website để các bạn có thể làm bài, xem lỗi và tìm phần cần luyện tiếp rõ ràng hơn.",
   },
 ];
 
 const blogStats = [
   { value: "8.000+", label: "người theo dõi" },
   { value: "100+", label: "bài viết" },
-  { value: "2", label: "mùa thi thử" },
-  { value: "1", label: "sự kiện ôn thi vào chuyên" },
+  { value: "3", label: "mùa thi thử" },
+  { value: "2", label: "sự kiện ôn thi vào chuyên" },
 ];
+
+const founderProfile = {
+  name: "Lương Trọng Quý",
+  tagline: "Founder của Englishphile · ASEAN Scholar tại National Junior College · cựu học sinh chuyên Anh Quốc Học Huế",
+};
+
+const founderIntro =
+  "Tớ bắt đầu Englishphile từ thời còn học chuyên Anh, khi nhận ra nhiều bạn ôn thi cần tài liệu rõ ràng hơn, bài luyện đủ khó hơn và một cách chữa lỗi có hệ thống hơn.";
 
 const founderHighlights = [
   {
     icon: GraduationCap,
     title: "Chuyên Anh & học thuật",
     items: [
-      "Cựu học sinh chuyên Anh, THPT chuyên Quốc Học Huế",
-      "Giải học sinh giỏi tiếng Anh",
       "ASEAN Scholar tại National Junior College (Singapore)",
+      "Á khoa chuyên Anh Quốc Học Huế 2023",
+      "Giải nhất HSG cấp Tỉnh lớp 9 môn tiếng Anh",
+      "Giải Khuyến khích HSGQG môn tiếng Anh 2023",
     ],
   },
   {
     icon: PenLine,
-    title: "Nội dung & mentoring",
+    title: "Englishphile & mentoring",
     items: [
       "Viết hơn 100 bài về phương pháp và các dạng bài chuyên Anh",
       "Soạn đề thi thử, ghi chú ôn tập và bài luyện bám theo điểm yếu",
-      "Mentor học sinh THCS ôn vào lớp chuyên Anh",
+      "Mentor các bạn cấp hai ôn vào lớp chuyên Anh",
     ],
   },
   {
@@ -60,30 +72,37 @@ const founderHighlights = [
     items: [
       "Secretary-General và Board Advisor tại ACHMUN",
       "Tổ chức hội nghị MUN với hơn 200 đại biểu",
-      "Workshop Junior High Compass với hơn 70 người tham dự và gần 10 diễn giả",
+      "Workshop Junior High Compass với hơn 70 người tham dự",
     ],
   },
+];
+
+const awardsTimeline = [
+  { year: "2024", detail: "Học bổng toàn phần ASEAN Scholar" },
+  { year: "2023", detail: "Á khoa chuyên Anh Quốc Học Huế" },
+  { year: "2023–2024", detail: "Giải nhì HSG cấp tỉnh THPT môn tiếng Anh" },
+  { year: "Lớp 9", detail: "Giải nhất HSG cấp Tỉnh lớp 9 môn tiếng Anh" },
+  { year: "Lớp 8", detail: "Giải nhì HSG cấp Tỉnh lớp 9 môn tiếng Anh" },
 ];
 
 export default function AboutPage() {
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-6">
-      {/* Hero — personal intro */}
+      {/* Hero */}
       <section className="surface-mint rounded-[2rem] p-6 sm:p-10" aria-labelledby="about-title">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <p className="text-sm font-semibold text-accent">Về Englishphile</p>
             <h1 id="about-title" className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-              Từ một blog ôn chuyên Anh đến một website luyện tập cá nhân
+              Từ một blog ôn chuyên Anh đến website ôn thi chuyên Anh
             </h1>
             <p className="mt-4 text-base leading-8 text-ink-soft text-pretty">
-              Englishphile bắt đầu vào năm 2022 như một blog chia sẻ kiến thức chuyên Anh. Sau gần bốn năm, mình đang mở
-              rộng dự án thành một website — để học sinh có thể vừa đọc, vừa luyện, vừa xem lại lỗi của mình rõ ràng
-              hơn.
+              Englishphile bắt đầu vào năm 2022 như một blog chia sẻ kiến thức chuyên Anh. Sau gần bốn năm, tớ đang mở
+              rộng dự án thành website — để các bạn có thể vừa đọc, vừa luyện, vừa xem lại lỗi của mình rõ ràng hơn.
             </p>
           </div>
           <div className="mx-auto w-full max-w-[17rem] sm:max-w-xs lg:justify-self-end">
-            <FounderPortrait />
+            <EnglishphileLogo />
           </div>
         </div>
       </section>
@@ -91,17 +110,21 @@ export default function AboutPage() {
       {/* Story */}
       <section className="surface rounded-3xl p-6 md:p-8" aria-labelledby="story-heading">
         <h2 id="story-heading" className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-          Englishphile bắt đầu từ một blog nhỏ
+          Englishphile là gì?
         </h2>
         <div className="mt-4 grid max-w-3xl gap-4 text-[15px] leading-7 text-ink-soft text-pretty">
           <p>
-            Năm 2022, mình mở một blog để chia sẻ những gì mình học được khi ôn chuyên Anh. Lý do rất đơn giản: nhiều
-            bạn quanh mình không có đủ tài liệu rõ ràng — kinh nghiệm làm bài, cách học từng dạng, đề luyện chất lượng
-            đều nằm rải rác ở nhiều nơi.
+            Năm 2022, tớ mở một blog để chia sẻ những gì tớ học được khi ôn chuyên Anh. Lý do rất đơn giản: nhiều bạn
+            quanh tớ không có đủ tài liệu rõ ràng — kinh nghiệm làm bài, cách học từng dạng, đề luyện chất lượng đều nằm
+            rải rác ở nhiều nơi.
           </p>
           <p>
-            Gần bốn năm sau, blog đã đi xa hơn dự tính ban đầu. Cùng các cộng sự, mình duy trì bài viết đều đặn, đồng tổ
-            chức hai mùa thi thử và một sự kiện chia sẻ kinh nghiệm ôn thi vào trường chuyên.
+            Gần bốn năm sau, blog đã đi xa hơn dự tính ban đầu. Cùng các cộng sự, tớ duy trì bài viết đều đặn, đồng tổ
+            chức ba mùa thi thử và hai sự kiện ôn thi vào trường chuyên.
+          </p>
+          <p>
+            Năm 2026, tớ bắt đầu chuyển Englishphile lên website để việc ôn thi không chỉ dừng lại ở việc đọc bài viết. Các
+            bạn có thể làm bài, xem lại lỗi và tìm phần cần luyện tiếp rõ ràng hơn.
           </p>
         </div>
 
@@ -128,32 +151,48 @@ export default function AboutPage() {
         </ol>
 
         <p className="mt-7 max-w-3xl text-[15px] leading-7 text-ink-soft text-pretty">
-          Mục tiêu của giai đoạn mới vẫn như những ngày đầu, chỉ rộng hơn: đến được với nhiều học sinh muốn vào lớp
-          chuyên Anh ở các trường chuyên trên cả nước — và lần này, không chỉ dừng ở việc đọc.
+          Mục tiêu vẫn như những ngày đầu, chỉ rộng hơn: đến được với nhiều bạn muốn vào lớp chuyên Anh ở các trường
+          chuyên trên cả nước — và lần này, không chỉ dừng ở việc đọc.
         </p>
       </section>
 
       {/* Founder */}
       <section className="surface rounded-3xl p-6 md:p-8" aria-labelledby="founder-heading">
         <h2 id="founder-heading" className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-          Người làm Englishphile
+          Và về tớ, founder của Englishphile
         </h2>
-        <div className="mt-4 grid max-w-3xl gap-4 text-[15px] leading-7 text-ink-soft text-pretty">
-          <p>
-            Mình là Lương Trọng Quý, người viết phần lớn nội dung trên Englishphile từ những ngày đầu. Mình từng học
-            chuyên Anh ở THPT chuyên Quốc Học Huế và hiện là ASEAN Scholar tại National Junior College (Singapore).
-          </p>
-          <p>
-            Englishphile được xây từ trải nghiệm rất thật: quá trình ôn chuyên Anh cần tài liệu rõ ràng, bài luyện đủ
-            khó, và một cách nhìn lại lỗi sau mỗi lần làm bài. Hồi ôn thi, mình phải tự ghép ba thứ đó từ nhiều nguồn
-            khác nhau — website này là cách mình gom chúng về một chỗ.
-          </p>
-          <p>
-            Mấy năm qua, mình cũng mentor các bạn cấp hai ôn vào lớp chuyên Anh: tự soạn đề thi thử, ghi chú ôn tập và
-            bài luyện bám theo điểm yếu của từng bạn. Nhiều thứ trên website này bắt đầu từ chính những buổi học đó.
-          </p>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-[auto_1fr] lg:items-start">
+          {/* Founder photo */}
+          <div className="mx-auto w-full max-w-[14rem] sm:max-w-[16rem]">
+            <FounderPortrait />
+          </div>
+
+          {/* Founder intro */}
+          <div className="space-y-4">
+            <div>
+              <p className="text-lg font-semibold">{founderProfile.name}</p>
+              <p className="mt-1 text-sm leading-relaxed text-ink-soft">{founderProfile.tagline}</p>
+            </div>
+
+            <p className="text-[15px] leading-7 text-ink-soft text-pretty">{founderIntro}</p>
+
+            {/* Awards timeline */}
+            <div className="mt-4 rounded-2xl bg-panel-muted p-4">
+              <p className="mb-3 text-sm font-semibold">Thành tích nổi bật</p>
+              <ol className="space-y-2">
+                {awardsTimeline.map((award) => (
+                  <li key={award.year + award.detail} className="flex gap-3 text-sm">
+                    <span className="w-16 flex-shrink-0 font-medium text-accent-strong">{award.year}</span>
+                    <span className="text-ink-soft">{award.detail}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
         </div>
 
+        {/* Highlights */}
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {founderHighlights.map((highlight) => {
             const Icon = highlight.icon;
@@ -174,49 +213,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Why the website exists */}
-      <section className="surface rounded-3xl p-6 md:p-8" aria-labelledby="why-heading">
-        <h2 id="why-heading" className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
-          Vì sao mình làm website này
-        </h2>
-        <div className="mt-4 grid max-w-3xl gap-4 text-[15px] leading-7 text-ink-soft text-pretty">
-          <p>
-            Blog giúp mình chia sẻ cách học. Nhưng đọc xong, phần khó nhất vẫn nằm ở phía bạn: tìm đề phù hợp, tự chấm,
-            tự đoán xem mình yếu ở đâu. Website là bước tiếp theo để phần đó bớt mù mờ.
-          </p>
-          <p>
-            Trên Englishphile, bạn bắt đầu bằng{" "}
-            <Link href="/diagnostic" className="font-semibold text-accent-strong hover:underline">
-              bài kiểm tra đầu vào
-            </Link>{" "}
-            để có ước lượng ban đầu về trình độ.{" "}
-            <Link href="/gym" className="font-semibold text-accent-strong hover:underline">
-              Gym
-            </Link>{" "}
-            là chỗ luyện từng kỹ năng, với gợi ý bám theo phần bạn còn yếu.{" "}
-            <Link href="/wiki" className="font-semibold text-accent-strong hover:underline">
-              Wiki
-            </Link>{" "}
-            tiếp tục vai trò của blog — nơi lưu chiến thuật và lý thuyết. Còn{" "}
-            <Link href="/contests" className="font-semibold text-accent-strong hover:underline">
-              Contests
-            </Link>{" "}
-            dành cho lúc bạn muốn thử sức với đề trong điều kiện tính giờ.
-          </p>
-          <p>
-            Mục tiêu không phải là làm mọi thứ phức tạp hơn, mà là làm quá trình ôn thi rõ ràng hơn: làm bài, thấy phần
-            yếu, luyện tiếp, rồi quay lại xem lỗi.
-          </p>
-        </div>
-        <Link
-          href="/diagnostic"
-          className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-accent transition-colors duration-150 hover:text-accent-strong"
-        >
-          Bắt đầu với bài kiểm tra đầu vào
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Link>
-      </section>
-
       {/* Contact */}
       <section className="surface rounded-3xl p-6 md:p-8" aria-labelledby="contact-heading">
         <h2 id="contact-heading" className="text-xl font-semibold tracking-tight text-balance md:text-2xl">
@@ -226,21 +222,58 @@ export default function AboutPage() {
           Nếu bạn gặp lỗi, muốn góp ý nội dung, hoặc cần hỏi về dữ liệu tài khoản, hãy liên hệ qua email dưới đây.
         </p>
         <p className="mt-4 text-sm font-semibold text-accent-strong">{CONTACT_EMAIL}</p>
+
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <a href={`mailto:${CONTACT_EMAIL}`} className="btn btn-primary">
+          {/* Primary: Email */}
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="btn btn-primary"
+            aria-label="Gửi email cho Englishphile"
+          >
             <Mail className="size-4" aria-hidden="true" />
             Gửi email
           </a>
-          <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-            Xem LinkedIn
-            <ArrowUpRight className="size-4" aria-hidden="true" />
+        </div>
+
+        {/* Social links - smaller, secondary */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <a
+            href={FACEBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost text-ink-soft"
+            aria-label="Facebook của tớ"
+          >
+            Facebook
+            <ExternalLink className="size-3" aria-hidden="true" />
+          </a>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost text-ink-soft"
+            aria-label="Instagram của tớ"
+          >
+            Instagram
+            <ExternalLink className="size-3" aria-hidden="true" />
+          </a>
+          <a
+            href={LINKEDIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-sm btn-ghost text-ink-soft"
+            aria-label="LinkedIn của tớ"
+          >
+            LinkedIn
+            <ExternalLink className="size-3" aria-hidden="true" />
           </a>
         </div>
+
         <p className="mt-4 text-sm leading-6 text-ink-soft">
           Khi báo lỗi, bạn có thể xem thêm{" "}
-          <Link href="/contact" className="font-semibold text-accent-strong hover:underline">
+          <a href="/contact" className="font-semibold text-accent-strong hover:underline">
             hướng dẫn liên hệ
-          </Link>{" "}
+          </a>{" "}
           để admin kiểm tra nhanh hơn.
         </p>
       </section>
