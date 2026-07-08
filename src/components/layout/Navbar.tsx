@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Role } from "@prisma/client";
-import { BookOpenCheck, ChevronDown, LogOut, Menu, UserRound } from "lucide-react";
+import { ChevronDown, LogOut, Menu, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/auth/actions";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { NavLinks } from "@/components/layout/NavLinks";
 import { isAdminUser } from "@/lib/auth/session";
 import { roleLabels } from "@/lib/labels";
@@ -58,9 +59,7 @@ export function Navbar({ user }: NavbarProps) {
     <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex min-h-11 items-center gap-2.5 rounded-full pr-2 font-semibold">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-accent text-on-accent">
-            <BookOpenCheck className="size-5" aria-hidden="true" />
-          </span>
+          <BrandMark />
           <span className="text-base tracking-tight">Englishphile</span>
         </Link>
 
