@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GraduationCap, PenLine, Users, Mail, ExternalLink } from "lucide-react";
+import { BookOpen, Users, Mail, ExternalLink } from "lucide-react";
 import { FounderPortrait } from "@/components/about/FounderPortrait";
 import { EnglishphileLogo } from "@/components/about/EnglishphileLogo";
 
@@ -40,42 +40,7 @@ const blogStats = [
 
 const founderProfile = {
   name: "Lương Trọng Quý",
-  tagline: "Founder của Englishphile · ASEAN Scholar tại National Junior College · cựu học sinh chuyên Anh Quốc Học Huế",
 };
-
-const founderIntro =
-  "Tớ bắt đầu Englishphile từ thời còn học chuyên Anh, khi nhận ra nhiều bạn ôn thi cần tài liệu rõ ràng hơn, bài luyện đủ khó hơn và một cách chữa lỗi có hệ thống hơn.";
-
-const founderHighlights = [
-  {
-    icon: GraduationCap,
-    title: "Chuyên Anh & học thuật",
-    items: [
-      "ASEAN Scholar tại National Junior College (Singapore)",
-      "Á khoa chuyên Anh Quốc Học Huế 2023",
-      "Giải nhất HSG cấp Tỉnh lớp 9 môn tiếng Anh",
-      "Giải Khuyến khích HSGQG môn tiếng Anh 2023",
-    ],
-  },
-  {
-    icon: PenLine,
-    title: "Englishphile & mentoring",
-    items: [
-      "Viết hơn 100 bài về phương pháp và các dạng bài chuyên Anh",
-      "Soạn đề thi thử, ghi chú ôn tập và bài luyện bám theo điểm yếu",
-      "Mentor các bạn cấp hai ôn vào lớp chuyên Anh",
-    ],
-  },
-  {
-    icon: Users,
-    title: "Leadership & sự kiện",
-    items: [
-      "Secretary-General và Board Advisor tại ACHMUN",
-      "Tổ chức hội nghị MUN với hơn 200 đại biểu",
-      "Workshop Junior High Compass với hơn 70 người tham dự",
-    ],
-  },
-];
 
 const awardsTimeline = [
   { year: "2024", detail: "Học bổng toàn phần ASEAN Scholar" },
@@ -84,6 +49,42 @@ const awardsTimeline = [
   { year: "Lớp 9", detail: "Giải nhất HSG cấp Tỉnh lớp 9 môn tiếng Anh" },
   { year: "Lớp 8", detail: "Giải nhì HSG cấp Tỉnh lớp 9 môn tiếng Anh" },
 ];
+
+const founderHighlights = [
+  {
+    icon: BookOpen,
+    title: "Học thuật",
+    items: [
+      "Cựu học sinh chuyên Anh Quốc Học Huế",
+      "Học sinh trao đổi với Đại học Jeju, Hàn Quốc",
+      "Học sinh trao đổi với Học viện Raffles, Singapore",
+    ],
+  },
+  {
+    icon: Users,
+    title: "Kinh nghiệm mentor",
+    items: [
+      "Blog hỗ trợ các bạn ôn thi chuyên Anh với hơn 7.000 người theo dõi",
+      "Diễn giả cho các sự kiện và dự án liên quan tới ôn thi chuyên Anh",
+      "4 năm cố vấn và gia sư tiếng Anh cho các bạn ôn thi vào trường chuyên",
+      "Thiết kế bài giảng, đề thi và bài tập phù hợp với năng lực của từng bạn",
+    ],
+  },
+];
+
+const otherExperience = {
+  awards: [
+    "Huy chương Vàng Singapore International Mathematical and Computational Challenge",
+    "Huy chương Vàng International Junior Informatics Olympiad 2025 & 2026",
+    "Huy chương Bạc Design Thinking with Robotics and Computational Thinking International Competition",
+    "Huy chương Đồng Southeast Asian Mathematical Olympiad",
+    "Giải Khuyến khích Vietnam Science and Engineering Fair",
+  ],
+  leadership: [
+    "Tổng thư kí Ancient Capital of Hue Model United Nations",
+    "Co-founder sự kiện The Junior High Compass",
+  ],
+};
 
 export default function AboutPage() {
   return (
@@ -168,17 +169,12 @@ export default function AboutPage() {
             <FounderPortrait />
           </div>
 
-          {/* Founder intro */}
+          {/* Founder info */}
           <div className="space-y-4">
-            <div>
-              <p className="text-lg font-semibold">{founderProfile.name}</p>
-              <p className="mt-1 text-sm leading-relaxed text-ink-soft">{founderProfile.tagline}</p>
-            </div>
-
-            <p className="text-[15px] leading-7 text-ink-soft text-pretty">{founderIntro}</p>
+            <p className="text-lg font-semibold">{founderProfile.name}</p>
 
             {/* Awards timeline */}
-            <div className="mt-4 rounded-2xl bg-panel-muted p-4">
+            <div className="rounded-2xl bg-panel-muted p-4">
               <p className="mb-3 text-sm font-semibold">Thành tích nổi bật</p>
               <ol className="space-y-2">
                 {awardsTimeline.map((award) => (
@@ -192,8 +188,8 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Highlights */}
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        {/* Highlights - 2 columns */}
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
           {founderHighlights.map((highlight) => {
             const Icon = highlight.icon;
             return (
@@ -210,6 +206,31 @@ export default function AboutPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* Other experience - full width */}
+        <div className="mt-4 rounded-2xl bg-panel-muted p-5">
+          <h3 className="mb-4 font-semibold">Kinh nghiệm khác</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Awards */}
+            <div>
+              <p className="mb-2 text-sm font-medium text-accent-strong">Giải thưởng</p>
+              <ul className="space-y-1.5 text-sm text-ink-soft">
+                {otherExperience.awards.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            {/* Leadership */}
+            <div>
+              <p className="mb-2 text-sm font-medium text-accent-strong">Leadership</p>
+              <ul className="space-y-1.5 text-sm text-ink-soft">
+                {otherExperience.leadership.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
