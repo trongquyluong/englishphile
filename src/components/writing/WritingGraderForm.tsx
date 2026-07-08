@@ -2,13 +2,12 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, Check, Lightbulb, ListChecks, LoaderCircle, LogIn, Quote, ShieldAlert, Sparkles } from "lucide-react";
+import { AlertTriangle, Check, ListChecks, LoaderCircle, LogIn, Quote, Sparkles } from "lucide-react";
 import {
   countWords,
   DEFAULT_TARGET_WORD_COUNT,
   essayTypeOptions,
   targetWordCountOptions,
-  WRITING_GRADER_MAX_PROMPT_CHARS,
   WRITING_GRADER_MAX_WORDS,
   WRITING_GRADER_MIN_WORDS,
   type EssayType,
@@ -16,9 +15,20 @@ import {
   type WritingGradeResult,
 } from "@/lib/writing-grader-shared";
 
+type PromptData = {
+  id: string;
+  slug: string;
+  title: string;
+  statement: string;
+  difficulty: string;
+  essayType?: string;
+  targetWordCount?: string;
+};
+
 type Props = {
   enabled: boolean;
   isAuthenticated: boolean;
+  prompt: PromptData;
 };
 
 const criterionRows = [
@@ -139,7 +149,7 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
             {result.detailedFeedback.map((item, index) => (
               <article key={index} className="rounded-2xl bg-panel-muted p-4">
                 <blockquote className="border-l-2 border-accent pl-3 text-sm italic leading-6 break-words">
-                  “{item.quote}”
+                  „{item.quote}&quot;
                 </blockquote>
                 <p className="mt-3 text-sm leading-6">
                   <span className="font-semibold">Vấn đề: </span>
@@ -206,15 +216,31 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
   );
 }
 
-export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
-  const [prompt, setPrompt] = useState("");
-  const [essayType, setEssayType] = useState<EssayType>("opinion");
-  const [targetWordCount, setTargetWordCount] = useState<TargetWordCount>(DEFAULT_TARGET_WORD_COUNT);
+export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
+  const [essayType, setEssayType] = useState<EssayType>(() => {
+    // Try to infer essay type from prompt metadata
+    if (prompt.essayType) {
+      const found = essayTypeOptions.find((opt) =>
+        opt.label.toLowerCase().includes(prompt.essayType!.toLowerCase()) ||
+        prompt.essayType!.toLowerCase().includes(opt.value.replace("-", " "))
+      );
+      if (found) return found.value;
+    }
+    return "opinion";
+  });
+  const [targetWordCount, setTargetWordCount] = useState<TargetWordCount>(() => {
+    // Try to infer target word count from prompt metadata
+    if (prompt.targetWordCount) {
+      const found = targetWordCountOptions.find((opt) => prompt.targetWordCount!.includes(opt.value.split("-")[0]));
+      if (found) return found.value;
+    }
+    return DEFAULT_TARGET_WORD_COUNT;
+  });
   const [essayText, setEssayText] = useState("");
-  const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<WritingGradeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dailyLimitError, setDailyLimitError] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
 
   const wordCount = useMemo(() => countWords(essayText), [essayText]);
@@ -231,12 +257,8 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
     event.preventDefault();
     if (formDisabled) return;
 
-    if (!prompt.trim()) {
-      setError("Vui lòng nhập đề bài trước khi chấm.");
-      return;
-    }
     if (!essayText.trim()) {
-      setError("Vui lòng dán bài viết của bạn vào ô bài làm.");
+      setError("Vui lòng nhập bài viết của bạn vào ô bài làm.");
       return;
     }
     if (wordCount < WRITING_GRADER_MIN_WORDS) {
@@ -247,29 +269,31 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
       setError(`Bài viết hiện có ${wordCount} từ — vượt giới hạn ${WRITING_GRADER_MAX_WORDS} từ của bản beta. Hãy rút gọn bớt.`);
       return;
     }
-    if (!consent) {
-      setError("Bạn cần xác nhận đồng ý gửi bài tới AI trước khi chấm.");
-      return;
-    }
 
     setLoading(true);
     setError(null);
+    setDailyLimitError(null);
     setResult(null);
     try {
       const response = await fetch("/api/writing/grade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: prompt.trim(),
+          promptId: prompt.id,
+          promptSlug: prompt.slug,
+          promptText: prompt.statement,
           essayType,
           targetWordCount,
           essayText,
-          consent: true,
         }),
       });
       const data = (await response.json().catch(() => null)) as { result?: WritingGradeResult; error?: string } | null;
       if (!response.ok || !data?.result) {
-        setError(data?.error ?? "Có lỗi xảy ra khi chấm bài. Vui lòng thử lại.");
+        if (response.status === 429) {
+          setDailyLimitError(data?.error ?? "Bạn đã dùng hết 5 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.");
+        } else {
+          setError(data?.error ?? "Có lỗi xảy ra khi chấm bài. Vui lòng thử lại.");
+        }
         return;
       }
       setResult(data.result);
@@ -294,7 +318,7 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
 
       {enabled && !isAuthenticated ? (
         <div className="surface flex flex-col gap-3 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm leading-6 text-ink-soft">Bạn cần đăng nhập để chấm bài Writing bằng AI.</p>
+          <p className="text-sm leading-6 text-ink-soft">Bạn cần đăng nhập để nộp bài và nhận nhận xét.</p>
           <Link href="/auth/sign-in" className="btn btn-primary shrink-0 self-start sm:self-auto">
             <LogIn className="size-4" aria-hidden="true" />
             Đăng nhập
@@ -302,24 +326,26 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
         </div>
       ) : null}
 
+      {dailyLimitError ? (
+        <div className="rounded-2xl bg-warning-soft p-4 text-sm leading-6 text-warning" role="alert">
+          <p className="font-semibold">Đã hết lượt nộp hôm nay</p>
+          <p className="mt-1">{dailyLimitError}</p>
+        </div>
+      ) : null}
+
       <form onSubmit={handleSubmit} className="surface rounded-3xl p-6 md:p-8">
         <fieldset disabled={formDisabled} className="grid gap-5">
-          <label className="grid gap-2 text-sm font-medium">
-            Đề bài (essay prompt)
-            <textarea
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              maxLength={WRITING_GRADER_MAX_PROMPT_CHARS}
-              rows={3}
-              className="field resize-y p-3"
-              placeholder="Ví dụ: Some people believe that homework should be abolished. To what extent do you agree or disagree?"
-            />
-          </label>
+          {/* Read-only prompt display */}
+          <div className="rounded-2xl bg-panel-muted p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">Đề bài</p>
+            <p className="mt-2 text-sm leading-6">{prompt.statement}</p>
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="grid gap-2 text-sm font-medium">
-              Dạng bài
+            <div className="grid gap-2 text-sm font-medium">
+              <label htmlFor="essay-type">Dạng bài</label>
               <select
+                id="essay-type"
                 value={essayType}
                 onChange={(event) => setEssayType(event.target.value as EssayType)}
                 className="field min-h-11"
@@ -330,10 +356,11 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="grid gap-2 text-sm font-medium">
-              Độ dài mục tiêu
+            </div>
+            <div className="grid gap-2 text-sm font-medium">
+              <label htmlFor="target-word-count">Độ dài mục tiêu</label>
               <select
+                id="target-word-count"
                 value={targetWordCount}
                 onChange={(event) => setTargetWordCount(event.target.value as TargetWordCount)}
                 className="field min-h-11"
@@ -344,37 +371,23 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
           </div>
 
-          <label className="grid gap-2 text-sm font-medium">
-            Bài viết của bạn
+          <div className="grid gap-2 text-sm font-medium">
+            <label htmlFor="essay-text">Bài viết của bạn</label>
             <textarea
+              id="essay-text"
               value={essayText}
               onChange={(event) => setEssayText(event.target.value)}
               rows={14}
               className="field min-h-72 resize-y p-3"
-              placeholder="Dán hoặc viết bài luận tiếng Anh của bạn ở đây..."
+              placeholder="Viết bài luận tiếng Anh của bạn ở đây..."
             />
             <span className={`tabular-nums text-xs font-medium ${wordCountTone}`}>
               {wordCount} từ · tối thiểu {WRITING_GRADER_MIN_WORDS}, tối đa {WRITING_GRADER_MAX_WORDS} từ
             </span>
-          </label>
-
-          <div className="flex gap-2.5 rounded-2xl bg-warning-soft p-4 text-sm leading-6 text-warning">
-            <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            <p>Bài viết sẽ được gửi tới AI bên thứ ba để tạo nhận xét. Đừng gửi thông tin cá nhân hoặc nội dung nhạy cảm.</p>
           </div>
-
-          <label className="flex items-start gap-2.5 text-sm leading-6">
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(event) => setConsent(event.target.checked)}
-              className="mt-1 size-4 shrink-0 accent-[var(--accent)]"
-            />
-            <span>Tớ hiểu bài viết sẽ được gửi tới AI bên thứ ba để tạo nhận xét.</span>
-          </label>
 
           {error ? (
             <p role="alert" className="rounded-2xl bg-danger-soft p-4 text-sm font-medium leading-6 text-danger">
@@ -391,7 +404,7 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
             ) : (
               <>
                 <Sparkles className="size-4" aria-hidden="true" />
-                Chấm bài
+                Nộp bài
               </>
             )}
           </button>
@@ -401,16 +414,6 @@ export function WritingGraderForm({ enabled, isAuthenticated }: Props) {
       <div ref={resultRef} aria-live="polite">
         {result ? <GradeResultView result={result} /> : null}
       </div>
-
-      {!result && !loading ? (
-        <div className="flex gap-2.5 rounded-2xl bg-panel-muted p-4 text-sm leading-6 text-ink-soft">
-          <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
-          <p>
-            Mẹo: viết đủ mở bài – thân bài – kết bài và bám sát đề trước khi gửi. AI chấm chặt tay với bài lạc đề, thiếu ý
-            hoặc quá ngắn, giống cách chấm trong phòng thi.
-          </p>
-        </div>
-      ) : null}
     </div>
   );
 }

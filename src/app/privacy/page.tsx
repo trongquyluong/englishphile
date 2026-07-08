@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Cách Englishphile lưu và sử dụng dữ liệu tài khoản, diagnostic và luyện tập trong giai đoạn beta.",
 };
 
-const lastUpdated = "08/07/2026";
+const lastUpdated = "09/07/2026";
 
 export default function PrivacyPage() {
   return (
@@ -57,9 +57,9 @@ export default function PrivacyPage() {
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Nhận xét Writing bằng AI</h2>
         <p className="mt-2">
-          Khi bạn dùng tính năng chấm bài Writing bằng AI, đề bài và bài viết bạn gửi sẽ được chuyển tới nhà cung cấp AI bên thứ ba để
-          tạo nhận xét, theo chính sách dữ liệu riêng của nhà cung cấp đó. Vì vậy, đừng đưa thông tin cá nhân hoặc nội dung nhạy cảm vào
-          bài viết. Tính năng chỉ chạy khi bạn chủ động gửi bài và xác nhận đồng ý trong form.
+          Khi bạn gửi bài viết để nhận nhận xét Writing, đề bài và bài viết sẽ được chuyển tới nhà cung cấp AI bên thứ ba để tạo nhận xét,
+          theo chính sách dữ liệu riêng của nhà cung cấp đó. Việc gửi bài được coi là đồng ý sử dụng dữ liệu cho mục đích này.
+          Vì vậy, đừng đưa thông tin cá nhân hoặc nội dung nhạy cảm vào bài viết.
         </p>
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Cookie và phiên đăng nhập</h2>

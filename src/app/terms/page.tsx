@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Điều khoản sử dụng Englishphile trong giai đoạn beta: tài khoản, nội dung, điểm số và giới hạn trách nhiệm.",
 };
 
-const lastUpdated = "08/07/2026";
+const lastUpdated = "09/07/2026";
 
 export default function TermsPage() {
   return (

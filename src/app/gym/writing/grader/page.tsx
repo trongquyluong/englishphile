@@ -1,13 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { WritingGraderForm } from "@/components/writing/WritingGraderForm";
 import { isWritingGraderEnabled } from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "Chấm bài Writing bằng AI",
-  description: "Nhận feedback Writing theo tiêu chí chuyên Anh: nội dung, bố cục, ngôn ngữ và lỗi diễn đạt.",
+  title: "Làm đề Writing",
+  description: "Viết bài theo đề đã chọn, sau đó nhận nhận xét theo tiêu chí chuyên Anh.",
+};
+
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const rubricItems = [
@@ -17,8 +22,47 @@ const rubricItems = [
   { label: "Chính tả & trình bày", maxScore: 3, description: "Chính tả, dấu câu, viết hoa và kỷ luật số từ." },
 ];
 
-export default async function WritingGraderPage() {
+export default async function WritingGraderPage({ searchParams }: PageProps) {
   const [user, enabled] = [await getCurrentUser(), isWritingGraderEnabled()];
+  const params = await searchParams;
+  const promptSlug = typeof params.prompt === "string" ? params.prompt : "";
+
+  // Fetch the selected prompt
+  let promptData: {
+    id: string;
+    slug: string;
+    title: string;
+    statement: string;
+    difficulty: string;
+    essayType?: string;
+    targetWordCount?: string;
+  } | null = null;
+
+  if (promptSlug) {
+    const problem = await prisma.problem.findFirst({
+      where: { slug: promptSlug, contentStatus: "PUBLISHED", skillType: "WRITING" },
+      include: {
+        questions: {
+          where: { type: "WRITING_PROMPT" },
+          take: 1,
+          select: { metadata: true },
+        },
+      },
+    });
+
+    if (problem) {
+      const meta = problem.questions[0]?.metadata as Record<string, unknown> | null;
+      promptData = {
+        id: problem.id,
+        slug: problem.slug,
+        title: problem.title,
+        statement: problem.statement,
+        difficulty: problem.difficulty,
+        essayType: typeof meta?.essayType === "string" ? meta.essayType : undefined,
+        targetWordCount: typeof meta?.suggestedLength === "string" ? meta.suggestedLength : undefined,
+      };
+    }
+  }
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6">
@@ -31,31 +75,48 @@ export default async function WritingGraderPage() {
       </Link>
 
       <section className="surface-mint rounded-[2rem] p-6 sm:p-10">
-        <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
-          <Sparkles className="size-4" aria-hidden="true" />
-          Gym / Writing · Beta
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance md:text-4xl">Chấm bài Writing bằng AI</h1>
+        <p className="text-sm font-semibold text-accent">Gym / Writing</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance md:text-4xl">Làm đề Writing</h1>
         <p className="mt-3 max-w-2xl text-base leading-7 text-ink-soft text-pretty">
-          Nhận nhận xét theo tiêu chí chuyên Anh: nội dung, bố cục, ngôn ngữ và lỗi diễn đạt.
+          Viết bài theo đề đã chọn, sau đó nhận nhận xét theo tiêu chí chuyên Anh: nội dung, bố cục, ngôn ngữ và lỗi diễn đạt.
         </p>
       </section>
 
-      <section className="surface rounded-3xl p-6">
-        <h2 className="text-lg font-semibold">Thang điểm 30 theo tiêu chí chuyên Anh</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {rubricItems.map((item) => (
-            <div key={item.label} className="rounded-2xl bg-panel-muted p-4">
-              <p className="text-sm font-semibold">
-                {item.label} <span className="tabular-nums font-medium text-ink-soft">/{item.maxScore}</span>
+      {!promptData ? (
+        <section className="surface rounded-3xl p-6">
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="size-5 shrink-0 text-warning" aria-hidden="true" />
+            <div>
+              <h2 className="font-semibold">Không tìm thấy đề bài</h2>
+              <p className="mt-1 text-sm text-ink-soft">
+                Vui lòng chọn một đề viết từ <Link href="/gym/writing" className="text-accent-strong hover:underline">Gym Writing</Link>.
               </p>
-              <p className="mt-1.5 text-sm leading-6 text-ink-soft">{item.description}</p>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
+      ) : (
+        <>
+          <section className="surface rounded-3xl p-6">
+            <h2 className="text-lg font-semibold">Thang điểm 30 theo tiêu chí chuyên Anh</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {rubricItems.map((item) => (
+                <div key={item.label} className="rounded-2xl bg-panel-muted p-4">
+                  <p className="text-sm font-semibold">
+                    {item.label} <span className="tabular-nums font-medium text-ink-soft">/{item.maxScore}</span>
+                  </p>
+                  <p className="mt-1.5 text-sm leading-6 text-ink-soft">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
 
-      <WritingGraderForm enabled={enabled} isAuthenticated={Boolean(user)} />
+          <WritingGraderForm
+            enabled={enabled}
+            isAuthenticated={Boolean(user)}
+            prompt={promptData}
+          />
+        </>
+      )}
     </div>
   );
 }
