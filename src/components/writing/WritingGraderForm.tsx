@@ -2,28 +2,19 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, Check, ListChecks, LoaderCircle, LogIn, Quote, Sparkles } from "lucide-react";
+import { Check, ListChecks, LoaderCircle, LogIn, Quote, Sparkles } from "lucide-react";
 import {
   countWords,
   DEFAULT_TARGET_WORD_COUNT,
-  essayTypeOptions,
   targetWordCountOptions,
   WRITING_GRADER_MAX_WORDS,
   WRITING_GRADER_MIN_WORDS,
-  type EssayType,
   type TargetWordCount,
   type WritingGradeResult,
 } from "@/lib/writing-grader-shared";
+import type { WritingPrompt } from "@/lib/writing-prompts";
 
-type PromptData = {
-  id: string;
-  slug: string;
-  title: string;
-  statement: string;
-  difficulty: string;
-  essayType?: string;
-  targetWordCount?: string;
-};
+type PromptData = WritingPrompt;
 
 type Props = {
   enabled: boolean;
@@ -89,10 +80,6 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
 
       {result.warnings.length ? (
         <section className="rounded-3xl bg-warning-soft p-5">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-warning">
-            <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
-            Lưu ý về độ tin cậy
-          </h3>
           <ul className="mt-2 grid list-disc gap-1.5 pl-5 text-sm leading-6 text-warning">
             {result.warnings.map((warning, index) => (
               <li key={index}>{warning}</li>
@@ -129,7 +116,7 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
               <ul className="mt-3 grid gap-2.5">
                 {result.priorityIssues.map((issue, index) => (
                   <li key={index} className="flex gap-2.5 text-sm leading-6 text-ink-soft">
-                    <AlertTriangle className="mt-1 size-4 shrink-0 text-warning" aria-hidden="true" />
+                    <span className="mt-1 shrink-0 text-warning" aria-hidden="true">⚠</span>
                     <span>{issue}</span>
                   </li>
                 ))}
@@ -217,23 +204,8 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
 }
 
 export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
-  const [essayType, setEssayType] = useState<EssayType>(() => {
-    // Try to infer essay type from prompt metadata
-    if (prompt.essayType) {
-      const found = essayTypeOptions.find((opt) =>
-        opt.label.toLowerCase().includes(prompt.essayType!.toLowerCase()) ||
-        prompt.essayType!.toLowerCase().includes(opt.value.replace("-", " "))
-      );
-      if (found) return found.value;
-    }
-    return "opinion";
-  });
   const [targetWordCount, setTargetWordCount] = useState<TargetWordCount>(() => {
-    // Try to infer target word count from prompt metadata
-    if (prompt.targetWordCount) {
-      const found = targetWordCountOptions.find((opt) => prompt.targetWordCount!.includes(opt.value.split("-")[0]));
-      if (found) return found.value;
-    }
+    // Default to the prompt's target word count
     return DEFAULT_TARGET_WORD_COUNT;
   });
   const [essayText, setEssayText] = useState("");
@@ -279,12 +251,9 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          promptId: prompt.id,
           promptSlug: prompt.slug,
-          promptText: prompt.statement,
-          essayType,
-          targetWordCount,
           essayText,
+          targetWordCount,
         }),
       });
       const data = (await response.json().catch(() => null)) as { result?: WritingGradeResult; error?: string } | null;
@@ -309,13 +278,6 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
 
   return (
     <div className="grid gap-5">
-      {!enabled ? (
-        <div className="rounded-2xl bg-warning-soft p-4 text-sm leading-6 text-warning" role="status">
-          <p className="font-semibold">Tính năng chấm bài AI chưa được bật trên server.</p>
-          <p className="mt-1">Người điều hành cần cấu hình khóa API trước khi tính năng hoạt động. Bạn vẫn có thể luyện Writing trong Gym như bình thường.</p>
-        </div>
-      ) : null}
-
       {enabled && !isAuthenticated ? (
         <div className="surface flex flex-col gap-3 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-ink-soft">Bạn cần đăng nhập để nộp bài và nhận nhận xét.</p>
@@ -341,21 +303,13 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
             <p className="mt-2 text-sm leading-6">{prompt.statement}</p>
           </div>
 
+          {/* Read-only essay type and target length */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2 text-sm font-medium">
-              <label htmlFor="essay-type">Dạng bài</label>
-              <select
-                id="essay-type"
-                value={essayType}
-                onChange={(event) => setEssayType(event.target.value as EssayType)}
-                className="field min-h-11"
-              >
-                {essayTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <label>Dạng bài</label>
+              <div className="field flex min-h-11 items-center rounded-lg border border-panel bg-panel-muted px-3 text-sm text-ink-soft">
+                {prompt.essayType}
+              </div>
             </div>
             <div className="grid gap-2 text-sm font-medium">
               <label htmlFor="target-word-count">Độ dài mục tiêu</label>

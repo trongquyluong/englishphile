@@ -1,25 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, FilePenLine, PenTool } from "lucide-react";
-import { DifficultyBadge } from "@/components/ui/Badges";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { WRITING_PROMPTS } from "@/lib/writing-prompts";
+import { getWritingSubmissionUsage } from "@/lib/writing-submissions";
 
 export default async function GymWritingPage() {
   const user = await getCurrentUser();
 
-  const [problems, submissionMap] = await Promise.all([
-    prisma.problem.findMany({
-      where: { contentStatus: "PUBLISHED", skillType: "WRITING" },
-      orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
-      take: 36,
-      include: {
-        questions: {
-          where: { type: "WRITING_PROMPT" },
-          take: 1,
-          select: { prompt: true, metadata: true },
-        },
-      },
-    }),
+  const [submissionMap, usage] = await Promise.all([
     user
       ? prisma.writingSubmission.findMany({
           where: { userId: user.id },
@@ -36,6 +25,7 @@ export default async function GymWritingPage() {
           return map;
         })
       : Promise.resolve(new Map<string, { createdAt: Date; hasResult: boolean }>()),
+    user ? getWritingSubmissionUsage(user.id) : Promise.resolve({ used: 0, limit: 5, remaining: 5 }),
   ]);
 
   return (
@@ -59,7 +49,7 @@ export default async function GymWritingPage() {
         <div className="surface rounded-2xl p-5">
           <FilePenLine className="size-5 text-accent" aria-hidden="true" />
           <p className="mt-3 text-sm font-semibold text-ink-soft">Số lượng đề viết</p>
-          <p className="tabular-nums mt-2 text-3xl font-semibold">{problems.length}</p>
+          <p className="tabular-nums mt-2 text-3xl font-semibold">{WRITING_PROMPTS.length}</p>
         </div>
         {user ? (
           <div className="surface rounded-2xl p-5">
@@ -74,63 +64,53 @@ export default async function GymWritingPage() {
         </Link>
       </section>
 
-      {problems.length === 0 ? (
-        <section className="surface rounded-2xl p-6 md:col-span-2 xl:col-span-3">
-          <h2 className="text-xl font-semibold">Chưa có đề viết nào</h2>
-          <p className="mt-2 text-sm text-ink-soft">Đề viết mới sẽ xuất hiện sau khi được review và xuất bản.</p>
-        </section>
-      ) : (
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {problems.map((problem) => {
-            const submission = submissionMap.get(problem.slug);
-            const isCompleted = !!submission;
-            const hasResult = submission?.hasResult;
-            return (
-              <Link
-                key={problem.id}
-                href={`/gym/writing/grader?prompt=${encodeURIComponent(problem.slug)}`}
-                className={`rounded-2xl p-5 transition-all duration-150 ${isCompleted ? "surface surface-hover border border-accent/20 bg-accent/5" : "surface surface-hover"}`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="font-semibold text-balance">{problem.title}</h2>
-                  <DifficultyBadge difficulty={problem.difficulty} />
-                </div>
-                {problem.questions[0]?.metadata ? (
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                    {(() => {
-                      const meta = problem.questions[0].metadata as Record<string, unknown>;
-                      if (meta.essayType) {
-                        return (
-                          <span className="rounded-full bg-panel-muted px-2.5 py-1 font-medium text-ink-soft">
-                            {String(meta.essayType)}
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                    {(() => {
-                      const meta = problem.questions[0].metadata as Record<string, unknown>;
-                      if (meta.suggestedLength) {
-                        return (
-                          <span className="rounded-full bg-panel-muted px-2.5 py-1 font-medium text-ink-soft">
-                            {String(meta.suggestedLength)} từ
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
-                ) : null}
-                <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink-soft">{problem.statement}</p>
-                <div className="mt-4 flex items-center justify-end gap-1.5 text-sm font-semibold text-accent-strong">
-                  {isCompleted ? (hasResult ? "Xem lại" : "Viết lại") : "Viết bài"}
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </div>
-              </Link>
-            );
-          })}
+      {user && (
+        <section className="surface rounded-2xl p-4">
+          <p className="text-sm font-medium">
+            Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.limit} lượt nộp hôm nay
+          </p>
         </section>
       )}
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {WRITING_PROMPTS.map((prompt) => {
+          const submission = submissionMap.get(prompt.slug);
+          const isCompleted = !!submission;
+          const hasResult = submission?.hasResult;
+          return (
+            <Link
+              key={prompt.slug}
+              href={`/gym/writing/grader?prompt=${encodeURIComponent(prompt.slug)}`}
+              className={`rounded-2xl p-5 transition-all duration-150 ${isCompleted ? "surface surface-hover border border-accent/20 bg-accent/5" : "surface surface-hover"}`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="font-semibold text-balance">{prompt.title}</h2>
+                <span className="shrink-0 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent-strong">
+                  {prompt.difficulty}
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full bg-panel-muted px-2.5 py-1 font-medium text-ink-soft">
+                  {prompt.essayType}
+                </span>
+                <span className="rounded-full bg-panel-muted px-2.5 py-1 font-medium text-ink-soft">
+                  {prompt.targetWordCount}
+                </span>
+              </div>
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink-soft">{prompt.statement}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className={`text-xs font-medium ${isCompleted ? "text-accent" : "text-ink-soft"}`}>
+                  {isCompleted ? "Đã nộp" : "Chưa làm"}
+                </span>
+                <span className="flex items-center gap-1.5 text-sm font-semibold text-accent-strong">
+                  {isCompleted ? (hasResult ? "Xem lại" : "Viết lại") : "Viết bài"}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </section>
 
       {!user && (
         <section className="surface rounded-2xl p-5">

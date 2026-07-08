@@ -7,24 +7,19 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import {
   countWords,
-  essayTypeValues,
   targetWordCountValues,
   WRITING_GRADER_MAX_ESSAY_CHARS,
-  WRITING_GRADER_MAX_PROMPT_CHARS,
   WRITING_GRADER_MAX_WORDS,
   WRITING_GRADER_MIN_WORDS,
 } from "@/lib/writing-grader-shared";
+import { getWritingPromptBySlug, mapEssayTypeToGraderValue } from "@/lib/writing-prompts";
+import { WRITING_DAILY_LIMIT } from "@/lib/writing-submissions";
 
 // Grading calls the AI provider and can take longer than the default limit.
 export const maxDuration = 60;
 
-const DAILY_SUBMISSION_LIMIT = 5;
-
 const requestSchema = z.object({
-  promptId: z.string().optional(),
   promptSlug: z.string().min(1),
-  promptText: z.string().trim().min(1).max(WRITING_GRADER_MAX_PROMPT_CHARS),
-  essayType: z.enum(essayTypeValues),
   targetWordCount: z.enum(targetWordCountValues),
   essayText: z.string().trim().min(1).max(WRITING_GRADER_MAX_ESSAY_CHARS),
 });
@@ -35,7 +30,7 @@ function errorResponse(message: string, status: number) {
 
 function validationMessage(error: z.ZodError): string {
   const fields = new Set(error.issues.map((issue) => String(issue.path[0] ?? "")));
-  if (fields.has("promptText")) {
+  if (fields.has("promptSlug")) {
     return "Vui lòng chọn đề bài từ Gym Writing.";
   }
   if (fields.has("essayText")) {
@@ -69,7 +64,7 @@ const graderErrorResponses: Record<WritingGraderError["code"], { message: string
 };
 
 async function checkDailyLimit(userId: string): Promise<{ allowed: boolean; remaining: number }> {
-  // Get start of today in user's timezone (UTC for simplicity)
+  // Get start of today in UTC
   const startOfToday = new Date();
   startOfToday.setUTCHours(0, 0, 0, 0);
 
@@ -80,8 +75,8 @@ async function checkDailyLimit(userId: string): Promise<{ allowed: boolean; rema
     },
   });
 
-  const remaining = Math.max(0, DAILY_SUBMISSION_LIMIT - count);
-  return { allowed: count < DAILY_SUBMISSION_LIMIT, remaining };
+  const remaining = Math.max(0, WRITING_DAILY_LIMIT - count);
+  return { allowed: count < WRITING_DAILY_LIMIT, remaining };
 }
 
 export async function POST(request: Request) {
@@ -125,6 +120,12 @@ export async function POST(request: Request) {
     return errorResponse(validationMessage(parsed.error), 400);
   }
 
+  // Look up prompt from static bank — do not trust client-supplied promptText or essayType
+  const prompt = getWritingPromptBySlug(parsed.data.promptSlug);
+  if (!prompt) {
+    return errorResponse("Đề bài không hợp lệ. Vui lòng chọn đề từ Gym Writing.", 400);
+  }
+
   const wordCount = countWords(parsed.data.essayText);
   if (wordCount < WRITING_GRADER_MIN_WORDS) {
     return errorResponse(
@@ -140,9 +141,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const essayType = mapEssayTypeToGraderValue(prompt.essayType);
+
     const result = await gradeEssay({
-      prompt: parsed.data.promptText,
-      essayType: parsed.data.essayType,
+      prompt: prompt.statement,
+      essayType: essayType as "opinion" | "discussion" | "advantage-disadvantage" | "outweigh" | "cause-effect-solution" | "double-question" | "other",
       targetWordCount: parsed.data.targetWordCount,
       essayText: parsed.data.essayText,
     });
@@ -151,10 +154,9 @@ export async function POST(request: Request) {
     await prisma.writingSubmission.create({
       data: {
         userId: user.id,
-        promptId: parsed.data.promptId || null,
-        promptSlug: parsed.data.promptSlug,
-        promptText: parsed.data.promptText,
-        essayType: parsed.data.essayType,
+        promptSlug: prompt.slug,
+        promptText: prompt.statement,
+        essayType: prompt.essayType,
         targetWordCount: parsed.data.targetWordCount,
         essayText: parsed.data.essayText,
         resultJson: result as unknown as Prisma.InputJsonValue,

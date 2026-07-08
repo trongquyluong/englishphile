@@ -22,10 +22,11 @@ export type EssayType = (typeof essayTypeOptions)[number]["value"];
 export const essayTypeValues = essayTypeOptions.map((option) => option.value) as [EssayType, ...EssayType[]];
 
 export const targetWordCountOptions = [
+  { value: "80-120", label: "80–120 từ" },
+  { value: "150-200", label: "150–200 từ" },
   { value: "250-300", label: "250–300 từ" },
   { value: "300-350", label: "300–350 từ" },
-  { value: "350-400", label: "350–400 từ" },
-  { value: "400-500", label: "400–500 từ" },
+  { value: "350+", label: "350+ từ" },
 ] as const;
 
 export type TargetWordCount = (typeof targetWordCountOptions)[number]["value"];
@@ -35,7 +36,7 @@ export const targetWordCountValues = targetWordCountOptions.map((option) => opti
   ...TargetWordCount[],
 ];
 
-export const DEFAULT_TARGET_WORD_COUNT: TargetWordCount = "300-350";
+export const DEFAULT_TARGET_WORD_COUNT: TargetWordCount = "250-300";
 
 export function countWords(text: string): number {
   const matches = text.trim().match(/\S+/g);

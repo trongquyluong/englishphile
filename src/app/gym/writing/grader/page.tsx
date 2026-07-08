@@ -4,7 +4,8 @@ import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { WritingGraderForm } from "@/components/writing/WritingGraderForm";
 import { isWritingGraderEnabled } from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
+import { getWritingPromptBySlug } from "@/lib/writing-prompts";
+import { getWritingSubmissionUsage } from "@/lib/writing-submissions";
 
 export const metadata: Metadata = {
   title: "Làm đề Writing",
@@ -27,42 +28,11 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const promptSlug = typeof params.prompt === "string" ? params.prompt : "";
 
-  // Fetch the selected prompt
-  let promptData: {
-    id: string;
-    slug: string;
-    title: string;
-    statement: string;
-    difficulty: string;
-    essayType?: string;
-    targetWordCount?: string;
-  } | null = null;
+  // Look up prompt from static bank
+  const promptData = promptSlug ? getWritingPromptBySlug(promptSlug) : null;
 
-  if (promptSlug) {
-    const problem = await prisma.problem.findFirst({
-      where: { slug: promptSlug, contentStatus: "PUBLISHED", skillType: "WRITING" },
-      include: {
-        questions: {
-          where: { type: "WRITING_PROMPT" },
-          take: 1,
-          select: { metadata: true },
-        },
-      },
-    });
-
-    if (problem) {
-      const meta = problem.questions[0]?.metadata as Record<string, unknown> | null;
-      promptData = {
-        id: problem.id,
-        slug: problem.slug,
-        title: problem.title,
-        statement: problem.statement,
-        difficulty: problem.difficulty,
-        essayType: typeof meta?.essayType === "string" ? meta.essayType : undefined,
-        targetWordCount: typeof meta?.suggestedLength === "string" ? meta.suggestedLength : undefined,
-      };
-    }
-  }
+  // Get daily usage
+  const usage = user ? await getWritingSubmissionUsage(user.id) : null;
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6">
@@ -96,6 +66,14 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
         </section>
       ) : (
         <>
+          {user && usage && (
+            <section className="surface rounded-2xl p-4">
+              <p className="text-sm font-medium">
+                Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.limit} lượt nộp hôm nay
+              </p>
+            </section>
+          )}
+
           <section className="surface rounded-3xl p-6">
             <h2 className="text-lg font-semibold">Thang điểm 30 theo tiêu chí chuyên Anh</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
