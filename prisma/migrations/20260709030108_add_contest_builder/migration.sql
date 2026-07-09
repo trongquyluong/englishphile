@@ -1,12 +1,12 @@
 -- AlterEnum
-ALTER TYPE "SkillType" ADD VALUE 'USE_OF_ENGLISH';
+ALTER TYPE "SkillType" ADD VALUE IF NOT EXISTS 'USE_OF_ENGLISH';
 
 -- CreateTable
 CREATE TABLE "ContestSection" (
     "id" TEXT NOT NULL,
     "contestId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "skillType" "SkillType" NOT NULL DEFAULT 'USE_OF_ENGLISH',
+    "skillType" "SkillType" NOT NULL,
     "orderIndex" INTEGER NOT NULL DEFAULT 0,
     "instructions" TEXT,
     "points" DOUBLE PRECISION,

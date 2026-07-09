@@ -597,7 +597,7 @@ model ContestSection {
   id           String    @id @default(cuid())
   contestId    String
   title        String
-  skillType    SkillType @default(USE_OF_ENGLISH)
+  skillType    SkillType
   orderIndex   Int       @default(0)
   instructions String?
   points       Float?
