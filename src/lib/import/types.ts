@@ -24,6 +24,7 @@ export const skillTypeValues = [
   "PHRASAL_VERBS",
   "TRANSITIONS",
   "GRAMMAR_FOCUS",
+  "USE_OF_ENGLISH",
 ] as const;
 export const questionTypeValues = [
   "PRONUNCIATION_ODD_ONE_OUT",

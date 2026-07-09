@@ -13,7 +13,8 @@ export async function startContestAction(formData: FormData) {
   const limit = checkRateLimit({ key: `contest-start:${user.id}:${contest.id}`, limit: 6, windowMs: 10 * 60 * 1000 });
   if (!limit.ok) redirect(`/contests/${contest.slug}?error=${encodeURIComponent(`Bạn thao tác quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`)}`);
   const availability = getContestAvailability(contest);
-  if (!availability.canStart || !contest.problems.length) redirect(`/contests/${contest.slug}?error=${encodeURIComponent(availability.reason)}`);
+  const hasContent = contest.problems.length > 0 || contest.sections.length > 0;
+  if (!availability.canStart || !hasContent) redirect(`/contests/${contest.slug}?error=${encodeURIComponent(availability.reason)}`);
   const attempt = await createContestAttempt(contest, user.id);
   redirect(`/contests/${contest.slug}/start?attempt=${attempt.id}`);
 }
@@ -27,15 +28,29 @@ export async function submitContestAction(formData: FormData) {
   const limit = checkRateLimit({ key: `contest-submit:${user.id}:${contest.id}`, limit: 8, windowMs: 10 * 60 * 1000 });
   if (!limit.ok) redirect(`/contests/${contest.slug}/start?attempt=${attemptId}&error=${encodeURIComponent(`Bạn nộp contest quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`)}`);
 
+  // Parse problem-based answers (answer:problemId:questionId)
   const answersByProblem: Record<string, Record<string, unknown>> = {};
+  // Parse section-based answers (sectionAnswer:sectionId:questionId)
+  const answersBySection: Record<string, Record<string, unknown>> = {};
+
   for (const [key, value] of formData.entries()) {
-    if (!key.startsWith("answer:")) continue;
-    const [, problemId, questionId] = key.split(":");
-    if (!problemId || !questionId) continue;
-    answersByProblem[problemId] ??= {};
-    answersByProblem[problemId][questionId] = String(value);
+    if (key.startsWith("sectionAnswer:")) {
+      const parts = key.split(":");
+      const [, sectionId, questionId] = parts;
+      if (sectionId && questionId) {
+        answersBySection[sectionId] ??= {};
+        answersBySection[sectionId][questionId] = String(value);
+      }
+    } else if (key.startsWith("answer:")) {
+      const parts = key.split(":");
+      const [, problemId, questionId] = parts;
+      if (problemId && questionId) {
+        answersByProblem[problemId] ??= {};
+        answersByProblem[problemId][questionId] = String(value);
+      }
+    }
   }
 
-  await submitContestAttempt(contest, attemptId, user.id, answersByProblem);
+  await submitContestAttempt(contest, attemptId, user.id, answersByProblem, answersBySection);
   redirect(`/contests/${contest.slug}/result?attempt=${attemptId}`);
 }

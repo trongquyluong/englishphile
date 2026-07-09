@@ -25,7 +25,9 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
         orderBy: { createdAt: "desc" },
       })
     : null;
-  const sections = [...new Set(contest.problems.map((item) => item.section))];
+  const problemSections = [...new Set(contest.problems.map((item) => item.section))];
+  const builderSections = contest.sections.map((s) => s.title);
+  const allSections = [...new Set([...problemSections, ...builderSections])];
   const availability = getContestAvailability(contest);
   const activeAttempt = latestAttempt?.status === "IN_PROGRESS" ? latestAttempt : null;
 
@@ -41,7 +43,7 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
             {contest.durationMinutes ? `${contest.durationMinutes} phút` : "Không giới hạn"}
           </span>
           <span className="rounded-lg bg-panel-muted px-2 py-1">{contestStatusLabels[contest.status]}</span>
-          <span className="rounded-lg bg-panel-muted px-2 py-1">{contest.problems.length} problems</span>
+          <span className="rounded-lg bg-panel-muted px-2 py-1">{contest.problems.length + contest.sections.reduce((s, sec) => s + sec.questions.length, 0)} câu hỏi</span>
           {contest.startsAt ? <span className="rounded-lg bg-panel-muted px-2 py-1">Mở: {contest.startsAt.toLocaleString("vi-VN")}</span> : null}
           {contest.endsAt ? <span className="rounded-lg bg-panel-muted px-2 py-1">Kết thúc: {contest.endsAt.toLocaleString("vi-VN")}</span> : null}
         </div>
@@ -54,7 +56,7 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
             <h2 className="text-lg font-semibold">Sections</h2>
           </div>
           <div className="mt-4 grid gap-2">
-            {sections.map((section) => (
+            {allSections.map((section) => (
               <div key={section} className="rounded-xl bg-panel-muted p-3 text-sm">
                 <span className="font-semibold">{section}</span>
                 <span className="text-ink-soft"> · {contest.problems.filter((item) => item.section === section).length} problems</span>

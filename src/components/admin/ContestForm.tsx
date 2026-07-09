@@ -63,6 +63,7 @@ const skillTypes: SkillType[] = [
   "PHRASAL_VERBS",
   "TRANSITIONS",
   "GRAMMAR_FOCUS",
+  "USE_OF_ENGLISH",
 ];
 const difficulties: Difficulty[] = ["B2", "C1", "C2", "CHUYEN", "HSG"];
 
@@ -70,6 +71,7 @@ function gymArea(skillType: SkillType) {
   if (skillType === "READING") return "Reading";
   if (skillType === "WRITING") return "Writing";
   if (skillType === "LISTENING") return "Listening";
+  if (skillType === "USE_OF_ENGLISH") return "Use of English";
   return "Use of English";
 }
 

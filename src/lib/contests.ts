@@ -14,6 +14,12 @@ export type ContestWithProblems = Prisma.ContestGetPayload<{
         };
       };
     };
+    sections: {
+      include: {
+        questions: { orderBy: { orderIndex: "asc" } };
+      };
+      orderBy: { orderIndex: "asc" };
+    };
   };
 }>;
 
@@ -87,6 +93,12 @@ export async function findContestByIdOrSlug(idOrSlug: string) {
           },
         },
       },
+      sections: {
+        include: {
+          questions: { orderBy: { orderIndex: "asc" } },
+        },
+        orderBy: { orderIndex: "asc" },
+      },
     },
   });
 }
@@ -108,28 +120,33 @@ export async function createContestAttempt(contest: Contest, userId: string) {
   });
 }
 
-export function scoreContest(contest: ContestWithProblems, answersByProblem: Record<string, Record<string, unknown>>) {
+export function scoreContest(
+  contest: ContestWithProblems,
+  answersByProblem: Record<string, Record<string, unknown>>,
+  answersBySection: Record<string, Record<string, unknown>> = {},
+) {
   let score = 0;
   let total = 0;
-  const sections = new Map<string, { score: number; total: number; needsReview: number }>();
+  const sectionScores = new Map<string, { score: number; total: number; needsReview: number }>();
 
+  // Score problem-based questions
   const problems = contest.problems.map((contestProblem) => {
     const problemAnswers = answersByProblem[contestProblem.problemId] ?? {};
     const questionResults = contestProblem.problem.questions.map((question) => {
       const studentAnswer = problemAnswers[question.id] ?? "";
       const checked = checkQuestionAnswer(question, studentAnswer);
-      if (!sections.has(contestProblem.section)) {
-        sections.set(contestProblem.section, { score: 0, total: 0, needsReview: 0 });
+      if (!sectionScores.has(contestProblem.section)) {
+        sectionScores.set(contestProblem.section, { score: 0, total: 0, needsReview: 0 });
       }
-      const section = sections.get(contestProblem.section)!;
+      const sec = sectionScores.get(contestProblem.section)!;
       if (checked.isCorrect === null) {
-        section.needsReview += 1;
+        sec.needsReview += 1;
       } else {
         total += 1;
-        section.total += 1;
+        sec.total += 1;
         if (checked.isCorrect) {
           score += 1;
-          section.score += 1;
+          sec.score += 1;
         }
       }
       return {
@@ -152,14 +169,63 @@ export function scoreContest(contest: ContestWithProblems, answersByProblem: Rec
     };
   });
 
-  const needsReview = problems.some((problem) => problem.results.some((result) => result.isCorrect === null));
-  const sectionBreakdown = [...sections.entries()].map(([section, data]) => ({ section, ...data }));
+  // Score section-based questions (standalone, not linked to Problem)
+  const sectionResults = contest.sections.map((section) => {
+    const sectionAnswers = answersBySection[section.id] ?? {};
+    const questionResults = section.questions.map((question) => {
+      // Cast answerJson to the shape checkQuestionAnswer expects
+      const questionWithAnswer = {
+        type: question.type,
+        answer: question.answerJson as unknown,
+        explanation: question.explanation,
+      } as Parameters<typeof checkQuestionAnswer>[0];
+      const studentAnswer = sectionAnswers[question.id] ?? "";
+      const checked = checkQuestionAnswer(questionWithAnswer, studentAnswer);
+      if (!sectionScores.has(section.title)) {
+        sectionScores.set(section.title, { score: 0, total: 0, needsReview: 0 });
+      }
+      const sec = sectionScores.get(section.title)!;
+      if (checked.isCorrect === null) {
+        sec.needsReview += 1;
+      } else {
+        total += 1;
+        sec.total += 1;
+        if (checked.isCorrect) {
+          score += 1;
+          sec.score += 1;
+        }
+      }
+      return {
+        questionId: question.id,
+        type: question.type,
+        prompt: question.prompt,
+        rootWord: question.rootWord,
+        studentAnswer,
+        isCorrect: checked.isCorrect,
+        feedback: checked.feedback,
+        correctAnswer: checked.correctAnswer,
+      };
+    });
+    return {
+      sectionId: section.id,
+      sectionTitle: section.title,
+      skillType: section.skillType,
+      results: questionResults,
+    };
+  });
+
+  const needsReview =
+    problems.some((p) => p.results.some((r) => r.isCorrect === null)) ||
+    sectionResults.some((s) => s.results.some((r) => r.isCorrect === null));
+  const sectionBreakdown = [...sectionScores.entries()].map(([section, data]) => ({ section, ...data }));
   return {
     score,
     total,
     status: (needsReview ? "NEEDS_REVIEW" : "SUBMITTED") as ContestAttemptStatus,
     answers: answersByProblem,
+    answersBySection,
     problems,
+    sectionResults,
     sectionBreakdown,
   };
 }
@@ -248,12 +314,18 @@ export async function updateContest(contestId: string, data: {
   });
 }
 
-export async function submitContestAttempt(contest: ContestWithProblems, attemptId: string, userId: string, answersByProblem: Record<string, Record<string, unknown>>) {
+export async function submitContestAttempt(
+  contest: ContestWithProblems,
+  attemptId: string,
+  userId: string,
+  answersByProblem: Record<string, Record<string, unknown>>,
+  answersBySection: Record<string, Record<string, unknown>> = {},
+) {
   const attempt = await prisma.contestAttempt.findFirst({ where: { id: attemptId, contestId: contest.id, userId } });
   if (!attempt) throw new Error("Không tìm thấy lượt làm contest.");
   if (attempt.status !== "IN_PROGRESS") throw new Error("Lượt làm này đã nộp.");
   const now = new Date();
-  const scored = scoreContest(contest, answersByProblem);
+  const scored = scoreContest(contest, answersByProblem, answersBySection);
   const overTimeLimit = Boolean(contest.durationMinutes && now.getTime() - attempt.startedAt.getTime() > contest.durationMinutes * 60 * 1000);
   const late = Boolean((contest.endsAt && contest.endsAt < now) || overTimeLimit);
   const status: ContestAttemptStatus = late ? "LATE" : scored.status;

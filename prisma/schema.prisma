@@ -34,6 +34,7 @@ enum SkillType {
   PHRASAL_VERBS
   TRANSITIONS
   GRAMMAR_FOCUS
+  USE_OF_ENGLISH
 }
 
 enum QuestionType {
@@ -554,6 +555,7 @@ model Contest {
   createdById     String?
   createdBy       User?               @relation("ContestCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   problems        ContestProblem[]
+  sections        ContestSection[]
   attempts        ContestAttempt[]
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
@@ -587,6 +589,43 @@ model ContestAttempt {
   user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
+}
+
+// Admin-built contest structure: sections + questions (standalone, not linked to Problem).
+// Can coexist with ContestProblem for backwards compatibility.
+model ContestSection {
+  id           String    @id @default(cuid())
+  contestId    String
+  title        String
+  skillType    SkillType @default(USE_OF_ENGLISH)
+  orderIndex   Int       @default(0)
+  instructions String?
+  points       Float?
+  audioUrl     String?
+  transcript   String?
+  passageText  String?
+  metadata     Json?
+  questions    ContestQuestion[]
+  contest      Contest   @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ContestQuestion {
+  id            String      @id @default(cuid())
+  sectionId     String
+  orderIndex    Int         @default(0)
+  type          QuestionType @default(MCQ)
+  prompt        String?
+  optionsJson   Json?
+  answerJson    Json?
+  points        Float?
+  explanation   String?
+  rootWord      String?
+  metadata      Json?
+  section       ContestSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Classroom {

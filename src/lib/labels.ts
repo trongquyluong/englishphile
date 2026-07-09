@@ -40,6 +40,7 @@ export const skillLabels: Record<SkillType, string> = {
   PHRASAL_VERBS: "Phrasal Verbs",
   TRANSITIONS: "Transitions",
   GRAMMAR_FOCUS: "Grammar Focus",
+  USE_OF_ENGLISH: "Use of English",
 };
 
 export const skillDescriptions: Record<SkillType, string> = {
@@ -58,6 +59,7 @@ export const skillDescriptions: Record<SkillType, string> = {
   PHRASAL_VERBS: "Cụm động từ theo nghĩa, sắc thái và ngữ cảnh.",
   TRANSITIONS: "Từ nối và chuyển ý trong đoạn văn, bài đọc và bài viết.",
   GRAMMAR_FOCUS: "Cụm bài tập tập trung vào một điểm ngữ pháp trọng tâm.",
+  USE_OF_ENGLISH: "Bài tập tổng hợp về ngữ pháp, từ vựng, collocation và register.",
 };
 
 export const difficultyLabels: Record<Difficulty, string> = {
