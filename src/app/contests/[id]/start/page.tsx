@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Clock } from "lucide-react";
+import type { ContestAttempt } from "@prisma/client";
+import { Clock, Eye } from "lucide-react";
 import { submitContestAction } from "@/app/contests/actions";
 import { ContestSubmitBar } from "@/components/contests/ContestSubmitBar";
 import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
-import { requireUser } from "@/lib/auth/session";
+import { isAdminUser, requireUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug } from "@/lib/contests";
 import { prisma } from "@/lib/prisma";
 
@@ -279,13 +281,20 @@ export default async function ContestStartPage({ params, searchParams }: PagePro
   const query = await searchParams;
   const attemptId = typeof query.attempt === "string" ? query.attempt : "";
   const error = typeof query.error === "string" ? query.error : "";
+  const isPreview = query.preview === "1" && isAdminUser(user);
   const contest = await findContestByIdOrSlug(id);
-  if (!contest || !attemptId) redirect(`/contests/${id}`);
-  const attempt = await prisma.contestAttempt.findFirst({
-    where: { id: attemptId, contestId: contest.id, userId: user.id },
-  });
-  if (!attempt) redirect(`/contests/${contest.slug}`);
-  if (attempt.status !== "IN_PROGRESS") redirect(`/contests/${contest.slug}/result?attempt=${attempt.id}`);
+  if (!contest) redirect("/contests");
+
+  // Admin preview renders the candidate view without an attempt; nothing is saved.
+  let attempt: ContestAttempt | null = null;
+  if (!isPreview) {
+    if (!attemptId) redirect(`/contests/${contest.slug}`);
+    attempt = await prisma.contestAttempt.findFirst({
+      where: { id: attemptId, contestId: contest.id, userId: user.id },
+    });
+    if (!attempt) redirect(`/contests/${contest.slug}`);
+    if (attempt.status !== "IN_PROGRESS") redirect(`/contests/${contest.slug}/result?attempt=${attempt.id}`);
+  }
 
   // Precompute cumulative offsets for section-based questions
   const problemCount = contest.problems.reduce((sum, cp) => sum + cp.problem.questions.length, 0);
@@ -297,6 +306,24 @@ export default async function ContestStartPage({ params, searchParams }: PagePro
     return offset;
   });
 
+  const examContent = (
+    <>
+      {/* Problem-based content (backwards compatible) */}
+      {contest.problems.map((contestProblem, problemIndex) => (
+        <ProblemSection key={contestProblem.id} contestProblem={contestProblem as never} problemIndex={problemIndex} />
+      ))}
+
+      {/* Section-based content (standalone questions from ContestBuilder) */}
+      {contest.sections.map((section, sectionIndex) => (
+        <BuilderSection
+          key={section.id}
+          section={section as never}
+          globalQuestionOffset={sectionOffsets[sectionIndex]}
+        />
+      ))}
+    </>
+  );
+
   return (
     <div className="grid gap-6">
       <header className="surface rounded-3xl p-6">
@@ -307,35 +334,52 @@ export default async function ContestStartPage({ params, searchParams }: PagePro
             <Clock className="size-4" aria-hidden="true" />
             {contest.durationMinutes ? `${contest.durationMinutes} phút` : "Không giới hạn"}
           </span>
-          <span className="rounded-full bg-panel-muted px-2.5 py-1">Không lưu kết quả cho tới khi nộp bài</span>
+          {attempt ? (
+            <span className="rounded-full bg-panel-muted px-2.5 py-1">Không lưu kết quả cho tới khi nộp bài</span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 font-semibold text-accent-strong">
+              <Eye className="size-4" aria-hidden="true" />
+              Chế độ xem trước
+            </span>
+          )}
         </div>
       </header>
 
-      <form action={submitContestAction} className="grid gap-5">
-        <input type="hidden" name="contestId" value={contest.id} />
-        <input type="hidden" name="attemptId" value={attempt.id} />
-        {error ? <p className="rounded-2xl bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
+      {attempt ? (
+        <form action={submitContestAction} className="grid gap-5">
+          <input type="hidden" name="contestId" value={contest.id} />
+          <input type="hidden" name="attemptId" value={attempt.id} />
+          {error ? <p className="rounded-2xl bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
 
-        {/* Problem-based content (backwards compatible) */}
-        {contest.problems.map((contestProblem, problemIndex) => (
-          <ProblemSection key={contestProblem.id} contestProblem={contestProblem as never} problemIndex={problemIndex} />
-        ))}
+          {examContent}
 
-        {/* Section-based content (standalone questions from ContestBuilder) */}
-        {contest.sections.map((section, sectionIndex) => (
-          <BuilderSection
-            key={section.id}
-            section={section as never}
-            globalQuestionOffset={sectionOffsets[sectionIndex]}
+          <ContestSubmitBar
+            returnHref={`/contests/${contest.slug}`}
+            startedAt={attempt.startedAt.toISOString()}
+            durationMinutes={contest.durationMinutes}
           />
-        ))}
+        </form>
+      ) : (
+        <div className="grid gap-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent-soft/60 px-4 py-3">
+            <p className="text-sm font-semibold">
+              Bạn đang xem contest ở góc nhìn thí sinh. Câu trả lời trong chế độ này không được lưu hay chấm điểm.
+            </p>
+            <Link href={`/admin/contests-builder/${contest.id}/edit`} className="btn btn-sm btn-secondary">
+              Quay lại builder
+            </Link>
+          </div>
 
-        <ContestSubmitBar
-          returnHref={`/contests/${contest.slug}`}
-          startedAt={attempt.startedAt.toISOString()}
-          durationMinutes={contest.durationMinutes}
-        />
-      </form>
+          {examContent}
+
+          <div className="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-panel/95 p-3 shadow-[0_18px_60px_-32px_rgba(23,33,27,0.45)] backdrop-blur">
+            <p className="text-sm text-ink-soft">Chế độ xem trước — nút nộp bài bị ẩn.</p>
+            <Link href={`/admin/contests-builder/${contest.id}/edit`} className="inline-flex min-h-11 items-center rounded-lg bg-foreground px-5 text-sm font-semibold text-background">
+              Quay lại builder
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

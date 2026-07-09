@@ -27,7 +27,7 @@ const adminActions = [
   { label: "Content QA", icon: ShieldCheck, href: "/admin/content-qa" },
   { label: "Duyệt nội dung", icon: ListChecks, href: "/admin/review" },
   { label: "Import PDF later", icon: FileText },
-  { label: "Create contest", icon: TestTube2, href: "/admin/contests/new" },
+  { label: "Tạo contest", icon: TestTube2, href: "/admin/contests-builder/new" },
   { label: "Beta checklist", icon: Rocket, href: "/admin/beta-checklist" },
 ];
 
@@ -39,7 +39,7 @@ const adminCards = [
   { label: "Quản lý kho bài", description: "Chỉnh sửa, publish, archive và bulk update.", href: "/admin/problems", icon: BookOpenCheck },
   { label: "Nguồn tài liệu", description: "Source collections và bài liên quan.", href: "/admin/sources", icon: FileText },
   { label: "Topic", description: "Topic, parent topic và problem liên quan.", href: "/admin/topics", icon: Tags },
-  { label: "Contests", description: "Tạo đề thi cũ hoặc contest theo thời gian.", href: "/admin/contests", icon: Medal },
+  { label: "Contest Builder", description: "Tạo contest với phần thi tùy chỉnh, hỗ trợ Listening.", href: "/admin/contests-builder", icon: Medal },
   { label: "Diagnostic Bank", description: "Theo dõi nguồn câu hỏi cho diagnostic.", href: "/admin/diagnostic", icon: TestTube2 },
   { label: "Checklist beta", description: "Kiểm tra env, backup, nội dung và trang pháp lý trước khi mở beta.", href: "/admin/beta-checklist", icon: Rocket },
 ];

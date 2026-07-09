@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
-import type { ContestStatus, QuestionType, SkillType } from "@prisma/client";
+import { ChevronDown, ChevronRight, Plus, Trash2, Eye, Save, Send } from "lucide-react";
+import type { ContestStatus, ContestVisibility, QuestionType, SkillType } from "@prisma/client";
 import {
-  createSectionAction,
+  createSectionWithQuestionsAction,
   updateSectionAction,
   deleteSectionAction,
   createQuestionAction,
@@ -16,7 +16,7 @@ import {
   archiveContestAction,
   ValidationError,
 } from "@/app/admin/contests-builder/actions";
-import { contestStatusLabels, questionTypeLabels, skillLabels } from "@/lib/labels";
+import { skillLabels, questionTypeLabels, contestStatusLabels } from "@/lib/labels";
 
 // --- Types ---
 
@@ -26,6 +26,8 @@ type ContestData = {
   slug: string;
   description: string | null;
   status: ContestStatus;
+  visibility: ContestVisibility;
+  accessCode: string | null;
   durationMinutes: number | null;
   startsAt: string | null;
   endsAt: string | null;
@@ -73,21 +75,34 @@ function toLocalDateTime(value: string | null) {
   return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
-const skillTypeOptions: SkillType[] = [
-  "USE_OF_ENGLISH", "READING", "WRITING", "LISTENING",
-  "PRONUNCIATION", "MULTIPLE_CHOICE", "OPEN_CLOZE", "GUIDED_CLOZE",
-  "WORD_FORMATION", "SENTENCE_TRANSFORMATION", "ERROR_IDENTIFICATION",
-  "TRIOS", "COLLOCATIONS", "PHRASAL_VERBS", "TRANSITIONS", "GRAMMAR_FOCUS",
+const durationOptions = [
+  { value: 120, label: "120 phút" },
+  { value: 150, label: "150 phút" },
+  { value: 180, label: "180 phút" },
 ];
 
-const questionTypeOptions: QuestionType[] = [
-  "MCQ", "SHORT_ANSWER", "WORD_FORMATION", "OPEN_CLOZE", "GUIDED_CLOZE",
-  "SENTENCE_TRANSFORMATION", "ERROR_IDENTIFICATION",
-  "LISTENING_SHORT_ANSWER", "LISTENING_MCQ", "READING_MCQ",
-  "WRITING_PROMPT", "TRIOS_GAPPED_SENTENCES", "PRONUNCIATION_ODD_ONE_OUT",
-];
+// Exam section types for the builder
+type ExamSectionType = "USE_OF_ENGLISH_MCQ" | "WORD_FORMATION" | "OPEN_CLOZE" | "GUIDED_CLOZE" | "READING" | "LISTENING" | "WRITING";
 
-const statusOptions: ContestStatus[] = ["DRAFT", "SCHEDULED", "LIVE", "ENDED", "ARCHIVED"];
+interface ExamSectionConfig {
+  id: ExamSectionType;
+  label: string;
+  skillType: SkillType;
+  questionType: QuestionType;
+  hasPassage: boolean;
+  hasAudio: boolean;
+  hasRootWord: boolean;
+}
+
+const EXAM_SECTION_TYPES: ExamSectionConfig[] = [
+  { id: "USE_OF_ENGLISH_MCQ", label: "Use of English — Multiple Choice", skillType: "USE_OF_ENGLISH", questionType: "MCQ", hasPassage: false, hasAudio: false, hasRootWord: false },
+  { id: "WORD_FORMATION", label: "Use of English — Word Formation", skillType: "WORD_FORMATION", questionType: "WORD_FORMATION", hasPassage: false, hasAudio: false, hasRootWord: true },
+  { id: "OPEN_CLOZE", label: "Use of English — Open Cloze", skillType: "OPEN_CLOZE", questionType: "OPEN_CLOZE", hasPassage: false, hasAudio: false, hasRootWord: false },
+  { id: "GUIDED_CLOZE", label: "Use of English — Guided Cloze", skillType: "GUIDED_CLOZE", questionType: "GUIDED_CLOZE", hasPassage: false, hasAudio: false, hasRootWord: false },
+  { id: "READING", label: "Reading", skillType: "READING", questionType: "READING_MCQ", hasPassage: true, hasAudio: false, hasRootWord: false },
+  { id: "LISTENING", label: "Listening", skillType: "LISTENING", questionType: "LISTENING_MCQ", hasPassage: false, hasAudio: true, hasRootWord: false },
+  { id: "WRITING", label: "Writing", skillType: "WRITING", questionType: "WRITING_PROMPT", hasPassage: false, hasAudio: false, hasRootWord: false },
+];
 
 function needsOptions(type: QuestionType) {
   return ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(type);
@@ -124,10 +139,11 @@ function parseAnswerJson(raw: unknown): string {
 
 // --- Question Card ---
 
-function QuestionCard({ contestId, question }: { contestId: string; question: QuestionData }) {
+function QuestionCard({ contestId, question, sectionType }: { contestId: string; question: QuestionData; sectionType: ExamSectionType }) {
   const [open, setOpen] = useState(false);
   const hasOptions = needsOptions(question.type);
   const hasAnswer = needsAnswerKey(question.type);
+  const sectionConfig = EXAM_SECTION_TYPES.find((s) => s.id === sectionType);
   const optionsText = parseOptionsJson(question.optionsJson);
   const answerText = parseAnswerJson(question.answerJson);
 
@@ -141,7 +157,7 @@ function QuestionCard({ contestId, question }: { contestId: string; question: Qu
         <div className="flex items-center gap-2">
           {open ? <ChevronDown className="size-3.5 text-ink-soft" /> : <ChevronRight className="size-3.5 text-ink-soft" />}
           <p className="text-sm font-semibold">
-            {question.prompt ? question.prompt.slice(0, 60) + (question.prompt.length > 60 ? "…" : "") : "(chưa có nội dung)"}
+            Câu {question.orderIndex + 1}: {question.prompt ? question.prompt.slice(0, 50) + (question.prompt.length > 50 ? "…" : "") : "(chưa có nội dung)"}
           </p>
         </div>
         <span className="text-xs text-ink-soft">{questionTypeLabels[question.type]}</span>
@@ -151,13 +167,8 @@ function QuestionCard({ contestId, question }: { contestId: string; question: Qu
         <form action={updateQuestionAction} className="border-t border-line p-4 grid gap-3">
           <input type="hidden" name="questionId" value={question.id} />
           <input type="hidden" name="contestId" value={contestId} />
+          <input type="hidden" name="type" value={question.type} />
           <div className="grid gap-2 md:grid-cols-3">
-            <label className="grid gap-1 text-xs font-semibold">
-              Loại
-              <select name="type" defaultValue={question.type} className="field text-sm">
-                {questionTypeOptions.map((t) => <option key={t} value={t}>{questionTypeLabels[t]}</option>)}
-              </select>
-            </label>
             <label className="grid gap-1 text-xs font-semibold">
               Thứ tự
               <input name="orderIndex" type="number" defaultValue={question.orderIndex} className="field text-sm" />
@@ -168,18 +179,18 @@ function QuestionCard({ contestId, question }: { contestId: string; question: Qu
             </label>
           </div>
           <label className="grid gap-1 text-xs font-semibold">
-            Nội dung
-            <textarea name="prompt" defaultValue={question.prompt ?? ""} rows={3} className="field text-sm" />
+            Nội dung câu hỏi
+            <textarea name="prompt" defaultValue={question.prompt ?? ""} rows={2} className="field text-sm" />
           </label>
-          {question.type === "WORD_FORMATION" && (
+          {sectionConfig?.hasRootWord && (
             <label className="grid gap-1 text-xs font-semibold">
-              Root word
-              <input name="rootWord" defaultValue={question.rootWord ?? ""} className="field text-sm" />
+              Từ gốc (root word)
+              <input name="rootWord" defaultValue={question.rootWord ?? ""} placeholder="VD: develop" className="field text-sm" />
             </label>
           )}
           {hasOptions && (
             <label className="grid gap-1 text-xs font-semibold">
-              Đáp án (mỗi dòng: <code className="text-accent">A|nội dung</code>)
+              Lựa chọn (mỗi dòng: <code className="text-accent">A|nội dung</code>)
               <textarea
                 name="optionsJson"
                 defaultValue={optionsText}
@@ -198,10 +209,13 @@ function QuestionCard({ contestId, question }: { contestId: string; question: Qu
                 placeholder={hasOptions ? "A" : "đáp án 1 / đáp án 2"}
                 className="field text-sm"
               />
+              {!hasOptions && (
+                <span className="font-normal text-ink-soft">Nhiều đáp án chấp nhận được thì phân tách bằng dấu &quot;/&quot;.</span>
+              )}
             </label>
           )}
           <label className="grid gap-1 text-xs font-semibold">
-            Giải thích
+            Giải thích (tuỳ chọn)
             <textarea name="explanation" defaultValue={question.explanation ?? ""} rows={2} className="field text-sm" />
           </label>
           <div className="flex gap-2">
@@ -230,11 +244,12 @@ function QuestionCard({ contestId, question }: { contestId: string; question: Qu
 
 // --- Section Card ---
 
-function SectionCard({ contestId, section, expanded }: { contestId: string; section: SectionData; expanded: boolean }) {
-  const [open, setOpen] = useState(expanded);
+function SectionCard({ contestId, section }: { contestId: string; section: SectionData }) {
+  const [open, setOpen] = useState(false);
   const [showAddQ, setShowAddQ] = useState(false);
   const isListening = section.skillType === "LISTENING";
   const isReading = section.skillType === "READING";
+  const sectionConfig = EXAM_SECTION_TYPES.find((s) => s.skillType === section.skillType);
 
   return (
     <div className="rounded-2xl border border-line bg-white">
@@ -248,13 +263,13 @@ function SectionCard({ contestId, section, expanded }: { contestId: string; sect
           <div>
             <p className="font-semibold">{section.title}</p>
             <p className="mt-0.5 text-xs text-ink-soft">
-              {skillLabels[section.skillType]} · {section.questions.length} câu
+              {skillLabels[section.skillType]} · {section.questions.length} câu · {section.points ?? 0} điểm
               {isListening && section.audioUrl ? " · 🎧 audio" : ""}
               {isReading && section.passageText ? " · 📖 passage" : ""}
             </p>
           </div>
         </div>
-        <span className="text-xs font-semibold text-ink-soft">{skillLabels[section.skillType]}</span>
+        <span className="text-xs font-semibold text-ink-soft">{section.points ? `${section.points} điểm` : ""}</span>
       </button>
 
       {open && (
@@ -269,20 +284,8 @@ function SectionCard({ contestId, section, expanded }: { contestId: string; sect
                 <input name="title" defaultValue={section.title} required className="field text-sm" />
               </label>
               <label className="grid gap-1 text-xs font-semibold">
-                Skill type
-                <select name="skillType" defaultValue={section.skillType} className="field text-sm">
-                  {skillTypeOptions.map((s) => (
-                    <option key={s} value={s}>{skillLabels[s]}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="grid gap-1 text-xs font-semibold">
-                Thứ tự
-                <input name="orderIndex" type="number" defaultValue={section.orderIndex} className="field text-sm" />
-              </label>
-              <label className="grid gap-1 text-xs font-semibold">
-                Điểm
-                <input name="points" type="number" step="0.5" defaultValue={section.points ?? ""} placeholder="Tự động" className="field text-sm" />
+                Tổng điểm
+                <input name="points" type="number" step="0.5" defaultValue={section.points ?? ""} placeholder="VD: 20" className="field text-sm" />
               </label>
             </div>
             <label className="grid gap-1 text-xs font-semibold">
@@ -296,7 +299,7 @@ function SectionCard({ contestId, section, expanded }: { contestId: string; sect
                   Đường dẫn audio
                   <input name="audioUrl" defaultValue={section.audioUrl ?? ""} placeholder="/audio/listening/test-01.mp3" className="field text-sm" />
                   <span className="font-normal text-ink-soft text-xs">
-                    Tạm thời nhập đường dẫn audio, ví dụ /audio/listening/test-01.mp3. Upload file nghe sẽ được bổ sung ở phase sau.
+                    Tạm thời nhập đường dẫn audio, ví dụ /audio/listening/test-01.mp3. Upload file nghe sẽ được bổ sung sau.
                   </span>
                 </label>
                 <label className="grid gap-1 text-xs font-semibold">
@@ -357,28 +360,22 @@ function SectionCard({ contestId, section, expanded }: { contestId: string; sect
               <form action={createQuestionAction} className="mx-5 mb-3 grid gap-2 rounded-xl bg-panel-muted p-4">
                 <input type="hidden" name="sectionId" value={section.id} />
                 <input type="hidden" name="contestId" value={contestId} />
-                <div className="grid gap-2 md:grid-cols-3">
-                  <label className="grid gap-1 text-xs font-semibold">
-                    Loại câu hỏi
-                    <select name="type" defaultValue="MCQ" className="field text-sm">
-                      {questionTypeOptions.map((t) => (
-                        <option key={t} value={t}>{questionTypeLabels[t]}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="grid gap-1 text-xs font-semibold">
-                    Thứ tự
-                    <input name="orderIndex" type="number" defaultValue={section.questions.length} className="field text-sm" />
-                  </label>
-                  <label className="grid gap-1 text-xs font-semibold">
-                    Điểm
-                    <input name="points" type="number" step="0.5" defaultValue="1" className="field text-sm" />
-                  </label>
-                </div>
+                <input type="hidden" name="type" value={sectionConfig?.questionType ?? "MCQ"} />
+                <input type="hidden" name="orderIndex" value={section.questions.length} />
                 <label className="grid gap-1 text-xs font-semibold">
-                  Nội dung (prompt)
+                  Nội dung câu hỏi
                   <input name="prompt" placeholder="Nhập câu hỏi..." className="field text-sm" />
                 </label>
+                <label className="grid gap-1 text-xs font-semibold">
+                  Điểm
+                  <input name="points" type="number" step="0.5" defaultValue="1" className="field text-sm" />
+                </label>
+                {sectionConfig?.hasRootWord && (
+                  <label className="grid gap-1 text-xs font-semibold">
+                    Từ gốc (root word)
+                    <input name="rootWord" placeholder="VD: develop" className="field text-sm" />
+                  </label>
+                )}
                 <div className="flex gap-2">
                   <button type="submit" className="btn btn-sm btn-primary">Thêm</button>
                   <button type="button" onClick={() => setShowAddQ(false)} className="btn btn-sm btn-ghost">Huỷ</button>
@@ -390,7 +387,7 @@ function SectionCard({ contestId, section, expanded }: { contestId: string; sect
               {section.questions
                 .sort((a, b) => a.orderIndex - b.orderIndex)
                 .map((q) => (
-                  <QuestionCard key={q.id} contestId={contestId} question={q} />
+                  <QuestionCard key={q.id} contestId={contestId} question={q} sectionType={sectionConfig?.id ?? "USE_OF_ENGLISH_MCQ"} />
                 ))}
               {section.questions.length === 0 && !showAddQ && (
                 <p className="rounded-xl bg-panel-muted p-4 text-center text-xs text-ink-soft">
@@ -405,14 +402,177 @@ function SectionCard({ contestId, section, expanded }: { contestId: string; sect
   );
 }
 
+// --- Exam Builder: Add Section Modal ---
+
+function AddSectionModal({
+  contestId,
+  nextOrderIndex,
+  onClose,
+}: {
+  contestId: string;
+  nextOrderIndex: number;
+  onClose: () => void;
+}) {
+  const [selectedType, setSelectedType] = useState<ExamSectionType | null>(null);
+  const [questionCount, setQuestionCount] = useState(10);
+  const [totalPoints, setTotalPoints] = useState(10);
+  const [sectionTitle, setSectionTitle] = useState("");
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  const config = selectedType ? EXAM_SECTION_TYPES.find((t) => t.id === selectedType) ?? null : null;
+  const pointsPerQuestion = questionCount > 0 && totalPoints > 0 ? totalPoints / questionCount : null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
+      <div ref={modalRef} className="surface max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Thêm phần thi</h2>
+          <button type="button" onClick={onClose} aria-label="Đóng" className="btn btn-ghost btn-sm">✕</button>
+        </div>
+
+        <form action={createSectionWithQuestionsAction} className="mt-4 grid gap-4">
+          <input type="hidden" name="contestId" value={contestId} />
+          <input type="hidden" name="orderIndex" value={nextOrderIndex} />
+          <input type="hidden" name="skillType" value={config?.skillType ?? ""} />
+          <input type="hidden" name="questionType" value={config?.questionType ?? ""} />
+
+          {/* Section type selection */}
+          <div className="grid gap-2">
+            <p className="text-sm font-semibold">Chọn loại phần thi</p>
+            <div className="grid gap-2">
+              {EXAM_SECTION_TYPES.map((type) => (
+                <label
+                  key={type.id}
+                  className={`flex items-center gap-3 rounded-xl p-3 cursor-pointer transition-colors ${
+                    selectedType === type.id ? "bg-accent-soft ring-2 ring-accent" : "bg-panel-muted hover:bg-panel-muted/70"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="sectionType"
+                    value={type.id}
+                    checked={selectedType === type.id}
+                    onChange={() => {
+                      setSelectedType(type.id);
+                      setSectionTitle(type.label);
+                      if (type.id === "WRITING") setQuestionCount(1);
+                    }}
+                    className="accent-[var(--accent)]"
+                  />
+                  <span className="text-sm font-semibold">{type.label}</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-ink-soft">
+              Có thể thêm nhiều phần cùng loại, ví dụ Reading với 2–3 passage riêng.
+            </p>
+          </div>
+
+          {config && (
+            <>
+              <label className="grid gap-1 text-sm font-semibold">
+                Tiêu đề phần thi
+                <input
+                  name="title"
+                  value={sectionTitle}
+                  onChange={(e) => setSectionTitle(e.target.value)}
+                  placeholder={config.label}
+                  className="field"
+                />
+              </label>
+
+              {/* Question count and points */}
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="grid gap-1 text-sm font-semibold">
+                  Số câu hỏi
+                  <input
+                    type="number"
+                    name="questionCount"
+                    min={1}
+                    max={100}
+                    value={questionCount}
+                    onChange={(e) => setQuestionCount(Number(e.target.value))}
+                    className="field"
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold">
+                  Tổng điểm
+                  <input
+                    type="number"
+                    name="points"
+                    min={1}
+                    step="0.5"
+                    value={totalPoints}
+                    onChange={(e) => setTotalPoints(Number(e.target.value))}
+                    className="field"
+                  />
+                </label>
+              </div>
+
+              <p className="text-xs text-ink-soft">
+                {pointsPerQuestion !== null
+                  ? `Hệ thống sẽ tạo sẵn ${questionCount} câu hỏi trống, mỗi câu ${Math.round(pointsPerQuestion * 100) / 100} điểm. Bạn nhập nội dung từng câu sau khi thêm.`
+                  : "Nhập số câu hỏi và tổng điểm cho phần thi này."}
+              </p>
+              {config.id === "WRITING" ? (
+                <p className="text-xs text-ink-soft">Với Writing, mỗi &quot;câu hỏi&quot; là một đề bài viết và sẽ được chấm tay.</p>
+              ) : null}
+              {config.hasAudio ? (
+                <p className="text-xs text-ink-soft">Đường dẫn audio cho Listening được nhập trong phần thi sau khi thêm.</p>
+              ) : null}
+            </>
+          )}
+
+          <div className="flex gap-2">
+            <button type="submit" disabled={!selectedType} className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-55">
+              Thêm phần thi
+            </button>
+            <button type="button" onClick={onClose} className="btn btn-ghost">
+              Huỷ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // --- Main Edit Component ---
 
 export function ContestBuilderEdit({ contest, sections, validationErrors, flashMessage, flashError }: Props) {
   const sortedSections = [...sections].sort((a, b) => a.orderIndex - b.orderIndex);
-  const [showAddSection, setShowAddSection] = useState(false);
-  const [sectionSkillType, setSectionSkillType] = useState<SkillType>("USE_OF_ENGLISH");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [visibility, setVisibility] = useState<ContestVisibility>(contest.visibility);
   const canPublish = contest.status === "DRAFT" || contest.status === "SCHEDULED";
   const isPublished = contest.status === "LIVE";
+  const nextOrderIndex = sortedSections.reduce((max, s) => Math.max(max, s.orderIndex + 1), sortedSections.length);
+
+  // The add-section form redirects back to this page; close the modal once the new section arrives.
+  const [prevSectionCount, setPrevSectionCount] = useState(sections.length);
+  if (prevSectionCount !== sections.length) {
+    setPrevSectionCount(sections.length);
+    setShowAddModal(false);
+  }
 
   return (
     <div className="grid gap-5">
@@ -434,10 +594,48 @@ export function ContestBuilderEdit({ contest, sections, validationErrors, flashM
         </div>
       )}
 
-      {/* Contest metadata */}
+      {/* Action buttons - sticky below the site header */}
+      <div className="sticky top-16 z-10 flex flex-wrap items-center gap-2 rounded-2xl bg-background/95 px-4 py-3 backdrop-blur-sm">
+        <span className="mr-1 rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">
+          {contestStatusLabels[contest.status]}
+        </span>
+
+        <button type="submit" form="contest-meta-form" className="btn btn-sm btn-secondary">
+          <Save className="size-4" aria-hidden="true" />
+          Lưu draft
+        </button>
+
+        {canPublish && (
+          <form action={publishContestAction} className="inline">
+            <input type="hidden" name="contestId" value={contest.id} />
+            <button type="submit" className="btn btn-sm btn-primary">
+              <Send className="size-4" aria-hidden="true" />
+              Publish contest
+            </button>
+          </form>
+        )}
+
+        {isPublished && (
+          <form action={archiveContestAction} className="inline">
+            <input type="hidden" name="contestId" value={contest.id} />
+            <button type="submit" className="btn btn-sm btn-ghost">
+              Lưu trữ
+            </button>
+          </form>
+        )}
+
+        <Link href={`/contests/${contest.slug}/start?preview=1`} target="_blank" className="btn btn-sm btn-secondary">
+          <Eye className="size-4" aria-hidden="true" />
+          Preview contest ở góc nhìn thí sinh
+        </Link>
+      </div>
+
+      {/* Contest metadata - simplified */}
       <section className="surface rounded-2xl p-5">
-        <form action={updateContestMetaAction} className="grid gap-4">
+        <h2 className="text-lg font-semibold">Thông tin contest</h2>
+        <form id="contest-meta-form" action={updateContestMetaAction} className="mt-4 grid gap-4">
           <input type="hidden" name="contestId" value={contest.id} />
+
           <div className="grid gap-3 md:grid-cols-2">
             <label className="grid gap-1.5 text-sm font-semibold">
               Tiêu đề
@@ -447,18 +645,14 @@ export function ContestBuilderEdit({ contest, sections, validationErrors, flashM
               Slug
               <input name="slug" defaultValue={contest.slug} className="field" />
             </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Trạng thái
-              <select name="status" defaultValue={contest.status} className="field">
-                {statusOptions.map((s) => (
-                  <option key={s} value={s}>{contestStatusLabels[s]}</option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Thời lượng (phút)
-              <input name="durationMinutes" type="number" min={1} defaultValue={contest.durationMinutes ?? ""} className="field" />
-            </label>
+          </div>
+
+          <label className="grid gap-1.5 text-sm font-semibold">
+            Mô tả
+            <textarea name="description" defaultValue={contest.description ?? ""} rows={2} className="field" />
+          </label>
+
+          <div className="grid gap-3 md:grid-cols-2">
             <label className="grid gap-1.5 text-sm font-semibold">
               Bắt đầu
               <input name="startsAt" type="datetime-local" defaultValue={toLocalDateTime(contest.startsAt)} className="field" />
@@ -468,99 +662,110 @@ export function ContestBuilderEdit({ contest, sections, validationErrors, flashM
               <input name="endsAt" type="datetime-local" defaultValue={toLocalDateTime(contest.endsAt)} className="field" />
             </label>
           </div>
-          <label className="grid gap-1.5 text-sm font-semibold">
-            Mô tả
-            <textarea name="description" defaultValue={contest.description ?? ""} rows={2} className="field" />
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <button type="submit" className="btn btn-sm btn-primary">Lưu thông tin</button>
-            {canPublish && (
-              <form action={publishContestAction} className="inline">
-                <input type="hidden" name="contestId" value={contest.id} />
-                <button type="submit" className="btn btn-sm btn-primary">Xuất bản</button>
-              </form>
-            )}
-            {isPublished && (
-              <form action={archiveContestAction} className="inline">
-                <input type="hidden" name="contestId" value={contest.id} />
-                <button type="submit" className="btn btn-sm btn-ghost">Lưu trữ</button>
-              </form>
-            )}
-            <Link href={`/contests/${contest.slug}/start?preview=1`} target="_blank" className="btn btn-sm btn-secondary">
-              Xem trước
-            </Link>
+
+          {/* Visibility */}
+          <div className="grid gap-3">
+            <p className="text-sm font-semibold">Chế độ hiển thị</p>
+            <div className="flex gap-3">
+              <label className="flex items-center gap-2 rounded-xl bg-panel-muted px-4 py-3 cursor-pointer has-[:checked]:bg-accent-soft has-[:checked]:ring-2 has-[:checked]:ring-accent">
+                <input
+                  type="radio"
+                  name="visibility"
+                  value="PUBLIC"
+                  checked={visibility === "PUBLIC"}
+                  onChange={() => setVisibility("PUBLIC")}
+                  className="accent-[var(--accent)]"
+                />
+                <div>
+                  <p className="text-sm font-semibold">Công khai</p>
+                  <p className="text-xs text-ink-soft">Mọi người đều có thể tham gia</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-2 rounded-xl bg-panel-muted px-4 py-3 cursor-pointer has-[:checked]:bg-accent-soft has-[:checked]:ring-2 has-[:checked]:ring-accent">
+                <input
+                  type="radio"
+                  name="visibility"
+                  value="PRIVATE"
+                  checked={visibility === "PRIVATE"}
+                  onChange={() => setVisibility("PRIVATE")}
+                  className="accent-[var(--accent)]"
+                />
+                <div>
+                  <p className="text-sm font-semibold">Riêng tư</p>
+                  <p className="text-xs text-ink-soft">Cần mã truy cập</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Access code for private */}
+          {visibility === "PRIVATE" && (
+            <label className="grid gap-1.5 text-sm font-semibold">
+              Mã truy cập
+              <input name="accessCode" defaultValue={contest.accessCode ?? ""} placeholder="VD: HSG2024" className="field" />
+              <span className="font-normal text-ink-soft text-xs">Chia sẻ mã này riêng với người tham gia. Nhớ nhấn Lưu draft sau khi đổi.</span>
+            </label>
+          )}
+
+          {/* Duration */}
+          <div className="grid gap-3">
+            <p className="text-sm font-semibold">Thời lượng</p>
+            <div className="flex gap-3">
+              {durationOptions.map((opt) => (
+                <label
+                  key={opt.value}
+                  className="flex items-center gap-2 rounded-xl bg-panel-muted px-4 py-3 cursor-pointer has-[:checked]:bg-accent-soft has-[:checked]:ring-2 has-[:checked]:ring-accent"
+                >
+                  <input
+                    type="radio"
+                    name="durationMinutes"
+                    value={opt.value}
+                    defaultChecked={contest.durationMinutes === opt.value}
+                    className="accent-[var(--accent)]"
+                  />
+                  <span className="text-sm font-semibold">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-ink-soft">Thông tin contest được lưu bằng nút &quot;Lưu draft&quot; ở thanh phía trên.</p>
           </div>
         </form>
       </section>
 
-      {/* Sections */}
+      {/* Sections - Exam Builder */}
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Sections ({sortedSections.length})</h2>
+          <h2 className="text-lg font-semibold">Phần thi ({sortedSections.length})</h2>
           <button
             type="button"
-            onClick={() => setShowAddSection(!showAddSection)}
+            onClick={() => setShowAddModal(true)}
             className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-semibold text-background"
           >
             <Plus className="size-4" aria-hidden="true" />
-            Thêm section
+            Thêm phần thi
           </button>
         </div>
 
-        {showAddSection && (
-          <form action={createSectionAction} className="mb-4 grid gap-3 rounded-2xl border-2 border-dashed border-accent bg-accent-soft/20 p-5">
-            <input type="hidden" name="contestId" value={contest.id} />
-            <input type="hidden" name="orderIndex" value={sortedSections.length} />
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="grid gap-1 text-sm font-semibold">
-                Tên section
-                <input name="title" placeholder="VD: Use of English" required className="field text-sm" />
-              </label>
-              <label className="grid gap-1 text-sm font-semibold">
-                Skill type
-                <select
-                  name="skillType"
-                  value={sectionSkillType}
-                  onChange={(e) => setSectionSkillType(e.target.value as SkillType)}
-                  className="field text-sm"
-                >
-                  {skillTypeOptions.map((s) => (
-                    <option key={s} value={s}>{skillLabels[s]}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <label className="grid gap-1 text-sm font-semibold">
-              Hướng dẫn (tuỳ chọn)
-              <input name="instructions" placeholder="VD: Đọc đoạn văn sau và trả lời các câu hỏi." className="field text-sm" />
-            </label>
-            {sectionSkillType === "LISTENING" && (
-              <label className="grid gap-1 text-sm font-semibold">
-                Đường dẫn audio
-                <input name="audioUrl" placeholder="/audio/listening/test-01.mp3" className="field text-sm" />
-                <span className="font-normal text-ink-soft text-xs">
-                  Tạm thời nhập đường dẫn audio. Upload file sẽ được bổ sung ở phase sau.
-                </span>
-              </label>
-            )}
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-sm btn-primary">Thêm section</button>
-              <button type="button" onClick={() => setShowAddSection(false)} className="btn btn-sm btn-ghost">Huỷ</button>
-            </div>
-          </form>
-        )}
-
         <div className="grid gap-3">
           {sortedSections.map((section) => (
-            <SectionCard key={section.id} contestId={contest.id} section={section} expanded={sortedSections.length === 1} />
+            <SectionCard key={section.id} contestId={contest.id} section={section} />
           ))}
-          {sortedSections.length === 0 && !showAddSection && (
+          {sortedSections.length === 0 && (
             <div className="rounded-2xl border-2 border-dashed border-line p-10 text-center">
-              <p className="text-sm text-ink-soft">Chưa có section nào. Nhấn &quot;Thêm section&quot; để bắt đầu.</p>
+              <p className="text-sm text-ink-soft">Chưa có phần thi nào. Nhấn &quot;Thêm phần thi&quot; để bắt đầu.</p>
             </div>
           )}
         </div>
       </section>
+
+      {/* Add Section Modal */}
+      {showAddModal && (
+        <AddSectionModal
+          contestId={contest.id}
+          nextOrderIndex={nextOrderIndex}
+          onClose={() => setShowAddModal(false)}
+        />
+      )}
     </div>
   );
 }

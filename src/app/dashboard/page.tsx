@@ -155,7 +155,7 @@ export default async function DashboardPage() {
             <Link href="/teacher/grading" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
               Chấm bài
             </Link>
-            <Link href="/admin/contests" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
+            <Link href="/admin/contests-builder" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
               Contests
             </Link>
           </div>

@@ -163,7 +163,7 @@ export async function getPersonalizedRecommendations(userId: string, take = 8): 
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
     });
     if (writing && !includesProblem(recommendations, writing.id)) {
-      recommendations.push(await toRecommendation(writing, "Bạn chưa có dữ liệu Writing, nên hãy thử một prompt ngắn.", 55));
+      recommendations.push(await toRecommendation(writing, "Luyện viết với prompt ngắn và nhận phản hồi.", 55));
     }
   }
 
@@ -174,7 +174,7 @@ export async function getPersonalizedRecommendations(userId: string, take = 8): 
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
     });
     if (reading && !includesProblem(recommendations, reading.id)) {
-      recommendations.push(await toRecommendation(reading, "Bạn chưa có đủ dữ liệu Reading, nên hãy làm một bài đọc ngắn.", 50));
+      recommendations.push(await toRecommendation(reading, "Làm bài đọc để cải thiện vocabulary và reading comprehension.", 50));
     }
   }
 

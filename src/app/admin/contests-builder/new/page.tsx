@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { createContestAction } from "@/app/admin/contests-builder/actions";
+import { requireAdmin } from "@/lib/auth/session";
+import { NewContestForm } from "@/app/admin/contests-builder/new/NewContestForm";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function NewContestBuilderPage({ searchParams }: PageProps) {
+  await requireAdmin();
   const query = await searchParams;
   const error = typeof query.error === "string" ? query.error : "";
 
@@ -22,6 +24,7 @@ export default async function NewContestBuilderPage({ searchParams }: PageProps)
       <div>
         <p className="text-sm font-semibold text-accent">Quản trị / Contest Builder</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Tạo contest mới</h1>
+        <p className="mt-2 text-sm text-ink-soft">Điền thông tin cơ bản, sau đó thêm phần thi và nhập câu hỏi ở bước tiếp theo.</p>
       </div>
 
       {error ? (
@@ -29,47 +32,7 @@ export default async function NewContestBuilderPage({ searchParams }: PageProps)
       ) : null}
 
       <section className="surface rounded-2xl p-5">
-        <form action={createContestAction} className="grid gap-5">
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Tiêu đề
-              <input name="title" required placeholder="VD: Đề thi HSG lớp 12 - Đợt 1" className="field" />
-            </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Slug
-              <input name="slug" placeholder="Tự tạo nếu để trống" className="field" />
-            </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Thời lượng (phút)
-              <input name="durationMinutes" type="number" min={1} placeholder="VD: 90" className="field" />
-            </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Trạng thái ban đầu
-              <select name="status" defaultValue="DRAFT" className="field">
-                <option value="DRAFT">Bản nháp</option>
-                <option value="LIVE">Đang mở</option>
-                <option value="SCHEDULED">Lên lịch</option>
-              </select>
-            </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Bắt đầu lúc
-              <input name="startsAt" type="datetime-local" className="field" />
-            </label>
-            <label className="grid gap-1.5 text-sm font-semibold">
-              Kết thúc lúc
-              <input name="endsAt" type="datetime-local" className="field" />
-            </label>
-          </div>
-          <label className="grid gap-1.5 text-sm font-semibold">
-            Mô tả
-            <textarea name="description" rows={3} placeholder="Mô tả ngắn gọn nội dung contest..." className="field" />
-          </label>
-          <div className="flex gap-3">
-            <button type="submit" className="btn btn-primary">
-              Tạo contest
-            </button>
-          </div>
-        </form>
+        <NewContestForm />
       </section>
     </div>
   );

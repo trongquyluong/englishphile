@@ -547,6 +547,7 @@ model Contest {
   contestType     ContestType         @default(PRACTICE_CONTEST)
   status          ContestStatus       @default(DRAFT)
   visibility      ContestVisibility   @default(PUBLIC)
+  accessCode      String?
   durationMinutes Int?
   startsAt        DateTime?
   endsAt          DateTime?

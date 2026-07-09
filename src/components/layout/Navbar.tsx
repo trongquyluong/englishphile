@@ -1,11 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import type { Role } from "@prisma/client";
 import { ChevronDown, LogOut, Menu, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/auth/actions";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { NavLinks } from "@/components/layout/NavLinks";
-import { isAdminUser } from "@/lib/auth/session";
 import { roleLabels } from "@/lib/labels";
+import { useEffect, useRef, useState } from "react";
+import type { Role } from "@prisma/client";
 
 type NavbarProps = {
   user: {
@@ -16,6 +18,7 @@ type NavbarProps = {
     fullName: string | null;
     role: Role;
   } | null;
+  canAdmin: boolean;
   showDiagnosticLink?: boolean;
 };
 
@@ -45,7 +48,7 @@ const adminLinks = [
   { href: "/admin/sources", label: "Sources" },
   { href: "/admin/topics", label: "Topic" },
   { href: "/admin/diagnostic", label: "Diagnostic Bank" },
-  { href: "/admin/contests", label: "Contests" },
+  { href: "/admin/contests-builder", label: "Contest Builder" },
   { href: "/admin/wiki", label: "Wiki" },
   { href: "/admin/beta-checklist", label: "Beta Checklist" },
 ];
@@ -53,8 +56,73 @@ const adminLinks = [
 const summaryPillClass =
   "flex min-h-11 cursor-pointer list-none items-center gap-1 rounded-full px-3.5 text-sm font-medium text-ink-soft transition-[background-color,color] duration-150 hover:bg-panel-muted hover:text-foreground";
 
-export function Navbar({ user, showDiagnosticLink = true }: NavbarProps) {
-  const canAdmin = isAdminUser(user);
+// Dropdown component with click-outside and escape handling
+function Dropdown({
+  trigger,
+  children,
+  className = "w-56",
+  alignRight = false,
+}: {
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  alignRight?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close on escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    if (open) {
+      document.addEventListener("keydown", handleEscape);
+    }
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [open]);
+
+  // Close on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={summaryPillClass}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        {trigger}
+        <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+      </button>
+      {open && (
+        <div
+          className={`surface absolute left-0 z-50 mt-2 grid gap-1 rounded-2xl p-2 ${className} ${alignRight ? "right-0 left-auto" : ""}`}
+          onClick={(event) => {
+            // Client-side navigation keeps the navbar mounted, so close the menu when an item is chosen.
+            if ((event.target as HTMLElement).closest("a")) setOpen(false);
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Navbar({ user, canAdmin, showDiagnosticLink = true }: NavbarProps) {
   // Diagnostic is onboarding-only: once finished, it leaves the main nav.
   const visibleUserLinks = showDiagnosticLink
     ? userLinks
@@ -71,58 +139,37 @@ export function Navbar({ user, showDiagnosticLink = true }: NavbarProps) {
         <nav className="hidden flex-wrap items-center gap-1 md:flex" aria-label="Điều hướng chính">
           <NavLinks links={mainLinks} />
           {user ? (
-            <details className="relative">
-              <summary className={summaryPillClass}>
-                Cá nhân
-                <ChevronDown className="size-4" aria-hidden="true" />
-              </summary>
-              <div className="surface absolute left-0 mt-2 grid w-56 gap-1 rounded-2xl p-2">
-                {visibleUserLinks.map((link) => (
-                  <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2 text-sm hover:bg-panel-muted">
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </details>
+            <Dropdown trigger="Cá nhân" className="w-56">
+              {visibleUserLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2 text-sm hover:bg-panel-muted">
+                  {link.label}
+                </Link>
+              ))}
+            </Dropdown>
           ) : null}
           {canAdmin ? (
-            <details className="relative">
-              <summary className={summaryPillClass}>
-                Quản trị
-                <ChevronDown className="size-4" aria-hidden="true" />
-              </summary>
-              <div className="surface absolute left-0 mt-2 grid w-64 gap-1 rounded-2xl p-2">
-                {adminLinks.map((link) => (
-                  <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2 text-sm hover:bg-panel-muted">
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </details>
+            <Dropdown trigger="Quản trị" className="w-64">
+              {adminLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2 text-sm hover:bg-panel-muted">
+                  {link.label}
+                </Link>
+              ))}
+            </Dropdown>
           ) : null}
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <details className="relative md:hidden">
-            <summary
-              className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-full text-ink-soft hover:bg-panel-muted"
-              aria-label="Mở menu"
-            >
-              <Menu className="size-5" aria-hidden="true" />
-              <span className="sr-only">Mở menu</span>
-            </summary>
-            <div className="surface absolute right-0 mt-2 grid w-60 gap-1 rounded-2xl p-2">
-              {[
-                ...mainLinks,
-                ...(user ? visibleUserLinks : [{ href: "/auth/sign-in", label: "Đăng nhập" }]),
-                ...(canAdmin ? adminLinks : []),
-              ].map((link) => (
-                <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2.5 text-sm hover:bg-panel-muted">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </details>
+          <Dropdown trigger={<Menu className="size-5" />} className="w-60" alignRight>
+            {[
+              ...mainLinks,
+              ...(user ? visibleUserLinks : [{ href: "/auth/sign-in", label: "Đăng nhập" }]),
+              ...(canAdmin ? adminLinks : []),
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="rounded-xl px-3 py-2.5 text-sm hover:bg-panel-muted">
+                {link.label}
+              </Link>
+            ))}
+          </Dropdown>
 
           {user ? (
             <>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, Clock, GraduationCap, ListChecks, Medal, Trophy } from "lucide-react";
+import { ArrowRight, Clock, GraduationCap, ListChecks, Lock, Medal, Trophy } from "lucide-react";
 import { contestStatusLabels, contestTypeLabels } from "@/lib/labels";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getContestAvailability } from "@/lib/contests";
@@ -54,7 +54,8 @@ export default async function ContestsPage({ searchParams }: PageProps) {
   const now = new Date();
   const contests = await prisma.contest.findMany({
     where: {
-      visibility: "PUBLIC",
+      // Private contests are listed with a lock badge; unlisted ones stay reachable only by link.
+      visibility: { in: ["PUBLIC", "PRIVATE"] },
       status: { notIn: ["DRAFT", "ARCHIVED"] },
     },
     include: {
@@ -117,7 +118,10 @@ export default async function ContestsPage({ searchParams }: PageProps) {
                     <p className="text-xs font-semibold text-accent">{contestTypeLabels[contest.contestType]}</p>
                     <h3 className="mt-2 font-semibold text-balance">{contest.title}</h3>
                   </div>
-                  <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">{contestStatusLabels[contest.status]}</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft">{contestStatusLabels[contest.status]}</span>
+                    {contest.visibility === "PRIVATE" && <span className="rounded-full bg-panel-muted px-2.5 py-1 text-xs font-semibold text-ink-soft flex items-center gap-1"><Lock className="size-3" />Riêng tư</span>}
+                  </div>
                 </div>
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-ink-soft">{contest.description ?? "Contest luyện tập từ nội dung đã xuất bản."}</p>
                 <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-ink-soft">

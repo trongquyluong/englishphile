@@ -211,7 +211,7 @@ export default async function AdminBetaChecklistPage() {
       label: "Contests public",
       detail: `${activeContests} contest public đang mở hoặc đã lên lịch.`,
       status: activeContests > 0 ? "ok" : "warning",
-      href: "/admin/contests",
+      href: "/admin/contests-builder",
     },
     {
       label: "Trang pháp lý beta",

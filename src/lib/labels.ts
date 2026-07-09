@@ -118,7 +118,7 @@ export const contestTypeLabels: Record<ContestType, string> = {
 
 export const contestStatusLabels: Record<ContestStatus, string> = {
   DRAFT: "Bản nháp",
-  SCHEDULED: "Đã lên lịch",
+  SCHEDULED: "Sắp mở",
   LIVE: "Đang mở",
   ENDED: "Đã kết thúc",
   ARCHIVED: "Đã lưu trữ",

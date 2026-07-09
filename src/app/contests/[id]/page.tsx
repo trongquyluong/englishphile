@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, ListChecks, Trophy } from "lucide-react";
+import { Clock, ListChecks, Lock, Trophy } from "lucide-react";
 import { startContestAction } from "@/app/contests/actions";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug, getContestAvailability } from "@/lib/contests";
 import { contestStatusLabels, contestTypeLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
@@ -17,8 +17,9 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
   const { id } = await params;
   const query = await searchParams;
   const error = typeof query.error === "string" ? query.error : "";
+  const needsAccess = typeof query.access === "string" ? query.access : "";
   const contest = await findContestByIdOrSlug(id);
-  if (!contest || contest.visibility !== "PUBLIC" || contest.status === "DRAFT" || contest.status === "ARCHIVED") notFound();
+  if (!contest || contest.status === "DRAFT" || contest.status === "ARCHIVED") notFound();
   const latestAttempt = user
     ? await prisma.contestAttempt.findFirst({
         where: { contestId: contest.id, userId: user.id },
@@ -26,10 +27,28 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
       })
     : null;
   const problemSections = [...new Set(contest.problems.map((item) => item.section))];
-  const builderSections = contest.sections.map((s) => s.title);
-  const allSections = [...new Set([...problemSections, ...builderSections])];
+  const sectionSummaries = [
+    ...problemSections.map((section) => ({
+      key: `problem:${section}`,
+      title: section,
+      detail: `${contest.problems.filter((item) => item.section === section).length} bài`,
+    })),
+    ...contest.sections.map((section) => ({
+      key: `section:${section.id}`,
+      title: section.title,
+      detail: `${section.questions.length} câu hỏi`,
+    })),
+  ];
   const availability = getContestAvailability(contest);
   const activeAttempt = latestAttempt?.status === "IN_PROGRESS" ? latestAttempt : null;
+
+  // Check private access (admins bypass the gate; students must supply the code)
+  const isAdmin = isAdminUser(user);
+  const isPrivate = contest.visibility === "PRIVATE";
+  const hasAccess = !isPrivate || isAdmin || (needsAccess !== "" && needsAccess === contest.accessCode);
+  const showAccessForm = isPrivate && !hasAccess;
+
+  const totalQuestions = contest.problems.length + contest.sections.reduce((s, sec) => s + sec.questions.length, 0);
 
   return (
     <div className="grid gap-6">
@@ -43,57 +62,90 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
             {contest.durationMinutes ? `${contest.durationMinutes} phút` : "Không giới hạn"}
           </span>
           <span className="rounded-lg bg-panel-muted px-2 py-1">{contestStatusLabels[contest.status]}</span>
-          <span className="rounded-lg bg-panel-muted px-2 py-1">{contest.problems.length + contest.sections.reduce((s, sec) => s + sec.questions.length, 0)} câu hỏi</span>
-          {contest.startsAt ? <span className="rounded-lg bg-panel-muted px-2 py-1">Mở: {contest.startsAt.toLocaleString("vi-VN")}</span> : null}
-          {contest.endsAt ? <span className="rounded-lg bg-panel-muted px-2 py-1">Kết thúc: {contest.endsAt.toLocaleString("vi-VN")}</span> : null}
+          {isPrivate && (
+            <span className="rounded-lg bg-panel-muted px-2 py-1 flex items-center gap-1">
+              <Lock className="size-3.5" aria-hidden="true" />
+              Riêng tư
+            </span>
+          )}
+          <span className="rounded-lg bg-panel-muted px-2 py-1">{totalQuestions} câu hỏi</span>
+          {contest.startsAt && <span className="rounded-lg bg-panel-muted px-2 py-1">Mở: {contest.startsAt.toLocaleString("vi-VN")}</span>}
+          {contest.endsAt && <span className="rounded-lg bg-panel-muted px-2 py-1">Kết thúc: {contest.endsAt.toLocaleString("vi-VN")}</span>}
         </div>
       </section>
 
-      <section className="grid gap-5 lg:grid-cols-[1fr_340px]">
-        <div className="surface rounded-2xl p-5">
-          <div className="flex items-center gap-2">
-            <ListChecks className="size-5 text-accent" aria-hidden="true" />
-            <h2 className="text-lg font-semibold">Sections</h2>
+      {showAccessForm ? (
+        <section className="surface rounded-2xl p-6">
+          <div className="flex items-center gap-3">
+            <Lock className="size-6 text-accent" aria-hidden="true" />
+            <div>
+              <h2 className="text-lg font-semibold">Contest này cần mã truy cập</h2>
+              <p className="mt-1 text-sm text-ink-soft">Nhập mã truy cập để xem nội dung contest.</p>
+            </div>
           </div>
-          <div className="mt-4 grid gap-2">
-            {allSections.map((section) => (
-              <div key={section} className="rounded-xl bg-panel-muted p-3 text-sm">
-                <span className="font-semibold">{section}</span>
-                <span className="text-ink-soft"> · {contest.problems.filter((item) => item.section === section).length} problems</span>
-              </div>
-            ))}
+          <form action={`/contests/${contest.slug}`} className="mt-4 grid gap-3">
+            <label className="grid gap-1.5 text-sm font-semibold">
+              Mã truy cập
+              <input name="access" type="text" placeholder="Nhập mã truy cập" className="field" />
+            </label>
+            {needsAccess !== "" ? <p className="text-sm text-danger">Mã truy cập không đúng. Vui lòng thử lại.</p> : null}
+            {error && <p className="text-sm text-danger">{error}</p>}
+            <button type="submit" className="btn btn-primary self-start">
+              Vào contest
+            </button>
+          </form>
+        </section>
+      ) : (
+        <section className="grid gap-5 lg:grid-cols-[1fr_340px]">
+          <div className="surface rounded-2xl p-5">
+            <div className="flex items-center gap-2">
+              <ListChecks className="size-5 text-accent" aria-hidden="true" />
+              <h2 className="text-lg font-semibold">Sections</h2>
+            </div>
+            <div className="mt-4 grid gap-2">
+              {sectionSummaries.map((section) => (
+                <div key={section.key} className="rounded-xl bg-panel-muted p-3 text-sm">
+                  <span className="font-semibold">{section.title}</span>
+                  <span className="text-ink-soft"> · {section.detail}</span>
+                </div>
+              ))}
+              {sectionSummaries.length === 0 && (
+                <p className="rounded-xl bg-panel-muted p-3 text-sm text-ink-soft">Contest chưa có phần thi.</p>
+              )}
+            </div>
           </div>
-        </div>
 
-        <aside className="surface rounded-2xl p-5">
-          <Trophy className="size-6 text-accent" aria-hidden="true" />
-          <h2 className="mt-3 text-lg font-semibold">Sẵn sàng làm bài?</h2>
-          <p className="mt-2 text-sm leading-6 text-ink-soft">{contest.rules ?? "Làm bài nghiêm túc, nộp một lần khi hoàn thành. Writing có thể cần chấm tay."}</p>
-          {error ? <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
-          <p className="mt-3 rounded-lg bg-panel-muted px-3 py-2 text-sm text-ink-soft">{availability.reason}</p>
-          <div className="mt-5 grid gap-2">
-            {activeAttempt ? (
-              <Link href={`/contests/${contest.slug}/start?attempt=${activeAttempt.id}`} className="btn btn-primary">
-                Tiếp tục lượt đang làm
+          <aside className="surface rounded-2xl p-5">
+            <Trophy className="size-6 text-accent" aria-hidden="true" />
+            <h2 className="mt-3 text-lg font-semibold">Sẵn sàng làm bài?</h2>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">{contest.rules ?? "Làm bài nghiêm túc, nộp một lần khi hoàn thành. Writing có thể cần chấm tay."}</p>
+            {error ? <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">{error}</p> : null}
+            <p className="mt-3 rounded-lg bg-panel-muted px-3 py-2 text-sm text-ink-soft">{availability.reason}</p>
+            <div className="mt-5 grid gap-2">
+              {activeAttempt ? (
+                <Link href={`/contests/${contest.slug}/start?attempt=${activeAttempt.id}`} className="btn btn-primary">
+                  Tiếp tục lượt đang làm
+                </Link>
+              ) : null}
+              {latestAttempt?.submittedAt ? (
+                <Link href={`/contests/${contest.slug}/result?attempt=${latestAttempt.id}`} className="btn btn-primary">
+                  Xem kết quả gần nhất
+                </Link>
+              ) : null}
+              <form action={startContestAction}>
+                <input type="hidden" name="contestId" value={contest.id} />
+                {isPrivate ? <input type="hidden" name="accessCode" value={needsAccess} /> : null}
+                <button disabled={!availability.canStart || totalQuestions === 0} className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-panel-muted px-4 text-sm font-semibold transition-transform duration-150 ease-out active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-55">
+                  Bắt đầu contest
+                </button>
+              </form>
+              <Link href={`/contests/${contest.slug}/leaderboard`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-panel-muted px-4 text-sm font-semibold">
+                Leaderboard
               </Link>
-            ) : null}
-            {latestAttempt?.submittedAt ? (
-              <Link href={`/contests/${contest.slug}/result?attempt=${latestAttempt.id}`} className="btn btn-primary">
-                Xem kết quả gần nhất
-              </Link>
-            ) : null}
-            <form action={startContestAction}>
-              <input type="hidden" name="contestId" value={contest.id} />
-              <button disabled={!availability.canStart || !contest.problems.length} className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-panel-muted px-4 text-sm font-semibold transition-transform duration-150 ease-out active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-55">
-                Bắt đầu contest
-              </button>
-            </form>
-            <Link href={`/contests/${contest.slug}/leaderboard`} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-panel-muted px-4 text-sm font-semibold">
-              Leaderboard
-            </Link>
-          </div>
-        </aside>
-      </section>
+            </div>
+          </aside>
+        </section>
+      )}
     </div>
   );
 }

@@ -39,6 +39,8 @@ export default async function ContestBuilderEditPage({ params, searchParams }: P
     slug: contest.slug,
     description: contest.description,
     status: contest.status,
+    visibility: contest.visibility,
+    accessCode: contest.accessCode,
     durationMinutes: contest.durationMinutes,
     startsAt: contest.startsAt?.toISOString() ?? null,
     endsAt: contest.endsAt?.toISOString() ?? null,
