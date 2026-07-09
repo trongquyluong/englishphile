@@ -135,7 +135,7 @@ export async function POST(request: Request) {
   }
   if (wordCount > WRITING_GRADER_MAX_WORDS) {
     return errorResponse(
-      `Bài viết hiện có ${wordCount} từ — vượt giới hạn ${WRITING_GRADER_MAX_WORDS} từ của bản beta. Hãy rút gọn bớt.`,
+      `Bài viết hiện có ${wordCount} từ — vượt giới hạn ${WRITING_GRADER_MAX_WORDS} từ cho mỗi lần chấm. Hãy rút gọn bớt.`,
       400,
     );
   }

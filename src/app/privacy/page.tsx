@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Chính sách riêng tư",
-  description: "Cách Englishphile lưu và sử dụng dữ liệu tài khoản, diagnostic và luyện tập trong giai đoạn beta.",
+  description: "Cách Englishphile lưu và sử dụng dữ liệu tài khoản, diagnostic và luyện tập.",
 };
 
 const lastUpdated = "09/07/2026";
@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         <p className="text-sm font-semibold text-accent">Privacy</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Chính sách riêng tư</h1>
         <p className="mt-3 text-sm leading-6 text-ink-soft text-pretty">
-          Englishphile là sản phẩm luyện tập tiếng Anh đang trong giai đoạn beta. Trang này giải thích Englishphile lưu những dữ liệu gì
+          Englishphile là sản phẩm luyện tập tiếng Anh. Trang này giải thích Englishphile lưu những dữ liệu gì
           và dùng chúng vào việc gì, bằng ngôn ngữ dễ đọc thay vì văn bản pháp lý. Trang này không phải là tư vấn pháp lý.
         </p>
         <p className="mt-3 text-xs font-medium text-ink-soft">Cập nhật lần cuối: {lastUpdated}</p>

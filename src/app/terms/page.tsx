@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Điều khoản sử dụng",
-  description: "Điều khoản sử dụng Englishphile trong giai đoạn beta: tài khoản, nội dung, điểm số và giới hạn trách nhiệm.",
+  description: "Điều khoản sử dụng Englishphile: tài khoản, nội dung, điểm số và giới hạn trách nhiệm.",
 };
 
 const lastUpdated = "09/07/2026";
@@ -15,17 +15,17 @@ export default function TermsPage() {
         <p className="text-sm font-semibold text-accent">Terms</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Điều khoản sử dụng</h1>
         <p className="mt-3 text-sm leading-6 text-ink-soft text-pretty">
-          Englishphile là sản phẩm luyện tập tiếng Anh đang trong giai đoạn beta. Khi tạo tài khoản và sử dụng dịch vụ, bạn đồng ý với
+          Englishphile là sản phẩm luyện tập tiếng Anh. Khi tạo tài khoản và sử dụng dịch vụ, bạn đồng ý với
           các điều khoản dưới đây.
         </p>
         <p className="mt-3 text-xs font-medium text-ink-soft">Cập nhật lần cuối: {lastUpdated}</p>
       </header>
 
       <section className="surface rounded-2xl p-6 text-sm leading-7 text-ink-soft">
-        <h2 className="text-lg font-semibold text-foreground">Sản phẩm beta</h2>
+        <h2 className="text-lg font-semibold text-foreground">Về dịch vụ</h2>
         <p className="mt-2">
-          Englishphile đang được hoàn thiện. Tính năng, nội dung và giao diện có thể thay đổi, tạm ngưng hoặc gỡ bỏ trong giai đoạn beta.
-          Chúng tôi cố gắng báo trước những thay đổi lớn, nhưng không cam kết dịch vụ hoạt động liên tục không gián đoạn.
+          Englishphile đang được duy trì và phát triển. Tính năng, nội dung và giao diện có thể được cập nhật theo thời gian.
+          Chúng tôi cố gắng thông báo trước khi có thay đổi lớn ảnh hưởng đến người dùng.
         </p>
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Tài khoản và sử dụng hợp lệ</h2>
@@ -47,7 +47,7 @@ export default function TermsPage() {
             lượng, không phải kết quả thi chính thức.
           </li>
           <li>
-            Trong giai đoạn beta, đề luyện và contest có thể còn sai sót. Nếu bạn phát hiện lỗi, hãy báo qua thông tin liên hệ trong
+            Đề luyện và contest có thể còn sai sót. Nếu bạn phát hiện lỗi, hãy báo qua thông tin liên hệ trong
             trang{" "}
             <Link href="/about" className="font-semibold text-accent-strong hover:underline">
               Về Englishphile
@@ -65,7 +65,7 @@ export default function TermsPage() {
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Giới hạn trách nhiệm</h2>
         <p className="mt-2">
-          Englishphile được cung cấp nguyên trạng trong giai đoạn beta. Trong phạm vi pháp luật cho phép, Englishphile không chịu trách
+          Englishphile được cung cấp nguyên trạng. Trong phạm vi pháp luật cho phép, Englishphile không chịu trách
           nhiệm cho các thiệt hại gián tiếp phát sinh từ việc sử dụng dịch vụ, ví dụ gián đoạn truy cập hoặc mất dữ liệu luyện tập.
           Kết quả trên Englishphile chỉ nên dùng để định hướng ôn tập.
         </p>

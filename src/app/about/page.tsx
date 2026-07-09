@@ -304,7 +304,7 @@ export default function AboutPage() {
 
       {/* Closing note */}
       <p className="rounded-3xl bg-panel-muted px-6 py-5 text-center text-sm leading-7 text-ink-soft text-pretty">
-        Englishphile vẫn đang trong giai đoạn beta. Nếu bạn thấy một câu hỏi sai, một phần giải thích chưa rõ, hoặc một
+        Nếu bạn thấy một câu hỏi sai, một phần giải thích chưa rõ, hoặc một
         tính năng khó dùng, góp ý của bạn sẽ giúp website tốt hơn.
       </p>
     </div>

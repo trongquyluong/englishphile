@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/session";
 import { contestStatusLabels, contestTypeLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
@@ -22,6 +22,14 @@ export default async function AdminContestsBuilderPage() {
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">Contest Builder</h1>
           <p className="mt-2 text-sm text-ink-soft">Tạo contest với section và câu hỏi tuỳ chỉnh, hỗ trợ Listening audio.</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <Link
+          href="/admin/contests-builder/import"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-line bg-panel-muted px-4 text-sm font-semibold hover:bg-panel"
+        >
+          <Upload className="size-4" aria-hidden="true" />
+          Nhập đề từ Excel
+        </Link>
         <Link
           href="/admin/contests-builder/new"
           className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-foreground px-4 text-sm font-semibold text-background"
@@ -29,6 +37,7 @@ export default async function AdminContestsBuilderPage() {
           <Plus className="size-4" aria-hidden="true" />
           Tạo contest
         </Link>
+      </div>
       </div>
 
       <section className="surface overflow-hidden rounded-2xl">

@@ -179,8 +179,7 @@ export default async function Home() {
         <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full bg-panel px-3.5 py-1.5 text-sm font-semibold text-accent shadow-[inset_0_0_0_1px_var(--line)]">
-              <span className="size-2 rounded-full bg-leaf" aria-hidden="true" />
-              Englishphile Beta
+              Englishphile
             </p>
             <h1 className="mt-5 max-w-2xl text-4xl font-semibold leading-[1.15] tracking-tight sm:text-5xl lg:text-[3.4rem]">
               Luyện tiếng Anh nâng cao rõ ràng hơn mỗi ngày
@@ -214,7 +213,7 @@ export default async function Home() {
               )}
             </div>
             <p className="mt-6 text-sm text-ink-soft">
-              Miễn phí trong giai đoạn beta. Chỉ cần một tài khoản học viên.
+              Chỉ cần một tài khoản học viên là có thể bắt đầu luyện tập.
             </p>
           </div>
 

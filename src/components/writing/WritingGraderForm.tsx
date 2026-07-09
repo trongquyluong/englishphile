@@ -238,7 +238,7 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
       return;
     }
     if (wordCount > WRITING_GRADER_MAX_WORDS) {
-      setError(`Bài viết hiện có ${wordCount} từ — vượt giới hạn ${WRITING_GRADER_MAX_WORDS} từ của bản beta. Hãy rút gọn bớt.`);
+      setError(`Bài viết hiện có ${wordCount} từ — vượt giới hạn ${WRITING_GRADER_MAX_WORDS} từ cho mỗi lần chấm. Hãy rút gọn bớt.`);
       return;
     }
 

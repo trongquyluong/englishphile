@@ -4,7 +4,7 @@ import { checkHealth } from "@/lib/health";
 
 export const metadata: Metadata = {
   title: "Trạng thái hệ thống",
-  description: "Theo dõi trạng thái beta của Englishphile.",
+  description: "Theo dõi trạng thái hoạt động của Englishphile.",
 };
 
 export default async function StatusPage() {
@@ -16,7 +16,7 @@ export default async function StatusPage() {
         <p className="text-sm font-semibold text-accent">Status</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Trạng thái Englishphile</h1>
         <p className="mt-3 text-sm leading-6 text-ink-soft text-pretty">
-          Đây là trang trạng thái beta đơn giản. Nếu có lỗi lặp lại, hãy ghi lại thời điểm và gửi cho quản trị viên.
+          Đây là trang theo dõi trạng thái hệ thống. Nếu có lỗi lặp lại, hãy ghi lại thời điểm và gửi cho quản trị viên.
         </p>
       </section>
 

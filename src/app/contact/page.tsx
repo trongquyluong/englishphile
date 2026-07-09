@@ -4,7 +4,7 @@ import { Mail, MessageCircle, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Liên hệ",
-  description: "Thông tin liên hệ và hỗ trợ cho Englishphile beta.",
+  description: "Thông tin liên hệ và hỗ trợ cho Englishphile.",
 };
 
 export default function ContactPage() {
@@ -16,7 +16,7 @@ export default function ContactPage() {
         <p className="text-sm font-semibold text-accent">Contact</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Liên hệ Englishphile</h1>
         <p className="mt-3 text-sm leading-6 text-ink-soft text-pretty">
-          Englishphile đang trong giai đoạn beta. Nếu bạn gặp lỗi, cần hỗ trợ tài khoản, hoặc muốn báo nội dung chưa chính xác, hãy liên hệ người điều hành.
+          Nếu bạn gặp lỗi, cần hỗ trợ tài khoản, hoặc muốn báo nội dung chưa chính xác, hãy liên hệ người điều hành.
         </p>
       </header>
 
@@ -34,13 +34,13 @@ export default function ContactPage() {
         </div>
         <div className="surface rounded-2xl p-5">
           <MessageCircle className="size-5 text-accent" aria-hidden="true" />
-          <h2 className="mt-3 font-semibold">Báo lỗi beta</h2>
+          <h2 className="mt-3 font-semibold">Báo lỗi</h2>
           <p className="mt-2 text-sm leading-6 text-ink-soft">Mô tả lỗi, trang bạn đang dùng, và thao tác trước khi lỗi xảy ra để admin kiểm tra nhanh hơn.</p>
         </div>
         <div className="surface rounded-2xl p-5">
           <ShieldCheck className="size-5 text-accent" aria-hidden="true" />
           <h2 className="mt-3 font-semibold">Dữ liệu cá nhân</h2>
-          <p className="mt-2 text-sm leading-6 text-ink-soft">Bạn có thể yêu cầu chỉnh sửa hoặc xóa dữ liệu tài khoản trong thời gian thử nghiệm.</p>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">Bạn có thể yêu cầu chỉnh sửa hoặc xóa dữ liệu tài khoản.</p>
         </div>
       </section>
 

@@ -3,12 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
-import type { ContestStatus, ContestVisibility, QuestionType, SkillType } from "@prisma/client";
+import type { ContestVisibility, QuestionType, SkillType } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/import/duplicates";
+import type { ParsedContest } from "@/lib/import/excel-contest-parser";
 
-// --- Helpers ---
+// --- Helpers (shared from existing actions.ts — duplicated here for the new import flow) ---
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -58,65 +59,10 @@ function parseQuestionType(value: string): QuestionType {
   return "MCQ";
 }
 
-function redirectBack(path: string, ok: boolean, message: string): never {
-  redirect(`${path}?${ok ? "message" : "error"}=${encodeURIComponent(message)}`);
-}
-
 const MCQ_QUESTION_TYPES: QuestionType[] = ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ", "PRONUNCIATION_ODD_ONE_OUT"];
 
-function optionIdForIndex(index: number) {
-  return String.fromCharCode(65 + (index % 26));
-}
-
-// Accepts one option per line as "A|text" (or a raw JSON array) and normalizes to [{ id, text }].
-function parseOptionsInput(formData: FormData, key = "optionsJson") {
-  const raw = text(formData, key);
-  if (!raw) return null;
-  if (raw.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch {
-      // fall through to line-based parsing
-    }
-  }
-  const options = raw
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line, index) => {
-      const separator = line.indexOf("|");
-      if (separator === -1) return { id: optionIdForIndex(index), text: line };
-      return {
-        id: line.slice(0, separator).trim().toUpperCase() || optionIdForIndex(index),
-        text: line.slice(separator + 1).trim(),
-      };
-    });
-  return options.length ? options : null;
-}
-
-// Accepts plain-text answers ("A", "answer 1 / answer 2", "A|correction") or a raw JSON object,
-// normalized to the shapes checkQuestionAnswer expects per question type.
-function parseAnswerInput(formData: FormData, type: QuestionType, key = "answerJson") {
-  const raw = text(formData, key);
-  if (!raw) return null;
-  if (raw.startsWith("{")) {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      // fall through to plain-text parsing
-    }
-  }
-  if (MCQ_QUESTION_TYPES.includes(type)) {
-    return { correctOptionId: raw.toUpperCase() };
-  }
-  if (type === "ERROR_IDENTIFICATION") {
-    const separator = raw.indexOf("|");
-    if (separator === -1) return { correctPart: raw.toUpperCase() };
-    return { correctPart: raw.slice(0, separator).trim().toUpperCase(), correction: raw.slice(separator + 1).trim() };
-  }
-  const acceptedAnswers = raw.split("/").map((item) => item.trim()).filter(Boolean);
-  return acceptedAnswers.length ? { acceptedAnswers } : null;
+function redirectBack(path: string, ok: boolean, message: string): never {
+  redirect(`${path}?${ok ? "message" : "error"}=${encodeURIComponent(message)}`);
 }
 
 async function ensureUniqueSlug(base: string, excludeContestId?: string) {
@@ -132,7 +78,145 @@ async function ensureUniqueSlug(base: string, excludeContestId?: string) {
   return `${base}-${Date.now()}`;
 }
 
-// --- Contest CRUD ---
+// ---------------------------------------------------------------------------
+// Import contest from parsed Excel data
+// ---------------------------------------------------------------------------
+
+export type ImportResult =
+  | { ok: true; contestId: string }
+  | { ok: false; error: string };
+
+export async function importContestFromParsedAction(
+  data: ParsedContest,
+): Promise<ImportResult> {
+  const user = await requireAdmin();
+
+  const { info, sections, questions } = data;
+
+  // Build slug
+  const baseSlug = info.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60);
+  const slug = await ensureUniqueSlug(baseSlug);
+
+  // Parse dates
+  const startsAt = info.startAt ? new Date(info.startAt) : null;
+  const endsAt = info.endAt ? new Date(info.endAt) : null;
+
+  // Create contest
+  const contest = await prisma.contest.create({
+    data: {
+      title: info.title,
+      slug,
+      description: info.description ?? null,
+      contestType: "PRACTICE_CONTEST",
+      status: "DRAFT",
+      visibility: info.visibility,
+      accessCode: info.visibility === "PRIVATE" ? (info.accessCode ?? null) : null,
+      durationMinutes: info.durationMinutes,
+      startsAt: startsAt ?? null,
+      endsAt: endsAt ?? null,
+      createdById: user.id,
+    },
+  });
+
+  // Section type mapping (same as parser)
+  const SECTION_TYPE_MAP: Record<string, SkillType> = {
+    UOE_MCQ: "USE_OF_ENGLISH",
+    WORD_FORMATION: "WORD_FORMATION",
+    OPEN_CLOZE: "OPEN_CLOZE",
+    GUIDED_CLOZE: "GUIDED_CLOZE",
+    READING: "READING",
+    LISTENING: "LISTENING",
+    WRITING: "WRITING",
+  };
+
+  const QUESTION_TYPE_MAP: Record<string, QuestionType> = {
+    MCQ: "MCQ",
+    SHORT_ANSWER: "SHORT_ANSWER",
+    WORD_FORMATION: "WORD_FORMATION",
+    OPEN_CLOZE: "OPEN_CLOZE",
+    GUIDED_CLOZE: "GUIDED_CLOZE",
+    LISTENING_SHORT_ANSWER: "LISTENING_SHORT_ANSWER",
+    WRITING: "WRITING_PROMPT",
+    LISTENING_MCQ: "LISTENING_MCQ",
+    READING_MCQ: "READING_MCQ",
+  };
+
+  // Create sections and questions
+  for (const section of sections) {
+    const skillType = SECTION_TYPE_MAP[section.sectionType.trim().toUpperCase()] ?? "USE_OF_ENGLISH";
+
+    const sectionRecord = await prisma.contestSection.create({
+      data: {
+        contestId: contest.id,
+        title: section.title,
+        skillType,
+        orderIndex: section.orderIndex,
+        instructions: section.instructions ?? null,
+        points: section.totalPoints,
+        audioUrl: section.audioUrl ?? null,
+        transcript: section.transcriptAdminOnly ?? null,
+        passageText: section.passageText ?? null,
+      },
+    });
+
+    // Get questions for this section
+    const sectionQuestions = questions
+      .filter((q) => q.sectionId === section.sectionId)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+
+    for (const q of sectionQuestions) {
+      const qType = QUESTION_TYPE_MAP[q.questionType.trim().toUpperCase()] ?? "MCQ";
+      const isMCQ = MCQ_QUESTION_TYPES.includes(qType);
+
+      // Build optionsJson — Prisma JSON fields use undefined (not null) for absent values
+      const hasOptions = isMCQ && (q.optionA || q.optionB || q.optionC || q.optionD);
+      const optionsJson = hasOptions
+        ? [
+            ...(q.optionA ? [{ id: "A", text: q.optionA }] : []),
+            ...(q.optionB ? [{ id: "B", text: q.optionB }] : []),
+            ...(q.optionC ? [{ id: "C", text: q.optionC }] : []),
+            ...(q.optionD ? [{ id: "D", text: q.optionD }] : []),
+          ]
+        : undefined;
+
+      // Build answerJson
+      const answerJson =
+        isMCQ && q.correctAnswer
+          ? { correctOptionId: q.correctAnswer.toUpperCase() }
+          : (q.correctAnswer || q.acceptedAnswers)
+            ? { acceptedAnswers: (q.acceptedAnswers ?? q.correctAnswer ?? "").split("|").map((a) => a.trim()).filter(Boolean) }
+            : undefined;
+
+      await prisma.contestQuestion.create({
+        data: {
+          sectionId: sectionRecord.id,
+          orderIndex: q.orderIndex,
+          type: qType,
+          prompt: q.prompt ?? null,
+          optionsJson: optionsJson as Prisma.InputJsonValue | undefined,
+          answerJson: answerJson as Prisma.InputJsonValue | undefined,
+          points: q.points ?? 1,
+          explanation: q.explanation ?? null,
+          rootWord: q.rootWord ?? null,
+        },
+      });
+    }
+  }
+
+  revalidatePath("/admin/contests-builder");
+  revalidatePath("/contests");
+
+  return { ok: true, contestId: contest.id };
+}
+
+// ---------------------------------------------------------------------------
+// Original actions preserved (create/update/delete/publish) — kept in this file
+// to avoid splitting the existing actions.ts content.
+// ---------------------------------------------------------------------------
 
 export async function createContestAction(formData: FormData) {
   const user = await requireAdmin();
@@ -174,7 +258,6 @@ export async function updateContestMetaAction(formData: FormData) {
   const visibility = parseVisibility(text(formData, "visibility"));
   const accessCode = visibility === "PRIVATE" ? nullableText(formData, "accessCode") : null;
 
-  // Status is managed only by publish/archive actions so saving the form never unpublishes a contest.
   await prisma.contest.update({
     where: { id: contestId },
     data: {
@@ -193,8 +276,6 @@ export async function updateContestMetaAction(formData: FormData) {
   revalidatePath(`/admin/contests-builder/${contestId}`);
   redirectBack(returnTo, true, "Đã cập nhật.");
 }
-
-// --- Sections ---
 
 export async function createSectionAction(formData: FormData) {
   await requireAdmin();
@@ -219,7 +300,6 @@ export async function createSectionAction(formData: FormData) {
   redirect(returnTo);
 }
 
-// Exam-entry flow: create a section plus N empty questions so the admin only has to fill in content.
 export async function createSectionWithQuestionsAction(formData: FormData) {
   await requireAdmin();
   const contestId = text(formData, "contestId");
@@ -300,8 +380,6 @@ export async function deleteSectionAction(formData: FormData) {
   redirect(returnTo);
 }
 
-// --- Questions ---
-
 export async function createQuestionAction(formData: FormData) {
   await requireAdmin();
   const sectionId = text(formData, "sectionId");
@@ -325,6 +403,54 @@ export async function createQuestionAction(formData: FormData) {
 
   revalidatePath(returnTo);
   redirect(returnTo);
+}
+
+function parseOptionsInput(formData: FormData, key = "optionsJson") {
+  const raw = text(formData, key);
+  if (!raw) return null;
+  if (raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // fall through
+    }
+  }
+  const options = raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index) => {
+      const separator = line.indexOf("|");
+      if (separator === -1) return { id: String.fromCharCode(65 + (index % 26)), text: line };
+      return {
+        id: line.slice(0, separator).trim().toUpperCase() || String.fromCharCode(65 + (index % 26)),
+        text: line.slice(separator + 1).trim(),
+      };
+    });
+  return options.length ? options : null;
+}
+
+function parseAnswerInput(formData: FormData, type: QuestionType, key = "answerJson") {
+  const raw = text(formData, key);
+  if (!raw) return null;
+  if (raw.startsWith("{")) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      // fall through
+    }
+  }
+  if (MCQ_QUESTION_TYPES.includes(type)) {
+    return { correctOptionId: raw.toUpperCase() };
+  }
+  if (type === "ERROR_IDENTIFICATION") {
+    const separator = raw.indexOf("|");
+    if (separator === -1) return { correctPart: raw.toUpperCase() };
+    return { correctPart: raw.slice(0, separator).trim().toUpperCase(), correction: raw.slice(separator + 1).trim() };
+  }
+  const acceptedAnswers = raw.split("/").map((item) => item.trim()).filter(Boolean);
+  return acceptedAnswers.length ? { acceptedAnswers } : null;
 }
 
 export async function updateQuestionAction(formData: FormData) {
@@ -442,7 +568,7 @@ export async function publishContestAction(formData: FormData) {
   }
 
   const contest = await prisma.contest.findUnique({ where: { id: contestId }, select: { startsAt: true } });
-  const nextStatus: ContestStatus = contest?.startsAt && contest.startsAt > new Date() ? "SCHEDULED" : "LIVE";
+  const nextStatus: "SCHEDULED" | "LIVE" = contest?.startsAt && contest.startsAt > new Date() ? "SCHEDULED" : "LIVE";
 
   await prisma.contest.update({
     where: { id: contestId },
