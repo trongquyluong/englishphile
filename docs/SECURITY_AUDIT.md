@@ -1290,14 +1290,18 @@ No `.github/workflows/*.yml` files exist in the repository. No CI/CD pipeline to
 The following items MUST be resolved before production deployment:
 
 - [ ] **C-00**: Rotate all secrets in `.env` (DATABASE_URL, SESSION_SECRET, GEMINI_API_KEY). Move `.env` outside of OneDrive sync.
-- [ ] **C-01**: `correctAnswer` removed from all API responses (`/api/submissions`, `/api/practice/random`, `/api/assignments/[id]/submit`)
-- [ ] **C-02**: File size limits added to all import routes
-- [ ] **C-03**: Database transaction added to `importContestFromParsedAction`
-- [ ] **C-04**: Row/question/cell limits added to all parsers
+- [x] **C-01**: ✅ **Remediated in Security Phase 1A** — `correctAnswer` removed from all API responses (`/api/submissions`, `/api/practice/random`, `/api/assignments/[id]/submit`). Learner-safe DTOs created in `src/lib/dto/submission.ts`.
+- [x] **C-02**: ✅ **Remediated in Security Phase 1A** — File size limits (2 MiB), signature validation, extension checks added to `src/app/api/admin/contests-import/parse/route.ts`. Constants centralized in `src/lib/import/resource-limits.ts`.
+- [x] **C-03**: ✅ **Remediated in Security Phase 1A** — `importContestFromParsedAction` now wraps all DB writes in `prisma.$transaction()`.
+- [x] **C-04**: ✅ **Remediated in Security Phase 1A** — Row/question/cell/sheet limits enforced in `parseExcelContest()`. Constants: MAX_QUESTIONS=500, MAX_SECTIONS=30, MAX_ROWS=1000, MAX_CELLS=20000, MAX_CELL_TEXT=20000.
+- [x] **H-03**: ✅ **Remediated in Security Phase 1A** — `validateContestForPublish` now calls `requireAdmin()` before returning any contest data.
+- [x] **H-04**: ✅ **Remediated in Security Phase 1A** — Server-side extension validation implemented (`.xlsx` only, ZIP signature check, file size limit, byte-length verification).
+- [x] **H-12**: ✅ **Remediated in Security Phase 1A** — `xlsx` package removed. Replaced with `exceljs@4.4.0`. Note: exceljs brings transitive `uuid@8.3.2` (moderate, not critical).
+- [x] **Formula Cell Rejection**: ✅ **Added in Verification Pass** — Parser now detects and rejects formula cells in all sheets with clear Vietnamese error messages.
+- [x] **Import Confirmation Revalidation**: ✅ **Added in Verification Pass** — `importContestFromParsedAction` performs independent server-side validation of all fields before import.
 - [ ] **H-01**: Access code rate limit bucket fixed
 - [ ] **H-02**: Access code removed from URL query params
-- [ ] **H-03**: `validateContestForPublish` has authentication
-- [ ] **H-12**: `xlsx` vulnerability documented and monitored (no fix available)
+- [ ] **H-07**: CSRF protection implemented
 
 ---
 
@@ -1313,6 +1317,23 @@ The following items MUST be resolved before production deployment:
 8. **JoinCodeEntropy**: Generate 1,000 join codes, assert no duplicates and sufficient entropy
 9. **SessionInvalidation**: Change password, assert old session cookie is rejected
 10. **GeminiPrivacy**: Grade essay, assert essay text is NOT in server logs
+
+### Phase 1A Tests Added
+
+Tests implemented in `src/lib/dto/submission.test.ts` and `src/lib/import/excel-parser-limits.test.ts`:
+- `toQuestionResult` DTO does not include `correctAnswer`
+- `QuestionResultDTO` type safety
+- Resource limits constants are correct
+- XLSX signature validation works
+- Empty buffer rejection
+- Authorization guards in admin actions
+- Import confirmation revalidation
+- Formula cell detection
+- Transaction rollback pattern
+- Invalid file format rejection
+- `validateContestForPublish` has `requireAdmin` guard
+- `exceljs` is the parser library (not `xlsx`)
+- Server-only directive in parser
 
 ---
 

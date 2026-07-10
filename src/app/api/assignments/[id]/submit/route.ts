@@ -4,6 +4,8 @@ import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatu
 import { getCurrentUser } from "@/lib/auth/session";
 import { canSubmitAssignment } from "@/lib/classroom/permissions";
 import { prisma } from "@/lib/prisma";
+import type { AssignmentSubmissionResultDTO } from "@/lib/dto/submission";
+import { toQuestionResult } from "@/lib/dto/submission";
 
 type RouteProps = {
   params: Promise<{ id: string }>;
@@ -212,7 +214,8 @@ export async function POST(request: Request, { params }: RouteProps) {
     return savedAssignmentSubmission;
   });
 
-  return NextResponse.json({
+  // Build learner-safe response — correct answers are NOT sent to the client
+  const response: AssignmentSubmissionResultDTO = {
     assignmentSubmissionId: assignmentSubmission.id,
     status: assignmentStatus,
     score,
@@ -222,12 +225,11 @@ export async function POST(request: Request, { params }: RouteProps) {
       score: item.score,
       total: item.total,
       status: item.status,
-      answers: item.results.map((result) => ({
-        questionId: result.question.id,
-        isCorrect: result.isCorrect,
-        feedback: result.feedback,
-        correctAnswer: result.correctAnswer,
-      })),
+      answers: item.results.map((result) =>
+        toQuestionResult(result.question.id, result.isCorrect, result.feedback),
+      ),
     })),
-  });
+  };
+
+  return NextResponse.json(response);
 }

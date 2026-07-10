@@ -93,6 +93,181 @@ export async function importContestFromParsedAction(
 
   const { info, sections, questions } = data;
 
+  // ========================================================================
+  // INDEPENDENT SERVER-SIDE VALIDATION — do NOT trust client preview data
+  // ========================================================================
+
+  // Validate info fields
+  if (!info || typeof info !== "object") {
+    return { ok: false, error: "Dữ liệu contest không hợp lệ." };
+  }
+  if (!info.title || typeof info.title !== "string" || info.title.trim().length === 0) {
+    return { ok: false, error: "Tiêu đề contest không được để trống." };
+  }
+  if (info.title.length > 200) {
+    return { ok: false, error: "Tiêu đề contest quá dài (tối đa 200 ký tự)." };
+  }
+
+  // Validate visibility
+  const VALID_VISIBILITY = ["PUBLIC", "PRIVATE", "UNLISTED"];
+  if (!info.visibility || !VALID_VISIBILITY.includes(info.visibility)) {
+    return { ok: false, error: "Visibility không hợp lệ." };
+  }
+
+  // Validate duration (only allow specific values)
+  if (info.durationMinutes !== null) {
+    const VALID_DURATIONS = [120, 150, 180];
+    if (typeof info.durationMinutes !== "number" || !VALID_DURATIONS.includes(info.durationMinutes)) {
+      return { ok: false, error: "durationMinutes phải là 120, 150 hoặc 180." };
+    }
+  }
+
+  // Validate sections array
+  if (!Array.isArray(sections)) {
+    return { ok: false, error: "Sections phải là một mảng." };
+  }
+  if (sections.length === 0) {
+    return { ok: false, error: "Contest cần có ít nhất một section." };
+  }
+  if (sections.length > 30) {
+    return { ok: false, error: "Số section vượt giới hạn (tối đa 30)." };
+  }
+
+  // Validate questions array
+  if (!Array.isArray(questions)) {
+    return { ok: false, error: "Questions phải là một mảng." };
+  }
+  if (questions.length === 0) {
+    return { ok: false, error: "Contest cần có ít nhất một câu hỏi." };
+  }
+  if (questions.length > 500) {
+    return { ok: false, error: "Số câu hỏi vượt giới hạn (tối đa 500)." };
+  }
+
+  // Validate each section
+  const sectionIds = new Set<string>();
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
+    if (!section || typeof section !== "object") {
+      return { ok: false, error: `Section ${i + 1} không hợp lệ.` };
+    }
+    if (!section.sectionId || typeof section.sectionId !== "string") {
+      return { ok: false, error: `Section ${i + 1} thiếu sectionId.` };
+    }
+    if (sectionIds.has(section.sectionId)) {
+      return { ok: false, error: `Section ID "${section.sectionId}" bị trùng.` };
+    }
+    sectionIds.add(section.sectionId);
+
+    // Validate section type
+    const VALID_SECTION_TYPES = ["UOE_MCQ", "WORD_FORMATION", "OPEN_CLOZE", "GUIDED_CLOZE", "READING", "LISTENING", "WRITING"];
+    const sectionType = section.sectionType?.toUpperCase?.() ?? "";
+    if (!VALID_SECTION_TYPES.includes(sectionType)) {
+      return { ok: false, error: `Section "${section.title || section.sectionId}" có section_type không hỗ trợ.` };
+    }
+
+    // Validate required fields
+    if (!section.title || typeof section.title !== "string" || section.title.trim().length === 0) {
+      return { ok: false, error: `Section ${i + 1} thiếu title.` };
+    }
+    if (typeof section.orderIndex !== "number" || !Number.isFinite(section.orderIndex)) {
+      return { ok: false, error: `Section "${section.title}" có orderIndex không hợp lệ.` };
+    }
+    if (typeof section.totalPoints !== "number" || !Number.isFinite(section.totalPoints)) {
+      return { ok: false, error: `Section "${section.title}" có totalPoints không hợp lệ.` };
+    }
+
+    // Validate cell text lengths
+    if (section.title && section.title.length > 200) {
+      return { ok: false, error: `Section "${section.title}" có tiêu đề quá dài.` };
+    }
+    if (section.instructions && section.instructions.length > 5000) {
+      return { ok: false, error: `Section "${section.title}" có instructions quá dài.` };
+    }
+  }
+
+  // Validate each question
+  const questionIds = new Set<string>();
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    if (!q || typeof q !== "object") {
+      return { ok: false, error: `Câu hỏi ${i + 1} không hợp lệ.` };
+    }
+    if (!q.questionId || typeof q.questionId !== "string") {
+      return { ok: false, error: `Câu hỏi ${i + 1} thiếu questionId.` };
+    }
+    if (questionIds.has(q.questionId)) {
+      return { ok: false, error: `Question ID "${q.questionId}" bị trùng.` };
+    }
+    questionIds.add(q.questionId);
+
+    // Validate section reference
+    if (!sectionIds.has(q.sectionId)) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có section_id không tồn tại.` };
+    }
+
+    // Validate question type
+    const VALID_QUESTION_TYPES = ["MCQ", "SHORT_ANSWER", "WORD_FORMATION", "OPEN_CLOZE", "GUIDED_CLOZE", "LISTENING_SHORT_ANSWER", "WRITING", "LISTENING_MCQ", "READING_MCQ"];
+    const qType = q.questionType?.toUpperCase?.() ?? "";
+    if (!VALID_QUESTION_TYPES.includes(qType)) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có question_type không hỗ trợ.` };
+    }
+
+    // Validate required fields
+    if (typeof q.orderIndex !== "number" || !Number.isFinite(q.orderIndex)) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có orderIndex không hợp lệ.` };
+    }
+    if (typeof q.points !== "number" || !Number.isFinite(q.points)) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có points không hợp lệ.` };
+    }
+
+    // Validate cell text lengths
+    if (q.prompt && q.prompt.length > 20000) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có prompt quá dài.` };
+    }
+    if (q.optionA && q.optionA.length > 5000) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có optionA quá dài.` };
+    }
+    if (q.optionB && q.optionB.length > 5000) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có optionB quá dài.` };
+    }
+    if (q.optionC && q.optionC.length > 5000) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có optionC quá dài.` };
+    }
+    if (q.optionD && q.optionD.length > 5000) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có optionD quá dài.` };
+    }
+    if (q.explanation && q.explanation.length > 10000) {
+      return { ok: false, error: `Câu hỏi "${q.questionId}" có explanation quá dài.` };
+    }
+
+    // MCQ validation: need options and correct answer
+    const MCQ_TYPES = ["MCQ", "GUIDED_CLOZE", "LISTENING_MCQ", "READING_MCQ"];
+    if (MCQ_TYPES.includes(qType)) {
+      const hasOptions = [q.optionA, q.optionB, q.optionC, q.optionD].filter(Boolean).length >= 2;
+      if (!hasOptions) {
+        return { ok: false, error: `Câu hỏi "${q.questionId}" là MCQ nhưng thiếu lựa chọn.` };
+      }
+      if (!q.correctAnswer || !["A", "B", "C", "D"].includes(q.correctAnswer.toUpperCase())) {
+        return { ok: false, error: `Câu hỏi "${q.questionId}" là MCQ nhưng thiếu correctAnswer hợp lệ.` };
+      }
+    }
+
+    // WORD_FORMATION validation: need root word
+    if (qType === "WORD_FORMATION") {
+      if (!q.rootWord || typeof q.rootWord !== "string" || q.rootWord.trim().length === 0) {
+        return { ok: false, error: `Câu hỏi "${q.questionId}" là WORD_FORMATION nhưng thiếu rootWord.` };
+      }
+    }
+
+    // Do NOT accept client-provided status — always force DRAFT
+    // This is enforced by hardcoding status: "DRAFT" in the transaction below
+  }
+
+  // ========================================================================
+  // END VALIDATION — proceed with import
+  // ========================================================================
+
   // Build slug
   const baseSlug = info.title
     .toLowerCase()
@@ -104,23 +279,6 @@ export async function importContestFromParsedAction(
   // Parse dates
   const startsAt = info.startAt ? new Date(info.startAt) : null;
   const endsAt = info.endAt ? new Date(info.endAt) : null;
-
-  // Create contest
-  const contest = await prisma.contest.create({
-    data: {
-      title: info.title,
-      slug,
-      description: info.description ?? null,
-      contestType: "PRACTICE_CONTEST",
-      status: "DRAFT",
-      visibility: info.visibility,
-      accessCode: info.visibility === "PRIVATE" ? (info.accessCode ?? null) : null,
-      durationMinutes: info.durationMinutes,
-      startsAt: startsAt ?? null,
-      endsAt: endsAt ?? null,
-      createdById: user.id,
-    },
-  });
 
   // Section type mapping (same as parser)
   const SECTION_TYPE_MAP: Record<string, SkillType> = {
@@ -145,67 +303,90 @@ export async function importContestFromParsedAction(
     READING_MCQ: "READING_MCQ",
   };
 
-  // Create sections and questions
-  for (const section of sections) {
-    const skillType = SECTION_TYPE_MAP[section.sectionType.trim().toUpperCase()] ?? "USE_OF_ENGLISH";
-
-    const sectionRecord = await prisma.contestSection.create({
+  // Use Prisma transaction to ensure atomicity
+  // All-or-nothing: if any step fails, no partial contest is created
+  const contest = await prisma.$transaction(async (tx) => {
+    // Create contest as DRAFT
+    const newContest = await tx.contest.create({
       data: {
-        contestId: contest.id,
-        title: section.title,
-        skillType,
-        orderIndex: section.orderIndex,
-        instructions: section.instructions ?? null,
-        points: section.totalPoints,
-        audioUrl: section.audioUrl ?? null,
-        transcript: section.transcriptAdminOnly ?? null,
-        passageText: section.passageText ?? null,
+        title: info.title,
+        slug,
+        description: info.description ?? null,
+        contestType: "PRACTICE_CONTEST",
+        status: "DRAFT",
+        visibility: info.visibility,
+        accessCode: info.visibility === "PRIVATE" ? (info.accessCode ?? null) : null,
+        durationMinutes: info.durationMinutes,
+        startsAt: startsAt ?? null,
+        endsAt: endsAt ?? null,
+        createdById: user.id,
       },
     });
 
-    // Get questions for this section
-    const sectionQuestions = questions
-      .filter((q) => q.sectionId === section.sectionId)
-      .sort((a, b) => a.orderIndex - b.orderIndex);
+    // Create sections and questions
+    for (const section of sections) {
+      const skillType = SECTION_TYPE_MAP[section.sectionType.trim().toUpperCase()] ?? "USE_OF_ENGLISH";
 
-    for (const q of sectionQuestions) {
-      const qType = QUESTION_TYPE_MAP[q.questionType.trim().toUpperCase()] ?? "MCQ";
-      const isMCQ = MCQ_QUESTION_TYPES.includes(qType);
-
-      // Build optionsJson — Prisma JSON fields use undefined (not null) for absent values
-      const hasOptions = isMCQ && (q.optionA || q.optionB || q.optionC || q.optionD);
-      const optionsJson = hasOptions
-        ? [
-            ...(q.optionA ? [{ id: "A", text: q.optionA }] : []),
-            ...(q.optionB ? [{ id: "B", text: q.optionB }] : []),
-            ...(q.optionC ? [{ id: "C", text: q.optionC }] : []),
-            ...(q.optionD ? [{ id: "D", text: q.optionD }] : []),
-          ]
-        : undefined;
-
-      // Build answerJson
-      const answerJson =
-        isMCQ && q.correctAnswer
-          ? { correctOptionId: q.correctAnswer.toUpperCase() }
-          : (q.correctAnswer || q.acceptedAnswers)
-            ? { acceptedAnswers: (q.acceptedAnswers ?? q.correctAnswer ?? "").split("|").map((a) => a.trim()).filter(Boolean) }
-            : undefined;
-
-      await prisma.contestQuestion.create({
+      const sectionRecord = await tx.contestSection.create({
         data: {
-          sectionId: sectionRecord.id,
-          orderIndex: q.orderIndex,
-          type: qType,
-          prompt: q.prompt ?? null,
-          optionsJson: optionsJson as Prisma.InputJsonValue | undefined,
-          answerJson: answerJson as Prisma.InputJsonValue | undefined,
-          points: q.points ?? 1,
-          explanation: q.explanation ?? null,
-          rootWord: q.rootWord ?? null,
+          contestId: newContest.id,
+          title: section.title,
+          skillType,
+          orderIndex: section.orderIndex,
+          instructions: section.instructions ?? null,
+          points: section.totalPoints,
+          audioUrl: section.audioUrl ?? null,
+          transcript: section.transcriptAdminOnly ?? null,
+          passageText: section.passageText ?? null,
         },
       });
+
+      // Get questions for this section
+      const sectionQuestions = questions
+        .filter((q) => q.sectionId === section.sectionId)
+        .sort((a, b) => a.orderIndex - b.orderIndex);
+
+      for (const q of sectionQuestions) {
+        const qType = QUESTION_TYPE_MAP[q.questionType.trim().toUpperCase()] ?? "MCQ";
+        const isMCQ = MCQ_QUESTION_TYPES.includes(qType);
+
+        // Build optionsJson — Prisma JSON fields use undefined (not null) for absent values
+        const hasOptions = isMCQ && (q.optionA || q.optionB || q.optionC || q.optionD);
+        const optionsJson = hasOptions
+          ? [
+              ...(q.optionA ? [{ id: "A", text: q.optionA }] : []),
+              ...(q.optionB ? [{ id: "B", text: q.optionB }] : []),
+              ...(q.optionC ? [{ id: "C", text: q.optionC }] : []),
+              ...(q.optionD ? [{ id: "D", text: q.optionD }] : []),
+            ]
+          : undefined;
+
+        // Build answerJson
+        const answerJson =
+          isMCQ && q.correctAnswer
+            ? { correctOptionId: q.correctAnswer.toUpperCase() }
+            : (q.correctAnswer || q.acceptedAnswers)
+              ? { acceptedAnswers: (q.acceptedAnswers ?? q.correctAnswer ?? "").split("|").map((a) => a.trim()).filter(Boolean) }
+              : undefined;
+
+        await tx.contestQuestion.create({
+          data: {
+            sectionId: sectionRecord.id,
+            orderIndex: q.orderIndex,
+            type: qType,
+            prompt: q.prompt ?? null,
+            optionsJson: optionsJson as Prisma.InputJsonValue | undefined,
+            answerJson: answerJson as Prisma.InputJsonValue | undefined,
+            points: q.points ?? 1,
+            explanation: q.explanation ?? null,
+            rootWord: q.rootWord ?? null,
+          },
+        });
+      }
     }
-  }
+
+    return newContest;
+  });
 
   revalidatePath("/admin/contests-builder");
   revalidatePath("/contests");
@@ -498,6 +679,10 @@ export type ValidationError = {
 };
 
 export async function validateContestForPublish(contestId: string): Promise<ValidationError[]> {
+  // Require admin authentication — unauthenticated callers get redirected
+  // Note: callers should call requireAdmin() before this to avoid redirect throws
+  await requireAdmin();
+
   const errors: ValidationError[] = [];
   const contest = await prisma.contest.findUnique({
     where: { id: contestId },

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatus } from "@/lib/answer-checking";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import type { RandomPracticeResultDTO } from "@/lib/dto/submission";
+import { toQuestionResult } from "@/lib/dto/submission";
 
 function toJson(value: unknown) {
   return value === undefined ? null : JSON.parse(JSON.stringify(value));
@@ -89,15 +91,15 @@ export async function POST(request: Request) {
   const total = results.filter((result) => result.isCorrect !== null).length;
   const score = results.filter((result) => result.isCorrect === true).length;
 
-  return NextResponse.json({
+  // Build learner-safe response — correct answers are NOT sent to the client
+  const response: RandomPracticeResultDTO = {
     status: getSubmissionStatus(results),
     score,
     total,
-    answers: results.map((result) => ({
-      questionId: result.question.id,
-      isCorrect: result.isCorrect,
-      feedback: result.feedback,
-      correctAnswer: result.correctAnswer,
-    })),
-  });
+    answers: results.map((result) =>
+      toQuestionResult(result.question.id, result.isCorrect, result.feedback),
+    ),
+  };
+
+  return NextResponse.json(response);
 }

@@ -3,6 +3,8 @@ import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatu
 import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { markRecommendationsCompletedForProblem } from "@/lib/recommendations";
+import type { SubmissionResultDTO } from "@/lib/dto/submission";
+import { toQuestionResult } from "@/lib/dto/submission";
 
 function toJson(value: unknown) {
   return value === undefined ? null : JSON.parse(JSON.stringify(value));
@@ -109,16 +111,16 @@ export async function POST(request: Request) {
 
   await markRecommendationsCompletedForProblem(user.id, body.problemId);
 
-  return NextResponse.json({
+  // Build learner-safe response — correct answers are NOT sent to the client
+  const response: SubmissionResultDTO = {
     submissionId: submission.id,
     status,
     score,
     total,
-    answers: results.map((result) => ({
-      questionId: result.question.id,
-      isCorrect: result.isCorrect,
-      feedback: result.feedback,
-      correctAnswer: result.correctAnswer,
-    })),
-  });
+    answers: results.map((result) =>
+      toQuestionResult(result.question.id, result.isCorrect, result.feedback),
+    ),
+  };
+
+  return NextResponse.json(response);
 }

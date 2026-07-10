@@ -1,4 +1,13 @@
 import type { ContestVisibility, QuestionType, SkillType } from "@prisma/client";
+import {
+  MAX_SHEETS,
+  MAX_SECTIONS,
+  MAX_QUESTIONS,
+  MAX_ROWS_PER_SHEET,
+  MAX_CELL_TEXT_LENGTH,
+  MAX_TOTAL_CELLS,
+  REQUIRED_SHEET_NAMES,
+} from "@/lib/import/resource-limits";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -133,6 +142,24 @@ function parseFloatSafe(value: unknown): number | null {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Formula cell detection
+// ---------------------------------------------------------------------------
+
+interface ExcelCell {
+  v?: unknown;  // cached value
+  w?: string;   // formatted text
+  f?: string;   // formula (present only for formula cells)
+}
+
+function hasFormula(cell: unknown): boolean {
+  if (typeof cell === "object" && cell !== null) {
+    const obj = cell as Record<string, unknown>;
+    return typeof obj.f === "string" && obj.f.length > 0;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -461,17 +488,199 @@ function crossValidate(
 // Main parse function
 // ---------------------------------------------------------------------------
 
+/**
+ * Converts an ExcelJS worksheet row to a string array.
+ * Rejects formula cells with a clear error.
+ * Never evaluates or trusts cached formula values.
+ */
+function sheetToStringArray(
+  row: Record<string, unknown> | undefined,
+  colCount: number,
+  sheetName: string,
+  rowIndex: number,
+): { cells: string[]; formulaErrors: ParseError[] } {
+  const formulaErrors: ParseError[] = [];
+  const cells: string[] = [];
+
+  if (!row) return { cells: [], formulaErrors };
+
+  for (let i = 0; i < colCount; i++) {
+    const colLetter = String.fromCharCode(65 + i); // A, B, C, ...
+    const cell = row[colLetter];
+
+    if (!cell) {
+      cells.push("");
+      continue;
+    }
+
+    // Check if this is a formula cell
+    if (hasFormula(cell)) {
+      const formula = (cell as ExcelCell).f ?? "";
+      formulaErrors.push({
+        sheet: sheetName,
+        row: rowIndex,
+        field: `${colLetter}${rowIndex}`,
+        message: `Sheet "${sheetName}" ô ${colLetter}${rowIndex} chứa công thức Excel (=${formula.slice(0, 50)}${formula.length > 50 ? "..." : ""}). Không chấp nhận công thức.`,
+      });
+      cells.push("");
+      continue;
+    }
+
+    // Extract value from non-formula cells
+    if (typeof cell === "object" && cell !== null) {
+      const obj = cell as Record<string, unknown>;
+      cells.push(String(obj.w ?? obj.v ?? "").trim());
+    } else {
+      cells.push(String(cell).trim());
+    }
+  }
+
+  return { cells, formulaErrors };
+}
+
 export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseResult> {
-  const XLSX = (await import("xlsx")).default;
-  const workbook = XLSX.read(new Uint8Array(fileBuffer), { type: "array", cellDates: false });
+  // --- Resource limits guard ---
+  if (fileBuffer.byteLength === 0) {
+    return { data: null, errors: [{ sheet: "", row: 0, field: "file", message: "File trống." }], warnings: [] };
+  }
 
-  const contestInfoRows = XLSX.utils.sheet_to_json(workbook.Sheets["Contest_Info"], { header: 1 }) as string[][];
-  const sectionsRows = XLSX.utils.sheet_to_json(workbook.Sheets["Sections"], { header: 1 }) as string[][];
-  const questionsRows = XLSX.utils.sheet_to_json(workbook.Sheets["Questions"], { header: 1 }) as string[][];
+  // Import exceljs dynamically to keep this server-only
+  const ExcelJS = (await import("exceljs")).default;
+  const workbook = new ExcelJS.Workbook();
 
-  if (!contestInfoRows.length) return { data: null, errors: [{ sheet: "Contest_Info", row: 0, field: "file", message: "Sheet Contest_Info trống." }], warnings: [] };
-  if (!sectionsRows.length) return { data: null, errors: [{ sheet: "Sections", row: 0, field: "file", message: "Sheet Sections trống." }], warnings: [] };
-  if (!questionsRows.length) return { data: null, errors: [{ sheet: "Questions", row: 0, field: "file", message: "Sheet Questions trống." }], warnings: [] };
+  try {
+    await workbook.xlsx.load(fileBuffer);
+  } catch {
+    return { data: null, errors: [{ sheet: "", row: 0, field: "file", message: "File không đúng định dạng XLSX." }], warnings: [] };
+  }
+
+  // --- Sheet count limit ---
+  if (workbook.worksheets.length > MAX_SHEETS) {
+    return {
+      data: null,
+      errors: [{ sheet: "", row: 0, field: "sheets", message: `File có ${workbook.worksheets.length} sheet, tối đa ${MAX_SHEETS}.` }],
+      warnings: [],
+    };
+  }
+
+  // --- Check required sheets exist ---
+  const sheetNames = new Set(workbook.worksheets.map((ws) => ws.name));
+  for (const required of REQUIRED_SHEET_NAMES) {
+    if (!sheetNames.has(required)) {
+      return {
+        data: null,
+        errors: [{ sheet: required, row: 0, field: "sheet", message: `Thiếu sheet "${required}".` }],
+        warnings: [],
+      };
+    }
+  }
+
+  // --- Extract sheet data with row limits ---
+  const contestInfoSheet = workbook.getWorksheet("Contest_Info");
+  const sectionsSheet = workbook.getWorksheet("Sections");
+  const questionsSheet = workbook.getWorksheet("Questions");
+
+  const contestInfoRows: string[][] = [];
+  const sectionsRows: string[][] = [];
+  const questionsRows: string[][] = [];
+  const allFormulaErrors: Array<{ sheet: string; row: number; field: string; message: string }> = [];
+
+  // Process Contest_Info sheet
+  if (contestInfoSheet) {
+    const header = sheetToStringArray(contestInfoSheet.getRow(1).values as Record<string, unknown>, 4, "Contest_Info", 1);
+    contestInfoRows.push(header.cells);
+    allFormulaErrors.push(...header.formulaErrors);
+    const infoRowCount = Math.min(contestInfoSheet.rowCount, MAX_ROWS_PER_SHEET);
+    for (let i = 2; i <= infoRowCount; i++) {
+      const result = sheetToStringArray(contestInfoSheet.getRow(i).values as Record<string, unknown>, 4, "Contest_Info", i);
+      contestInfoRows.push(result.cells);
+      allFormulaErrors.push(...result.formulaErrors);
+    }
+  }
+
+  // Process Sections sheet
+  if (sectionsSheet) {
+    const header = sheetToStringArray(sectionsSheet.getRow(1).values as Record<string, unknown>, 13, "Sections", 1);
+    sectionsRows.push(header.cells);
+    allFormulaErrors.push(...header.formulaErrors);
+    const sectionRowCount = Math.min(sectionsSheet.rowCount, MAX_ROWS_PER_SHEET);
+    let totalSections = 0;
+    for (let i = 2; i <= sectionRowCount; i++) {
+      const row = sectionsSheet.getRow(i);
+      const result = sheetToStringArray(row.values as Record<string, unknown>, 13, "Sections", i);
+      if (result.cells.some((c) => c.trim())) totalSections++;
+      if (totalSections > MAX_SECTIONS) {
+        return {
+          data: null,
+          errors: [{ sheet: "Sections", row: i, field: "limit", message: `Số section vượt giới hạn ${MAX_SECTIONS}.` }],
+          warnings: [],
+        };
+      }
+      sectionsRows.push(result.cells);
+      allFormulaErrors.push(...result.formulaErrors);
+    }
+  }
+
+  // Process Questions sheet
+  if (questionsSheet) {
+    const header = sheetToStringArray(questionsSheet.getRow(1).values as Record<string, unknown>, 15, "Questions", 1);
+    questionsRows.push(header.cells);
+    allFormulaErrors.push(...header.formulaErrors);
+    const questionRowCount = Math.min(questionsSheet.rowCount, MAX_ROWS_PER_SHEET);
+    let totalQuestions = 0;
+    let totalCells = 0;
+    for (let i = 2; i <= questionRowCount; i++) {
+      const row = questionsSheet.getRow(i);
+      const result = sheetToStringArray(row.values as Record<string, unknown>, 15, "Questions", i);
+      // Check cell text lengths
+      for (let j = 0; j < result.cells.length; j++) {
+        if (result.cells[j].length > MAX_CELL_TEXT_LENGTH) {
+          return {
+            data: null,
+            errors: [{ sheet: "Questions", row: i, field: `col_${j}`, message: `Ô có quá ${MAX_CELL_TEXT_LENGTH} ký tự.` }],
+            warnings: [],
+          };
+        }
+        totalCells++;
+        if (totalCells > MAX_TOTAL_CELLS) {
+          return {
+            data: null,
+            errors: [{ sheet: "Questions", row: i, field: "limit", message: `Số ô vượt giới hạn ${MAX_TOTAL_CELLS}.` }],
+            warnings: [],
+          };
+        }
+      }
+      if (result.cells.some((c) => c.trim())) totalQuestions++;
+      if (totalQuestions > MAX_QUESTIONS) {
+        return {
+          data: null,
+          errors: [{ sheet: "Questions", row: i, field: "limit", message: `Số câu hỏi vượt giới hạn ${MAX_QUESTIONS}.` }],
+          warnings: [],
+        };
+      }
+      questionsRows.push(result.cells);
+      allFormulaErrors.push(...result.formulaErrors);
+    }
+  }
+
+  if (!contestInfoRows.length || contestInfoRows.length <= 1) {
+    return { data: null, errors: [{ sheet: "Contest_Info", row: 0, field: "file", message: "Sheet Contest_Info trống." }], warnings: [] };
+  }
+  if (!sectionsRows.length || sectionsRows.length <= 1) {
+    return { data: null, errors: [{ sheet: "Sections", row: 0, field: "file", message: "Sheet Sections trống." }], warnings: [] };
+  }
+  if (!questionsRows.length || questionsRows.length <= 1) {
+    return { data: null, errors: [{ sheet: "Questions", row: 0, field: "file", message: "Sheet Questions trống." }], warnings: [] };
+  }
+
+  // Fail fast if any formula cells were detected
+  if (allFormulaErrors.length > 0) {
+    return {
+      data: null,
+      errors: allFormulaErrors,
+      warnings: [],
+    };
+  }
 
   const { info, errors, warnings } = parseContestInfoSheet(contestInfoRows);
   const { sections, errors: secErrors, warnings: secWarnings } = parseSectionsSheet(sectionsRows);
