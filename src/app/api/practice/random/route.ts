@@ -1,18 +1,34 @@
 import { NextResponse } from "next/server";
 import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatus } from "@/lib/answer-checking";
 import { getCurrentUser } from "@/lib/auth/session";
+import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { prisma } from "@/lib/prisma";
 import type { RandomPracticeResultDTO } from "@/lib/dto/submission";
 import { toQuestionResult } from "@/lib/dto/submission";
+import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 
 function toJson(value: unknown) {
   return value === undefined ? null : JSON.parse(JSON.stringify(value));
 }
 
 export async function POST(request: Request) {
+  // Validate request origin (CSRF protection for Route Handlers)
+  const originCheck = await validateRequestOrigin();
+  if (!originCheck.valid) {
+    return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
+  }
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limit = await checkConfiguredRateLimit(RATE_LIMITS.RANDOM_PRACTICE(user.id));
+  if (limit.status === "infrastructure-error") {
+    return NextResponse.json({ error: "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau." }, { status: 503 });
+  }
+  if (limit.status === "rate-limited") {
+    return NextResponse.json({ error: "Bạn nộp bài quá nhanh. Vui lòng thử lại sau." }, { status: 429 });
   }
 
   const body = (await request.json()) as {

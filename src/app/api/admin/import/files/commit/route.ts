@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
+import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { importContentPackFiles, type ContentPackInputFile } from "@/lib/content-packs/importer";
-import { checkRateLimit } from "@/lib/rate-limit";
 
 async function requireAdminApi() {
   const user = await getCurrentUser();
@@ -25,13 +26,30 @@ function normalizeFiles(value: unknown): ContentPackInputFile[] {
 }
 
 export async function POST(request: Request) {
+  // Validate request origin (CSRF protection)
+  const originCheck = await validateRequestOrigin();
+  if (!originCheck.valid) {
+    return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
+  }
+
   const user = await requireAdminApi();
   if (!user) {
     return NextResponse.json({ error: "Bạn không có quyền import dữ liệu." }, { status: 403 });
   }
-  const limit = checkRateLimit({ key: `admin-files-commit:${user.id}`, limit: 12, windowMs: 10 * 60 * 1000 });
-  if (!limit.ok) {
-    return NextResponse.json({ error: `Bạn import file quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.` }, { status: 429 });
+
+  // Rate limit Excel import commit: 5 imports per admin per hour (database-backed)
+  const limit = await checkConfiguredRateLimit(RATE_LIMITS.CONTENT_PACK_COMMIT(user.id));
+  if (limit.status !== "allowed") {
+    if (limit.status === "infrastructure-error") {
+      return NextResponse.json(
+        { error: "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau." },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json(
+      { error: `Bạn đã import quá nhiều lần. Thử lại sau khoảng ${limit.retryAfterSeconds} giây.` },
+      { status: 429 }
+    );
   }
 
   const body = (await request.json()) as {

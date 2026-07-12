@@ -307,6 +307,8 @@ export async function importContestFromParsedAction(
   // All-or-nothing: if any step fails, no partial contest is created
   const contest = await prisma.$transaction(async (tx) => {
     // Create contest as DRAFT
+    // For private contests, set accessCodeUpdatedAt to invalidate any stale grants
+    const isPrivate = info.visibility === "PRIVATE";
     const newContest = await tx.contest.create({
       data: {
         title: info.title,
@@ -315,7 +317,10 @@ export async function importContestFromParsedAction(
         contestType: "PRACTICE_CONTEST",
         status: "DRAFT",
         visibility: info.visibility,
-        accessCode: info.visibility === "PRIVATE" ? (info.accessCode ?? null) : null,
+        accessCode: isPrivate ? (info.accessCode ?? null) : null,
+        // Set accessCodeUpdatedAt for private contests to invalidate any stale grants
+        // This is defensive - there shouldn't be existing grants for new contests
+        ...(isPrivate ? { accessCodeUpdatedAt: new Date() } : {}),
         durationMinutes: info.durationMinutes,
         startsAt: startsAt ?? null,
         endsAt: endsAt ?? null,
@@ -437,20 +442,34 @@ export async function updateContestMetaAction(formData: FormData) {
   if (!title) redirectBack(returnTo, false, "Tiêu đề không được để trống.");
 
   const visibility = parseVisibility(text(formData, "visibility"));
-  const accessCode = visibility === "PRIVATE" ? nullableText(formData, "accessCode") : null;
+  const newAccessCode = visibility === "PRIVATE" ? nullableText(formData, "accessCode") : null;
 
-  await prisma.contest.update({
+  // Reject missing contests before entering the mutation transaction.
+  const current = await prisma.contest.findUnique({
     where: { id: contestId },
-    data: {
-      title,
-      slug: await ensureUniqueSlug(text(formData, "slug") || generateSlug(title), contestId),
-      description: nullableText(formData, "description"),
-      visibility,
-      accessCode,
-      durationMinutes: numberOrNull(formData, "durationMinutes"),
-      startsAt: dateOrNull(formData, "startsAt"),
-      endsAt: dateOrNull(formData, "endsAt"),
-    },
+    select: { id: true },
+  });
+
+  if (!current) redirectBack(returnTo, false, "Không tìm thấy contest.");
+
+  const slug = await ensureUniqueSlug(text(formData, "slug") || generateSlug(title), contestId);
+  await prisma.$transaction(async (tx) => {
+    await tx.contest.update({
+      where: { id: contestId },
+      data: {
+        title,
+        slug,
+        description: nullableText(formData, "description"),
+        visibility,
+        accessCode: newAccessCode,
+        durationMinutes: numberOrNull(formData, "durationMinutes"),
+        startsAt: dateOrNull(formData, "startsAt"),
+        endsAt: dateOrNull(formData, "endsAt"),
+        // This editor always submits both fields, so invalidate on every update.
+        accessCodeUpdatedAt: new Date(),
+      },
+    });
+    await tx.contestAccessGrant.deleteMany({ where: { contestId } });
   });
 
   revalidatePath("/contests");

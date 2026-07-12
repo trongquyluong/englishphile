@@ -3,12 +3,18 @@
 import { redirect } from "next/navigation";
 import { createDiagnosticAttempt, getLatestDiagnosticAttempt, scoreDiagnosticAttempt } from "@/lib/diagnostic";
 import { requireUser } from "@/lib/auth/session";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
+import { parseDiagnosticAnswerEntries } from "@/lib/security/submission-input";
 
 export async function startDiagnosticAction() {
   const user = await requireUser();
-  const limit = checkRateLimit({ key: `diagnostic-start:${user.id}`, limit: 6, windowMs: 10 * 60 * 1000 });
-  if (!limit.ok) redirect(`/diagnostic?error=${encodeURIComponent(`Bạn tạo diagnostic quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`)}`);
+  const limit = await checkConfiguredRateLimit(RATE_LIMITS.DIAGNOSTIC_START(user.id));
+  if (limit.status !== "allowed") {
+    const message = limit.status === "infrastructure-error"
+      ? "Không thể bắt đầu diagnostic lúc này. Vui lòng thử lại sau."
+      : `Bạn tạo diagnostic quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`;
+    redirect(`/diagnostic?error=${encodeURIComponent(message)}`);
+  }
 
   // Resume existing IN_PROGRESS attempt if one exists
   const existing = await getLatestDiagnosticAttempt(user.id, "IN_PROGRESS");
@@ -22,23 +28,15 @@ export async function submitDiagnosticAction(formData: FormData) {
   const user = await requireUser();
   const attemptId = String(formData.get("attemptId") ?? "");
   if (!attemptId) redirect("/diagnostic");
-  const limit = checkRateLimit({ key: `diagnostic-submit:${user.id}`, limit: 8, windowMs: 10 * 60 * 1000 });
-  if (!limit.ok) redirect(`/diagnostic/start?attempt=${attemptId}&error=${encodeURIComponent(`Bạn nộp diagnostic quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`)}`);
-
-  const answers: Record<string, unknown> = {};
-  for (const [key, value] of formData.entries()) {
-    if (!key.startsWith("answer:")) continue;
-    const [, questionId, field] = key.split(":");
-    if (!questionId) continue;
-    if (field) {
-      const current = answers[questionId];
-      const objectAnswer = current && typeof current === "object" && !Array.isArray(current) ? current as Record<string, unknown> : {};
-      objectAnswer[field] = String(value);
-      answers[questionId] = objectAnswer;
-    } else {
-      answers[questionId] = String(value);
-    }
+  const limit = await checkConfiguredRateLimit(RATE_LIMITS.DIAGNOSTIC_SUBMIT(user.id));
+  if (limit.status !== "allowed") {
+    const message = limit.status === "infrastructure-error"
+      ? "Không thể nộp diagnostic lúc này. Vui lòng thử lại sau."
+      : `Bạn nộp diagnostic quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`;
+    redirect(`/diagnostic/start?attempt=${attemptId}&error=${encodeURIComponent(message)}`);
   }
+
+  const answers = parseDiagnosticAnswerEntries(formData.entries());
 
   await scoreDiagnosticAttempt(attemptId, user.id, answers);
   redirect(`/diagnostic/result?attempt=${attemptId}`);

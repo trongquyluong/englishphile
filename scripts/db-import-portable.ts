@@ -547,36 +547,41 @@ async function main() {
   }
 
   async function upsertContest(contest: Record<string, unknown>) {
-    await prisma.contest.upsert({
-      where: { slug: contest.slug as string },
-      update: {
-        title: contest.title as string,
-        description: (contest.description as string | null) ?? null,
-        contestType: contest.contestType as "PAST_EXAM" | "LIVE_CONTEST" | "PRACTICE_CONTEST",
-        status: contest.status as "DRAFT" | "SCHEDULED" | "LIVE" | "ENDED" | "ARCHIVED",
-        visibility: contest.visibility as "PUBLIC" | "PRIVATE" | "UNLISTED",
-        durationMinutes: (contest.durationMinutes as number | null) ?? null,
-        startsAt: contest.startsAt ? new Date(contest.startsAt as string) : null,
-        endsAt: contest.endsAt ? new Date(contest.endsAt as string) : null,
-        sourceName: (contest.sourceName as string | null) ?? null,
-        rules: (contest.rules as string | null) ?? null,
-        createdById: (contest.createdById as string | null) ?? null,
-      },
-      create: {
-        id: contest.id as string,
-        title: contest.title as string,
-        slug: contest.slug as string,
-        description: (contest.description as string | null) ?? null,
-        contestType: contest.contestType as "PAST_EXAM" | "LIVE_CONTEST" | "PRACTICE_CONTEST",
-        status: contest.status as "DRAFT" | "SCHEDULED" | "LIVE" | "ENDED" | "ARCHIVED",
-        visibility: contest.visibility as "PUBLIC" | "PRIVATE" | "UNLISTED",
-        durationMinutes: (contest.durationMinutes as number | null) ?? null,
-        startsAt: contest.startsAt ? new Date(contest.startsAt as string) : null,
-        endsAt: contest.endsAt ? new Date(contest.endsAt as string) : null,
-        sourceName: (contest.sourceName as string | null) ?? null,
-        rules: (contest.rules as string | null) ?? null,
-        createdById: (contest.createdById as string | null) ?? null,
-      },
+    await prisma.$transaction(async (tx) => {
+      const savedContest = await tx.contest.upsert({
+        where: { slug: contest.slug as string },
+        update: {
+          title: contest.title as string,
+          description: (contest.description as string | null) ?? null,
+          contestType: contest.contestType as "PAST_EXAM" | "LIVE_CONTEST" | "PRACTICE_CONTEST",
+          status: contest.status as "DRAFT" | "SCHEDULED" | "LIVE" | "ENDED" | "ARCHIVED",
+          visibility: contest.visibility as "PUBLIC" | "PRIVATE" | "UNLISTED",
+          accessCodeUpdatedAt: new Date(),
+          durationMinutes: (contest.durationMinutes as number | null) ?? null,
+          startsAt: contest.startsAt ? new Date(contest.startsAt as string) : null,
+          endsAt: contest.endsAt ? new Date(contest.endsAt as string) : null,
+          sourceName: (contest.sourceName as string | null) ?? null,
+          rules: (contest.rules as string | null) ?? null,
+          createdById: (contest.createdById as string | null) ?? null,
+        },
+        create: {
+          id: contest.id as string,
+          title: contest.title as string,
+          slug: contest.slug as string,
+          description: (contest.description as string | null) ?? null,
+          contestType: contest.contestType as "PAST_EXAM" | "LIVE_CONTEST" | "PRACTICE_CONTEST",
+          status: contest.status as "DRAFT" | "SCHEDULED" | "LIVE" | "ENDED" | "ARCHIVED",
+          visibility: contest.visibility as "PUBLIC" | "PRIVATE" | "UNLISTED",
+          accessCodeUpdatedAt: new Date(),
+          durationMinutes: (contest.durationMinutes as number | null) ?? null,
+          startsAt: contest.startsAt ? new Date(contest.startsAt as string) : null,
+          endsAt: contest.endsAt ? new Date(contest.endsAt as string) : null,
+          sourceName: (contest.sourceName as string | null) ?? null,
+          rules: (contest.rules as string | null) ?? null,
+          createdById: (contest.createdById as string | null) ?? null,
+        },
+      });
+      await tx.contestAccessGrant.deleteMany({ where: { contestId: savedContest.id } });
     });
   }
 
