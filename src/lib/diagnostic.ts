@@ -16,6 +16,7 @@ import {
 import { diagnosticQuestionDataWhere, hasRequiredDiagnosticQuestionData } from "@/lib/diagnostic-question-readiness";
 import { skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
+import { runSingleWinnerTransaction } from "@/lib/security/replay-guard";
 
 const diagnosticQuestionSelect = {
   id: true,
@@ -210,16 +211,28 @@ export { skillStatusLabel };
 
 export async function createDiagnosticAttempt(userId: string) {
   const selection = await selectDiagnosticQuestions();
-  return prisma.diagnosticAttempt.create({
-    data: {
-      userId,
-      status: "IN_PROGRESS",
-      recommendationJson: {
-        questionIds: selection.questions.map((question) => question.id),
-        sections: selection.sections,
-        coverageWarnings: selection.coverageWarnings,
+  const lockKey = `diagnostic-attempt:${userId}`;
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw<Array<{ locked: string }>>`
+      SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS "locked"
+    `;
+    const existing = await tx.diagnosticAttempt.findFirst({
+      where: { userId, status: "IN_PROGRESS" },
+      orderBy: { startedAt: "desc" },
+    });
+    if (existing) return existing;
+
+    return tx.diagnosticAttempt.create({
+      data: {
+        userId,
+        status: "IN_PROGRESS",
+        recommendationJson: {
+          questionIds: selection.questions.map((question) => question.id),
+          sections: selection.sections,
+          coverageWarnings: selection.coverageWarnings,
+        },
       },
-    },
+    });
   });
 }
 
@@ -264,8 +277,14 @@ export async function scoreDiagnosticAttempt(attemptId: string, userId: string, 
   const data = await getDiagnosticQuestionsForAttempt(attemptId, userId);
   if (!data) throw new Error("Không tìm thấy diagnostic attempt.");
 
+  // Check if already completed — prevent duplicate scoring
+  if (data.attempt.status !== "IN_PROGRESS") {
+    throw new Error("Diagnostic này đã hoàn thành.");
+  }
+
   const results = data.questions.map((question) => {
-    const result = checkQuestionAnswer(question, answers[question.id]);
+    const studentAnswer = Object.hasOwn(answers, question.id) ? answers[question.id] : undefined;
+    const result = checkQuestionAnswer(question, studentAnswer);
     return {
       questionId: question.id,
       problemId: question.problemId,
@@ -282,105 +301,137 @@ export async function scoreDiagnosticAttempt(attemptId: string, userId: string, 
   const scoreSummary = calculateDiagnosticScore(results);
   const estimatedLevel = scoreSummary.estimatedLevel;
 
-  for (const item of scoreSummary.skillBreakdown) {
-    await prisma.userSkillProfile.upsert({
-      where: { userId_skillType: { userId, skillType: item.skillType } },
-      create: {
-        userId,
-        skillType: item.skillType,
-        estimatedLevel,
-        accuracy: item.accuracy,
-        attempted: item.attempted,
-        correct: item.correct,
-        confidence: Math.min(1, item.attempted / 10),
-      },
-      update: {
-        estimatedLevel,
-        accuracy: item.accuracy,
-        attempted: item.attempted,
-        correct: item.correct,
-        confidence: Math.min(1, item.attempted / 10),
-        lastUpdatedAt: new Date(),
-      },
-    });
-  }
-
-  for (const item of scoreSummary.topicBreakdown) {
-    await prisma.userTopicProfile.upsert({
-      where: { userId_topicId: { userId, topicId: item.topicId } },
-      create: {
-        userId,
-        topicId: item.topicId,
-        estimatedLevel,
-        accuracy: item.accuracy,
-        attempted: item.attempted,
-        correct: item.correct,
-        confidence: Math.min(1, item.attempted / 8),
-      },
-      update: {
-        estimatedLevel,
-        accuracy: item.accuracy,
-        attempted: item.attempted,
-        correct: item.correct,
-        confidence: Math.min(1, item.attempted / 8),
-        lastUpdatedAt: new Date(),
-      },
-    });
-  }
-
-  await prisma.learningRecommendation.updateMany({
-    where: { userId, status: "ACTIVE", recommendationType: { not: "WRONG_QUESTION_RETRY" } },
-    data: { status: "DISMISSED" },
-  });
-
-  await createDiagnosticRecommendations(userId, scoreSummary, estimatedLevel);
-
+  // Use a transaction to atomically:
+  // 1. Check attempt is still IN_PROGRESS
+  // 2. Apply all side effects (profiles, recommendations)
+  // 3. Mark attempt as COMPLETED/NEEDS_REVIEW
+  //
+  // The conditional UPDATE ensures only one concurrent request wins.
+  // If the attempt was already finalized by another request, updateMany returns 0
+  // and we throw an error.
+  const finalStatus = results.some((result) => result.isCorrect === null) ? "NEEDS_REVIEW" : "COMPLETED";
   const existingMetadata = parseAttemptMetadata(data.attempt.recommendationJson);
-  const attempt = await prisma.diagnosticAttempt.update({
-    where: { id: attemptId },
-    data: {
-      status: results.some((result) => result.isCorrect === null) ? "NEEDS_REVIEW" : "COMPLETED",
-      completedAt: new Date(),
-      score: scoreSummary.score,
-      total: scoreSummary.total,
-      estimatedLevel,
-      skillBreakdownJson: scoreSummary.skillBreakdown,
-      topicBreakdownJson: scoreSummary.topicBreakdown,
-      recommendationJson: {
-        ...existingMetadata,
-        results: results.map((result) => ({
-          questionId: result.questionId,
-          problemId: result.problemId,
-          skillType: result.skillType,
-          difficulty: result.difficulty,
-          isCorrect: result.isCorrect,
-          feedback: result.feedback,
-          correctAnswer: result.correctAnswer,
-        })),
-        scoring: {
-          weightedAccuracy: scoreSummary.weightedAccuracy,
-          rawCorrect: scoreSummary.rawCorrect,
-          rawAttempted: scoreSummary.rawAttempted,
-          confidence: scoreSummary.confidence,
-          confidenceLabel: scoreSummary.confidenceLabel,
-          confidenceReason: scoreSummary.confidenceReason,
-          strengths: scoreSummary.strengths,
-          weakAreas: scoreSummary.weakAreas,
-          levelExplanation: diagnosticLevelExplanation(estimatedLevel),
-        },
-      },
-    },
-  });
 
-  return attempt;
+  await runSingleWinnerTransaction<Prisma.TransactionClient, void>(
+    (operation) => prisma.$transaction(operation),
+    async (tx) => {
+      const claimed = await tx.diagnosticAttempt.updateMany({
+        where: {
+          id: attemptId,
+          userId,
+          status: "IN_PROGRESS",
+        },
+        data: {
+          status: finalStatus,
+          completedAt: new Date(),
+          score: scoreSummary.score,
+          total: scoreSummary.total,
+          estimatedLevel,
+          skillBreakdownJson: scoreSummary.skillBreakdown,
+          topicBreakdownJson: scoreSummary.topicBreakdown,
+          recommendationJson: {
+            ...existingMetadata,
+            results: results.map((result) => ({
+              questionId: result.questionId,
+              problemId: result.problemId,
+              skillType: result.skillType,
+              difficulty: result.difficulty,
+              isCorrect: result.isCorrect,
+              feedback: result.feedback,
+              correctAnswer: result.correctAnswer,
+            })),
+            scoring: {
+              weightedAccuracy: scoreSummary.weightedAccuracy,
+              rawCorrect: scoreSummary.rawCorrect,
+              rawAttempted: scoreSummary.rawAttempted,
+              confidence: scoreSummary.confidence,
+              confidenceLabel: scoreSummary.confidenceLabel,
+              confidenceReason: scoreSummary.confidenceReason,
+              strengths: scoreSummary.strengths,
+              weakAreas: scoreSummary.weakAreas,
+              levelExplanation: diagnosticLevelExplanation(estimatedLevel),
+            },
+          },
+        },
+      });
+      return claimed.count;
+    },
+    async (tx) => {
+      for (const item of scoreSummary.skillBreakdown) {
+        await tx.userSkillProfile.upsert({
+          where: { userId_skillType: { userId, skillType: item.skillType } },
+          create: {
+            userId,
+            skillType: item.skillType,
+            estimatedLevel,
+            accuracy: item.accuracy,
+            attempted: item.attempted,
+            correct: item.correct,
+            confidence: Math.min(1, item.attempted / 10),
+          },
+          update: {
+            estimatedLevel,
+            accuracy: item.accuracy,
+            attempted: item.attempted,
+            correct: item.correct,
+            confidence: Math.min(1, item.attempted / 10),
+            lastUpdatedAt: new Date(),
+          },
+        });
+      }
+
+      for (const item of scoreSummary.topicBreakdown) {
+        await tx.userTopicProfile.upsert({
+          where: { userId_topicId: { userId, topicId: item.topicId } },
+          create: {
+            userId,
+            topicId: item.topicId,
+            estimatedLevel,
+            accuracy: item.accuracy,
+            attempted: item.attempted,
+            correct: item.correct,
+            confidence: Math.min(1, item.attempted / 8),
+          },
+          update: {
+            estimatedLevel,
+            accuracy: item.accuracy,
+            attempted: item.attempted,
+            correct: item.correct,
+            confidence: Math.min(1, item.attempted / 8),
+            lastUpdatedAt: new Date(),
+          },
+        });
+      }
+
+      await tx.learningRecommendation.updateMany({
+        where: { userId, status: "ACTIVE", recommendationType: { not: "WRONG_QUESTION_RETRY" } },
+        data: { status: "DISMISSED" },
+      });
+      await createDiagnosticRecommendationsTx(tx, userId, scoreSummary, estimatedLevel);
+    },
+    "Diagnostic này đã hoàn thành.",
+  );
+
+  return prisma.diagnosticAttempt.findUniqueOrThrow({ where: { id: attemptId } });
 }
 
-async function createDiagnosticRecommendations(userId: string, scoreSummary: DiagnosticScoreSummary, estimatedLevel: Difficulty) {
-  const solved = await prisma.userProblemStatus.findMany({ where: { userId, status: "SOLVED" }, select: { problemId: true } });
+/**
+ * Create diagnostic recommendations within a transaction.
+ */
+async function createDiagnosticRecommendationsTx(
+  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  userId: string,
+  scoreSummary: DiagnosticScoreSummary,
+  estimatedLevel: Difficulty
+) {
+  const solved = await tx.userProblemStatus.findMany({
+    where: { userId, status: "SOLVED" },
+    select: { problemId: true },
+  });
   const solvedIds = solved.map((item) => item.problemId);
 
   for (const [index, skill] of scoreSummary.weakAreas.entries()) {
-    const problem = await prisma.problem.findFirst({
+    const problem = await tx.problem.findFirst({
       where: {
         contentStatus: "PUBLISHED",
         skillType: skill.skillType,
@@ -388,7 +439,7 @@ async function createDiagnosticRecommendations(userId: string, scoreSummary: Dia
       },
       orderBy: [{ recommendedMinLevel: "asc" }, { difficulty: "asc" }, { orderIndex: "asc" }],
     });
-    await prisma.learningRecommendation.create({
+    await tx.learningRecommendation.create({
       data: {
         userId,
         recommendationType: problem ? "NEXT_PROBLEM" : "SKILL_FOCUS",
@@ -404,7 +455,7 @@ async function createDiagnosticRecommendations(userId: string, scoreSummary: Dia
     .filter((topic) => topic.attempted >= 2 && (topic.accuracy ?? 1) < 0.7)
     .slice(0, 3);
   for (const [index, topic] of weakTopics.entries()) {
-    const problem = await prisma.problem.findFirst({
+    const problem = await tx.problem.findFirst({
       where: {
         contentStatus: "PUBLISHED",
         id: { notIn: solvedIds },
@@ -412,7 +463,7 @@ async function createDiagnosticRecommendations(userId: string, scoreSummary: Dia
       },
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
     });
-    await prisma.learningRecommendation.create({
+    await tx.learningRecommendation.create({
       data: {
         userId,
         recommendationType: "TOPIC_REVIEW",
@@ -424,7 +475,7 @@ async function createDiagnosticRecommendations(userId: string, scoreSummary: Dia
     });
   }
 
-  const levelProblem = await prisma.problem.findFirst({
+  const levelProblem = await tx.problem.findFirst({
     where: {
       contentStatus: "PUBLISHED",
       difficulty: estimatedLevel,
@@ -433,7 +484,7 @@ async function createDiagnosticRecommendations(userId: string, scoreSummary: Dia
     orderBy: [{ orderIndex: "asc" }],
   });
   if (levelProblem) {
-    await prisma.learningRecommendation.create({
+    await tx.learningRecommendation.create({
       data: {
         userId,
         recommendationType: "NEXT_PROBLEM",

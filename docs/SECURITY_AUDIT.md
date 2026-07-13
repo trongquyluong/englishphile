@@ -6,6 +6,8 @@
 **Auditor:** Claude Code (Security Audit Phase 0)
 **Phase:** Audit only — no code modifications made
 
+> Historical baseline: findings and code excerpts in the Phase 0 body describe the repository as inspected on 2026-07-10. Current disposition after Phase 1A, the Phase 1B Final Integrity Correction Pass, and the owner-confirmed operational reconciliation dated 2026-07-13 is recorded in the release checklist and current-status matrix near the end of this document. The detailed Phase 1B implementation, evidence boundaries, and test classification are in `docs/SECURITY_PHASE_1B_REPORT.md`.
+
 ---
 
 ## Executive Summary
@@ -139,11 +141,13 @@ This Phase 0 security audit of the Englishphile repository identified **5 Critic
 
 #### C-00: `.env` File Contains Real Production Secrets
 
+**Current status (2026-07-13):** Remediated based on owner-attested operational evidence. The repository pass did not independently inspect Vercel, Neon, or Google dashboards and did not read any real environment-variable value.
+
 **Severity:** Critical
 **CWE:** CWE-312: Cleartext Storage of Sensitive Information
 **OWASP:** A02:2021 – Cryptographic Failures
 **Confidence:** High (agent confirmed secrets present in `.env`)
-**Release-blocking:** Yes — secrets must be rotated before production use
+**Release-blocking:** No — the owner confirmed rotation and successful post-rotation production checks on 2026-07-13
 
 **Affected File:** `.env` (in the repository root)
 
@@ -162,23 +166,15 @@ The agent's sub-process read the `.env` file and confirmed the following product
 - OneDrive sync may have uploaded the file to cloud storage
 - Any backup or copy of the project folder exposes all secrets
 
-**Immediate Actions Required:**
+**Owner-attested remediation evidence (2026-07-13):**
 
-1. **Rotate all three secrets immediately:**
-   - Reset the Neon database password via the Neon dashboard
-   - Generate a new `SESSION_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-   - Regenerate the `GEMINI_API_KEY` via Google AI Studio
-2. **Move `.env` outside of OneDrive:** Store it in a non-synced location (e.g., `~/.englishphile/.env`)
-3. **Check OneDrive/cloud backups:** Search for any copies of `.env` and delete them
-4. **Update Vercel environment variables:** Set the new rotated values in the Vercel dashboard
+- Production session, Gemini, and Neon role credentials were replaced; `AUTH_SECRET` was removed.
+- A pre-rotation authenticated session was invalidated after a credential-rotation redeploy from the current `main` branch, and a new sign-in succeeded.
+- Production health returned HTTP 200 with `database=connected`; database reads and a low-risk write succeeded; no database authentication or Prisma connection errors were found in Vercel runtime logs.
+- A production Gemini smoke check succeeded before the old key was revoked.
+- The active local clone is outside OneDrive, its local environment uses an independent non-production PostgreSQL project, and the old OneDrive copy retains only `.env.example` among environment files.
 
-**Minimal Fix:** The `.gitignore` already excludes `.env`. The issue is that the file was accidentally created with real secrets. After rotation, the new `.env` with rotated values should be stored securely (not in a cloud-synced folder).
-
-**Regression Test:** After rotation, verify that:
-- The app still connects to the database
-- Users can still log in
-- Writing grading still works
-- The `.env` file is not synced to OneDrive
+No values, connection strings, passwords, tokens, hostnames, cookies, deployment IDs, or dashboard-derived secrets are recorded. These operations are owner-attested and were not automatically verified from the repository.
 
 ---
 
@@ -431,6 +427,8 @@ if (value.length > MAX_TEXT_FIELD_LENGTH) {
 
 #### H-01: Access Code Brute-Force — Rate Limit Bucket Scope
 
+**Current status (2026-07-12):** Remediated — private-code attempts use the atomic database limiter; real PostgreSQL concurrency remains Test debt.
+
 **Severity:** High
 **CWE:** CWE-307: Excessive Authentication Attempts
 **Confidence:** High
@@ -475,6 +473,8 @@ checkRateLimit({ key: `contest-access:${contest.id}:${clientIp}`, limit: 20, win
 ---
 
 #### H-02: Access Code Reflected in URL After Failed Attempt
+
+**Current status (2026-07-12):** Remediated — access codes are submitted by POST and are not placed in query parameters.
 
 **Severity:** High
 **CWE:** CWE-201: Exposure of Sensitive Information Through Sent Data
@@ -566,6 +566,8 @@ An attacker can POST directly to `/api/admin/import/files/commit` with a `.exe` 
 
 #### H-05: Admin IDOR — Any Admin Can Modify Any Contest
 
+**Current status (2026-07-12):** Unresolved.
+
 **Severity:** High
 **CWE:** CWE-639: Authorization Bypass Through User-Controlled Key
 **Confidence:** High
@@ -601,6 +603,8 @@ if (contest.createdById !== user.id && user.role !== "ADMIN") {
 
 #### H-06: Admin IDOR — Any Admin Can Modify Any Problem/Content
 
+**Current status (2026-07-12):** Unresolved.
+
 **Severity:** High
 **CWE:** CWE-639: Authorization Bypass Through User-Controlled Key
 **Confidence:** High
@@ -616,6 +620,8 @@ if (contest.createdById !== user.id && user.role !== "ADMIN") {
 ---
 
 #### H-07: No CSRF Protection on Admin Forms
+
+**Current status (2026-07-12):** Remediated for unsafe Route Handlers through exact-origin/fail-secure validation. Next.js Server Actions retain framework origin/host validation.
 
 **Severity:** High
 **CWE:** CWE-352: Cross-Site Request Forgery
@@ -648,6 +654,8 @@ No `useFormStatus` CSRF tokens, no `Origin`/`Referrer` header validation, no dou
 ---
 
 #### H-08: Classroom Join Code Uses Non-Cryptographic RNG
+
+**Current status (2026-07-12):** Remediated — join codes use `node:crypto` `randomInt()`.
 
 **Severity:** High
 **CWE:** CWE-338: Use of Cryptographically Weak PRNG
@@ -820,6 +828,8 @@ Malicious Excel file contains a specially crafted string that causes the xlsx re
 
 #### M-01: No Rate Limiting on Write API Routes
 
+**Current status (2026-07-12):** Remediated — submissions, random practice, and assignment submission use the database limiter with 503/429 failure separation.
+
 **Severity:** Medium
 **CWE:** CWE-307: Excessive Authentication Attempts
 **OWASP:** A04:2021 – Insecure Design
@@ -837,6 +847,8 @@ Malicious Excel file contains a specially crafted string that causes the xlsx re
 ---
 
 #### M-02: In-Memory Rate Limiter — Bypassable in Multi-Instance Deployments
+
+**Current status (2026-07-12):** Remediated — every current security-sensitive caller uses the database limiter, and the unused process-local compatibility helper has been removed. This does not mean public authentication abuse is fully solved: randomized email identifiers can still create distinct database buckets, tracked separately in the current matrix.
 
 **Severity:** Medium
 **CWE:** CWE-307: Excessive Authentication Attempts
@@ -868,6 +880,8 @@ In Vercel serverless deployments, each cold start creates a new Node.js instance
 ---
 
 #### M-03: In-Memory Rate Limiter — Memory Leak Under Sustained Traffic
+
+**Current status (2026-07-12):** Remediated — the unused compatibility Map has been removed. Database `RateLimitBucket` cleanup scheduling remains a separate Operational requirement.
 
 **Severity:** Medium
 **CWE:** CWE-400: Resource Exhaustion
@@ -1052,6 +1066,8 @@ Changing password does not invalidate existing sessions. An attacker with the ol
 
 #### L-03: Slight User Enumeration via Timing
 
+**Current status (2026-07-12):** Remediated — missing-user and wrong-password paths both perform one scrypt verification and return the same generic response.
+
 **Severity:** Low
 **CWE:** CWE-204: Observable Response Discrepancy
 **Confidence:** Medium
@@ -1065,7 +1081,7 @@ if (!user || !verifyPassword(password, user.passwordHash)) {
 }
 ```
 
-When the user is not found, `verifyPassword` is NOT called. When the user IS found, `verifyPassword` performs scrypt hash computation. The timing difference is measurable but the scrypt computation dominates, making this very difficult to exploit.
+The excerpt above is the historical Phase 0 implementation. The current code selects either the stored hash or a fixed valid dummy scrypt hash and always invokes the verifier once. The dummy hash is precomputed, not generated per request. This is constant-work password verification; it is not a claim that the entire authentication request is constant-time.
 
 ---
 
@@ -1246,7 +1262,7 @@ No `.github/workflows/*.yml` files exist in the repository. No CI/CD pipeline to
 
 ### Phase 1 — Immediate (Before Any Production Deployment)
 
-1. **C-00: Rotate all secrets** — Reset Neon DB password, regenerate SESSION_SECRET, regenerate GEMINI_API_KEY. Move `.env` outside of OneDrive sync.
+1. **C-00: Rotate all secrets — Remediated 2026-07-13** based on owner-attested operational evidence; preserve environment isolation and do not reintroduce retired credentials.
 2. **C-01: Strip `correctAnswer` from all API responses** — Remove from `answers` array in all three routes
 2. **C-02: Add file size limits** — Add `MAX_FILE_SIZE_BYTES` and `MAX_JSON_CONTENT_LENGTH` constants
 3. **C-03: Add transaction to contest import** — Wrap `importContestFromParsedAction` in `prisma.$transaction`
@@ -1287,102 +1303,82 @@ No `.github/workflows/*.yml` files exist in the repository. No CI/CD pipeline to
 
 ## Release-Blocking Checklist
 
-The following items MUST be resolved before production deployment:
+The following historical release-blocking items are shown with their current disposition:
 
-- [ ] **C-00**: Rotate all secrets in `.env` (DATABASE_URL, SESSION_SECRET, GEMINI_API_KEY). Move `.env` outside of OneDrive sync.
-- [x] **C-01**: ✅ **Remediated in Security Phase 1A** — `correctAnswer` removed from all API responses (`/api/submissions`, `/api/practice/random`, `/api/assignments/[id]/submit`). Learner-safe DTOs created in `src/lib/dto/submission.ts`.
-- [x] **C-02**: ✅ **Remediated in Security Phase 1A** — File size limits (2 MiB), signature validation, extension checks added to `src/app/api/admin/contests-import/parse/route.ts`. Constants centralized in `src/lib/import/resource-limits.ts`.
-- [x] **C-03**: ✅ **Remediated in Security Phase 1A** — `importContestFromParsedAction` now wraps all DB writes in `prisma.$transaction()`.
-- [x] **C-04**: ✅ **Remediated in Security Phase 1A** — Row/question/cell/sheet limits enforced in `parseExcelContest()`. Constants: MAX_QUESTIONS=500, MAX_SECTIONS=30, MAX_ROWS=1000, MAX_CELLS=20000, MAX_CELL_TEXT=20000.
-- [x] **H-03**: ✅ **Remediated in Security Phase 1A** — `validateContestForPublish` now calls `requireAdmin()` before returning any contest data.
-- [x] **H-04**: ✅ **Remediated in Security Phase 1A** — Server-side extension validation implemented (`.xlsx` only, ZIP signature check, file size limit, byte-length verification).
-- [x] **H-12**: ✅ **Remediated in Security Phase 1A** — `xlsx` package removed. Replaced with `exceljs@4.4.0`. Note: exceljs brings transitive `uuid@8.3.2` (moderate, not critical).
-- [x] **Formula Cell Rejection**: ✅ **Added in Verification Pass** — Parser now detects and rejects formula cells in all sheets with clear Vietnamese error messages.
-- [x] **Import Confirmation Revalidation**: ✅ **Added in Verification Pass** — `importContestFromParsedAction` performs independent server-side validation of all fields before import.
-- [ ] **H-01**: Access code rate limit bucket fixed
-- [ ] **H-02**: Access code removed from URL query params
-- [ ] **H-07**: CSRF protection implemented
-
----
-
-## Required Security Tests
-
-1. **CorrectAnswerExposure**: POST to `/api/submissions` with any `problemId`, assert `correctAnswer` is NOT in response
-2. **CorrectAnswerExposurePractice**: POST to `/api/practice/random` with empty answers, assert `correctAnswer` is NOT in response
-3. **AccessCodeBruteForce**: Call `startContestAction` with 100 wrong access codes, assert rate limit is enforced per attempt
-4. **ValidateWithoutAuth**: Call `validateContestForPublish` unauthenticated, assert 401 response
-5. **FileSizeLimit**: Upload 50MB file to `/api/admin/contests-import/parse`, assert 413 response
-6. **RowLimit**: Import Excel with 10,000 questions, assert error response
-7. **CSRF**: POST to admin action from cross-origin without CSRF token, assert rejection
-8. **JoinCodeEntropy**: Generate 1,000 join codes, assert no duplicates and sufficient entropy
-9. **SessionInvalidation**: Change password, assert old session cookie is rejected
-10. **GeminiPrivacy**: Grade essay, assert essay text is NOT in server logs
-
-### Phase 1A Tests Added
-
-Tests implemented in `src/lib/dto/submission.test.ts` and `src/lib/import/excel-parser-limits.test.ts`:
-- `toQuestionResult` DTO does not include `correctAnswer`
-- `QuestionResultDTO` type safety
-- Resource limits constants are correct
-- XLSX signature validation works
-- Empty buffer rejection
-- Authorization guards in admin actions
-- Import confirmation revalidation
-- Formula cell detection
-- Transaction rollback pattern
-- Invalid file format rejection
-- `validateContestForPublish` has `requireAdmin` guard
-- `exceljs` is the parser library (not `xlsx`)
-- Server-only directive in parser
+- [x] **C-00 — Remediated:** the owner confirmed database, session, and Gemini credential rotation, removal of `AUTH_SECRET`, invalidation of the prior session, and successful post-rotation production checks on 2026-07-13. This repository pass did not independently inspect provider dashboards.
+- [x] **C-01 — Remediated:** learner submission responses exclude `correctAnswer`.
+- [x] **C-02 — Remediated:** contest spreadsheet uploads have server-side size, extension, and signature limits.
+- [x] **C-03 — Remediated:** contest spreadsheet import writes are transactional.
+- [x] **C-04 — Remediated:** spreadsheet parser row, question, section, cell, and text limits are enforced.
+- [x] **H-03 — Remediated:** contest publish validation requires admin access.
+- [x] **H-04 — Remediated:** server-side file-format validation rejects unsupported uploads.
+- [x] **H-12 — Remediated:** vulnerable `xlsx` was replaced by `exceljs`; current moderate transitive advisories remain Unresolved.
+- [x] **Formula-cell rejection — Remediated:** formula cells are rejected with Vietnamese validation errors.
+- [x] **Import confirmation revalidation — Remediated:** server-side confirmation validation does not trust preview data.
+- [x] **H-01 — Remediated:** private-code attempts use one atomic database authorization statement. Real PostgreSQL concurrency remains Test debt.
+- [x] **H-02 — Remediated:** access codes are submitted by POST; grants are signed, database-backed, scoped, expiring, and mutation-revoked.
+- [x] **H-07 — Remediated:** unsafe Route Handlers require an exact trusted origin or independent same-origin browser proof.
 
 ---
 
-## Commands Run
+## Current Phase 1B status matrix
 
-```bash
-npm audit
-npm audit --omit=dev
-npm outdated
-git status --short
-```
+| Control | Status | Evidence boundary |
+|---|---|---|
+| C-00 credential rotation | Remediated | Owner-attested dashboard/runtime evidence dated 2026-07-13; no secret values inspected and no provider dashboard independently queried by this repository pass |
+| Production migration chain | Applied | Owner attests 15 migrations and schema up to date in production; the Phase 1B migration is immutable |
+| Non-production migration chain | Applied | Owner attests all 15 migrations and schema up to date in the independent `englishphile-nonprod` project with no production data |
+| Credential-rotation production redeploy | Passed | Owner attests a redeploy from current `main` plus health, new sign-in, database read/write, Gemini checks, and clean database-auth/Prisma runtime logs |
+| Phase 1B application code | Draft PR #2 | Not merged into `main`; no Phase 1B application deployment is claimed |
+| Post-merge Phase 1B production verification | Operational requirement | Pending until Draft PR #2 is merged and deployed |
+| Production/Preview isolation | Verified | Owner attests distinct database credentials and session secrets; a synthetic write changed only the `englishphile-nonprod` `preview` branch User count while production remained unchanged |
+| Isolated Preview smoke | Passed | Owner-attested 2026-07-13 health, signup/write, sign-out/sign-in, authenticated read, safe Gemini absence, and newest-deployment runtime-log checks |
+| GitHub PR checks | Passed | Owner-attested checks for Draft PR #2 passed |
+| Local development isolation | Configured | Owner attests the active clone is outside OneDrive and local development uses independent non-production PostgreSQL credentials |
+| Writing five-slot UTC quota | Remediated | Production factory runtime tests plus static lifecycle wiring; PostgreSQL integration is Test debt |
+| Locked contest start availability | Remediated | Current status/time/content/private grant are revalidated under the Contest lock before resume or create |
+| Contest replay protection | Remediated | Conditional ownership-scoped finalization and advisory start serialization; PostgreSQL integration is Test debt |
+| Diagnostic replay protection | Remediated | Conditional transactional winner and advisory start serialization; PostgreSQL integration is Test debt |
+| Authentication missing-user work | Remediated | Production verifier factory and valid fixed dummy-hash runtime tests |
+| Public authentication abuse controls | Partially remediated | Sign-in/sign-up have atomic per-account buckets, but no trusted client/network dimension exists |
+| Random-email auth bucket amplification | Unresolved | Attacker-controlled unique email digests can create unbounded distinct `RateLimitBucket` subjects without scheduled cleanup |
+| M-01 write API limiting | Remediated | Submissions, random practice, and assignment submission use database policies |
+| M-02 multi-instance enforcement | Remediated | All current security callers are database-backed; the unused instance-local helper was removed |
+| M-03 compatibility Map growth | Remediated | The unused compatibility Map was removed |
+| H-05 contest admin ownership | Unresolved | No ownership remediation in Phase 1B |
+| H-06 content admin ownership | Unresolved | No ownership remediation in Phase 1B |
+| H-09 signed-session invalidation | Unresolved | Stateless session invalidation limitation remains |
+| H-10 diagnostic result answer data | Unresolved | Outside Phase 1B |
+| H-11 contest result answer data at rest | Unresolved | Outside Phase 1B |
+| Four moderate dependency advisories | Unresolved | Previously recorded `postcss` and `uuid` dependency-chain advisories remain; breaking dependency upgrades require a separate reviewed pass |
+| Database cleanup scheduling | Operational requirement | Implement and configure a bounded caller before public exposure; no scheduler or caller exists |
+| PostgreSQL concurrency coverage | Test debt | No safe isolated PostgreSQL integration run was established |
+
+## Security test classification
+
+The final suite contains 133 cases:
+
+- 59 production-runtime cases: 42 Phase 1B imported production helpers/factories and 17 existing Phase 1A production-function cases;
+- 74 non-runtime or static cases: 36 explicit Phase 1B structural checks and 38 older Phase 1A source/literal/constant/simulated checks.
+
+Phase 1B runtime coverage includes production access-code comparison, origin decisions, access-grant and locked contest-start decisions, UTC quota keys, submission-input parsing, authentication dummy work, and production limiter/Writing/replay factories with mocked repositories. Mocked concurrency is not PostgreSQL integration testing.
+
+PostgreSQL verification of the real limiter statement, Writing slot uniqueness and cleanup, advisory locks, conditional replay transitions, and grant/mutation locking remains Test debt. Testing must use an isolated `TEST_DATABASE_URL` and must never fall back to `DATABASE_URL`.
+
+## Current operational status and remaining requirements
+
+- **C-00 — Remediated:** credential rotation and post-rotation production checks are owner-confirmed. This is no longer a release blocker.
+- **Phase 1B migration — Applied:** the owner reports 15 migrations and an up-to-date production schema. The independent non-production project reports the same migration chain and an up-to-date schema. The migration is immutable; any future database change requires a new additive migration.
+- **Credential-rotation production redeploy — Passed:** the current `main` production application passed health, new sign-in, database read/write, Gemini, and relevant runtime-log checks after credential rotation.
+- **Phase 1B application code — Draft PR #2:** it has not been merged into `main`; post-merge Phase 1B Production verification remains pending.
+- **Environment isolation — Verified:** the owner-confirmed synthetic Preview write affected only the independent `englishphile-nonprod` `preview` branch, while the production User count remained unchanged. The non-production root branch is named `production`, not `main`.
+- **Isolated Preview smoke — Passed:** owner-attested health, auth, database read/write, safe Gemini absence, runtime-log review, and GitHub PR checks passed on 2026-07-13. Safe Gemini absence is not a Gemini functionality test.
+- **Cleanup scheduler — Operational requirement:** implement, configure, and monitor a bounded cleanup caller before public exposure; none is configured now.
+- **Draft PR #2 — Review required:** complete final documentation and security review, mark ready after checks pass, merge through the reviewed GitHub workflow, and perform post-merge Production verification.
+- **Unresolved security work:** random-email authentication bucket amplification remains Phase 2; H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories remain open. PostgreSQL concurrency integration remains Test debt.
+
+The complete final implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.
 
 ---
 
-## Files Inspected
-
-| Category | Files |
-|---|---|
-| Authentication | `src/lib/auth/session.ts`, `src/lib/auth/password.ts`, `src/app/auth/actions.ts` |
-| Session & Config | `src/lib/auth/session.ts`, `src/lib/config.ts` |
-| Rate Limiting | `src/lib/rate-limit.ts` |
-| Server Actions | `src/app/*/actions.ts` (11 files with "use server") |
-| Route Handlers | `src/app/api/**/route.ts` (10 route files) |
-| Contest Logic | `src/lib/contests.ts`, `src/app/contests/actions.ts` |
-| Diagnostic Logic | `src/lib/diagnostic.ts`, `src/app/diagnostic/actions.ts` |
-| Answer Checking | `src/lib/answer-checking.ts` |
-| Import | `src/lib/import/excel-contest-parser.ts`, `src/lib/import/json-importer.ts`, `src/lib/import/csv-importer.ts` |
-| AI Grading | `src/lib/ai/writing-grader.ts`, `src/app/api/writing/grade/route.ts` |
-| Permissions | `src/lib/classroom/permissions.ts` |
-| Health | `src/app/api/health/route.ts`, `src/lib/health.ts` |
-| Config | `next.config.ts`, `.env.example` |
-| Package Files | `package.json` (read via npm audit/outdated) |
-
----
-
-## Files Created
-
-- `docs/SECURITY_AUDIT.md` — this document
-
----
-
-## Git Status
-
-```
-?? .claude/
-```
-
-**No application code, migration, database, commit, or push was changed.**
-
----
-
-*Audit conducted by Claude Code on branch `security-audit-phase-0`. All findings are based on static code inspection. Dynamic testing (penetration testing) was not performed in this Phase 0 audit. Recommended findings should be verified with dynamic testing before remediation is marked complete.*
+*The Phase 0 finding narratives above remain the historical 2026-07-10 audit record. Their current disposition is controlled by the checklist and matrix in this addendum, not by historical source excerpts.*

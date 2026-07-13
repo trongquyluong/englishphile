@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/session";
+import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
+import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { parseExcelContest } from "@/lib/import/excel-contest-parser";
 import { hasValidXlsxSignature, MAX_FILE_SIZE_BYTES } from "@/lib/import/resource-limits";
 
 export async function POST(req: NextRequest) {
-  await requireAdmin();
+  // Validate request origin (CSRF protection)
+  const originCheck = await validateRequestOrigin();
+  if (!originCheck.valid) {
+    return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
+  }
+
+  // Require admin auth
+  const user = await requireAdmin();
+
+  // Rate limit Excel parse: 10 requests per admin per hour (database-backed)
+  const limit = await checkConfiguredRateLimit(RATE_LIMITS.EXCEL_PARSE(user.id));
+  if (limit.status !== "allowed") {
+    if (limit.status === "infrastructure-error") {
+      return NextResponse.json(
+        { error: "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau." },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json(
+      { error: "Bạn đã parse quá nhiều file. Thử lại sau vài phút." },
+      { status: 429 }
+    );
+  }
 
   let fileBuffer: ArrayBuffer;
   try {

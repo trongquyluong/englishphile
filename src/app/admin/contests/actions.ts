@@ -88,11 +88,19 @@ export async function updateContestAction(formData: FormData) {
   const returnTo = `/admin/contests/${contestId}/edit`;
   const title = text(formData, "title");
   const problems = parseProblems(formData);
+  const newVisibility = parseContestVisibility(text(formData, "visibility"));
   if (!title) redirectBack(returnTo, false, "Tiêu đề không được để trống.");
   if (!problems.length) redirectBack(returnTo, false, "Contest cần có ít nhất một problem đã xuất bản.");
   if (!(await ensurePublishedProblems(problems.map((problem) => problem.problemId)))) {
     redirectBack(returnTo, false, "Contest chỉ được dùng problem đã xuất bản.");
   }
+
+  // Reject missing contests before entering the mutation transaction.
+  const current = await prisma.contest.findUnique({
+    where: { id: contestId },
+    select: { id: true },
+  });
+  if (!current) redirectBack(returnTo, false, "Không tìm thấy contest.");
 
   const contest = await updateContest(contestId, {
     title,
@@ -100,7 +108,7 @@ export async function updateContestAction(formData: FormData) {
     description: nullableText(formData, "description"),
     contestType: parseContestType(text(formData, "contestType")),
     status: parseContestStatus(text(formData, "status")),
-    visibility: parseContestVisibility(text(formData, "visibility")),
+    visibility: newVisibility,
     durationMinutes: numberOrNull(formData, "durationMinutes"),
     startsAt: dateOrNull(formData, "startsAt"),
     endsAt: dateOrNull(formData, "endsAt"),

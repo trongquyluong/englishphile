@@ -1,4 +1,7 @@
+import "server-only";
+
 import { notFound, redirect } from "next/navigation";
+import { randomInt } from "node:crypto";
 import type { Assignment, Classroom, User } from "@prisma/client";
 import { isAdminUser, requireAdmin, requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -57,6 +60,20 @@ export function canManageAssignment(user: CurrentUser, assignment: Pick<Assignme
   return isAdminUser(user) || assignment.createdById === user.id || assignment.classroom?.teacherId === user.id;
 }
 
-export function generateJoinCode() {
-  return Math.random().toString(36).slice(2, 8).toUpperCase();
+const JOIN_CODE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const JOIN_CODE_LENGTH = 6;
+
+/**
+ * Generate a cryptographically secure classroom join code.
+ * Uses crypto.randomInt for uniform distribution without modulo bias.
+ * Alphabet: 36 chars (A-Z, 0-9), 6 chars = ~31 bits entropy.
+ */
+export function generateJoinCode(): string {
+  const code: string[] = [];
+  for (let i = 0; i < JOIN_CODE_LENGTH; i++) {
+    // randomInt is uniform in [0, max) with no modulo bias
+    const randomIndex = randomInt(0, JOIN_CODE_ALPHABET.length);
+    code.push(JOIN_CODE_ALPHABET[randomIndex]!);
+  }
+  return code.join("");
 }

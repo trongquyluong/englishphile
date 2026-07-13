@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, ListChecks, Lock, Trophy } from "lucide-react";
-import { startContestAction } from "@/app/contests/actions";
+import { startContestAction, submitAccessCodeAction } from "@/app/contests/actions";
 import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug, getContestAvailability } from "@/lib/contests";
+import { validateContestAccessGrant } from "@/lib/security/access-grant";
 import { contestStatusLabels, contestTypeLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -17,7 +18,6 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
   const { id } = await params;
   const query = await searchParams;
   const error = typeof query.error === "string" ? query.error : "";
-  const needsAccess = typeof query.access === "string" ? query.access : "";
   const contest = await findContestByIdOrSlug(id);
   if (!contest || contest.status === "DRAFT" || contest.status === "ARCHIVED") notFound();
   const latestAttempt = user
@@ -42,10 +42,17 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
   const availability = getContestAvailability(contest);
   const activeAttempt = latestAttempt?.status === "IN_PROGRESS" ? latestAttempt : null;
 
-  // Check private access (admins bypass the gate; students must supply the code)
+  // Check private access (admins bypass the gate; students must have a valid grant)
   const isAdmin = isAdminUser(user);
   const isPrivate = contest.visibility === "PRIVATE";
-  const hasAccess = !isPrivate || isAdmin || (needsAccess !== "" && needsAccess === contest.accessCode);
+
+  // Validate grant if user is authenticated
+  let hasAccess = !isPrivate || isAdmin;
+  if (isPrivate && !isAdmin && user) {
+    const grantResult = await validateContestAccessGrant(user.id, contest.id);
+    hasAccess = grantResult.valid;
+  }
+
   const showAccessForm = isPrivate && !hasAccess;
 
   const totalQuestions = contest.problems.length + contest.sections.reduce((s, sec) => s + sec.questions.length, 0);
@@ -83,12 +90,13 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
               <p className="mt-1 text-sm text-ink-soft">Nhập mã truy cập để xem nội dung contest.</p>
             </div>
           </div>
-          <form action={`/contests/${contest.slug}`} className="mt-4 grid gap-3">
+          <form action={submitAccessCodeAction} className="mt-4 grid gap-3">
+            <input type="hidden" name="contestId" value={contest.id} />
+            <input type="hidden" name="contestSlug" value={contest.slug} />
             <label className="grid gap-1.5 text-sm font-semibold">
               Mã truy cập
-              <input name="access" type="text" placeholder="Nhập mã truy cập" className="field" />
+              <input name="accessCode" type="text" placeholder="Nhập mã truy cập" className="field" autoComplete="off" />
             </label>
-            {needsAccess !== "" ? <p className="text-sm text-danger">Mã truy cập không đúng. Vui lòng thử lại.</p> : null}
             {error && <p className="text-sm text-danger">{error}</p>}
             <button type="submit" className="btn btn-primary self-start">
               Vào contest
@@ -134,7 +142,6 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
               ) : null}
               <form action={startContestAction}>
                 <input type="hidden" name="contestId" value={contest.id} />
-                {isPrivate ? <input type="hidden" name="accessCode" value={needsAccess} /> : null}
                 <button disabled={!availability.canStart || totalQuestions === 0} className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-panel-muted px-4 text-sm font-semibold transition-transform duration-150 ease-out active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-55">
                   Bắt đầu contest
                 </button>

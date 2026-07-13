@@ -2,6 +2,12 @@ import type { Contest, ContestAttemptStatus, ContestStatus, ContestType, Contest
 import { checkQuestionAnswer } from "@/lib/answer-checking";
 import { generateSlug } from "@/lib/import/duplicates";
 import { prisma } from "@/lib/prisma";
+import {
+  evaluateLockedContestStart,
+  getContestAvailabilityDecision,
+  type LockedContestStartSnapshot,
+} from "@/lib/security/contest-start-decision";
+import { claimSingleWinner } from "@/lib/security/replay-guard";
 
 export type ContestWithProblems = Prisma.ContestGetPayload<{
   include: {
@@ -58,25 +64,7 @@ export function getContestAvailability(
   contest: Pick<Contest, "contestType" | "status" | "startsAt" | "endsAt">,
   now = new Date(),
 ) {
-  if (contest.status === "DRAFT" || contest.status === "ARCHIVED") {
-    return { canStart: false, reason: "Contest chưa mở công khai." };
-  }
-
-  if (contest.contestType === "LIVE_CONTEST") {
-    if (contest.startsAt && contest.startsAt > now) {
-      return { canStart: false, reason: "Contest chưa đến giờ bắt đầu." };
-    }
-    if (contest.status === "ENDED" || (contest.endsAt && contest.endsAt < now)) {
-      return { canStart: false, reason: "Contest đã kết thúc." };
-    }
-    return { canStart: true, reason: "Contest đang mở." };
-  }
-
-  if (contest.startsAt && contest.startsAt > now) {
-    return { canStart: false, reason: "Contest chưa đến giờ mở." };
-  }
-
-  return { canStart: true, reason: contest.status === "ENDED" ? "Đề cũ vẫn có thể luyện lại." : "Có thể bắt đầu." };
+  return getContestAvailabilityDecision(contest, now);
 }
 
 export async function findContestByIdOrSlug(idOrSlug: string) {
@@ -103,20 +91,81 @@ export async function findContestByIdOrSlug(idOrSlug: string) {
   });
 }
 
-export async function createContestAttempt(contest: Contest, userId: string) {
-  const existing = await prisma.contestAttempt.findFirst({
-    where: { contestId: contest.id, userId, status: "IN_PROGRESS" },
-    orderBy: { startedAt: "desc" },
-  });
+export async function createContestAttempt(
+  contest: Pick<Contest, "id">,
+  userId: string,
+  access: { grantId?: string | null; bypassPrivateAccess?: boolean } = {},
+) {
+  const lockKey = `contest-attempt:${contest.id}:${userId}`;
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw<Array<{ locked: string }>>`
+      SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))::text AS "locked"
+    `;
+    const lockedContests = await tx.$queryRaw<LockedContestStartSnapshot[]>`
+      SELECT "id", "contestType", "status", "startsAt", "endsAt", "visibility", "accessCodeUpdatedAt"
+      FROM "Contest"
+      WHERE "id" = ${contest.id}
+      FOR UPDATE
+    `;
+    const lockedContest = lockedContests[0];
+    if (!lockedContest) {
+      return { ok: false, message: "Không tìm thấy contest." } as const;
+    }
 
-  if (existing) return existing;
+    const [problemRows, sectionRows, grantRecord] = await Promise.all([
+      tx.$queryRaw<Array<{ id: string }>>`
+        SELECT "id"
+        FROM "ContestProblem"
+        WHERE "contestId" = ${lockedContest.id}
+        LIMIT 1
+        FOR SHARE
+      `,
+      tx.$queryRaw<Array<{ id: string }>>`
+        SELECT "id"
+        FROM "ContestSection"
+        WHERE "contestId" = ${lockedContest.id}
+        LIMIT 1
+        FOR SHARE
+      `,
+      access.grantId
+        ? tx.contestAccessGrant.findUnique({
+            where: { id: access.grantId },
+            select: { userId: true, contestId: true, expiresAt: true, createdAt: true },
+          })
+        : Promise.resolve(null),
+    ]);
 
-  return prisma.contestAttempt.create({
-    data: {
-      contestId: contest.id,
+    const decision = evaluateLockedContestStart(lockedContest, {
       userId,
-      status: "IN_PROGRESS",
-    },
+      now: new Date(),
+      hasContent: problemRows.length > 0 || sectionRows.length > 0,
+      bypassPrivateAccess: access.bypassPrivateAccess === true,
+      grant: grantRecord
+        ? {
+            ...grantRecord,
+            contest: {
+              id: lockedContest.id,
+              accessCodeUpdatedAt: lockedContest.accessCodeUpdatedAt,
+            },
+          }
+        : null,
+    });
+    if (!decision.allowed) return { ok: false, message: decision.message } as const;
+
+    const existing = await tx.contestAttempt.findFirst({
+      where: { contestId: contest.id, userId, status: "IN_PROGRESS" },
+      orderBy: { startedAt: "desc" },
+    });
+    if (existing) return { ok: true, attempt: existing } as const;
+
+    const attempt = await tx.contestAttempt.create({
+      data: {
+        contestId: contest.id,
+        userId,
+        status: "IN_PROGRESS",
+      },
+    });
+    return { ok: true, attempt } as const;
   });
 }
 
@@ -287,30 +336,39 @@ export async function updateContest(contestId: string, data: {
   problems: Array<{ problemId: string; section: string; orderIndex: number; points?: number | null }>;
 }) {
   const slug = data.slug?.trim() || generateSlug(data.title);
-  return prisma.contest.update({
-    where: { id: contestId },
-    data: {
-      title: data.title.trim(),
-      slug,
-      description: data.description || null,
-      contestType: data.contestType,
-      status: data.status,
-      visibility: data.visibility,
-      durationMinutes: data.durationMinutes,
-      startsAt: data.startsAt,
-      endsAt: data.endsAt,
-      sourceName: data.sourceName || null,
-      rules: data.rules || null,
-      problems: {
-        deleteMany: {},
-        create: data.problems.map((problem, index) => ({
-          problemId: problem.problemId,
-          section: problem.section || "Use of English",
-          orderIndex: problem.orderIndex ?? index,
-          points: problem.points,
-        })),
+
+  // This legacy editor always submits visibility. Invalidate grants on every
+  // update so concurrent PRIVATE -> PUBLIC -> PRIVATE transitions cannot reuse
+  // an earlier grant. The update and deletion share one transaction.
+  return prisma.$transaction(async (tx) => {
+    const contest = await tx.contest.update({
+      where: { id: contestId },
+      data: {
+        title: data.title.trim(),
+        slug,
+        description: data.description || null,
+        contestType: data.contestType,
+        status: data.status,
+        visibility: data.visibility,
+        durationMinutes: data.durationMinutes,
+        startsAt: data.startsAt,
+        endsAt: data.endsAt,
+        sourceName: data.sourceName || null,
+        rules: data.rules || null,
+        accessCodeUpdatedAt: new Date(),
+        problems: {
+          deleteMany: {},
+          create: data.problems.map((problem, index) => ({
+            problemId: problem.problemId,
+            section: problem.section || "Use of English",
+            orderIndex: problem.orderIndex ?? index,
+            points: problem.points,
+          })),
+        },
       },
-    },
+    });
+    await tx.contestAccessGrant.deleteMany({ where: { contestId } });
+    return contest;
   });
 }
 
@@ -321,23 +379,40 @@ export async function submitContestAttempt(
   answersByProblem: Record<string, Record<string, unknown>>,
   answersBySection: Record<string, Record<string, unknown>> = {},
 ) {
-  const attempt = await prisma.contestAttempt.findFirst({ where: { id: attemptId, contestId: contest.id, userId } });
+  // First validate attempt exists and belongs to user
+  const attempt = await prisma.contestAttempt.findFirst({
+    where: { id: attemptId, contestId: contest.id, userId },
+  });
   if (!attempt) throw new Error("Không tìm thấy lượt làm contest.");
   if (attempt.status !== "IN_PROGRESS") throw new Error("Lượt làm này đã nộp.");
+
   const now = new Date();
   const scored = scoreContest(contest, answersByProblem, answersBySection);
   const overTimeLimit = Boolean(contest.durationMinutes && now.getTime() - attempt.startedAt.getTime() > contest.durationMinutes * 60 * 1000);
   const late = Boolean((contest.endsAt && contest.endsAt < now) || overTimeLimit);
   const status: ContestAttemptStatus = late ? "LATE" : scored.status;
-  return prisma.contestAttempt.update({
-    where: { id: attempt.id },
-    data: {
-      status,
-      submittedAt: now,
-      score: scored.score,
-      total: scored.total,
-      timeSpentSeconds: Math.max(0, Math.round((now.getTime() - attempt.startedAt.getTime()) / 1000)),
-      answersJson: toJson(scored),
-    },
-  });
+
+  // Use conditional UPDATE to prevent race: only update if still IN_PROGRESS.
+  // This ensures exactly one concurrent request wins.
+  await claimSingleWinner(async () => {
+    const updated = await prisma.contestAttempt.updateMany({
+      where: {
+        id: attemptId,
+        contestId: contest.id,
+        userId,
+        status: "IN_PROGRESS",
+      },
+      data: {
+        status,
+        submittedAt: now,
+        score: scored.score,
+        total: scored.total,
+        timeSpentSeconds: Math.max(0, Math.round((now.getTime() - attempt.startedAt.getTime()) / 1000)),
+        answersJson: toJson(scored),
+      },
+    });
+    return updated.count;
+  }, "Lượt làm này đã nộp.");
+
+  return prisma.contestAttempt.findUniqueOrThrow({ where: { id: attemptId } });
 }

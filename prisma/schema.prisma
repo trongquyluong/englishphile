@@ -202,6 +202,12 @@ enum ContestAttemptStatus {
   NEEDS_REVIEW
 }
 
+enum WritingQuotaReservationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 model User {
   id                 String              @id @default(cuid())
   email              String              @unique
@@ -230,6 +236,8 @@ model User {
   contestsCreated   Contest[]            @relation("ContestCreatedBy")
   contestAttempts   ContestAttempt[]
   writingSubmissions WritingSubmission[]
+  contestAccessGrants ContestAccessGrant[]
+  writingQuotaReservations WritingQuotaReservation[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 }
@@ -540,26 +548,30 @@ model LearningRecommendation {
 }
 
 model Contest {
-  id              String              @id @default(cuid())
-  title           String
-  slug            String              @unique
-  description     String?
-  contestType     ContestType         @default(PRACTICE_CONTEST)
-  status          ContestStatus       @default(DRAFT)
-  visibility      ContestVisibility   @default(PUBLIC)
-  accessCode      String?
-  durationMinutes Int?
-  startsAt        DateTime?
-  endsAt          DateTime?
-  sourceName      String?
-  rules           String?
-  createdById     String?
-  createdBy       User?               @relation("ContestCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  problems        ContestProblem[]
-  sections        ContestSection[]
-  attempts        ContestAttempt[]
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  id                   String              @id @default(cuid())
+  title                String
+  slug                 String              @unique
+  description          String?
+  contestType          ContestType         @default(PRACTICE_CONTEST)
+  status               ContestStatus       @default(DRAFT)
+  visibility           ContestVisibility   @default(PUBLIC)
+  accessCode           String?
+  accessCodeUpdatedAt  DateTime?           // Track when access code was last changed (for grant invalidation)
+  durationMinutes      Int?
+  startsAt             DateTime?
+  endsAt               DateTime?
+  sourceName           String?
+  rules                String?
+  createdById          String?
+  createdBy            User?               @relation("ContestCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  problems             ContestProblem[]
+  sections             ContestSection[]
+  attempts             ContestAttempt[]
+  accessGrants        ContestAccessGrant[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([accessCodeUpdatedAt], map: "Contest_accessCodeUpdatedAt_idx")
 }
 
 model ContestProblem {
@@ -736,4 +748,71 @@ model WritingSubmission {
   updatedAt       DateTime @updatedAt
 
   @@index([userId, createdAt])
+}
+
+// Security: Rate limit buckets for distributed serverless deployments
+// Uses fixed-window strategy with atomic upsert operations
+model RateLimitBucket {
+  id          String   @id @default(dbgenerated("gen_random_uuid()::text"))
+  action      String
+  subject     String   // User ID, scoped composite ID, global marker, or hashed account identifier
+  count       Int      @default(1)
+  windowStart DateTime @default(now())
+  expiresAt   DateTime
+
+  @@unique([action, subject], map: "RateLimitBucket_action_subject_key")
+  @@index([expiresAt], map: "RateLimitBucket_expiresAt_idx")
+}
+
+// Security: Contest access grants for private contests
+// Grants are scoped to user+contest, short-lived, and invalidated when code changes
+model ContestAccessGrant {
+  id        String   @id @default(dbgenerated("gen_random_uuid()::text"))
+  userId    String
+  contestId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Validation enforces expiry; optional bounded cleanup requires an external scheduler.
+  @@index([expiresAt], map: "ContestAccessGrant_expiresAt_idx")
+  @@index([userId, contestId], map: "ContestAccessGrant_userId_contestId_idx")
+}
+
+// Security: Writing submission quota reservations to prevent race conditions
+// Used to atomically reserve a slot before calling the AI grader
+//
+// Design: 5 slots per user per day, enforced by database unique constraint.
+// Each slot is identified by slotNumber (1-5), allowing up to 5 concurrent
+// or sequential reservations per quota day.
+//
+// Lifecycle:
+// 1. All validation before reservation — no slot consumed
+// 2. Reserve slot atomically via unique constraint (status = PENDING)
+// 3. Before calling provider, persist providerStartedAt to mark "in use"
+// 4. Call Gemini outside any database transaction
+// 5. Mark COMPLETED, or FAILED with an auditable failureCode
+// 6. All occupied slots (PENDING + COMPLETED + FAILED) count for the quota day
+// 7. Cleanup reclaims PENDING rows where providerStartedAt IS NULL and expired
+model WritingQuotaReservation {
+  id               String    @id @default(dbgenerated("gen_random_uuid()::text"))
+  userId           String
+  quotaDate        DateTime  @map("quota_date") @db.Date // UTC date, no time
+  slotNumber       Int       @map("slot_number") // 1-5, enforced by CHECK constraint
+  status           WritingQuotaReservationStatus @default(PENDING)
+  providerStartedAt DateTime? @map("provider_started_at") // Set before calling Gemini
+  completedAt       DateTime? @map("completed_at") // Set on COMPLETED or FAILED
+  failureCode      String?   @map("failure_code")
+  expiresAt        DateTime  @map("expires_at")
+  createdAt        DateTime  @default(now())
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Each slot can only be used once per user per day
+  @@unique([userId, quotaDate, slotNumber], map: "WritingQuotaReservation_userId_quotaDate_slotNumber_key")
+  @@index([expiresAt], map: "WritingQuotaReservation_expiresAt_idx")
+  @@index([status], map: "WritingQuotaReservation_status_idx")
+  @@index([userId, quotaDate], map: "WritingQuotaReservation_userId_quotaDate_idx")
+  // Index for cleanup: find reclaimable expired PENDING rows
+  @@index([status, expiresAt, providerStartedAt], map: "WritingQuotaReservation_cleanup_idx")
 }

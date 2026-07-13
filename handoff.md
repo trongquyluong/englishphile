@@ -140,8 +140,8 @@ Phase 10.5 completed deployment readiness for free beta on Vercel + Neon.
 ### Database Strategy
 
 - **Production**: PostgreSQL on Neon Free.
-- **Local dev**: requires PostgreSQL (Neon branch or local Postgres). SQLite dev path is deprecated but documented.
-- **Local SQLite data**: preserved — no seed, no reset. Use `npm run db:export:portable` to move content to Neon.
+- **Local dev**: requires an isolated PostgreSQL database (an independent Neon project or local Postgres). SQLite is not a supported current development path.
+- **Historical SQLite data**: preserved — no seed, no reset. Use `npm run db:export:portable` to move content to Neon.
 - **Migration**: `npm run prisma:deploy` for production. `npm run prisma:migrate` for local dev.
 
 ### Data Portability

@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatus } from "@/lib/answer-checking";
 import { getCurrentUser } from "@/lib/auth/session";
 import { canSubmitAssignment } from "@/lib/classroom/permissions";
+import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { prisma } from "@/lib/prisma";
 import type { AssignmentSubmissionResultDTO } from "@/lib/dto/submission";
 import { toQuestionResult } from "@/lib/dto/submission";
+import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 
 type RouteProps = {
   params: Promise<{ id: string }>;
@@ -26,12 +28,26 @@ function secondsBetween(startedAt: Date | null, submittedAt: Date) {
 }
 
 export async function POST(request: Request, { params }: RouteProps) {
+  // Validate request origin (CSRF protection for Route Handlers)
+  const originCheck = await validateRequestOrigin();
+  if (!originCheck.valid) {
+    return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
+  }
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Bạn cần đăng nhập để nộp bài." }, { status: 401 });
   }
 
   const { id } = await params;
+  const limit = await checkConfiguredRateLimit(RATE_LIMITS.ASSIGNMENT_SUBMIT(user.id));
+  if (limit.status === "infrastructure-error") {
+    return NextResponse.json({ error: "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau." }, { status: 503 });
+  }
+  if (limit.status === "rate-limited") {
+    return NextResponse.json({ error: "Bạn nộp bài quá nhanh. Vui lòng thử lại sau." }, { status: 429 });
+  }
+
   const body = (await request.json()) as AssignmentAnswerBody;
   const assignment = await prisma.assignment.findUnique({
     where: { id },
