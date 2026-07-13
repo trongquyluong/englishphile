@@ -5,7 +5,7 @@ import { Clock, Eye } from "lucide-react";
 import { submitContestAction } from "@/app/contests/actions";
 import { ContestSubmitBar } from "@/components/contests/ContestSubmitBar";
 import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
-import { isAdminUser, requireUser } from "@/lib/auth/session";
+import { isContentAdminUser, requireUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug } from "@/lib/contests";
 import { prisma } from "@/lib/prisma";
 
@@ -281,7 +281,7 @@ export default async function ContestStartPage({ params, searchParams }: PagePro
   const query = await searchParams;
   const attemptId = typeof query.attempt === "string" ? query.attempt : "";
   const error = typeof query.error === "string" ? query.error : "";
-  const isPreview = query.preview === "1" && isAdminUser(user);
+  const isPreview = query.preview === "1" && isContentAdminUser(user);
   const contest = await findContestByIdOrSlug(id);
   if (!contest) redirect("/contests");
 

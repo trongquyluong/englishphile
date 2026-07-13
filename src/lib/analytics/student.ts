@@ -17,7 +17,7 @@ export type StudentTopicStat = ReturnType<typeof finalizeBucket> & {
 };
 
 export async function getStudentOverview(userId: string) {
-  const [statuses, submissions, answers, accessibleAssignments, assignmentSubmissions] = await Promise.all([
+  const [statuses, submissions, answers] = await Promise.all([
     prisma.userProblemStatus.findMany({ where: { userId } }),
     prisma.submission.findMany({
       where: { userId },
@@ -29,33 +29,10 @@ export async function getStudentOverview(userId: string) {
       where: { submission: { userId } },
       include: { manualGrade: true },
     }),
-    prisma.assignment.findMany({
-      where: {
-        status: "PUBLISHED",
-        OR: [{ classroomId: null }, { classroom: { members: { some: { userId, role: "STUDENT" } } } }],
-      },
-      select: { id: true },
-    }),
-    prisma.assignmentSubmission.findMany({
-      where: { userId },
-      include: { assignment: true },
-      orderBy: { updatedAt: "desc" },
-      take: 8,
-    }),
   ]);
 
   const bucket = emptyBucket();
   answers.forEach((answer) => addAnswer(bucket, answer));
-  const scoredAssignments = assignmentSubmissions.filter((submission) => submission.total && submission.total > 0);
-  const completedAssignmentCount = assignmentSubmissions.filter((submission) => submission.submittedAt).length;
-  const assignmentCompletion =
-    accessibleAssignments.length > 0 ? completedAssignmentCount / accessibleAssignments.length : null;
-  const averageScore =
-    scoredAssignments.length > 0
-      ? scoredAssignments.reduce((sum, submission) => sum + ((submission.score ?? 0) / (submission.total ?? 1)), 0) /
-        scoredAssignments.length
-      : null;
-
   const recentProgress = submissions.map((submission) => ({
     id: submission.id,
     problemTitle: submission.problem.title,
@@ -84,12 +61,9 @@ export async function getStudentOverview(userId: string) {
     attemptedProblems: statuses.length,
     solvedProblems: statuses.filter((status) => status.status === "SOLVED").length,
     totalSubmissions: await prisma.submission.count({ where: { userId } }),
-    assignmentCompletion,
-    averageScore,
     questionsNeedingReview: bucket.needsReview,
     answerStats: finalizeBucket(bucket),
     recentProgress,
-    recentAssignmentResults: assignmentSubmissions,
     wrongAnswerTrends: [...trendMap.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-10)

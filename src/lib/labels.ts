@@ -1,8 +1,4 @@
 import type {
-  AssignmentStatus,
-  AssignmentSubmissionStatus,
-  AssignmentType,
-  ClassroomRole,
   ContentStatus,
   ContentPackStatus,
   ContestAttemptStatus,
@@ -10,7 +6,6 @@ import type {
   ContestType,
   ContestVisibility,
   Difficulty,
-  ManualGradeCorrectness,
   ProblemStatus,
   QuestionType,
   Role,
@@ -20,7 +15,6 @@ import type {
 
 export const roleLabels: Record<Role, string> = {
   STUDENT: "Học viên",
-  TEACHER: "Quản trị cũ",
   ADMIN: "Quản trị",
 };
 
@@ -137,41 +131,6 @@ export const contestAttemptStatusLabels: Record<ContestAttemptStatus, string> = 
   NEEDS_REVIEW: "Cần chấm tay",
 };
 
-export const classroomRoleLabels: Record<ClassroomRole, string> = {
-  STUDENT: "Học sinh",
-  ASSISTANT: "Trợ giảng",
-  TEACHER: "Quản trị lớp",
-};
-
-export const assignmentTypeLabels: Record<AssignmentType, string> = {
-  PRACTICE_SET: "Bộ luyện tập",
-  MOCK_TEST: "Đề mock test",
-  HOMEWORK: "Bài về nhà",
-  REVIEW_SET: "Bộ ôn lỗi sai",
-};
-
-export const assignmentStatusLabels: Record<AssignmentStatus, string> = {
-  DRAFT: "Bản nháp",
-  PUBLISHED: "Đã giao",
-  CLOSED: "Đã đóng",
-  ARCHIVED: "Đã lưu trữ",
-};
-
-export const assignmentSubmissionStatusLabels: Record<AssignmentSubmissionStatus, string> = {
-  NOT_STARTED: "Chưa bắt đầu",
-  IN_PROGRESS: "Đang làm",
-  SUBMITTED: "Đã nộp",
-  LATE: "Nộp muộn",
-  NEEDS_REVIEW: "Cần chấm tay",
-};
-
-export const manualGradeCorrectnessLabels: Record<ManualGradeCorrectness, string> = {
-  CORRECT: "Đúng",
-  INCORRECT: "Sai",
-  PARTIAL: "Đúng một phần",
-  NEEDS_REVISION: "Cần sửa lại",
-};
-
 export const submissionStatusLabels: Record<SubmissionStatus, string> = {
   ACCEPTED: "Đã đúng",
   WRONG_ANSWER: "Sai",
@@ -200,5 +159,3 @@ export const skillOrder: SkillType[] = [
 export const difficultyOrder: Difficulty[] = ["B2", "C1", "C2", "CHUYEN", "HSG"];
 
 export const contentStatusOrder: ContentStatus[] = ["DRAFT", "NEEDS_REVIEW", "PUBLISHED", "ARCHIVED"];
-export const assignmentTypeOrder: AssignmentType[] = ["PRACTICE_SET", "MOCK_TEST", "HOMEWORK", "REVIEW_SET"];
-export const assignmentStatusOrder: AssignmentStatus[] = ["DRAFT", "PUBLISHED", "CLOSED", "ARCHIVED"];

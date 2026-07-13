@@ -505,7 +505,7 @@ export async function getLatestDiagnosticAttempt(userId: string, status?: "IN_PR
 }
 
 // A finished attempt = the learner submitted the test. NEEDS_REVIEW counts as
-// finished: the auto-scored result exists, only manual grading is pending.
+// finished: the auto-scored result exists; non-auto-scored content remains pending review.
 const FINISHED_DIAGNOSTIC_STATUSES = ["COMPLETED", "NEEDS_REVIEW"] as const;
 
 export async function getLatestFinishedDiagnosticAttempt(userId: string) {

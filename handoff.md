@@ -7,9 +7,9 @@ Prepare Englishphile for public beta while preserving the current product direct
 - Englishphile is a personalized English practice platform for specialized English exam preparation.
 - Main learner flow: sign up as a learner, take diagnostic, receive Gym recommendations, practice, review analytics, join contests, read Wiki.
 - Main navigation: Trang chu, Gym, Contests, Wiki, Ve Englishphile.
-- There are no public teacher accounts. Public signup must remain learner-only.
+- Supported database roles are `STUDENT` and `ADMIN`. Public signup must remain learner-only.
 - Site owner/admin manages content, imports, QA, contests, Wiki, and publishing.
-- Classroom/assignment features are legacy/hidden and must not become the main user flow.
+- Classroom and assignment application features are decommissioned; retained tables and rows are historical data only.
 - Do not run seed or reset imported/local data unless the user explicitly accepts that reset.
 
 ## Current Progress
@@ -18,10 +18,10 @@ Phase 1-9 are already implemented:
 
 - Local auth with hashed passwords and signed session cookies.
 - Learner-only public signup with username, full name, school, province/city, and confirm password.
-- OWNER_EMAIL/admin-compatible access helpers in `src/lib/auth/session.ts`.
+- Content-admin access accepts stored `ADMIN` or a current database user whose normalized email matches `OWNER_EMAIL`; role and email are reloaded from the database for each authorization decision.
 - Diagnostic system with blueprint, scoring, confidence, skill/topic profiles, and recommendations.
 - Gym hub and subpages for Reading, Writing, Listening, and Use of English.
-- Problem bank, solving UI, submissions, wrong questions, analytics, and manual grading.
+- Problem bank, solving UI, submissions, wrong questions, and learner analytics.
 - Contests mode with public contest list/detail/start/result/leaderboard and admin contest builder.
 - Wiki route, with `/theory` kept as a compatibility redirect.
 - Upload-first JSON/CSV/content-pack import workflow with duplicate detection and content QA.
@@ -98,9 +98,23 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - contests: 0
 - diagnosticAttempts: 1
 
+## Phase 1C-A Role Policy And Classroom Decommissioning
+
+- The user-role model is now `STUDENT` and `ADMIN` only in Prisma.
+- The new, unapplied forward migration downgrades all legacy teacher-role users to `STUDENT`, recreates only the `Role` enum, and preserves all classroom/assignment tables, rows, IDs, and foreign keys.
+- The migration is explicitly transactional. Before applying it, use aggregate-only checks to confirm at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count, and pause role-management writes.
+- `ADMIN` users are global editorial peers. `Contest.createdById`, `ContentPack.importedById`, `ImportBatch.userId`, reviewer IDs, and similar fields are attribution rather than ownership boundaries.
+- `OWNER_EMAIL` grants the same content-admin access as `ADMIN`; it is not a database role or super-admin tier.
+- `/admin/layout.tsx` guards the complete admin page subtree, while every Server Action and Route Handler retains its own guard.
+- Admin APIs return generic JSON 401/403 decisions and do not use redirect-style authorization.
+- Classroom/assignment pages and UI components were removed. Legacy action names and the assignment API are safe not-found tombstones with no Prisma mutation path.
+- `/api/submissions` remains the active independent-practice `SINGLE_PROBLEM` submission path; only `/api/assignments/[id]/submit` is retired. The seed no longer recreates classroom or assignment fixtures.
+- Portable import is operator-level tooling. Explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The selected input-directory argument is now correctly used when resolving the fixed internal import-step filenames; this has pure helper coverage but no end-to-end import run.
+- H-05 and H-06 are only partially remediated: global-peer policy is clarified, but cross-parent ID binding, publish TOCTOU, and bulk transaction work remains Phase 1C-B.
+
 ## What Worked
 
-- Centralizing admin checks with `requireAdmin()` and `isAdminUser()` kept admin page protection consistent.
+- Centralizing content-admin policy and API decisions keeps page, action, and Route Handler semantics consistent.
 - OWNER_EMAIL support is useful for local owner access without exposing admin signup.
 - Keeping public signup learner-only avoided role leakage.
 - No schema changes were needed for Phase 10, so Prisma migration was a clean no-op.
@@ -185,7 +199,7 @@ User accounts must sign up again on production (passwords are not exported). The
    - admin import/upload
    - content QA
    - beta checklist
-9. Keep classroom/assignment routes hidden from primary UX unless the user explicitly asks to revive legacy tools.
+9. Keep classroom/assignment application surfaces decommissioned and preserve their historical database rows.
 10. Continue following `AGENTS.md`, especially:
     - UI text Vietnamese, code/types/database English.
     - No old coding-practice comparison wording.

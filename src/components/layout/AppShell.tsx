@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Role } from "@prisma/client";
 import { Navbar } from "@/components/layout/Navbar";
-import { isAdminUser } from "@/lib/auth/session";
+import { isContentAdminUser } from "@/lib/auth/session";
 
 type AppShellProps = {
   children: ReactNode;
@@ -18,7 +18,7 @@ type AppShellProps = {
 };
 
 export function AppShell({ children, user, showDiagnosticLink = true }: AppShellProps) {
-  const canAdmin = isAdminUser(user);
+  const canAdmin = isContentAdminUser(user);
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar user={user} canAdmin={canAdmin} showDiagnosticLink={showDiagnosticLink} />

@@ -4,6 +4,10 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Role } from "@prisma/client";
+import {
+  isConfiguredOwnerEmail,
+  isContentAdminIdentity,
+} from "@/lib/auth/content-admin-policy";
 import { getAuthSecret } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
 
@@ -21,18 +25,12 @@ function getSecret() {
   return getAuthSecret();
 }
 
-function normalizeEmail(value: string | null | undefined) {
-  return String(value ?? "").trim().toLowerCase();
-}
-
 export function isOwnerEmail(email: string | null | undefined) {
-  const ownerEmail = normalizeEmail(process.env.OWNER_EMAIL);
-  return Boolean(ownerEmail && normalizeEmail(email) === ownerEmail);
+  return isConfiguredOwnerEmail(email, process.env.OWNER_EMAIL);
 }
 
-export function isAdminUser(user: Pick<CurrentUser, "email" | "role"> | null | undefined) {
-  if (!user) return false;
-  return user.role === "ADMIN" || user.role === "TEACHER" || isOwnerEmail(user.email);
+export function isContentAdminUser(user: Pick<CurrentUser, "email" | "role"> | null | undefined) {
+  return isContentAdminIdentity(user, process.env.OWNER_EMAIL);
 }
 
 function base64url(input: string | Buffer) {
@@ -127,20 +125,26 @@ export async function getCurrentUserOrRedirect() {
   return requireUser();
 }
 
-export async function requireAdmin() {
+export async function requireContentAdmin() {
   const user = await requireUser();
 
-  if (!isAdminUser(user)) {
+  if (!isContentAdminUser(user)) {
     redirect("/unauthorized");
   }
 
   return user;
 }
 
+/**
+ * Compatibility name for existing Server Actions. Its policy is content-admin
+ * authorization: stored ADMIN or a current database user matching OWNER_EMAIL.
+ */
+export const requireAdmin = requireContentAdmin;
+
 export async function requireRole(roles: Role[]) {
   const user = await requireUser();
 
-  if (roles.includes(user.role) || (roles.some((role) => role === "ADMIN" || role === "TEACHER") && isAdminUser(user))) {
+  if (roles.includes(user.role) || (roles.includes("ADMIN") && isContentAdminUser(user))) {
     return user;
   }
 

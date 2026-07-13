@@ -12,8 +12,9 @@
  * Safety:
  *   - Skips rows that already exist (idempotent by email, slug, composite key).
  *   - Prompts for confirmation when target URL looks like a hosted service.
- *   - Does NOT overwrite existing users; creates placeholder accounts for imported
- *     users who do not yet exist in the target DB.
+ *   - Existing users keep their password and identity fields; the operator-run
+ *     import synchronizes only their supported role. Missing users are created
+ *     as placeholder accounts.
  *
  * Usage:
  *   # Using env vars (DIRECT_URL or DATABASE_URL)
@@ -49,6 +50,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { createInterface } from "node:readline";
 import { PrismaClient } from "@prisma/client";
+import { resolvePortableImportFile } from "@/lib/import/portable-import-path";
+import { parsePortableUserRole } from "@/lib/import/portable-user-role";
 
 interface ImportOptions {
   inputDir: string;
@@ -86,7 +89,7 @@ function parseArgs(): ImportOptions {
 }
 
 function readJson<T>(dir: string, file: string): T[] {
-  const filePath = path.join(dir, file);
+  const filePath = resolvePortableImportFile(dir, file);
   const raw = fs.readFileSync(filePath, "utf8");
   return JSON.parse(raw) as T[];
 }
@@ -200,14 +203,20 @@ async function main() {
     return val as object;
   }
 
+  let legacyTeacherRolesDowngraded = 0;
+
   async function upsertUser(user: Record<string, unknown>) {
+    const roleResult = parsePortableUserRole(user.role);
+    if (roleResult.legacyTeacherDowngraded) legacyTeacherRolesDowngraded += 1;
+
     const existing = await prisma.user.findUnique({ where: { email: user.email as string } });
     if (existing) {
-      // Update role if needed, preserve existing password.
-      if (existing.role !== (user.role as string)) {
+      // Operator-level import: preserve an explicit supported role while
+      // downgrading legacy TEACHER through parsePortableUserRole().
+      if (existing.role !== roleResult.role) {
         await prisma.user.update({
           where: { email: user.email as string },
-          data: { role: user.role as "STUDENT" | "TEACHER" | "ADMIN" },
+          data: { role: roleResult.role },
         });
       }
       return;
@@ -221,7 +230,7 @@ async function main() {
         username: (user.username as string | null) ?? null,
         displayName: user.displayName as string,
         fullName: (user.fullName as string | null) ?? null,
-        role: user.role as "STUDENT" | "TEACHER" | "ADMIN",
+        role: roleResult.role,
       },
     });
 
@@ -834,7 +843,7 @@ async function main() {
   for (const step of importSteps) {
     let rows: Record<string, unknown>[] = [];
     try {
-      rows = readJson(step.name, step.name);
+      rows = readJson(opts.inputDir, step.name);
     } catch {
       // File not found — skip silently (some exports may not have all tables).
       continue;
@@ -844,7 +853,7 @@ async function main() {
     let imported = 0;
     let skipped = 0;
 
-    for (const row of rows) {
+    for (const [rowIndex, row] of rows.entries()) {
       try {
         await step.fn(row);
         imported++;
@@ -853,9 +862,9 @@ async function main() {
         // Log FK violations as skipped rather than failing the whole import.
         if (err2?.code === "P2003") {
           skipped++;
-          console.warn(`  Skipped row ${(row as { id?: string }).id ?? "(no id)"}: foreign key constraint failed`);
+          console.warn(`  Skipped ${step.name} row ${rowIndex + 1}: foreign key constraint failed`);
         } else {
-          console.error(`  Error on row ${(row as { id?: string }).id ?? "(no id)"}: ${err}`);
+          console.error(`  Error on ${step.name} row ${rowIndex + 1}: import rejected`);
         }
       }
     }
@@ -866,6 +875,9 @@ async function main() {
   await prisma.$disconnect();
 
   console.log("\n=== Import complete ===");
+  if (legacyTeacherRolesDowngraded > 0) {
+    console.warn(`WARNING: ${legacyTeacherRolesDowngraded} legacy role value(s) were downgraded to STUDENT.`);
+  }
   console.log("NOTE: Imported users have empty passwordHash. They must use 'Forgot password' to set a password.");
   console.log("NOTE: Submission, submission-answer, and user-problem-status data was NOT imported (user-specific).");
   console.log("\nNext steps:");
@@ -874,7 +886,7 @@ async function main() {
   console.log("  3. Review published content and run QA.\n");
 }
 
-main().catch((error) => {
-  console.error(error);
+main().catch(() => {
+  console.error("ERROR: Portable import failed.");
   process.exitCode = 1;
 });

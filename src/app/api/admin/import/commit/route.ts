@@ -1,29 +1,21 @@
 import { NextResponse } from "next/server";
 import { importCsvRows } from "@/lib/import/csv-importer";
 import { importJsonPayload } from "@/lib/import/json-importer";
-import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { requireContentAdminApi } from "@/lib/auth/content-admin-api";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 
-async function requireAdminApi() {
-  const user = await getCurrentUser();
-  if (!isAdminUser(user)) {
-    return null;
-  }
-  return user;
-}
-
 export async function POST(request: Request) {
+  const authorization = await requireContentAdminApi();
+  if (!authorization.authorized) return authorization.response;
+
   // Validate request origin (CSRF protection)
   const originCheck = await validateRequestOrigin();
   if (!originCheck.valid) {
     return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
   }
 
-  const user = await requireAdminApi();
-  if (!user) {
-    return NextResponse.json({ error: "Bạn không có quyền import dữ liệu." }, { status: 403 });
-  }
+  const user = authorization.user;
   const limit = await checkConfiguredRateLimit(RATE_LIMITS.IMPORT_COMMIT(user.id));
   if (limit.status !== "allowed") {
     if (limit.status === "infrastructure-error") {

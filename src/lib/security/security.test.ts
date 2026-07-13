@@ -38,7 +38,6 @@ describe("static distributed caller coverage", () => {
     "src/app/api/writing/grade/route.ts",
     "src/app/api/submissions/route.ts",
     "src/app/api/practice/random/route.ts",
-    "src/app/api/assignments/[id]/submit/route.ts",
     "src/app/api/admin/contests-import/parse/route.ts",
     "src/app/api/admin/import/validate/route.ts",
     "src/app/api/admin/import/commit/route.ts",
@@ -238,7 +237,6 @@ describe("static unsafe Route Handler origin coverage", () => {
   const routes = [
     "src/app/api/submissions/route.ts",
     "src/app/api/practice/random/route.ts",
-    "src/app/api/assignments/[id]/submit/route.ts",
     "src/app/api/writing/grade/route.ts",
     "src/app/api/admin/contests-import/parse/route.ts",
     "src/app/api/admin/import/files/commit/route.ts",

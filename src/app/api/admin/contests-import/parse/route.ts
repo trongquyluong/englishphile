@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireContentAdminApi } from "@/lib/auth/content-admin-api";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { parseExcelContest } from "@/lib/import/excel-contest-parser";
 import { hasValidXlsxSignature, MAX_FILE_SIZE_BYTES } from "@/lib/import/resource-limits";
 
 export async function POST(req: NextRequest) {
+  const authorization = await requireContentAdminApi();
+  if (!authorization.authorized) return authorization.response;
+
   // Validate request origin (CSRF protection)
   const originCheck = await validateRequestOrigin();
   if (!originCheck.valid) {
     return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
   }
 
-  // Require admin auth
-  const user = await requireAdmin();
+  const user = authorization.user;
 
   // Rate limit Excel parse: 10 requests per admin per hour (database-backed)
   const limit = await checkConfiguredRateLimit(RATE_LIMITS.EXCEL_PARSE(user.id));

@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { isAdminUser, requireUser } from "@/lib/auth/session";
+import { isContentAdminUser, requireUser } from "@/lib/auth/session";
 import { createContestAttempt, findContestByIdOrSlug, getContestAvailability, submitContestAttempt } from "@/lib/contests";
 import {
   authorizeContestAccess,
@@ -26,7 +26,7 @@ export async function submitAccessCodeAction(formData: FormData) {
   if (!contestId || contestId.length > 128) redirect(genericFailure);
 
   // Admin bypass
-  if (isAdminUser(user)) {
+  if (isContentAdminUser(user)) {
     const contest = await findContestByIdOrSlug(contestId);
     if (!contest) redirect(genericFailure);
     redirect(`/contests/${contest.slug}`);
@@ -80,7 +80,7 @@ export async function startContestAction(formData: FormData) {
       `/contests/${contest.slug}?error=${encodeURIComponent(availability.reason)}`
     );
 
-  const isAdmin = isAdminUser(user);
+  const isAdmin = isContentAdminUser(user);
   const grantId = isAdmin ? null : await getContestAccessGrantIdFromCookie();
   const attemptResult = await createContestAttempt(contest, user.id, {
     grantId,

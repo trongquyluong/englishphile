@@ -1,8 +1,5 @@
-import type { AssignmentStatus, AssignmentSubmissionStatus, AssignmentType, ContentPackStatus, ContentStatus, Difficulty, SkillType } from "@prisma/client";
+import type { ContentPackStatus, ContentStatus, Difficulty, SkillType } from "@prisma/client";
 import {
-  assignmentStatusLabels,
-  assignmentSubmissionStatusLabels,
-  assignmentTypeLabels,
   contentPackStatusLabels,
   contentStatusLabels,
   difficultyLabels,
@@ -106,46 +103,6 @@ export function ContentPackStatusBadge({ status, className }: { status: ContentP
   return (
     <span role="status" className={cn(badgeBase, tone, className)}>
       {contentPackStatusLabels[status]}
-    </span>
-  );
-}
-
-export function AssignmentStatusBadge({ status, className }: { status: AssignmentStatus; className?: string }) {
-  const tone =
-    status === "PUBLISHED"
-      ? "bg-accent-soft text-accent-strong"
-      : status === "CLOSED"
-        ? "bg-warning-soft text-warning"
-        : status === "ARCHIVED"
-          ? "bg-panel-muted text-ink-soft"
-          : "bg-panel-muted text-foreground";
-
-  return (
-    <span role="status" className={cn(badgeBase, tone, className)}>
-      {assignmentStatusLabels[status]}
-    </span>
-  );
-}
-
-export function AssignmentTypeBadge({ type, className }: { type: AssignmentType; className?: string }) {
-  return (
-    <span role="status" className={cn(badgeBase, "bg-panel-muted text-foreground", className)}>
-      {assignmentTypeLabels[type]}
-    </span>
-  );
-}
-
-export function AssignmentSubmissionStatusBadge({ status, className }: { status: AssignmentSubmissionStatus; className?: string }) {
-  const tone =
-    status === "SUBMITTED"
-      ? "bg-accent-soft text-accent-strong"
-      : status === "LATE" || status === "NEEDS_REVIEW"
-        ? "bg-warning-soft text-warning"
-        : "bg-panel-muted text-foreground";
-
-  return (
-    <span role="status" className={cn(badgeBase, tone, className)}>
-      {assignmentSubmissionStatusLabels[status]}
     </span>
   );
 }
