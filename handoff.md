@@ -101,8 +101,8 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 ## Phase 1C-A Role Policy And Classroom Decommissioning
 
 - The user-role model is now `STUDENT` and `ADMIN` only in Prisma.
-- The new, unapplied forward migration downgrades all legacy teacher-role users to `STUDENT`, recreates only the `Role` enum, and preserves all classroom/assignment tables, rows, IDs, and foreign keys.
-- The migration is explicitly transactional. Before applying it, use aggregate-only checks to confirm at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count, and pause role-management writes.
+- The Phase 1C-A forward migration downgrades all legacy teacher-role users to `STUDENT`, recreates only the `Role` enum, and preserves all classroom/assignment tables, rows, IDs, and foreign keys. It is applied in isolated non-production Preview only, remains unapplied in Production, and is immutable because it has now been applied in an environment.
+- The migration is explicitly transactional. Before applying it to Production, use aggregate-only checks to confirm at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count, confirm the downgrade cannot remove the final usable administrator, and pause role-management writes.
 - `ADMIN` users are global editorial peers. `Contest.createdById`, `ContentPack.importedById`, `ImportBatch.userId`, reviewer IDs, and similar fields are attribution rather than ownership boundaries.
 - `OWNER_EMAIL` grants the same content-admin access as `ADMIN`; it is not a database role or super-admin tier.
 - `/admin/layout.tsx` guards the complete admin page subtree, while every Server Action and Route Handler retains its own guard.
@@ -111,6 +111,17 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - `/api/submissions` remains the active independent-practice `SINGLE_PROBLEM` submission path; only `/api/assignments/[id]/submit` is retired. The seed no longer recreates classroom or assignment fixtures.
 - Portable import is operator-level tooling. Explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The selected input-directory argument is now correctly used when resolving the fixed internal import-step filenames; this has pure helper coverage but no end-to-end import run.
 - H-05 and H-06 are only partially remediated: global-peer policy is clarified, but cross-parent ID binding, publish TOCTOU, and bulk transaction work remains Phase 1C-B.
+
+### Phase 1C-A Preview reconciliation (owner-attested 2026-07-14)
+
+- PR #6 remains open and Draft; GitHub/Vercel checks passed, and the Phase 1C-A application was deployed to an isolated Vercel Preview. Production application code and Production data remain unchanged by Phase 1C-A.
+- Preview reports all 16 migrations applied and Prisma schema up to date. `20260713160000_phase1c_a_role_policy` is applied in Preview only and must never be edited; any future SQL correction requires a new additive migration.
+- The Preview role postflight found two `STUDENT` rows, no stored `ADMIN`, and no unexpected role. The configured `OWNER_EMAIL` resolved to a current Preview user, preserving usable content-admin access. No identity or infrastructure value is recorded.
+- Preview health reported database connected; owner sign-out/sign-in and `/admin` access passed; an ordinary student was denied; retired classroom, assignment, teacher, and grading pages returned not found; and retired assignment API GET/POST returned generic 404.
+- Independent single-problem practice submission and persistence passed. Checked Preview logs reported no Prisma enum error, database-authentication error, unexpected 500, or sensitive value.
+- Initial direct HTTP checks were invalid application evidence because Vercel Deployment Protection intercepted them: GET followed Vercel authentication and appeared as 200, while POST was blocked with 401. Authenticated Vercel CLI protection bypass reached the application and produced the expected generic 404 for both methods.
+- During manual Preview setup, a Preview-only non-production database credential was inadvertently exposed in terminal/chat input. The owner treated it as compromised, rotated it, updated Preview `DATABASE_URL` and `DIRECT_URL`, removed the old value from PowerShell history and clipboard, and subsequently validated the rotated configuration through successful Preview health and migration operations. Production variables were unchanged. The incident is operationally remediated.
+- Preview evidence does not prove Production behavior. Production backup/export, aggregate admin-lockout preflight, migration application, immediate application deployment, authorization/retirement/practice smoke checks, and runtime-log inspection remain required.
 
 ## What Worked
 

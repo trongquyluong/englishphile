@@ -1397,13 +1397,13 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 
 The complete Phase 1B implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.
 
-## Phase 1C-A role-policy addendum (2026-07-13)
+## Phase 1C-A role-policy addendum (2026-07-13; Preview reconciled 2026-07-14)
 
 The owner selected the independent-practice/global-editorial policy for Phase 1C-A. The supported database roles are now `STUDENT` and `ADMIN`. Stored `ADMIN` users are global editorial peers for contests, problems, questions, topics, source collections, content packs, imports, Wiki content, and diagnostic eligibility. Creator, importer, and reviewer foreign keys are attribution fields, not per-admin ownership boundaries.
 
 `OWNER_EMAIL` remains a server-configured bootstrap and recovery path. A current database user whose trimmed, case-insensitive email matches the configured value receives the same content-admin authorization as a stored `ADMIN`. It is not a database role or a stronger super-admin tier. Session cookies continue to contain only a user identifier and expiry; `getCurrentUser()` reloads current role and email from the database before authorization.
 
-The new forward migration `20260713160000_phase1c_a_role_policy` is intentionally unapplied in this implementation pass. It updates every legacy teacher-role `User` row to `STUDENT` before recreating the PostgreSQL `Role` enum with only `STUDENT` and `ADMIN`. It drops and restores the `User.role` default, converts only `User.role`, drops no table, uses no `CASCADE`, and does not delete classroom, assignment, grading, membership, submission, or user data.
+The implementation pass created forward migration `20260713160000_phase1c_a_role_policy` without applying it at that time. It updates every legacy teacher-role `User` row to `STUDENT` before recreating the PostgreSQL `Role` enum with only `STUDENT` and `ADMIN`. It drops and restores the `User.role` default, converts only `User.role`, drops no table, uses no `CASCADE`, and does not delete classroom, assignment, grading, membership, submission, or user data. Owner-attested evidence dated 2026-07-14 now records that this migration is applied in isolated non-production Preview only, remains unapplied in Production, and is immutable because it has been applied in an environment.
 
 The migration is enclosed in an explicit PostgreSQL transaction so a failure rolls back the enum rename, type conversion, and default change together. Deployment requires aggregate-only admin-lockout preflight: at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, a recorded legacy-role count, confirmation the downgrade does not remove the last usable administrator, and a pause on role-management writes. The enum conversion takes a short lock on `User`; this has not been measured against Production.
 
@@ -1413,16 +1413,24 @@ The general `POST /api/submissions` endpoint remains active for independent sing
 
 Portable role handling is operator-level rather than an HTTP authorization path. `STUDENT` remains `STUDENT`, explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The importer also now passes the selected input directory to `readJson(directory, filename)` and resolves only its fixed internal step filenames; this path correction has focused pure-helper coverage, not an end-to-end import test.
 
-Current finding disposition after this code-only pass:
+Repository evidence confirms the committed policy, guards, tombstones, migration SQL, and independent-practice path. Separately, owner-attested operational evidence dated 2026-07-14 records Draft PR #6 with passing GitHub/Vercel checks, an isolated Preview deployment, all 16 Preview migrations applied with schema up to date, and a role postflight of two `STUDENT` rows, no stored `ADMIN`, and no unexpected role. The configured owner identity resolved to a current Preview user, so usable content-admin access remained. Production application code and Production data were unchanged by Phase 1C-A.
+
+Owner-attested Preview smoke passed database-connected health, owner sign-out/sign-in and admin access, ordinary-student denial, retired page not-found responses, generic retired assignment API 404 for GET and POST, independent single-problem submission/persistence, and checked runtime logs without reported enum/authentication errors, unexpected 500s, or sensitive values. Initial direct HTTP observations were invalid because Vercel Deployment Protection intercepted them; authenticated Vercel CLI protection bypass produced the actual generic application 404 responses for GET and POST.
+
+During manual Preview setup, a Preview-only non-production database credential was inadvertently exposed in terminal/chat input. The owner treated it as compromised, rotated it, updated the two Preview database variables, removed the old value from PowerShell history and clipboard, and validated the rotated configuration through subsequent successful Preview health and migration operations. Production variables were unchanged. This is a remediated non-production operational incident, not a Production credential incident.
+
+Current finding disposition:
 
 | Finding | Status | Evidence boundary |
 |---|---|---|
-| Teacher-role global-admin overprivilege | Remediated in code; deployment pending | No teacher-role branch remains in content-admin policy; migration downgrades legacy user rows before enum recreation |
-| Missing admin import page guard | Remediated in code; deployment pending | `src/app/admin/layout.tsx` guards the complete admin subtree, including the client import page |
-| Classroom/assignment attack surface | Decommissioned in code; deployment pending | Pages/components removed; action/API tombstones contain no Prisma mutation path |
+| Teacher-role global-admin overprivilege | Remediated in code and verified in isolated Preview; Production deployment pending | No teacher-role branch remains; owner attests Preview downgrade/postflight and retained owner access |
+| Missing admin import page guard | Remediated in code and verified through Preview access boundaries; Production deployment pending | `src/app/admin/layout.tsx` guards the complete subtree; owner admin access and ordinary-student denial passed in Preview |
+| Classroom/assignment attack surface | Decommissioned in code and smoke-tested in Preview; Production deployment pending | Pages/components removed; tombstones contain no Prisma mutation path; tested Preview pages and assignment API returned not found/generic 404 |
 | H-05 contest admin IDOR | Partially remediated / policy clarified | Global ADMIN-to-ADMIN editing is intentional; cross-parent IDs and publish TOCTOU remain for Phase 1C-B |
 | H-06 problem/content admin IDOR | Partially remediated / policy clarified | Global corpus is intentional; cross-parent IDs and bulk/TOCTOU remediation remain for Phase 1C-B |
-| Phase 1C-A PostgreSQL verification | Operational requirement / Test debt | Migration was reviewed statically and was not applied or tested against a database in this pass |
+| Phase 1C-A migration | Applied in isolated Preview; unapplied in Production; immutable | Owner attests all 16 Preview migrations applied and schema up to date; Production remains unchanged |
+| Admin-lockout protection | Passed in Preview; Production preflight required | No stored Preview `ADMIN`; current owner-email match preserved content-admin access |
+| PostgreSQL integration | Test debt | Preview migration execution is operational evidence, not general authorization or concurrency integration testing |
 | H-09, H-10, H-11 | Unresolved | Outside Phase 1C-A |
 | Random-email authentication amplification | Unresolved | Outside Phase 1C-A |
 | Dependency advisories | Unresolved | No automated dependency fix was run |

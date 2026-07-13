@@ -502,14 +502,16 @@ Phase 7.5 clarifies the product model:
 
 - Public users are learners. Signup creates `STUDENT` accounts only and asks for email, username, password, full name, school, and province/city.
 - The site owner/admin manages content, imports, QA, contests, wiki content, and review/publish workflows.
-- The only user roles are `STUDENT` and `ADMIN`; the unapplied Phase 1C-A migration downgrades every legacy teacher-role user to `STUDENT` before removing that enum value.
-- The Phase 1C-A enum migration is explicitly transactional. Before deployment, run aggregate-only checks confirming at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count without identities, and pause role-management writes.
+- The only user roles are `STUDENT` and `ADMIN`; the Phase 1C-A migration downgrades every legacy teacher-role user to `STUDENT` before removing that enum value. Owner-attested evidence dated 2026-07-14 records that it is applied and verified only in isolated non-production Preview, remains unapplied in Production, and is now immutable.
+- The Phase 1C-A enum migration is explicitly transactional. Before Production deployment, run aggregate-only checks confirming at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count without identities, and pause role-management writes. Preview success does not replace this Production gate.
 - Portable import/export is operator-level tooling: `STUDENT` and explicit `ADMIN` are preserved, legacy `TEACHER` is downgraded to `STUDENT`, and unknown roles are rejected. An explicit `ADMIN` bundle value can assign `ADMIN` only when an authorized operator runs the importer. The importer now resolves its fixed internal filenames from the selected input directory.
 - Gym is the primary practice hub. It contains Reading, Writing, Listening, and Use of English.
 - Contests are for past exam practice and occasional timed English contests created by the admin.
 - Wiki replaces Theory as the knowledge area. `/theory` redirects to `/wiki`.
 - Topic tags should be subtle metadata or deliberate filters. Avoid large chip-only sections like “Topic Reading” that make the UI feel generated or noisy.
 - Student-facing pages should prioritize title, skill/mode, difficulty, short description, reason for recommendation, and the next action.
+
+Owner-attested Preview reconciliation dated 2026-07-14 records that Draft PR #6 passed GitHub/Vercel checks and was deployed to an isolated Vercel Preview while Production application code and data remained unchanged. Preview health, owner and learner authorization boundaries, retired-route 404 behavior, and independent-practice persistence passed. Full evidence boundaries and the still-pending Production gate are documented in `docs/SECURITY_PHASE_1C_REPORT.md`.
 
 Contest routes:
 
