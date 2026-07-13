@@ -3,9 +3,30 @@
 **Repository:** Englishphile
 **Branch:** `security-phase-1b-access-csrf-rate-limits`
 **Correction date:** 2026-07-12
+**Operational reconciliation date:** 2026-07-13
+**Review state:** Draft PR #2
 **Scope:** H-01, H-02, H-07, H-08, M-01, M-02, M-03, Writing quota integrity, replay protection, and authentication abuse controls
 
-This report describes the final uncommitted working tree and the later operational migration state. The Phase 1B migration was applied operationally on 2026-07-12 to the configured Neon database, and `npx.cmd prisma migrate status` reported 15 migrations with the database schema up to date. This does not claim application deployment, production smoke verification, production database testing, secret rotation, or scheduler configuration.
+This report describes the Phase 1B implementation represented by Draft PR #2 and reconciles its operational status with owner-confirmed work completed on 2026-07-13. The repository supports the implementation and configuration claims described below. Secret rotation, Vercel environment scopes, Neon project isolation, migration status, runtime logs, and smoke checks are owner-attested dashboard or runtime evidence; this repository reconciliation did not independently query those platforms or access a database.
+
+## Evidence boundary and operational reconciliation
+
+Repository evidence confirms the PostgreSQL datasource, `SESSION_SECRET`-first compatibility behavior, `VERCEL_URL` origin fallback, Phase 1B migration file, security implementation, tests, and the absence of a configured cleanup scheduler in the branch. It does not reveal or verify deployed secret values or provider dashboard state.
+
+Owner-attested evidence dated 2026-07-13 records that:
+
+- production session, Gemini, and Neon role credentials were replaced; `AUTH_SECRET` was removed;
+- the prior authenticated session was invalidated after a credential-rotation redeploy from the current `main` branch, and a new sign-in succeeded;
+- the old Gemini key was revoked after a successful credential-rotation Gemini check against the current production application;
+- the credential-rotation redeploy from `main` completed successfully; `/api/health` returned HTTP 200 with `database=connected`; production sign-in, database reads, and a low-risk database write succeeded; and Vercel runtime logs showed no database authentication or Prisma connection errors;
+- production reported all 15 migrations applied and the schema up to date;
+- the independent `englishphile-nonprod` Neon project contains no production data, reported the same 15-migration chain applied, and reported its schema up to date;
+- Production and Preview use isolated database credentials and different session secrets; Preview has no Gemini production key, no `AUTH_SECRET`, and no `NEXT_PUBLIC_APP_URL`, relying on `VERCEL_URL` for the exact deployment origin;
+- the Preview database branch was created from the empty, migrated non-production database rather than production, the earlier Preview deployment containing production values was deleted, and deployment protection was enabled where available;
+- the active local clone is outside OneDrive, its local environment uses the independent non-production PostgreSQL project, and no production connection string was copied into the local environment; and
+- the isolated Preview has not yet been redeployed or smoke-tested.
+
+No secret value, connection string, password, token, hostname, cookie, deployment ID, or fabricated automated evidence is recorded here.
 
 ## Recovery assessment
 
@@ -14,7 +35,7 @@ This was a continuation of an interrupted correction pass. At recovery time, the
 The interrupted tree already contained substantial implementation work:
 
 - new Prisma models for rate buckets, contest access grants, and Writing reservations;
-- a new additive Phase 1B migration, later applied operationally on 2026-07-12;
+- a new additive Phase 1B migration, now owner-confirmed as applied in production and the independent non-production project;
 - POST-based private-contest access instead of access codes in URLs;
 - request-origin validation on unsafe Route Handlers;
 - conditional contest and diagnostic finalization;
@@ -30,7 +51,7 @@ The final pre-commit verification then confirmed four narrower issues: contest s
 
 | Finding or control | Status | Final assessment |
 |---|---|---|
-| C-00 manual secret rotation | Operational requirement | Release-blocking until the owner confirms rotation; not performed or verified here |
+| C-00 credential rotation | Remediated | Owner-attested production session, Gemini, and database credential rotation plus successful post-rotation checks; not independently dashboard-verified by this repository pass |
 | H-01 private contest brute-force protection | Remediated | Database-backed, atomic fixed-window limiter |
 | H-02 access code in URL | Remediated | POST Server Action plus signed HttpOnly database grant |
 | H-07 unsafe-request origin validation | Remediated | Exact origin or independent same-origin browser signal required |
@@ -49,6 +70,13 @@ The final pre-commit verification then confirmed four narrower issues: contest s
 | H-06 content admin ownership | Unresolved | Outside this correction pass and still open |
 | PostgreSQL concurrency integration | Test debt | No safe isolated PostgreSQL integration run was established |
 | Cleanup scheduling | Operational requirement | Helpers exist; no cron, Vercel Cron, GitHub workflow, or package-script caller exists |
+| Production Phase 1B migration | Applied | Owner-attested 15-migration production status and schema up to date; migration is immutable |
+| Non-production migration chain | Applied | Owner-attested independent project with all 15 migrations and schema up to date |
+| Production/Preview isolation | Configured | Owner-attested isolated database credentials and session secrets; no production Gemini key in Preview |
+| Credential-rotation production redeploy | Passed | Redeployed from current `main`; health, auth, database read/write, and Gemini checks validate rotated credentials against the current production application |
+| Phase 1B application code | Draft PR #2 | Not merged into `main`; no Phase 1B application deployment is claimed |
+| Isolated Preview smoke test | Operational requirement | Preview has not yet been redeployed or smoke-tested |
+| Post-merge Phase 1B production verification | Operational requirement | Pending until Draft PR #2 is merged and deployed |
 
 ## Atomic database rate limiter
 
@@ -248,7 +276,7 @@ No safe isolated `TEST_DATABASE_URL` was established or used. This pass did not 
 
 ## Schema and migration integrity
 
-Only the then-new migration `20260711152247_add_security_rate_limits` was corrected before application. It was applied operationally on 2026-07-12 to the configured Neon database. Previously applied migrations were not changed.
+Only the then-new migration `20260711152247_add_security_rate_limits` was corrected before its first application. Previously applied migrations were not changed.
 
 The schema and migration align on:
 
@@ -263,7 +291,9 @@ The schema and migration align on:
 - cleanup and lookup index names;
 - `Contest.accessCodeUpdatedAt` and its index.
 
-Prisma migrate status reported 15 migrations and the database schema up to date. Application deployment and production smoke verification remain unconfirmed. The applied Phase 1B migration is now immutable: it must not be modified, renamed, regenerated, or squashed, and any future database change requires a new additive migration.
+Owner-attested operational evidence dated 2026-07-13 records 15 migrations and an up-to-date schema in production. The owner also reports that the same 15-migration chain was deployed successfully to the independent, empty `englishphile-nonprod` project and that its schema is up to date. The Phase 1B migration is now immutable: it must not be modified, renamed, regenerated, or squashed, and any future database change requires a new additive migration.
+
+The owner further reports that a credential-rotation redeploy from the current `main` branch passed HTTP 200 health with `database=connected`, new sign-in, database reads, a low-risk database write, and Gemini checks. Draft PR #2 has not been merged into `main`, so these results validate rotated credentials against the current production application; they are not Phase 1B application deployment or post-merge smoke evidence. These are owner-attested deployment/runtime results, not checks performed by this repository-only reconciliation.
 
 ## Unresolved findings
 
@@ -291,23 +321,24 @@ Prisma migrate status reported 15 migrations and the database schema up to date.
 
 | Item | Status | Requirement |
 |---|---|---|
-| C-00 secret rotation | Operational requirement | Release-blocking; owner must rotate database, session, and Gemini secrets and confirm |
-| Applied migration immutability | Operational requirement | Phase 1B was applied operationally on 2026-07-12; preserve it unchanged and use a new additive migration for future database changes |
+| C-00 credential rotation | Remediated | Preserve the owner-attested rotated configuration; do not reintroduce `AUTH_SECRET` or share secrets across environments |
+| Applied migration immutability | Operational requirement | Production and non-production application is owner-confirmed as of 2026-07-13; preserve the migration unchanged and use a new additive migration for future database changes |
+| Phase 1B application code | Draft PR #2 | Not merged or deployed from `main` |
 | Cleanup scheduler | Operational requirement | Implement, configure, and monitor a bounded recurring caller before public exposure; none exists now |
-| Production smoke verification | Operational requirement | Verify auth, access codes, origin rejection, Writing lifecycle, replay, and limiter responses after deployment |
+| Isolated Preview smoke test | Operational requirement | Redeploy the isolated Preview, then verify health, auth, origin handling, database access, and the absence of Gemini grading without a Preview key |
+| Draft PR #2 | Operational requirement | Review and merge only after the isolated Preview smoke test and security review are satisfactory |
+| Post-merge production verification | Operational requirement | Recheck health, auth, protected flows, database access, and relevant security behavior after merge |
 
-## Required production deployment order
+## Remaining operational order
 
-1. Confirm C-00 secret rotation before release.
-2. Back up and export any database containing real or imported data.
-3. Confirm production `DATABASE_URL`, non-pooled `DIRECT_URL`, session secret, owner email, and app URL configuration without logging values.
-4. Confirm the applied Phase 1B migration remains present and unchanged; do not redeploy, modify, rename, regenerate, or squash it.
-5. Deploy the application code.
-6. Before public exposure, implement, configure, and monitor bounded cleanup scheduling and carry a trusted multi-dimensional public-auth limiter into Security Phase 2.
-7. Run production smoke checks as both learner and admin without exposing secrets or other users' data.
-8. Run the concurrency suite only against a dedicated isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
+1. Redeploy the isolated Preview and run its smoke checks; do not claim completion until those checks pass.
+2. Implement, configure, and monitor bounded cleanup scheduling before public exposure.
+3. Keep random-email public-auth bucket amplification and the other unresolved findings in the Phase 2/security backlog.
+4. Review and merge Draft PR #2 after the Preview and code review gates pass.
+5. Run post-merge production verification without exposing secrets or other users' data.
+6. Run the concurrency suite only against a dedicated isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
 
-## Final verification outcomes
+## Pre-reconciliation verification outcomes
 
 | Command | Outcome |
 |---|---|
@@ -325,6 +356,8 @@ Prisma migrate status reported 15 migrations and the database schema up to date.
 
 Required searches were also repeated for limiter read/update patterns, expired reset code, `allowDbFailure`, allow-on-database-error paths, every limiter caller, Writing states and error membership, cleanup predicates, contest code/visibility mutations, grant mutations, copied test logic, replay handlers, scheduler configuration, M-01/M-02/M-03 claims, and incomplete/TODO markers. No production `allowDbFailure`, `in quotaConsumingErrors`, limiter read-then-authorize path, unbounded security caller, or configured scheduler was found.
 
+The operational reconciliation pass reruns the prescribed non-database checks and records its exact results in the owner handoff; it does not rerun `npm audit` or any migration command.
+
 ## npm audit result
 
 Both audit commands reported 4 moderate vulnerabilities:
@@ -334,62 +367,18 @@ Both audit commands reported 4 moderate vulnerabilities:
 
 The proposed automated resolutions require forced breaking dependency changes. No `npm audit fix` command was run. These advisories remain Unresolved.
 
-## Complete uncommitted file inventory
+## Review state
 
-Tracked changes reported by `git status --short`:
-
-- `docs/SECURITY_AUDIT.md`
-- `prisma/schema.prisma`
-- `scripts/db-import-portable.ts`
-- `src/app/admin/contests-builder/actions.ts`
-- `src/app/admin/contests/actions.ts`
-- `src/app/api/admin/contests-import/parse/route.ts`
-- `src/app/api/admin/import/commit/route.ts`
-- `src/app/api/admin/import/files/commit/route.ts`
-- `src/app/api/admin/import/files/validate/route.ts`
-- `src/app/api/admin/import/validate/route.ts`
-- `src/app/api/assignments/[id]/submit/route.ts`
-- `src/app/api/practice/random/route.ts`
-- `src/app/api/submissions/route.ts`
-- `src/app/api/writing/grade/route.ts`
-- `src/app/auth/actions.ts`
-- `src/app/contests/[id]/page.tsx`
-- `src/app/contests/actions.ts`
-- `src/app/diagnostic/actions.ts`
-- `src/lib/auth/password.ts`
-- `src/lib/classroom/permissions.ts`
-- `src/lib/contests.ts`
-- `src/lib/diagnostic.ts`
-- `src/lib/rate-limit.ts` (deleted; unused compatibility Map removed)
-
-Untracked files reported by `git status --short --untracked-files=all`:
-
-- `docs/SECURITY_PHASE_1B_REPORT.md`
-- `prisma/migrations/20260711152247_add_security_rate_limits/migration.sql`
-- `src/lib/security/access-code.ts`
-- `src/lib/security/access-grant-decision.ts`
-- `src/lib/security/access-grant.ts`
-- `src/lib/security/contest-start-decision.ts`
-- `src/lib/security/helpers.test.ts`
-- `src/lib/security/rate-limit-core.ts`
-- `src/lib/security/rate-limit.ts`
-- `src/lib/security/replay-guard.ts`
-- `src/lib/security/request-origin-decision.ts`
-- `src/lib/security/request-origin.ts`
-- `src/lib/security/security.test.ts`
-- `src/lib/security/submission-input.ts`
-- `src/lib/security/writing-quota-core.ts`
-- `src/lib/security/writing-quota.ts`
-
-`git diff --stat` reported 23 tracked files, 995 insertions, and 511 deletions. It excludes every untracked file above, including the production contest-start helper, Writing/limiter implementations, tests, migration, and this report, so it is not the complete change set.
+The implementation is already committed and pushed on `security-phase-1b-access-csrf-rate-limits` at the reconciliation starting commit and is represented by Draft PR #2. This reconciliation leaves only its documentation/template corrections uncommitted for owner review. It does not alter application behavior, Prisma schema, or any migration.
 
 ## Safety confirmation
 
-- No production database was accessed.
-- No migration was deployed.
-- No migrate-dev, reset, db push, seed, backup, export, or import command was run.
-- No secret value was inspected or printed.
+- This reconciliation did not read or print `.env` or any real environment-variable value.
+- This reconciliation did not access a database.
+- This reconciliation did not run a migration command; the owner-attested production and non-production applications predate this pass.
+- No schema or migration file was changed.
+- No secret value, connection string, password, API key, token, hostname, or cookie was inspected or printed.
 - No `npm audit fix` command was run.
 - No existing change was discarded.
 - No commit or push occurred.
-- All changes remain uncommitted for owner review.
+- The reconciliation changes remain uncommitted for owner review.

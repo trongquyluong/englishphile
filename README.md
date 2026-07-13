@@ -27,9 +27,7 @@ Englishphile is operated by a site owner/admin. Public signup creates normal lea
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
-- Prisma ORM
-- Prisma ORM with PostgreSQL (Neon) for production
-- SQLite for local development (deprecated — see below)
+- Prisma ORM with PostgreSQL (Neon or another isolated PostgreSQL service)
 - Local signed-cookie auth scaffold
 - Zod validation for imports
 - Lucide React icons
@@ -39,7 +37,7 @@ Englishphile is operated by a site owner/admin. Public signup creates normal lea
 ```bash
 npm install
 npm run prisma:generate
-npm run prisma:migrate -- --name init
+npm run prisma:deploy
 # Optional only for a fresh demo database. Do not run on populated beta data.
 # npm run prisma:seed
 npm run dev
@@ -52,9 +50,10 @@ Open `http://localhost:3000`.
 Create `.env` from `.env.example`:
 
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL=""
+DIRECT_URL=""
 SESSION_SECRET="replace-with-a-long-random-secret"
-AUTH_SECRET="replace-with-a-long-random-secret"
+AUTH_SECRET=""
 OWNER_EMAIL="owner@example.com"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_CONTACT_EMAIL=""
@@ -67,7 +66,7 @@ Generate a local session secret with:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Never commit `.env`. Production must set `DATABASE_URL`, `SESSION_SECRET` or `AUTH_SECRET`, and `OWNER_EMAIL`.
+Never commit `.env`. Local development must use a separate PostgreSQL database, such as an independent Neon project, and must never use production `DATABASE_URL` or `DIRECT_URL`. Production must configure `DATABASE_URL`, `SESSION_SECRET`, and `OWNER_EMAIL`. `AUTH_SECRET` is retained only as a legacy compatibility fallback when `SESSION_SECRET` is absent; new deployments should leave it empty.
 
 ## Test Accounts And Signup
 
@@ -94,7 +93,6 @@ Existing `ADMIN` accounts and legacy `TEACHER` accounts can still access admin t
 
 ```bash
 npm run prisma:generate
-npm run prisma:migrate -- --name <migration-name>
 npm run lint
 npm run typecheck
 npm run build
@@ -678,7 +676,8 @@ Phase 10 prepares Englishphile for safe public beta deployment and real-user tes
 
 Use `.env.example` as the source of truth:
 
-- `DATABASE_URL` - SQLite locally or deployed database URL in production.
+- `DATABASE_URL` - pooled PostgreSQL runtime connection; use an isolated non-production database locally.
+- `DIRECT_URL` - direct PostgreSQL connection for migration and administrative workflows; never reuse the production value locally.
 - `SESSION_SECRET` - preferred signed-cookie secret.
 - `AUTH_SECRET` - compatibility fallback if `SESSION_SECRET` is not set.
 - `OWNER_EMAIL` - site-owner account email; public signup is still learner-only.
@@ -727,19 +726,25 @@ Exports go under `exports/`. Backups go under `backups/`. Do not commit real use
 
 ### Migration Workflow
 
-Development:
-
-```bash
-npm run prisma:migrate -- --name some_name
-```
-
-Production:
+Apply the repository's existing migration chain to a newly provisioned empty isolated PostgreSQL database:
 
 ```bash
 npm run prisma:deploy
 ```
 
-Do not use `prisma migrate dev` in production. Do not run `npm run prisma:seed` on beta/production data unless you intentionally want a reset.
+Only after intentionally changing `prisma/schema.prisma`, create a new local development migration with a descriptive name:
+
+```bash
+npm run prisma:migrate -- --name <descriptive_name>
+```
+
+Apply reviewed migrations in production with:
+
+```bash
+npm run prisma:deploy
+```
+
+Never use `prisma migrate dev` or `npm run prisma:migrate` against production. Do not run `npm run prisma:seed` on beta/production data unless you intentionally want a reset.
 
 ### Health, Status, And Legal Pages
 
@@ -926,23 +931,24 @@ Trước khi mở cho người dùng thật, kiểm tra:
 - **Vercel Hobby không dùng cho traffic cao** — nâng cấp nếu cần.
 - **Neon Free có giới hạn** — theo dõi storage và compute để tránh bị giới hạn.
 
-### Local dev với SQLite (deprecated)
+### Local dev với PostgreSQL riêng biệt
 
-Prisma schema hiện dùng PostgreSQL provider. Để tiếp tục dev local với SQLite:
+Prisma schema dùng PostgreSQL provider. Local development phải dùng một database PostgreSQL riêng, không chứa dữ liệu production:
 
-1. Đảm bảo đã có PostgreSQL local (ví dụ: PostgreSQL app, Docker).
-2. Hoặc sử dụng một Neon branch/branch database cho local dev:
-   - Tạo branch database trong Neon (Free tier cho phép nhiều branch).
-   - Dùng branch connection string làm `DATABASE_URL` local.
-3. Chạy migration:
+1. Tạo một Neon project độc lập hoặc một PostgreSQL instance cô lập dành cho local development.
+2. Dùng pooled connection cho `DATABASE_URL` và direct connection cho `DIRECT_URL`.
+3. Tuyệt đối không sao chép `DATABASE_URL` hoặc `DIRECT_URL` của production vào `.env` local.
+4. Áp dụng chuỗi migration hiện có lên database local trống và cô lập:
    ```bash
-   npm run prisma:migrate -- --name local_dev_setup
+   npm run prisma:deploy
    ```
+
+Chỉ dùng `npm run prisma:migrate -- --name <descriptive_name>` khi chủ động sửa `prisma/schema.prisma` và cần tạo một migration development mới. Tuyệt đối không dùng migrate-dev đối với production.
 
 ### Database scripts
 
 ```bash
-npm run db:backup              # Backup SQLite (chỉ dùng cho local SQLite)
+npm run db:backup              # Backup helper cho dữ liệu SQLite legacy
 npm run db:export              # Export an toàn (users không có password hash)
 npm run db:export:portable     # Export đầy đủ cho migration Neon
 npm run db:import:portable     # Import vào target database
