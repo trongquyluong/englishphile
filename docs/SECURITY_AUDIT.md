@@ -1342,7 +1342,7 @@ The following historical release-blocking items are shown with their current dis
 | Diagnostic replay protection | Remediated | Conditional transactional winner and advisory start serialization; PostgreSQL integration is Test debt |
 | Authentication missing-user work | Remediated | Production verifier factory and valid fixed dummy-hash runtime tests |
 | Public authentication abuse controls | Partially remediated | Sign-in/sign-up have atomic per-account buckets, but no trusted client/network dimension exists |
-| Random-email auth bucket amplification | Unresolved | Attacker-controlled unique email digests can create unbounded distinct `RateLimitBucket` subjects without scheduled cleanup |
+| Random-email auth bucket amplification | Unresolved | Attacker-controlled unique email digests can outpace bounded daily cleanup; no trusted client/network abuse dimension exists |
 | M-01 write API limiting | Remediated | Submissions, random practice, and assignment submission use database policies |
 | M-02 multi-instance enforcement | Remediated | All current security callers are database-backed; the unused instance-local helper was removed |
 | M-03 compatibility Map growth | Remediated | The unused compatibility Map was removed |
@@ -1352,17 +1352,20 @@ The following historical release-blocking items are shown with their current dis
 | H-10 diagnostic result answer data | Unresolved | Outside Phase 1B |
 | H-11 contest result answer data at rest | Unresolved | Outside Phase 1B |
 | Four moderate dependency advisories | Unresolved | Previously recorded `postcss` and `uuid` dependency-chain advisories remain; breaking dependency upgrades require a separate reviewed pass |
-| Database cleanup scheduling | Operational requirement | Implement and configure a bounded caller before public exposure; no scheduler or caller exists |
+| Cleanup scheduler implementation | Implemented, deployment pending | Repository contains an authenticated bounded route, sequential orchestrator, safe logging, and one daily UTC Vercel Cron entry; no deployed invocation is claimed |
+| `CRON_SECRET` configuration | Operational requirement | Unique Production-only server secret must be configured after merge; at least 16 UTF-8 bytes are enforced, 32 random bytes are preferred, and 512 bytes is the accepted maximum |
+| First authenticated Production invocation | Operational requirement | Must be verified after deployment; no runtime result exists yet |
+| Vercel Cron monitoring | Operational requirement | Owner must monitor failures; Vercel does not automatically retry failed invocations |
 | PostgreSQL concurrency coverage | Test debt | No safe isolated PostgreSQL integration run was established |
 
 ## Security test classification
 
-The final suite contains 133 cases:
+The final suite contains 170 cases:
 
-- 59 production-runtime cases: 42 Phase 1B imported production helpers/factories and 17 existing Phase 1A production-function cases;
-- 74 non-runtime or static cases: 36 explicit Phase 1B structural checks and 38 older Phase 1A source/literal/constant/simulated checks.
+- 88 production-runtime cases: 71 Phase 1B imported production helpers/factories, including 29 cron-authentication, cleanup-orchestration, and route-method cases, and 17 existing Phase 1A production-function cases;
+- 82 non-runtime or static cases: 44 explicit Phase 1B structural checks, including 8 scheduler route/configuration/bound checks, and 38 older Phase 1A source/literal/constant/simulated checks.
 
-Phase 1B runtime coverage includes production access-code comparison, origin decisions, access-grant and locked contest-start decisions, UTC quota keys, submission-input parsing, authentication dummy work, and production limiter/Writing/replay factories with mocked repositories. Mocked concurrency is not PostgreSQL integration testing.
+Phase 1B runtime coverage includes production access-code comparison, origin decisions, access-grant and locked contest-start decisions, UTC quota keys, submission-input parsing, authentication dummy work, cron bearer verification, non-GET production route behavior, and production limiter/Writing/replay/cleanup factories with mocked repositories. Cleanup is mocked only while importing the production route to prove non-GET handlers never invoke it. Mocked orchestration and concurrency are not PostgreSQL integration testing; source/configuration tests are explicitly static.
 
 PostgreSQL verification of the real limiter statement, Writing slot uniqueness and cleanup, advisory locks, conditional replay transitions, and grant/mutation locking remains Test debt. Testing must use an isolated `TEST_DATABASE_URL` and must never fall back to `DATABASE_URL`.
 
@@ -1378,7 +1381,10 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 - **Private-contest Production smoke — Not tested:** no final private-contest Production smoke was reported or is claimed.
 - **Environment isolation — Verified:** the owner-confirmed synthetic Preview write affected only the independent `englishphile-nonprod` `preview` branch, while the production User count remained unchanged. The non-production root branch is named `production`, not `main`.
 - **Isolated Preview smoke — Passed:** owner-attested health, auth, database read/write, safe Gemini absence, runtime-log review, and GitHub PR checks passed on 2026-07-13. Safe Gemini absence is not a Gemini functionality test.
-- **Cleanup scheduler — Operational requirement:** implement, configure, and monitor a bounded cleanup caller before public exposure; none is configured now.
+- **Cleanup scheduler implementation — Implemented, deployment pending:** repository code adds authenticated `GET /api/cron/security-cleanup`, a sequential bounded orchestrator, safe structured logs, and one daily Production `03:17 UTC` Vercel Cron entry. Only authenticated `GET` can invoke cleanup; explicit `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` handlers return non-cacheable HTTP 405 with `Allow: GET` and do not redirect or run cleanup. The exact credential is case-sensitive, accepts 16-512 UTF-8 bytes, and should be generated from at least 32 random bytes.
+- **Cleanup bound — Repository-confirmed:** there are three cleanup components and five bounded modifying phases. Rate-limit and access-grant cleanup can each affect at most 500 rows; Writing reclaim, reconciliation, and archival can each affect at most 500 rows. The maximum affected-row count is therefore 2,500, but that is not the complete database work because every phase also selects or inspects up to 500 candidates.
+- **Cleanup runtime operations — Operational requirement:** configure a unique Production `CRON_SECRET`, deploy, verify the first authenticated Production invocation, and monitor Vercel/dashboard runtime failures before public exposure. Vercel does not automatically retry failures; no active, monitored, or successful scheduler is claimed yet.
+- **Delivery behavior:** missed runs leave work for later reconciliation; duplicate or overlapping runs may add database work but remain data-safe because modifying statements recheck eligibility. No distributed or process-local scheduler lock exists. Bounded daily cleanup can fall behind sustained unique-subject abuse, so random-email authentication amplification remains Unresolved.
 - **Unresolved security work:** random-email authentication bucket amplification remains Phase 2; H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories remain open. PostgreSQL concurrency integration remains Test debt.
 
 The complete final implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.

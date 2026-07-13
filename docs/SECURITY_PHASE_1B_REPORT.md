@@ -5,13 +5,14 @@
 **Correction date:** 2026-07-12
 **Operational reconciliation date:** 2026-07-13
 **Review state:** PR #2 merged into `main` at merge commit `45c551f`; deployed to Production
+**Cleanup scheduler implementation:** Implemented in repository; deployment and runtime verification pending
 **Scope:** H-01, H-02, H-07, H-08, M-01, M-02, M-03, Writing quota integrity, replay protection, and authentication abuse controls
 
 This report describes the Phase 1B implementation merged through PR #2 at merge commit `45c551f` and reconciles its operational status with owner-confirmed work completed on 2026-07-13. The repository supports the implementation and control-flow claims described below. Secret rotation, Vercel environment scopes, Neon project isolation, deployment state, runtime logs, and smoke checks are owner-attested dashboard or runtime evidence; this repository reconciliation did not independently query those platforms or access a database.
 
 ## Evidence boundary and operational reconciliation
 
-Repository evidence confirms the PostgreSQL datasource, `SESSION_SECRET`-first compatibility behavior, `VERCEL_URL` origin fallback, Phase 1B migration file, security implementation, tests, and the absence of a configured cleanup scheduler in the branch. It does not reveal or verify deployed secret values or provider dashboard state.
+Repository evidence confirms the PostgreSQL datasource, `SESSION_SECRET`-first compatibility behavior, `VERCEL_URL` origin fallback, Phase 1B migration file, security implementation, tests, and the bounded cleanup scheduler implementation. It does not reveal or verify deployed secret values, provider dashboard state, deployment of the scheduler, or any successful cron invocation.
 
 Owner-attested evidence dated 2026-07-13 records that:
 
@@ -80,14 +81,14 @@ The final pre-commit verification then confirmed four narrower issues: contest s
 | Diagnostic start/final-submit replay | Remediated | Advisory start serialization and transactional conditional finalization |
 | Authentication missing-user work | Remediated | Fixed, valid dummy scrypt hash verified on missing-user path |
 | Public authentication abuse controls | Partially remediated | Per-account atomic limiting exists, but no trustworthy client/network abuse dimension was established |
-| Random-email auth bucket amplification | Unresolved | Unique attacker-chosen email digests can create distinct database rows indefinitely without scheduled cleanup |
+| Random-email auth bucket amplification | Unresolved | Unique attacker-chosen email digests can outpace the bounded daily cleanup capacity; no trusted client/network abuse dimension exists |
 | M-01 write-route abuse limiting | Remediated | All identified write-heavy learner routes use the database limiter |
 | M-02 distributed enforcement | Remediated | Every current limiter caller is database-backed; the unused process-local helper was removed |
 | M-03 process-local Map growth | Remediated | The unused compatibility Map was removed |
 | H-05 contest admin ownership | Unresolved | Outside this correction pass and still open |
 | H-06 content admin ownership | Unresolved | Outside this correction pass and still open |
 | PostgreSQL concurrency integration | Test debt | No safe isolated PostgreSQL integration run was established |
-| Cleanup scheduling | Operational requirement | Helpers exist; no cron, Vercel Cron, GitHub workflow, or package-script caller exists |
+| Cleanup scheduler implementation | Implemented, deployment pending | Authenticated GET route, sequential orchestrator, explicit failures, safe logs, and one daily Vercel Cron entry exist in the repository; no runtime invocation is claimed |
 | Production Phase 1B migration | Applied | Owner-attested 15-migration production status and schema up to date; migration is immutable |
 | Non-production migration chain | Applied | Owner-attested independent project with all 15 migrations and schema up to date |
 | Production/Preview isolation | Verified | Owner-attested distinct database credentials and session secrets plus a synthetic write confined to the non-production `preview` branch; no production Gemini key in Preview |
@@ -235,18 +236,26 @@ Unsafe Route Handlers call `validateRequestOrigin()` before cookie-authenticated
 
 No wildcard credentialed CORS configuration was found.
 
-## Cleanup race safety
+## Cleanup scheduler and race safety
 
-All cleanup helpers use a batch limit of 500 and reassert eligibility in the modifying statement.
+The repository implements `GET /api/cron/security-cleanup` for one Production Vercel Cron delivery at `03:17 UTC` (`17 3 * * *`). The Node.js, force-dynamic route returns `Cache-Control: no-store` and requires an exact, case-sensitive `Authorization: Bearer <CRON_SECRET>` credential. Configured and presented credentials must each be 16-512 UTF-8 bytes; at least 32 random bytes are preferred. Missing, short, oversized, malformed, or wrong configuration/credentials fail closed with the same generic HTTP 401. Attacker-controlled credential input is rejected before hashing when it exceeds the bound. Accepted-length values are hashed to fixed-length digests before `timingSafeEqual`; values are never trimmed or normalized, and the secret is never accepted from a URL, query string, cookie, or body or logged or returned.
 
-- Rate buckets: the outer delete rechecks `expiresAt < cutoff`, so a renewed bucket cannot be deleted.
-- Access grants: the outer delete rechecks expiry.
-- Writing unstarted rows: only expired `PENDING` rows with `provider_started_at IS NULL` are reclaimed.
-- Writing provider-started rows: only prior-quota-day, expired `PENDING` rows are reconciled to `FAILED`.
-- Writing archival: only prior-day `COMPLETED` or `FAILED` rows older than seven days are deleted.
-- Writing maintenance statements run in one short database transaction.
+The installed Next.js version automatically delegates `HEAD` to `GET` when `HEAD` is absent. The route therefore explicitly handles `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` as non-mutating HTTP 405 responses with `Allow: GET` and `Cache-Control: no-store`. These handlers do not call cleanup or redirect. Only authenticated `GET` can perform cleanup.
 
-Cleanup errors return zero and never authorize a protected request. No scheduler is configured, so invoking cleanup remains an Operational requirement. Without scheduling, distinct public account identifiers can accumulate database rate-bucket rows even though authorization remains fail-closed.
+Exact maximum affected rows per authenticated invocation:
+
+- Rate buckets: one delete operation selecting at most 500 rows.
+- Contest access grants: one delete operation selecting at most 500 rows.
+- Writing reservations: three distinct operations, each selecting at most 500 rows—up to 500 unstarted rows reclaimed, 500 provider-started rows reconciled to `FAILED`, and 500 completed/failed rows archived. These three statements run in one short Writing-only transaction.
+- Maximum affected rows across the invocation: 2,500, not 500 total. This is not the complete quantity of database work: there are three cleanup components and five bounded modifying phases, and each phase also selects or inspects up to 500 candidate rows before the eligibility-rechecked modification.
+
+Every modifying statement reasserts its eligibility predicate. A renewed rate bucket cannot be deleted; access grants must still be expired; unstarted Writing reservations must still be expired `PENDING` rows without provider start; provider-started reconciliation must still be prior-day, expired, and `PENDING`; archival must still be prior-day, terminal, and older than retention. Duplicate or overlapping invocations may repeat selection/database work, but the rechecked predicates prevent stale-row eligibility bypass and data corruption. No distributed lock or process-local lock is implemented.
+
+The orchestrator invokes rate-limit, access-grant, and Writing cleanup sequentially once each. If one component fails, the remaining independent components still run; the aggregate result is failure, the authenticated route returns generic HTTP 500, and no component failure can be mistaken for a successful zero-row cleanup. There are no retries or transaction spanning all components.
+
+Structured server logs contain only the event name, success flag, aggregate component counts, safe failed-component names, total affected count, and duration. They exclude credentials, request headers, database details, row identifiers, account identifiers, contest/grant data, subjects, and raw errors. Vercel does not automatically retry failed cron invocations, so dashboard/runtime-log monitoring and verification of the first authenticated Production invocation remain owner operational requirements.
+
+Missed delivery leaves eligible rows for a later reconciliation; duplicate/overlapping delivery is data-safe but may add database work. The once-daily Hobby-compatible schedule has bounded capacity, so sustained unique-subject abuse can create a backlog faster than cleanup removes it. Random-email authentication bucket amplification remains Unresolved.
 
 ## Replay protection
 
@@ -282,16 +291,16 @@ This is constant-work password verification, not a claim that the entire authent
 
 ## Test classification
 
-The suite contains 133 cases:
+The suite contains 170 cases:
 
-- 59 production-runtime cases:
-  - 42 Phase 1B cases importing production comparison, origin, grant, locked contest-start, submission-input, password, limiter, Writing, and replay helpers/factories;
+- 88 production-runtime cases:
+  - 71 Phase 1B cases importing production comparison, origin, grant, locked contest-start, submission-input, password, limiter, Writing, replay, cron-authentication, cleanup-orchestration helpers/factories, and the production cron route for non-GET method behavior;
   - 17 existing Phase 1A cases executing production DTO, signature, and parser helpers.
-- 74 non-runtime or static cases:
-  - 36 explicitly static Phase 1B structural checks;
+- 82 non-runtime or static cases:
+  - 44 explicitly static Phase 1B structural checks, including route, cron configuration, environment-template, and database-bound preservation checks;
   - 38 older Phase 1A source, literal, constant-restatement, or simulated checks.
 
-The mocked limiter, Writing, and replay concurrency cases are runtime unit tests of production factories. They are not PostgreSQL integration tests and are not described as such.
+The mocked limiter, Writing, replay, and cleanup-orchestration cases are runtime unit tests of production factories. Six runtime method cases import the production cron route with its cleanup dependency mocked and prove that `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` do not invoke cleanup. None of these mocked cases are PostgreSQL integration or concurrency tests. Static source/configuration cases remain explicitly labeled static.
 
 No safe isolated `TEST_DATABASE_URL` was established or used. This pass did not fall back to `DATABASE_URL`. PostgreSQL tests for the real upsert, slot uniqueness, advisory locks, conditional updates, grant locking, and cleanup races remain Test debt.
 
@@ -345,18 +354,26 @@ Before PR #2 merged, the owner reported that a credential-rotation redeploy from
 | C-00 credential rotation | Remediated | Preserve the owner-attested rotated configuration; do not reintroduce `AUTH_SECRET` or share secrets across environments |
 | Phase 1B migration | Applied and immutable | Production and non-production application is owner-confirmed as of 2026-07-13; preserve the migration unchanged and use a new additive migration for future database changes |
 | Phase 1B application deployment | Deployed | PR #2 merged at `45c551f` and the merge commit was deployed to Production |
-| Cleanup scheduler | Operational requirement | Implement, configure, and monitor a bounded recurring caller before public exposure; none exists now |
+| Cleanup scheduler implementation | Implemented, deployment pending | Route, orchestrator, safe failure policy, and daily UTC `vercel.json` schedule exist; no deployed invocation is claimed |
+| `CRON_SECRET` configuration | Operational requirement | Configure a unique Production-only server secret after merge without logging it; 16-512 UTF-8 bytes are accepted and at least 32 random bytes are preferred |
+| First authenticated Production invocation | Operational requirement | Confirm the deployed cron receives HTTP 200; no runtime invocation has been performed in this pass |
+| Vercel Cron monitoring | Operational requirement | Monitor dashboard/runtime failures; Vercel does not automatically retry failed invocations |
 | Isolated Preview smoke | Passed | Owner-attested 2026-07-13; Gemini absence passed safely and was not a functionality test |
 | Post-merge Production verification | Passed | Health and tested authenticated Writing/Gemini path passed after canonical-origin correction |
 | Private-contest Production smoke | Not tested | No final Production private-contest check was reported |
 
 ## Remaining operational order
 
-1. Implement, configure, and monitor bounded cleanup scheduling before public exposure.
-2. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
-3. Run real PostgreSQL concurrency tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
+1. Review, merge, and deploy the cleanup scheduler implementation.
+2. Configure a unique Production `CRON_SECRET` generated from at least 32 random bytes; the route enforces 16-512 UTF-8 bytes. Do not share it with Preview/local testing or log its value.
+3. Confirm Vercel recognizes the single daily Production schedule and verify the first authenticated Production invocation without exposing response credentials or database details.
+4. Monitor Vercel Cron and runtime logs; failed invocations are not automatically retried.
+5. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
+6. Run real PostgreSQL concurrency tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
 
-## Pre-reconciliation verification outcomes
+## Historical pre-scheduler verification outcomes
+
+The following outcomes describe the earlier post-merge documentation pass before the cleanup scheduler implementation began; they are retained as dated history rather than current scheduler verification.
 
 | Command | Outcome |
 |---|---|
@@ -372,7 +389,7 @@ Before PR #2 merged, the owner reported that a credential-rotation redeploy from
 | `git diff --stat` | Exit 0; tracked changes only |
 | `git status --short` | Exit 0; all work remains uncommitted |
 
-Required searches were also repeated for limiter read/update patterns, expired reset code, `allowDbFailure`, allow-on-database-error paths, every limiter caller, Writing states and error membership, cleanup predicates, contest code/visibility mutations, grant mutations, copied test logic, replay handlers, scheduler configuration, M-01/M-02/M-03 claims, and incomplete/TODO markers. No production `allowDbFailure`, `in quotaConsumingErrors`, limiter read-then-authorize path, unbounded security caller, or configured scheduler was found.
+In that earlier pass, required searches were repeated for limiter read/update patterns, expired reset code, `allowDbFailure`, allow-on-database-error paths, every limiter caller, Writing states and error membership, cleanup predicates, contest code/visibility mutations, grant mutations, copied test logic, replay handlers, scheduler configuration, M-01/M-02/M-03 claims, and incomplete/TODO markers. At that time, no production `allowDbFailure`, `in quotaConsumingErrors`, limiter read-then-authorize path, unbounded security caller, or configured scheduler was found; the current implementation status is documented above.
 
 The operational reconciliation pass reruns the prescribed non-database checks and records its exact results in the owner handoff; it does not rerun `npm audit` or any migration command.
 
@@ -387,7 +404,7 @@ The proposed automated resolutions require forced breaking dependency changes. N
 
 ## Review state
 
-PR #2 is merged into `main` at merge commit `45c551f`, and the owner attests that commit was deployed to Production. This post-merge documentation pass leaves only its two security-document corrections uncommitted for owner review. It does not alter application behavior, Prisma schema, or any migration.
+PR #2 is merged into `main` at merge commit `45c551f`, and the owner attests that commit was deployed to Production. The later post-merge documentation correction was merged through PR #3 at commit `14b785c`. The current cleanup scheduler implementation remains uncommitted for owner review and does not alter the Prisma schema or any migration.
 
 ## Safety confirmation
 

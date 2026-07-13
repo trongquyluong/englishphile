@@ -9,6 +9,7 @@ import {
   type WritingReservationResult,
   type WritingSlotStore,
 } from "@/lib/security/writing-quota-core";
+import type { CleanupOperationResult } from "@/lib/security/cleanup-core";
 
 export type { WritingReservationResult as ReservationResult } from "@/lib/security/writing-quota-core";
 
@@ -188,21 +189,21 @@ const WRITING_QUOTA_CLEANUP_BATCH = 500;
 const WRITING_ARCHIVE_DAYS = 7;
 
 /**
- * Bounded maintenance helper. No scheduler is configured in this repository.
+ * Bounded maintenance operation for the external scheduler.
  *
  * - Only expired PENDING rows with provider_started_at IS NULL are reclaimed.
  * - Provider-started PENDING rows from an earlier quota day become FAILED.
  * - COMPLETED/FAILED rows are archived only after the quota day and retention
  *   window have both passed.
  */
-export async function cleanupWritingReservations(): Promise<number> {
+export async function cleanupWritingReservations(): Promise<CleanupOperationResult> {
   const now = new Date();
   const quotaKey = getUtcQuotaKey(now);
   const archiveCutoff = new Date(now);
   archiveCutoff.setUTCDate(archiveCutoff.getUTCDate() - WRITING_ARCHIVE_DAYS);
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    const affected = await prisma.$transaction(async (tx) => {
       const reclaimed = await tx.$executeRaw`
       DELETE FROM "WritingQuotaReservation"
       WHERE "id" IN (
@@ -259,11 +260,8 @@ export async function cleanupWritingReservations(): Promise<number> {
 
       return Number(reclaimed) + Number(reconciled) + Number(archived);
     });
-  } catch (error) {
-    console.error(
-      "[writing-quota] Cleanup infrastructure error:",
-      error instanceof Error ? error.name : "unknown",
-    );
-    return 0;
+    return { status: "success", affected };
+  } catch {
+    return { status: "infrastructure-error" };
   }
 }
