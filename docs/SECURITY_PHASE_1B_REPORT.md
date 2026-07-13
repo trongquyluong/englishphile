@@ -21,12 +21,22 @@ Owner-attested evidence dated 2026-07-13 records that:
 - the credential-rotation redeploy from `main` completed successfully; `/api/health` returned HTTP 200 with `database=connected`; production sign-in, database reads, and a low-risk database write succeeded; and Vercel runtime logs showed no database authentication or Prisma connection errors;
 - production reported all 15 migrations applied and the schema up to date;
 - the independent `englishphile-nonprod` Neon project contains no production data, reported the same 15-migration chain applied, and reported its schema up to date;
-- Production and Preview use isolated database credentials and different session secrets; Preview has no Gemini production key, no `AUTH_SECRET`, and no `NEXT_PUBLIC_APP_URL`, relying on `VERCEL_URL` for the exact deployment origin;
-- the Preview database branch was created from the empty, migrated non-production database rather than production, the earlier Preview deployment containing production values was deleted, and deployment protection was enabled where available;
+- Production and Preview use distinct `DATABASE_URL`, `DIRECT_URL`, and `SESSION_SECRET` values; Preview has no Gemini production key, no `AUTH_SECRET`, and no `NEXT_PUBLIC_APP_URL`, relying on `VERCEL_URL` for the exact deployment origin;
+- the independent `englishphile-nonprod` project has a root branch named `production` and an isolated child branch named `preview`; Preview database connections target that non-production `preview` branch, not the Production Neon project;
+- a synthetic Preview signup increased the User count only on the non-production `preview` branch while the production User count remained unchanged, verifying database isolation without copying production data;
+- the earlier Preview deployment containing production values was deleted, Preview Deployment Protection is active, and the ignored `GEMINI_MODE` typo was removed;
+- the isolated Preview redeploy passed health, signup/write, sign-out/sign-in, authenticated database-backed read, safe Gemini-unavailable behavior, and runtime-log review; GitHub PR checks also passed;
+- Production variables were restored, and a subsequent credential-rotation Production redeploy from `main` passed health and sign-in checks;
 - the active local clone is outside OneDrive, its local environment uses the independent non-production PostgreSQL project, and no production connection string was copied into the local environment; and
-- the isolated Preview has not yet been redeployed or smoke-tested.
+- Draft PR #2 remains unmerged, so post-merge Phase 1B Production verification is still pending.
 
 No secret value, connection string, password, token, hostname, cookie, deployment ID, or fabricated automated evidence is recorded here.
+
+### Isolated Preview smoke evidence
+
+Owner-attested browser, SQL-count, dashboard, runtime-log, and CLI results dated 2026-07-13 classify the isolated Preview smoke as **Passed**. `/api/health` reported the application healthy and database connected; signup and its database write succeeded; sign-out and sign-in succeeded; and an authenticated database-backed read succeeded. Gemini was unavailable safely because Preview intentionally has no `GEMINI_API_KEY`; this validates safe absence, not Gemini functionality. No database authentication error, Prisma connection error, or unexpected HTTP 500 was found in the newest tested Preview deployment logs.
+
+The repository-only reconciliation did not access provider dashboards, inspect environment values, execute SQL, or connect to a database.
 
 ## Recovery assessment
 
@@ -72,10 +82,12 @@ The final pre-commit verification then confirmed four narrower issues: contest s
 | Cleanup scheduling | Operational requirement | Helpers exist; no cron, Vercel Cron, GitHub workflow, or package-script caller exists |
 | Production Phase 1B migration | Applied | Owner-attested 15-migration production status and schema up to date; migration is immutable |
 | Non-production migration chain | Applied | Owner-attested independent project with all 15 migrations and schema up to date |
-| Production/Preview isolation | Configured | Owner-attested isolated database credentials and session secrets; no production Gemini key in Preview |
+| Production/Preview isolation | Verified | Owner-attested distinct database credentials and session secrets plus a synthetic write confined to the non-production `preview` branch; no production Gemini key in Preview |
 | Credential-rotation production redeploy | Passed | Redeployed from current `main`; health, auth, database read/write, and Gemini checks validate rotated credentials against the current production application |
 | Phase 1B application code | Draft PR #2 | Not merged into `main`; no Phase 1B application deployment is claimed |
-| Isolated Preview smoke test | Operational requirement | Preview has not yet been redeployed or smoke-tested |
+| Preview database isolation | Verified | Owner-attested synthetic write changed only the non-production `preview` branch User count; production remained unchanged |
+| Isolated Preview smoke | Passed | Owner-attested 2026-07-13 health, auth, read/write, safe Gemini absence, and runtime-log checks |
+| GitHub PR checks | Passed | Owner-attested checks for Draft PR #2 passed |
 | Post-merge Phase 1B production verification | Operational requirement | Pending until Draft PR #2 is merged and deployed |
 
 ## Atomic database rate limiter
@@ -305,7 +317,7 @@ The owner further reports that a credential-rotation redeploy from the current `
 | H-10 diagnostic answer data in result payload | Unresolved | Not changed by this pass |
 | H-11 unencrypted contest result answer data | Unresolved | Not changed by this pass |
 | Random-email authentication bucket amplification | Unresolved | Per-email limiting does not bound the number of attacker-selected subjects |
-| Moderate dependency advisories | Unresolved | Automated fixes propose breaking dependency changes |
+| Four moderate dependency advisories | Unresolved | Automated fixes propose breaking dependency changes |
 
 ## Test debt
 
@@ -325,18 +337,19 @@ The owner further reports that a credential-rotation redeploy from the current `
 | Applied migration immutability | Operational requirement | Production and non-production application is owner-confirmed as of 2026-07-13; preserve the migration unchanged and use a new additive migration for future database changes |
 | Phase 1B application code | Draft PR #2 | Not merged or deployed from `main` |
 | Cleanup scheduler | Operational requirement | Implement, configure, and monitor a bounded recurring caller before public exposure; none exists now |
-| Isolated Preview smoke test | Operational requirement | Redeploy the isolated Preview, then verify health, auth, origin handling, database access, and the absence of Gemini grading without a Preview key |
-| Draft PR #2 | Operational requirement | Review and merge only after the isolated Preview smoke test and security review are satisfactory |
+| Isolated Preview smoke | Passed | Owner-attested 2026-07-13; Gemini absence passed safely and was not a functionality test |
+| Draft PR #2 | Operational requirement | Complete final documentation and security review, then mark ready only after checks pass |
 | Post-merge production verification | Operational requirement | Recheck health, auth, protected flows, database access, and relevant security behavior after merge |
 
 ## Remaining operational order
 
-1. Redeploy the isolated Preview and run its smoke checks; do not claim completion until those checks pass.
-2. Implement, configure, and monitor bounded cleanup scheduling before public exposure.
-3. Keep random-email public-auth bucket amplification and the other unresolved findings in the Phase 2/security backlog.
-4. Review and merge Draft PR #2 after the Preview and code review gates pass.
-5. Run post-merge production verification without exposing secrets or other users' data.
-6. Run the concurrency suite only against a dedicated isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
+1. Complete final review of Draft PR #2.
+2. Mark the PR ready only after documentation review and checks pass.
+3. Merge PR #2 through the reviewed GitHub workflow.
+4. Verify the post-merge Production deployment and security flows without exposing secrets or other users' data.
+5. Implement, configure, and monitor bounded cleanup scheduling before public exposure.
+6. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
+7. Run real PostgreSQL concurrency tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
 
 ## Pre-reconciliation verification outcomes
 
