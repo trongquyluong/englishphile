@@ -8,6 +8,7 @@ import {
   type RateLimitPolicy,
   type RateLimitResult,
 } from "@/lib/security/rate-limit-core";
+import type { CleanupOperationResult } from "@/lib/security/cleanup-core";
 
 export type { RateLimitPolicy, RateLimitResult } from "@/lib/security/rate-limit-core";
 
@@ -162,9 +163,9 @@ export const RATE_LIMITS = {
 const RATE_LIMIT_CLEANUP_BATCH = 500;
 
 /**
- * Bounded cleanup helper. No scheduler is configured in this repository.
+ * Bounded cleanup operation for the external scheduler.
  */
-export async function cleanupExpiredRateLimits(): Promise<number> {
+export async function cleanupExpiredRateLimits(): Promise<CleanupOperationResult> {
   const cutoff = new Date();
 
   try {
@@ -179,12 +180,8 @@ export async function cleanupExpiredRateLimits(): Promise<number> {
       )
       AND "expiresAt" < ${cutoff}
     `;
-    return Number(deleted);
-  } catch (error) {
-    console.error(
-      "[rate-limit] Cleanup infrastructure error:",
-      error instanceof Error ? error.name : "unknown",
-    );
-    return 0;
+    return { status: "success", affected: Number(deleted) };
+  } catch {
+    return { status: "infrastructure-error" };
   }
 }

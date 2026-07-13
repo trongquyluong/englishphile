@@ -7,6 +7,7 @@ import { getAuthSecret } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessCode } from "@/lib/security/access-code";
 import { evaluateAccessGrant } from "@/lib/security/access-grant-decision";
+import type { CleanupOperationResult } from "@/lib/security/cleanup-core";
 
 export { constantTimeEquals, verifyAccessCode } from "@/lib/security/access-code";
 
@@ -157,8 +158,8 @@ export async function revokeUserContestAccessGrant(
 
 const ACCESS_GRANT_CLEANUP_BATCH = 500;
 
-/** Bounded cleanup helper. No scheduler is configured in this repository. */
-export async function cleanupExpiredAccessGrants(): Promise<number> {
+/** Bounded cleanup operation for the external scheduler. */
+export async function cleanupExpiredAccessGrants(): Promise<CleanupOperationResult> {
   const cutoff = new Date();
 
   try {
@@ -173,12 +174,8 @@ export async function cleanupExpiredAccessGrants(): Promise<number> {
       )
       AND "expiresAt" < ${cutoff}
     `;
-    return Number(deleted);
-  } catch (error) {
-    console.error(
-      "[access-grant] Cleanup infrastructure error:",
-      error instanceof Error ? error.name : "unknown",
-    );
-    return 0;
+    return { status: "success", affected: Number(deleted) };
+  } catch {
+    return { status: "infrastructure-error" };
   }
 }
