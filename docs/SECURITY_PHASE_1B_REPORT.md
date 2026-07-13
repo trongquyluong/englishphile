@@ -4,15 +4,16 @@
 **Branch:** `security-phase-1b-access-csrf-rate-limits`
 **Correction date:** 2026-07-12
 **Operational reconciliation date:** 2026-07-13
-**Review state:** PR #2 merged into `main` at merge commit `45c551f`; deployed to Production
-**Cleanup scheduler implementation:** Implemented in repository; deployment and runtime verification pending
+**Cleanup Production verification date:** 2026-07-13 and 2026-07-14 owner-attested evidence
+**Review state:** PR #4 merged into `main` at merge commit `e5c6f38`; owner attests that commit is deployed to Production
+**Cleanup scheduler implementation:** Deployed; initial manual and scheduled Production verification passed
 **Scope:** H-01, H-02, H-07, H-08, M-01, M-02, M-03, Writing quota integrity, replay protection, and authentication abuse controls
 
-This report describes the Phase 1B implementation merged through PR #2 at merge commit `45c551f` and reconciles its operational status with owner-confirmed work completed on 2026-07-13. The repository supports the implementation and control-flow claims described below. Secret rotation, Vercel environment scopes, Neon project isolation, deployment state, runtime logs, and smoke checks are owner-attested dashboard or runtime evidence; this repository reconciliation did not independently query those platforms or access a database.
+This report describes the Phase 1B implementation merged through PR #2 at merge commit `45c551f` and reconciles its operational status with owner-confirmed work dated 2026-07-13 and 2026-07-14, including the cleanup scheduler merged through PR #4. The repository supports the implementation and control-flow claims described below. Secret rotation, Vercel environment scopes, Neon project isolation, deployment state, runtime logs, and smoke checks are owner-attested dashboard or runtime evidence; this repository reconciliation did not independently query those platforms or access a database.
 
 ## Evidence boundary and operational reconciliation
 
-Repository evidence confirms the PostgreSQL datasource, `SESSION_SECRET`-first compatibility behavior, `VERCEL_URL` origin fallback, Phase 1B migration file, security implementation, tests, and the bounded cleanup scheduler implementation. It does not reveal or verify deployed secret values, provider dashboard state, deployment of the scheduler, or any successful cron invocation.
+Repository evidence confirms the PostgreSQL datasource, `SESSION_SECRET`-first compatibility behavior, `VERCEL_URL` origin fallback, Phase 1B migration file, security implementation, tests, bounded cleanup scheduler control flow, and the single daily `vercel.json` cron entry. It does not reveal or verify deployed secret values, Production environment scope, provider dashboard state, deployment state, HTTP results, cleanup counts, or runtime logs.
 
 Owner-attested evidence dated 2026-07-13 records that:
 
@@ -32,6 +33,18 @@ Owner-attested evidence dated 2026-07-13 records that:
 - PR #2 was merged into `main` at `45c551f`, and that merge commit was deployed to Vercel Production.
 
 No secret value, connection string, password, token, hostname, cookie, deployment ID, or fabricated automated evidence is recorded here.
+
+### Cleanup scheduler Production verification
+
+Owner-attested deployment, dashboard, HTTP, and runtime-log evidence dated 2026-07-13 and 2026-07-14 records that PR #4 merged into `main` at `e5c6f38`, that merge commit was deployed to Vercel Production, and the server-only `CRON_SECRET` is configured for Production only. Vercel Cron Jobs showed one enabled Production job at `/api/cron/security-cleanup` with schedule `17 3 * * *` (daily at 03:17 UTC, subject to the Vercel Hobby flexible execution window).
+
+The same owner-attested evidence records HTTP 200 health with the database connected; generic HTTP 401 plus `Cache-Control: no-store` for an unauthenticated `GET`; and HTTP 405 with `Allow: GET` plus `Cache-Control: no-store` for both `HEAD` and `POST`. No cleanup execution was observed for the tested `HEAD` or `POST` requests.
+
+One authenticated manual Production `GET` returned HTTP 200 with `Cache-Control: no-store` and the safe aggregate result `rateLimits=3`, `accessGrants=0`, `writingReservations=0`, `totalAffected=3`, and `durationMs=3015`. Runtime logs for that invocation contained no Prisma/database error or sensitive information.
+
+The first reported automatic scheduled invocation was present, returned HTTP 200, emitted a successful cleanup event, and reported `totalAffected=3`. The owner did not provide its component breakdown, so none is inferred. The checked scheduled invocation had zero reported runtime errors and no sensitive data in its reviewed logs.
+
+These results classify the authentication/method Production smoke, first authenticated cleanup invocation, first automatic scheduled invocation, and initial scheduler monitoring verification as **Passed**. They do not prove permanent delivery or comprehensive monitoring. Ongoing dashboard/runtime-log monitoring remains an Operational requirement. These operational results are owner-attested; this documentation pass did not access Vercel, invoke the endpoint, inspect environment values, or connect to a database.
 
 ### Isolated Preview smoke evidence
 
@@ -88,7 +101,15 @@ The final pre-commit verification then confirmed four narrower issues: contest s
 | H-05 contest admin ownership | Unresolved | Outside this correction pass and still open |
 | H-06 content admin ownership | Unresolved | Outside this correction pass and still open |
 | PostgreSQL concurrency integration | Test debt | No safe isolated PostgreSQL integration run was established |
-| Cleanup scheduler implementation | Implemented, deployment pending | Authenticated GET route, sequential orchestrator, explicit failures, safe logs, and one daily Vercel Cron entry exist in the repository; no runtime invocation is claimed |
+| Cleanup scheduler implementation | Deployed | PR #4 merged at `e5c6f38`; repository evidence confirms the bounded route/orchestrator and owner attests that the merge commit is deployed to Production |
+| Vercel Cron registration | Configured and enabled | Owner-attested one enabled Production job at `/api/cron/security-cleanup`, daily at `17 3 * * *` with the Hobby flexible execution window |
+| `CRON_SECRET` configuration | Configured, Production-only | Owner-attested server-only Production scope; no value was inspected or recorded |
+| Authentication/method Production smoke | Passed | Owner-attested unauthenticated `GET` 401, `HEAD`/`POST` 405 with no cleanup observed, and no-store response headers |
+| First authenticated Production cleanup | Passed | Owner-attested HTTP 200 manual run with safe aggregate counts and clean checked runtime logs |
+| First automatic scheduled invocation | Passed | Owner-attested HTTP 200 successful event with `totalAffected=3`; component breakdown was not provided |
+| Initial scheduler monitoring verification | Passed | Owner-attested zero checked runtime errors and no sensitive information in reviewed logs |
+| Ongoing scheduler monitoring | Operational requirement | One successful scheduled run does not prove permanent delivery or comprehensive monitoring |
+| Bounded cleanup before public exposure | Satisfied | Deployed authenticated scheduler and first manual/scheduled verification satisfy the bounded-caller operational gate; backlog risk remains |
 | Production Phase 1B migration | Applied | Owner-attested 15-migration production status and schema up to date; migration is immutable |
 | Non-production migration chain | Applied | Owner-attested independent project with all 15 migrations and schema up to date |
 | Production/Preview isolation | Verified | Owner-attested distinct database credentials and session secrets plus a synthetic write confined to the non-production `preview` branch; no production Gemini key in Preview |
@@ -253,7 +274,7 @@ Every modifying statement reasserts its eligibility predicate. A renewed rate bu
 
 The orchestrator invokes rate-limit, access-grant, and Writing cleanup sequentially once each. If one component fails, the remaining independent components still run; the aggregate result is failure, the authenticated route returns generic HTTP 500, and no component failure can be mistaken for a successful zero-row cleanup. There are no retries or transaction spanning all components.
 
-Structured server logs contain only the event name, success flag, aggregate component counts, safe failed-component names, total affected count, and duration. They exclude credentials, request headers, database details, row identifiers, account identifiers, contest/grant data, subjects, and raw errors. Vercel does not automatically retry failed cron invocations, so dashboard/runtime-log monitoring and verification of the first authenticated Production invocation remain owner operational requirements.
+Structured server logs contain only the event name, success flag, aggregate component counts, safe failed-component names, total affected count, and duration. They exclude credentials, request headers, database details, row identifiers, account identifiers, contest/grant data, subjects, and raw errors. The owner-attested first manual and scheduled Production invocations and initial log review passed. Vercel does not automatically retry failed cron invocations, so ongoing dashboard/runtime-log monitoring remains an owner Operational requirement.
 
 Missed delivery leaves eligible rows for a later reconciliation; duplicate/overlapping delivery is data-safe but may add database work. The once-daily Hobby-compatible schedule has bounded capacity, so sustained unique-subject abuse can create a backlog faster than cleanup removes it. Random-email authentication bucket amplification remains Unresolved.
 
@@ -354,22 +375,25 @@ Before PR #2 merged, the owner reported that a credential-rotation redeploy from
 | C-00 credential rotation | Remediated | Preserve the owner-attested rotated configuration; do not reintroduce `AUTH_SECRET` or share secrets across environments |
 | Phase 1B migration | Applied and immutable | Production and non-production application is owner-confirmed as of 2026-07-13; preserve the migration unchanged and use a new additive migration for future database changes |
 | Phase 1B application deployment | Deployed | PR #2 merged at `45c551f` and the merge commit was deployed to Production |
-| Cleanup scheduler implementation | Implemented, deployment pending | Route, orchestrator, safe failure policy, and daily UTC `vercel.json` schedule exist; no deployed invocation is claimed |
-| `CRON_SECRET` configuration | Operational requirement | Configure a unique Production-only server secret after merge without logging it; 16-512 UTF-8 bytes are accepted and at least 32 random bytes are preferred |
-| First authenticated Production invocation | Operational requirement | Confirm the deployed cron receives HTTP 200; no runtime invocation has been performed in this pass |
-| Vercel Cron monitoring | Operational requirement | Monitor dashboard/runtime failures; Vercel does not automatically retry failed invocations |
+| Cleanup scheduler implementation | Deployed | PR #4 merged at `e5c6f38`; owner attests that the merge commit is deployed to Production |
+| Vercel Cron registration | Configured and enabled | Owner-attested single Production job at `/api/cron/security-cleanup`, daily at 03:17 UTC with Hobby flexible execution timing |
+| `CRON_SECRET` configuration | Configured, Production-only | Owner-attested server-only scope; no value was inspected or recorded |
+| Authentication/method Production smoke | Passed | Owner-attested health, unauthenticated `GET`, `HEAD`, `POST`, and authenticated `GET` results matched the repository contract |
+| First authenticated Production invocation | Passed | Owner-attested HTTP 200, no-store response, safe aggregate result, and clean checked runtime logs |
+| First automatic scheduled invocation | Passed | Owner-attested HTTP 200 successful cleanup event with `totalAffected=3`; no component breakdown is claimed |
+| Initial scheduler monitoring verification | Passed | Checked manual/scheduled runtime logs had zero reported errors and no sensitive information |
+| Ongoing scheduler monitoring | Operational requirement | Continue monitoring dashboard/runtime failures; Vercel does not automatically retry failed invocations, and one successful run does not prove permanent delivery |
+| Bounded cleanup before public exposure | Satisfied | Deployed bounded scheduler and first verified invocations satisfy this operational gate; sustained-abuse backlog risk remains unresolved |
 | Isolated Preview smoke | Passed | Owner-attested 2026-07-13; Gemini absence passed safely and was not a functionality test |
 | Post-merge Production verification | Passed | Health and tested authenticated Writing/Gemini path passed after canonical-origin correction |
 | Private-contest Production smoke | Not tested | No final Production private-contest check was reported |
 
 ## Remaining operational order
 
-1. Review, merge, and deploy the cleanup scheduler implementation.
-2. Configure a unique Production `CRON_SECRET` generated from at least 32 random bytes; the route enforces 16-512 UTF-8 bytes. Do not share it with Preview/local testing or log its value.
-3. Confirm Vercel recognizes the single daily Production schedule and verify the first authenticated Production invocation without exposing response credentials or database details.
-4. Monitor Vercel Cron and runtime logs; failed invocations are not automatically retried.
-5. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
-6. Run real PostgreSQL concurrency tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
+1. Continue monitoring Vercel Cron and runtime logs; failed invocations are not automatically retried, and one successful scheduled run is not comprehensive monitoring evidence.
+2. Watch bounded cleanup counts and backlog behavior under sustained unique-subject abuse without treating cleanup as remediation of random-email amplification.
+3. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
+4. Run real PostgreSQL concurrency and cleanup-race tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
 
 ## Historical pre-scheduler verification outcomes
 
@@ -404,7 +428,7 @@ The proposed automated resolutions require forced breaking dependency changes. N
 
 ## Review state
 
-PR #2 is merged into `main` at merge commit `45c551f`, and the owner attests that commit was deployed to Production. The later post-merge documentation correction was merged through PR #3 at commit `14b785c`. The current cleanup scheduler implementation remains uncommitted for owner review and does not alter the Prisma schema or any migration.
+PR #2 is merged into `main` at merge commit `45c551f`, and the post-merge documentation correction was merged through PR #3 at `14b785c`. PR #4 merged the cleanup scheduler into `main` at `e5c6f38`; the owner attests that this commit is deployed to Production and has passed the initial manual and scheduled verification documented above. Only this Production-verification documentation reconciliation remains uncommitted for owner review; it does not alter application behavior, configuration, Prisma schema, or any migration.
 
 ## Safety confirmation
 

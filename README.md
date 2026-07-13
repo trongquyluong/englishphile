@@ -877,7 +877,9 @@ Chỉ `GET` đã xác thực mới chạy cleanup. `HEAD`, `POST`, `PUT`, `PATCH
 
 Các thành phần chạy tuần tự; một thành phần lỗi không ngăn các thành phần độc lập còn lại chạy, nhưng toàn bộ request trả `500` và không báo thành công. Delivery có thể bị lỡ, trùng hoặc chồng lấp; các predicate được kiểm tra lại trong câu lệnh sửa dữ liệu nên việc chạy trùng/chồng có thể tạo thêm database work nhưng không bỏ qua điều kiện eligibility. Không có distributed lock.
 
-Vercel không tự động retry cron thất bại. Sau khi merge/deploy, owner phải cấu hình `CRON_SECRET` riêng cho Production, xác nhận lần gọi Production được xác thực đầu tiên, và theo dõi runtime logs/Vercel dashboard. Daily cleanup có bounded capacity nên backlog vẫn có thể tăng khi abuse tạo nhiều subject mới; cron không khắc phục hoàn toàn random-email authentication bucket amplification.
+Theo bằng chứng vận hành do owner xác nhận ngày 2026-07-13 và 2026-07-14, PR #4 đã được merge và deploy lên Production, `CRON_SECRET` đã được cấu hình server-side chỉ cho Production, Cron Job đang enabled, lần gọi thủ công đã xác thực và lần chạy tự động đầu tiên đều trả `200`, và bước kiểm tra log ban đầu đã pass. Đây không phải bằng chứng rằng delivery sẽ luôn thành công hoặc monitoring đã toàn diện.
+
+Vercel không tự động retry cron thất bại, vì vậy owner vẫn phải theo dõi runtime logs/Vercel dashboard liên tục. Daily cleanup có bounded capacity nên backlog vẫn có thể tăng khi abuse tạo nhiều subject mới; cron không khắc phục random-email authentication bucket amplification.
 
 #### 4. Chạy migration trên Neon
 
