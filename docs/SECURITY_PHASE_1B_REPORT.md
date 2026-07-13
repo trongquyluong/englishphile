@@ -4,10 +4,10 @@
 **Branch:** `security-phase-1b-access-csrf-rate-limits`
 **Correction date:** 2026-07-12
 **Operational reconciliation date:** 2026-07-13
-**Review state:** Draft PR #2
+**Review state:** PR #2 merged into `main` at merge commit `45c551f`; deployed to Production
 **Scope:** H-01, H-02, H-07, H-08, M-01, M-02, M-03, Writing quota integrity, replay protection, and authentication abuse controls
 
-This report describes the Phase 1B implementation represented by Draft PR #2 and reconciles its operational status with owner-confirmed work completed on 2026-07-13. The repository supports the implementation and configuration claims described below. Secret rotation, Vercel environment scopes, Neon project isolation, migration status, runtime logs, and smoke checks are owner-attested dashboard or runtime evidence; this repository reconciliation did not independently query those platforms or access a database.
+This report describes the Phase 1B implementation merged through PR #2 at merge commit `45c551f` and reconciles its operational status with owner-confirmed work completed on 2026-07-13. The repository supports the implementation and control-flow claims described below. Secret rotation, Vercel environment scopes, Neon project isolation, deployment state, runtime logs, and smoke checks are owner-attested dashboard or runtime evidence; this repository reconciliation did not independently query those platforms or access a database.
 
 ## Evidence boundary and operational reconciliation
 
@@ -16,9 +16,9 @@ Repository evidence confirms the PostgreSQL datasource, `SESSION_SECRET`-first c
 Owner-attested evidence dated 2026-07-13 records that:
 
 - production session, Gemini, and Neon role credentials were replaced; `AUTH_SECRET` was removed;
-- the prior authenticated session was invalidated after a credential-rotation redeploy from the current `main` branch, and a new sign-in succeeded;
+- the prior authenticated session was invalidated after a credential-rotation redeploy from the then-current pre-merge `main` branch, and a new sign-in succeeded;
 - the old Gemini key was revoked after a successful credential-rotation Gemini check against the current production application;
-- the credential-rotation redeploy from `main` completed successfully; `/api/health` returned HTTP 200 with `database=connected`; production sign-in, database reads, and a low-risk database write succeeded; and Vercel runtime logs showed no database authentication or Prisma connection errors;
+- the credential-rotation redeploy from the pre-merge `main` branch completed successfully; `/api/health` returned HTTP 200 with `database=connected`; production sign-in, database reads, and a low-risk database write succeeded; and Vercel runtime logs showed no database authentication or Prisma connection errors;
 - production reported all 15 migrations applied and the schema up to date;
 - the independent `englishphile-nonprod` Neon project contains no production data, reported the same 15-migration chain applied, and reported its schema up to date;
 - Production and Preview use distinct `DATABASE_URL`, `DIRECT_URL`, and `SESSION_SECRET` values; Preview has no Gemini production key, no `AUTH_SECRET`, and no `NEXT_PUBLIC_APP_URL`, relying on `VERCEL_URL` for the exact deployment origin;
@@ -28,7 +28,7 @@ Owner-attested evidence dated 2026-07-13 records that:
 - the isolated Preview redeploy passed health, signup/write, sign-out/sign-in, authenticated database-backed read, safe Gemini-unavailable behavior, and runtime-log review; GitHub PR checks also passed;
 - Production variables were restored, and a subsequent credential-rotation Production redeploy from `main` passed health and sign-in checks;
 - the active local clone is outside OneDrive, its local environment uses the independent non-production PostgreSQL project, and no production connection string was copied into the local environment; and
-- Draft PR #2 remains unmerged, so post-merge Phase 1B Production verification is still pending.
+- PR #2 was merged into `main` at `45c551f`, and that merge commit was deployed to Vercel Production.
 
 No secret value, connection string, password, token, hostname, cookie, deployment ID, or fabricated automated evidence is recorded here.
 
@@ -37,6 +37,14 @@ No secret value, connection string, password, token, hostname, cookie, deploymen
 Owner-attested browser, SQL-count, dashboard, runtime-log, and CLI results dated 2026-07-13 classify the isolated Preview smoke as **Passed**. `/api/health` reported the application healthy and database connected; signup and its database write succeeded; sign-out and sign-in succeeded; and an authenticated database-backed read succeeded. Gemini was unavailable safely because Preview intentionally has no `GEMINI_API_KEY`; this validates safe absence, not Gemini functionality. No database authentication error, Prisma connection error, or unexpected HTTP 500 was found in the newest tested Preview deployment logs.
 
 The repository-only reconciliation did not access provider dashboards, inspect environment values, execute SQL, or connect to a database.
+
+### Post-merge Production verification
+
+Owner-attested deployment, browser, health, and runtime-log evidence dated 2026-07-13 records that merge commit `45c551f` was deployed to Production and `/api/health` returned HTTP 200 with the database connected. An initial authenticated Writing request was rejected by exact-origin validation because the deployed `NEXT_PUBLIC_APP_URL` did not match the canonical Production origin. This was an operational configuration mismatch, not a successful hostile-origin security test. The canonical Production origin configuration was corrected, remained Production-only, and Production was redeployed. A subsequent authenticated Writing submission succeeded and returned grading results.
+
+Repository evidence in `src/app/api/writing/grade/route.ts` confirms that origin validation runs before authentication-dependent user/global rate limiting, quota reservation, `providerStartedAt` persistence, and Gemini execution. The rejected request therefore exited before limiter, quota, or provider execution and did not consume a Writing quota slot. The same route returns a successful Writing result only after authentication succeeds, both database limiters allow, a quota reservation is acquired, `providerStartedAt` is persisted, Gemini succeeds, and `WritingSubmission` plus the `COMPLETED` reservation transition are persisted atomically.
+
+Owner-attested post-merge runtime-log review found no Prisma initialization, database authentication, database connection, limiter/quota infrastructure-error, unexpected persistence, or HTTP 500 issue for the checked Production deployment. This verification covers Production health and the tested authenticated Writing/Gemini path. No private-contest Production smoke was reported or is claimed.
 
 ## Recovery assessment
 
@@ -83,12 +91,13 @@ The final pre-commit verification then confirmed four narrower issues: contest s
 | Production Phase 1B migration | Applied | Owner-attested 15-migration production status and schema up to date; migration is immutable |
 | Non-production migration chain | Applied | Owner-attested independent project with all 15 migrations and schema up to date |
 | Production/Preview isolation | Verified | Owner-attested distinct database credentials and session secrets plus a synthetic write confined to the non-production `preview` branch; no production Gemini key in Preview |
-| Credential-rotation production redeploy | Passed | Redeployed from current `main`; health, auth, database read/write, and Gemini checks validate rotated credentials against the current production application |
-| Phase 1B application code | Draft PR #2 | Not merged into `main`; no Phase 1B application deployment is claimed |
+| Credential-rotation production redeploy | Passed | Redeployed from the then-current pre-merge `main`; health, auth, database read/write, and Gemini checks validated rotated credentials before PR #2 merged |
+| Phase 1B application deployment | Deployed | PR #2 merged into `main` at `45c551f`; owner attests that merge commit was deployed to Production |
 | Preview database isolation | Verified | Owner-attested synthetic write changed only the non-production `preview` branch User count; production remained unchanged |
 | Isolated Preview smoke | Passed | Owner-attested 2026-07-13 health, auth, read/write, safe Gemini absence, and runtime-log checks |
-| GitHub PR checks | Passed | Owner-attested checks for Draft PR #2 passed |
-| Post-merge Phase 1B production verification | Operational requirement | Pending until Draft PR #2 is merged and deployed |
+| PR #2 | Merged | Owner-attested PR state is `MERGED` |
+| Post-merge Phase 1B Production verification | Passed | Owner-attested health and authenticated Writing/Gemini path after canonical-origin correction; repository evidence confirms the success-path ordering |
+| Private-contest Production smoke | Not tested | No final Production private-contest smoke was reported; none is claimed |
 
 ## Atomic database rate limiter
 
@@ -305,7 +314,7 @@ The schema and migration align on:
 
 Owner-attested operational evidence dated 2026-07-13 records 15 migrations and an up-to-date schema in production. The owner also reports that the same 15-migration chain was deployed successfully to the independent, empty `englishphile-nonprod` project and that its schema is up to date. The Phase 1B migration is now immutable: it must not be modified, renamed, regenerated, or squashed, and any future database change requires a new additive migration.
 
-The owner further reports that a credential-rotation redeploy from the current `main` branch passed HTTP 200 health with `database=connected`, new sign-in, database reads, a low-risk database write, and Gemini checks. Draft PR #2 has not been merged into `main`, so these results validate rotated credentials against the current production application; they are not Phase 1B application deployment or post-merge smoke evidence. These are owner-attested deployment/runtime results, not checks performed by this repository-only reconciliation.
+Before PR #2 merged, the owner reported that a credential-rotation redeploy from the then-current `main` branch passed HTTP 200 health with `database=connected`, new sign-in, database reads, a low-risk database write, and Gemini checks. After PR #2 merged at `45c551f`, the owner separately confirmed deployment of that merge commit and passed post-merge health plus the authenticated Writing/Gemini path after correcting the canonical-origin configuration. These are owner-attested deployment/runtime results, not checks performed by this repository-only reconciliation.
 
 ## Unresolved findings
 
@@ -334,22 +343,18 @@ The owner further reports that a credential-rotation redeploy from the current `
 | Item | Status | Requirement |
 |---|---|---|
 | C-00 credential rotation | Remediated | Preserve the owner-attested rotated configuration; do not reintroduce `AUTH_SECRET` or share secrets across environments |
-| Applied migration immutability | Operational requirement | Production and non-production application is owner-confirmed as of 2026-07-13; preserve the migration unchanged and use a new additive migration for future database changes |
-| Phase 1B application code | Draft PR #2 | Not merged or deployed from `main` |
+| Phase 1B migration | Applied and immutable | Production and non-production application is owner-confirmed as of 2026-07-13; preserve the migration unchanged and use a new additive migration for future database changes |
+| Phase 1B application deployment | Deployed | PR #2 merged at `45c551f` and the merge commit was deployed to Production |
 | Cleanup scheduler | Operational requirement | Implement, configure, and monitor a bounded recurring caller before public exposure; none exists now |
 | Isolated Preview smoke | Passed | Owner-attested 2026-07-13; Gemini absence passed safely and was not a functionality test |
-| Draft PR #2 | Operational requirement | Complete final documentation and security review, then mark ready only after checks pass |
-| Post-merge production verification | Operational requirement | Recheck health, auth, protected flows, database access, and relevant security behavior after merge |
+| Post-merge Production verification | Passed | Health and tested authenticated Writing/Gemini path passed after canonical-origin correction |
+| Private-contest Production smoke | Not tested | No final Production private-contest check was reported |
 
 ## Remaining operational order
 
-1. Complete final review of Draft PR #2.
-2. Mark the PR ready only after documentation review and checks pass.
-3. Merge PR #2 through the reviewed GitHub workflow.
-4. Verify the post-merge Production deployment and security flows without exposing secrets or other users' data.
-5. Implement, configure, and monitor bounded cleanup scheduling before public exposure.
-6. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
-7. Run real PostgreSQL concurrency tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
+1. Implement, configure, and monitor bounded cleanup scheduling before public exposure.
+2. Carry random-email authentication bucket amplification and the other unresolved findings into their documented future security phases.
+3. Run real PostgreSQL concurrency tests only against an isolated `TEST_DATABASE_URL`, never by falling back to `DATABASE_URL`.
 
 ## Pre-reconciliation verification outcomes
 
@@ -382,7 +387,7 @@ The proposed automated resolutions require forced breaking dependency changes. N
 
 ## Review state
 
-The implementation is already committed and pushed on `security-phase-1b-access-csrf-rate-limits` at the reconciliation starting commit and is represented by Draft PR #2. This reconciliation leaves only its documentation/template corrections uncommitted for owner review. It does not alter application behavior, Prisma schema, or any migration.
+PR #2 is merged into `main` at merge commit `45c551f`, and the owner attests that commit was deployed to Production. This post-merge documentation pass leaves only its two security-document corrections uncommitted for owner review. It does not alter application behavior, Prisma schema, or any migration.
 
 ## Safety confirmation
 

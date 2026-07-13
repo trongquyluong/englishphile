@@ -1328,12 +1328,13 @@ The following historical release-blocking items are shown with their current dis
 | C-00 credential rotation | Remediated | Owner-attested dashboard/runtime evidence dated 2026-07-13; no secret values inspected and no provider dashboard independently queried by this repository pass |
 | Production migration chain | Applied | Owner attests 15 migrations and schema up to date in production; the Phase 1B migration is immutable |
 | Non-production migration chain | Applied | Owner attests all 15 migrations and schema up to date in the independent `englishphile-nonprod` project with no production data |
-| Credential-rotation production redeploy | Passed | Owner attests a redeploy from current `main` plus health, new sign-in, database read/write, Gemini checks, and clean database-auth/Prisma runtime logs |
-| Phase 1B application code | Draft PR #2 | Not merged into `main`; no Phase 1B application deployment is claimed |
-| Post-merge Phase 1B production verification | Operational requirement | Pending until Draft PR #2 is merged and deployed |
+| Credential-rotation production redeploy | Passed | Owner attests a redeploy from the then-current pre-merge `main` plus health, new sign-in, database read/write, Gemini checks, and clean database-auth/Prisma runtime logs |
+| Phase 1B application deployment | Deployed | PR #2 merged into `main` at `45c551f`; owner attests that merge commit was deployed to Production |
+| Post-merge Phase 1B Production verification | Passed | Owner-attested HTTP 200 health with database connected and successful authenticated Writing/Gemini completion after canonical-origin correction |
+| Private-contest Production smoke | Not tested | No final Production private-contest smoke was reported; none is claimed |
 | Production/Preview isolation | Verified | Owner attests distinct database credentials and session secrets; a synthetic write changed only the `englishphile-nonprod` `preview` branch User count while production remained unchanged |
 | Isolated Preview smoke | Passed | Owner-attested 2026-07-13 health, signup/write, sign-out/sign-in, authenticated read, safe Gemini absence, and newest-deployment runtime-log checks |
-| GitHub PR checks | Passed | Owner-attested checks for Draft PR #2 passed |
+| PR #2 | Merged | Owner-attested PR state is `MERGED` |
 | Local development isolation | Configured | Owner attests the active clone is outside OneDrive and local development uses independent non-production PostgreSQL credentials |
 | Writing five-slot UTC quota | Remediated | Production factory runtime tests plus static lifecycle wiring; PostgreSQL integration is Test debt |
 | Locked contest start availability | Remediated | Current status/time/content/private grant are revalidated under the Contest lock before resume or create |
@@ -1369,12 +1370,15 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 
 - **C-00 — Remediated:** credential rotation and post-rotation production checks are owner-confirmed. This is no longer a release blocker.
 - **Phase 1B migration — Applied:** the owner reports 15 migrations and an up-to-date production schema. The independent non-production project reports the same migration chain and an up-to-date schema. The migration is immutable; any future database change requires a new additive migration.
-- **Credential-rotation production redeploy — Passed:** the current `main` production application passed health, new sign-in, database read/write, Gemini, and relevant runtime-log checks after credential rotation.
-- **Phase 1B application code — Draft PR #2:** it has not been merged into `main`; post-merge Phase 1B Production verification remains pending.
+- **Credential-rotation production redeploy — Passed:** the then-current pre-merge `main` production application passed health, new sign-in, database read/write, Gemini, and relevant runtime-log checks after credential rotation.
+- **Phase 1B application deployment — Deployed:** PR #2 merged into `main` at `45c551f`, and the owner attests that the merge commit was deployed to Production.
+- **Post-merge Production verification — Passed for health and the tested Writing path:** health returned HTTP 200 with database connected. An initial Writing request was rejected because deployed canonical-origin configuration did not match Production; after correcting the Production-only configuration and redeploying, authenticated Writing/Gemini completion succeeded. This was an operational configuration mismatch, not a hostile-origin security test.
+- **Writing control-flow evidence — Repository-confirmed:** exact-origin validation precedes database limiters, quota reservation, provider-start persistence, and Gemini, so the rejected request did not consume a quota slot. A success response follows authentication, both limiters, reservation, persisted provider start, Gemini success, and persisted submission plus `COMPLETED` reservation state.
+- **Runtime-log review — Passed for checked classes:** the owner found no Prisma initialization, database authentication, database connection, infrastructure-error, unexpected persistence, or HTTP 500 issue in the post-merge Production logs.
+- **Private-contest Production smoke — Not tested:** no final private-contest Production smoke was reported or is claimed.
 - **Environment isolation — Verified:** the owner-confirmed synthetic Preview write affected only the independent `englishphile-nonprod` `preview` branch, while the production User count remained unchanged. The non-production root branch is named `production`, not `main`.
 - **Isolated Preview smoke — Passed:** owner-attested health, auth, database read/write, safe Gemini absence, runtime-log review, and GitHub PR checks passed on 2026-07-13. Safe Gemini absence is not a Gemini functionality test.
 - **Cleanup scheduler — Operational requirement:** implement, configure, and monitor a bounded cleanup caller before public exposure; none is configured now.
-- **Draft PR #2 — Review required:** complete final documentation and security review, mark ready after checks pass, merge through the reviewed GitHub workflow, and perform post-merge Production verification.
 - **Unresolved security work:** random-email authentication bucket amplification remains Phase 2; H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories remain open. PostgreSQL concurrency integration remains Test debt.
 
 The complete final implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.
