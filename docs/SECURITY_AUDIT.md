@@ -881,7 +881,7 @@ In Vercel serverless deployments, each cold start creates a new Node.js instance
 
 #### M-03: In-Memory Rate Limiter — Memory Leak Under Sustained Traffic
 
-**Current status (2026-07-12):** Remediated — the unused compatibility Map has been removed. Database `RateLimitBucket` cleanup scheduling remains a separate Operational requirement.
+**Historical status (2026-07-12):** Remediated — the unused compatibility Map had been removed, while database `RateLimitBucket` cleanup scheduling remained a separate Operational requirement at that time. The current status matrix records the later scheduler deployment and Production verification.
 
 **Severity:** Medium
 **CWE:** CWE-400: Resource Exhaustion
@@ -1323,6 +1323,8 @@ The following historical release-blocking items are shown with their current dis
 
 ## Current Phase 1B status matrix
 
+For the cleanup scheduler, repository evidence is limited to the route, authentication/orchestration control flow, safe response/logging structure, bounds, and `vercel.json` schedule. PR/deployment state, Production-only environment scope, Vercel dashboard registration, HTTP outcomes, cleanup counts, and runtime-log review below are owner-attested operational evidence dated 2026-07-13 and 2026-07-14. This documentation reconciliation did not query Vercel, inspect environment values, invoke the endpoint, or access a database.
+
 | Control | Status | Evidence boundary |
 |---|---|---|
 | C-00 credential rotation | Remediated | Owner-attested dashboard/runtime evidence dated 2026-07-13; no secret values inspected and no provider dashboard independently queried by this repository pass |
@@ -1352,10 +1354,15 @@ The following historical release-blocking items are shown with their current dis
 | H-10 diagnostic result answer data | Unresolved | Outside Phase 1B |
 | H-11 contest result answer data at rest | Unresolved | Outside Phase 1B |
 | Four moderate dependency advisories | Unresolved | Previously recorded `postcss` and `uuid` dependency-chain advisories remain; breaking dependency upgrades require a separate reviewed pass |
-| Cleanup scheduler implementation | Implemented, deployment pending | Repository contains an authenticated bounded route, sequential orchestrator, safe logging, and one daily UTC Vercel Cron entry; no deployed invocation is claimed |
-| `CRON_SECRET` configuration | Operational requirement | Unique Production-only server secret must be configured after merge; at least 16 UTF-8 bytes are enforced, 32 random bytes are preferred, and 512 bytes is the accepted maximum |
-| First authenticated Production invocation | Operational requirement | Must be verified after deployment; no runtime result exists yet |
-| Vercel Cron monitoring | Operational requirement | Owner must monitor failures; Vercel does not automatically retry failed invocations |
+| Cleanup scheduler implementation | Deployed | PR #4 merged at `e5c6f38`; repository confirms the bounded implementation and owner attests that the merge commit is deployed to Production |
+| Vercel Cron registration | Configured and enabled | Owner attests one enabled Production job at `/api/cron/security-cleanup`, scheduled daily at `17 3 * * *` with the Hobby flexible execution window |
+| `CRON_SECRET` configuration | Configured, Production-only | Owner-attested server-only Production scope; no value was inspected or recorded |
+| Authentication/method Production smoke | Passed | Owner-attested unauthenticated `GET` 401, `HEAD`/`POST` 405 with no cleanup observed, no-store headers, and authenticated `GET` 200 |
+| First authenticated Production invocation | Passed | Owner-attested safe aggregate result: 3 rate limits, 0 access grants, 0 Writing reservations, 3 total affected, and 3015 ms |
+| First automatic scheduled invocation | Passed | Owner-attested HTTP 200 successful cleanup event and `totalAffected=3`; component breakdown was not provided |
+| Initial scheduler monitoring verification | Passed | Owner-attested zero checked runtime errors and no sensitive information in reviewed logs |
+| Ongoing scheduler monitoring | Operational requirement | One successful scheduled run does not prove permanent delivery or comprehensive monitoring; Vercel does not automatically retry failures |
+| Bounded cleanup before public exposure | Satisfied | The deployed bounded scheduler and verified first manual/scheduled invocations satisfy this operational gate; backlog risk remains unresolved |
 | PostgreSQL concurrency coverage | Test debt | No safe isolated PostgreSQL integration run was established |
 
 ## Security test classification
@@ -1381,9 +1388,10 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 - **Private-contest Production smoke — Not tested:** no final private-contest Production smoke was reported or is claimed.
 - **Environment isolation — Verified:** the owner-confirmed synthetic Preview write affected only the independent `englishphile-nonprod` `preview` branch, while the production User count remained unchanged. The non-production root branch is named `production`, not `main`.
 - **Isolated Preview smoke — Passed:** owner-attested health, auth, database read/write, safe Gemini absence, runtime-log review, and GitHub PR checks passed on 2026-07-13. Safe Gemini absence is not a Gemini functionality test.
-- **Cleanup scheduler implementation — Implemented, deployment pending:** repository code adds authenticated `GET /api/cron/security-cleanup`, a sequential bounded orchestrator, safe structured logs, and one daily Production `03:17 UTC` Vercel Cron entry. Only authenticated `GET` can invoke cleanup; explicit `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` handlers return non-cacheable HTTP 405 with `Allow: GET` and do not redirect or run cleanup. The exact credential is case-sensitive, accepts 16-512 UTF-8 bytes, and should be generated from at least 32 random bytes.
+- **Cleanup scheduler implementation — Deployed:** PR #4 merged at `e5c6f38`; repository code provides authenticated `GET /api/cron/security-cleanup`, a sequential bounded orchestrator, safe structured logs, and one daily Production `03:17 UTC` Vercel Cron entry. The owner attests that the merge commit is deployed, the job is enabled, and `CRON_SECRET` is configured server-side for Production only. Only authenticated `GET` can invoke cleanup; explicit `HEAD`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` handlers return non-cacheable HTTP 405 with `Allow: GET` and do not redirect or run cleanup.
 - **Cleanup bound — Repository-confirmed:** there are three cleanup components and five bounded modifying phases. Rate-limit and access-grant cleanup can each affect at most 500 rows; Writing reclaim, reconciliation, and archival can each affect at most 500 rows. The maximum affected-row count is therefore 2,500, but that is not the complete database work because every phase also selects or inspects up to 500 candidates.
-- **Cleanup runtime operations — Operational requirement:** configure a unique Production `CRON_SECRET`, deploy, verify the first authenticated Production invocation, and monitor Vercel/dashboard runtime failures before public exposure. Vercel does not automatically retry failures; no active, monitored, or successful scheduler is claimed yet.
+- **Cleanup Production verification — Passed for the tested scope:** owner-attested health, unauthenticated `GET`, `HEAD`, `POST`, one authenticated manual cleanup, the first automatic scheduled invocation, and initial runtime-log review matched the documented contract. The manual run affected 3 rate-limit rows and no access-grant or Writing rows; the scheduled run reported 3 total affected without a provided component breakdown. This is not permanent-delivery or comprehensive-monitoring evidence.
+- **Cleanup monitoring — Operational requirement:** ongoing Vercel/dashboard and runtime-log monitoring remains required because failed invocations are not automatically retried and one successful scheduled run cannot establish future delivery.
 - **Delivery behavior:** missed runs leave work for later reconciliation; duplicate or overlapping runs may add database work but remain data-safe because modifying statements recheck eligibility. No distributed or process-local scheduler lock exists. Bounded daily cleanup can fall behind sustained unique-subject abuse, so random-email authentication amplification remains Unresolved.
 - **Unresolved security work:** random-email authentication bucket amplification remains Phase 2; H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories remain open. PostgreSQL concurrency integration remains Test debt.
 
