@@ -1328,8 +1328,8 @@ For the cleanup scheduler, repository evidence is limited to the route, authenti
 | Control | Status | Evidence boundary |
 |---|---|---|
 | C-00 credential rotation | Remediated | Owner-attested dashboard/runtime evidence dated 2026-07-13; no secret values inspected and no provider dashboard independently queried by this repository pass |
-| Production migration chain | Applied | Owner attests 15 migrations and schema up to date in production; the Phase 1B migration is immutable |
-| Non-production migration chain | Applied | Owner attests all 15 migrations and schema up to date in the independent `englishphile-nonprod` project with no production data |
+| Production migration chain (Phase 1B snapshot) | Applied | Owner attested 15 migrations at the Phase 1B checkpoint; the later Phase 1C-A reconciliation below records 16 in Production |
+| Non-production migration chain (Phase 1B snapshot) | Applied | Owner attested 15 migrations at the Phase 1B checkpoint; the later Phase 1C-A Preview reconciliation records 16 |
 | Credential-rotation production redeploy | Passed | Owner attests a redeploy from the then-current pre-merge `main` plus health, new sign-in, database read/write, Gemini checks, and clean database-auth/Prisma runtime logs |
 | Phase 1B application deployment | Deployed | PR #2 merged into `main` at `45c551f`; owner attests that merge commit was deployed to Production |
 | Post-merge Phase 1B Production verification | Passed | Owner-attested HTTP 200 health with database connected and successful authenticated Writing/Gemini completion after canonical-origin correction |
@@ -1379,7 +1379,7 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 ## Current operational status and remaining requirements
 
 - **C-00 — Remediated:** credential rotation and post-rotation production checks are owner-confirmed. This is no longer a release blocker.
-- **Phase 1B migration — Applied:** the owner reports 15 migrations and an up-to-date production schema. The independent non-production project reports the same migration chain and an up-to-date schema. The migration is immutable; any future database change requires a new additive migration.
+- **Phase 1B migration — Applied:** at the Phase 1B checkpoint the owner reported 15 migrations and up-to-date Production/non-production schemas. The later Phase 1C-A reconciliation below records 16 migrations. Applied migrations are immutable; future database changes require new additive migrations.
 - **Credential-rotation production redeploy — Passed:** the then-current pre-merge `main` production application passed health, new sign-in, database read/write, Gemini, and relevant runtime-log checks after credential rotation.
 - **Phase 1B application deployment — Deployed:** PR #2 merged into `main` at `45c551f`, and the owner attests that the merge commit was deployed to Production.
 - **Post-merge Production verification — Passed for health and the tested Writing path:** health returned HTTP 200 with database connected. An initial Writing request was rejected because deployed canonical-origin configuration did not match Production; after correcting the Production-only configuration and redeploying, authenticated Writing/Gemini completion succeeded. This was an operational configuration mismatch, not a hostile-origin security test.
@@ -1397,15 +1397,15 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 
 The complete Phase 1B implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.
 
-## Phase 1C-A role-policy addendum (2026-07-13; Preview reconciled 2026-07-14)
+## Phase 1C-A role-policy addendum (2026-07-13; Preview and Production reconciled 2026-07-14)
 
 The owner selected the independent-practice/global-editorial policy for Phase 1C-A. The supported database roles are now `STUDENT` and `ADMIN`. Stored `ADMIN` users are global editorial peers for contests, problems, questions, topics, source collections, content packs, imports, Wiki content, and diagnostic eligibility. Creator, importer, and reviewer foreign keys are attribution fields, not per-admin ownership boundaries.
 
 `OWNER_EMAIL` remains a server-configured bootstrap and recovery path. A current database user whose trimmed, case-insensitive email matches the configured value receives the same content-admin authorization as a stored `ADMIN`. It is not a database role or a stronger super-admin tier. Session cookies continue to contain only a user identifier and expiry; `getCurrentUser()` reloads current role and email from the database before authorization.
 
-The implementation pass created forward migration `20260713160000_phase1c_a_role_policy` without applying it at that time. It updates every legacy teacher-role `User` row to `STUDENT` before recreating the PostgreSQL `Role` enum with only `STUDENT` and `ADMIN`. It drops and restores the `User.role` default, converts only `User.role`, drops no table, uses no `CASCADE`, and does not delete classroom, assignment, grading, membership, submission, or user data. Owner-attested evidence dated 2026-07-14 now records that this migration is applied in isolated non-production Preview only, remains unapplied in Production, and is immutable because it has been applied in an environment.
+The implementation pass created forward migration `20260713160000_phase1c_a_role_policy` without applying it at that time. It updates every legacy teacher-role `User` row to `STUDENT` before recreating the PostgreSQL `Role` enum with only `STUDENT` and `ADMIN`. It drops and restores the `User.role` default, converts only `User.role`, drops no table, uses no `CASCADE`, and does not delete classroom, assignment, grading, membership, submission, or user data. Owner-attested evidence dated 2026-07-14 records that it was subsequently applied in isolated Preview and Production. It is immutable; any correction requires a new additive migration.
 
-The migration is enclosed in an explicit PostgreSQL transaction so a failure rolls back the enum rename, type conversion, and default change together. Deployment requires aggregate-only admin-lockout preflight: at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, a recorded legacy-role count, confirmation the downgrade does not remove the last usable administrator, and a pause on role-management writes. The enum conversion takes a short lock on `User`; this has not been measured against Production.
+The migration is enclosed in an explicit PostgreSQL transaction as its designed atomic boundary. Owner-attested Production preflight recorded `storedAdminCount=1`, `legacyTeacherCount=0`, configured `OWNER_EMAIL` resolving to a current user, and `usableAdministratorRemains=true`. Postflight recorded 16 applied migrations with schema up to date, roles `ADMIN=1` and `STUDENT=1`, `unexpectedRoleCount=0`, `storedAdminCount=1`, continued owner resolution, and `usableAdministratorRemains=true`. No claim is made that backup/export completed or role-management writes were paused. Failure rollback and lock duration were not empirically tested.
 
 Classroom and assignment application surfaces are decommissioned. Their pages and UI components are removed; retained legacy Server Actions terminate through a not-found boundary before any repository access; and the assignment submission Route Handler returns generic JSON 404 for all exposed methods without parsing or mutation. The database models and historical rows remain temporarily for a separately approved retention decision.
 
@@ -1413,24 +1413,31 @@ The general `POST /api/submissions` endpoint remains active for independent sing
 
 Portable role handling is operator-level rather than an HTTP authorization path. `STUDENT` remains `STUDENT`, explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The importer also now passes the selected input directory to `readJson(directory, filename)` and resolves only its fixed internal step filenames; this path correction has focused pure-helper coverage, not an end-to-end import test.
 
-Repository evidence confirms the committed policy, guards, tombstones, migration SQL, and independent-practice path. Separately, owner-attested operational evidence dated 2026-07-14 records Draft PR #6 with passing GitHub/Vercel checks, an isolated Preview deployment, all 16 Preview migrations applied with schema up to date, and a role postflight of two `STUDENT` rows, no stored `ADMIN`, and no unexpected role. The configured owner identity resolved to a current Preview user, so usable content-admin access remained. Production application code and Production data were unchanged by Phase 1C-A.
+Repository evidence confirms the committed policy, guards, tombstones, migration SQL, independent-practice path, and PR #6 merge commit `df89089c89e56abed1feb0ab0569e77656d51598`. Separately, owner-attested operational evidence dated 2026-07-14 records that PR #6 is merged, the merge commit was deployed to Vercel Production, and the canonical Production deployment reached READY. The earlier isolated Preview deployment, migration, role postflight, and selected smoke remain dated pre-Production evidence.
 
-Owner-attested Preview smoke passed database-connected health, owner sign-out/sign-in and admin access, ordinary-student denial, retired page not-found responses, generic retired assignment API 404 for GET and POST, independent single-problem submission/persistence, and checked runtime logs without reported enum/authentication errors, unexpected 500s, or sensitive values. Initial direct HTTP observations were invalid because Vercel Deployment Protection intercepted them; authenticated Vercel CLI protection bypass produced the actual generic application 404 responses for GET and POST.
+Owner-attested Production verification passed HTTP 200 health with database connected, generic retired assignment API 404 for GET and POST, owner sign-out/sign-in and `/admin` access, ordinary-student denial, independent single-problem submission/persistence, and basic contest, diagnostic, and Writing smoke. Checked Production logs contained no reported runtime error or sensitive value. Contest/diagnostic/Writing coverage was basic smoke only and does not establish comprehensive authorization, persistence, concurrency, or security behavior. Private-contest Production smoke remains unperformed.
+
+An initial read-only aggregate preflight and migration-status check was recognized as targeting isolated Preview/nonproduction. It performed no mutation and was discarded as Production evidence. The correct Production target was then selected and independently verified before the Production migration was applied. No infrastructure identifier or credential is recorded.
 
 During manual Preview setup, a Preview-only non-production database credential was inadvertently exposed in terminal/chat input. The owner treated it as compromised, rotated it, updated the two Preview database variables, removed the old value from PowerShell history and clipboard, and validated the rotated configuration through subsequent successful Preview health and migration operations. Production variables were unchanged. This is a remediated non-production operational incident, not a Production credential incident.
+
+Temporary Production credentials used during verification were cleared from the PowerShell process and clipboard afterward. No credential value, database connection endpoint, provider infrastructure identifier, or account identity is recorded.
 
 Current finding disposition:
 
 | Finding | Status | Evidence boundary |
 |---|---|---|
-| Teacher-role global-admin overprivilege | Remediated in code and verified in isolated Preview; Production deployment pending | No teacher-role branch remains; owner attests Preview downgrade/postflight and retained owner access |
-| Missing admin import page guard | Remediated in code and verified through Preview access boundaries; Production deployment pending | `src/app/admin/layout.tsx` guards the complete subtree; owner admin access and ordinary-student denial passed in Preview |
-| Classroom/assignment attack surface | Decommissioned in code and smoke-tested in Preview; Production deployment pending | Pages/components removed; tombstones contain no Prisma mutation path; tested Preview pages and assignment API returned not found/generic 404 |
+| Teacher-role global-admin overprivilege | Remediated, deployed, and verified in selected Production checks | No teacher-role branch remains; Production role postflight contained only `ADMIN` and `STUDENT` with usable admin access |
+| Missing admin import page guard | Remediated, deployed, and verified through selected Production access checks | `src/app/admin/layout.tsx` guards the complete subtree; owner admin access and ordinary-student denial passed |
+| Classroom/assignment attack surface | Decommissioned and deployed; retired assignment API smoke passed | Pages/components remain removed; tombstones contain no Prisma mutation path; Production GET/POST returned generic 404; every retired page was not claimed as Production-smoked |
 | H-05 contest admin IDOR | Partially remediated / policy clarified | Global ADMIN-to-ADMIN editing is intentional; cross-parent IDs and publish TOCTOU remain for Phase 1C-B |
 | H-06 problem/content admin IDOR | Partially remediated / policy clarified | Global corpus is intentional; cross-parent IDs and bulk/TOCTOU remediation remain for Phase 1C-B |
-| Phase 1C-A migration | Applied in isolated Preview; unapplied in Production; immutable | Owner attests all 16 Preview migrations applied and schema up to date; Production remains unchanged |
-| Admin-lockout protection | Passed in Preview; Production preflight required | No stored Preview `ADMIN`; current owner-email match preserved content-admin access |
-| PostgreSQL integration | Test debt | Preview migration execution is operational evidence, not general authorization or concurrency integration testing |
+| Phase 1C-A migration | Applied in Preview and Production; immutable | Owner attests 16 Production migrations and schema up to date; any correction requires a new additive migration |
+| Admin-lockout protection | Production preflight and postflight passed | Stored admin remained 1, owner resolution remained true, and `usableAdministratorRemains=true` before and after migration |
+| Phase 1C-A application deployment | Deployed to Production | PR #6 merged at `df89089`; owner attests the canonical Production deployment reached READY |
+| Selected Production runtime smoke | Passed | Health/database, assignment tombstone GET/POST, owner/student admin boundary, independent submission, and basic contest/diagnostic/Writing checks passed |
+| PostgreSQL integration | Test debt | Successful migration execution is operational evidence, not rollback-failure, lock-duration, authorization-race, or concurrency integration testing |
+| Publish/QA race integration | Test debt | Basic smoke does not test publish TOCTOU, QA races, cross-parent binding, or transactional bulk behavior |
 | H-09, H-10, H-11 | Unresolved | Outside Phase 1C-A |
 | Random-email authentication amplification | Unresolved | Outside Phase 1C-A |
 | Dependency advisories | Unresolved | No automated dependency fix was run |
