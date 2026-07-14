@@ -101,8 +101,8 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 ## Phase 1C-A Role Policy And Classroom Decommissioning
 
 - The user-role model is now `STUDENT` and `ADMIN` only in Prisma.
-- The Phase 1C-A forward migration downgrades all legacy teacher-role users to `STUDENT`, recreates only the `Role` enum, and preserves all classroom/assignment tables, rows, IDs, and foreign keys. It is applied in isolated non-production Preview only, remains unapplied in Production, and is immutable because it has now been applied in an environment.
-- The migration is explicitly transactional. Before applying it to Production, use aggregate-only checks to confirm at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count, confirm the downgrade cannot remove the final usable administrator, and pause role-management writes.
+- The Phase 1C-A forward migration downgrades all legacy teacher-role users to `STUDENT`, recreates only the `Role` enum, and preserves all classroom/assignment tables, rows, IDs, and foreign keys. It is applied in isolated Preview and Production and is immutable.
+- The migration is explicitly transactional. Any future SQL correction requires a new additive migration; do not edit, rename, squash, or regenerate the applied Phase 1C-A migration.
 - `ADMIN` users are global editorial peers. `Contest.createdById`, `ContentPack.importedById`, `ImportBatch.userId`, reviewer IDs, and similar fields are attribution rather than ownership boundaries.
 - `OWNER_EMAIL` grants the same content-admin access as `ADMIN`; it is not a database role or super-admin tier.
 - `/admin/layout.tsx` guards the complete admin page subtree, while every Server Action and Route Handler retains its own guard.
@@ -112,16 +112,19 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Portable import is operator-level tooling. Explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The selected input-directory argument is now correctly used when resolving the fixed internal import-step filenames; this has pure helper coverage but no end-to-end import run.
 - H-05 and H-06 are only partially remediated: global-peer policy is clarified, but cross-parent ID binding, publish TOCTOU, and bulk transaction work remains Phase 1C-B.
 
-### Phase 1C-A Preview reconciliation (owner-attested 2026-07-14)
+### Phase 1C-A Production reconciliation (owner-attested 2026-07-14)
 
-- PR #6 remains open and Draft; GitHub/Vercel checks passed, and the Phase 1C-A application was deployed to an isolated Vercel Preview. Production application code and Production data remain unchanged by Phase 1C-A.
-- Preview reports all 16 migrations applied and Prisma schema up to date. `20260713160000_phase1c_a_role_policy` is applied in Preview only and must never be edited; any future SQL correction requires a new additive migration.
-- The Preview role postflight found two `STUDENT` rows, no stored `ADMIN`, and no unexpected role. The configured `OWNER_EMAIL` resolved to a current Preview user, preserving usable content-admin access. No identity or infrastructure value is recorded.
-- Preview health reported database connected; owner sign-out/sign-in and `/admin` access passed; an ordinary student was denied; retired classroom, assignment, teacher, and grading pages returned not found; and retired assignment API GET/POST returned generic 404.
-- Independent single-problem practice submission and persistence passed. Checked Preview logs reported no Prisma enum error, database-authentication error, unexpected 500, or sensitive value.
-- Initial direct HTTP checks were invalid application evidence because Vercel Deployment Protection intercepted them: GET followed Vercel authentication and appeared as 200, while POST was blocked with 401. Authenticated Vercel CLI protection bypass reached the application and produced the expected generic 404 for both methods.
-- During manual Preview setup, a Preview-only non-production database credential was inadvertently exposed in terminal/chat input. The owner treated it as compromised, rotated it, updated Preview `DATABASE_URL` and `DIRECT_URL`, removed the old value from PowerShell history and clipboard, and subsequently validated the rotated configuration through successful Preview health and migration operations. Production variables were unchanged. The incident is operationally remediated.
-- Preview evidence does not prove Production behavior. Production backup/export, aggregate admin-lockout preflight, migration application, immediate application deployment, authorization/retirement/practice smoke checks, and runtime-log inspection remain required.
+- PR #6 merged at `df89089c89e56abed1feb0ab0569e77656d51598`. That merge commit was deployed to Vercel Production, and the canonical Production deployment reached READY.
+- Before migration, Production aggregates were `storedAdminCount=1` and `legacyTeacherCount=0`; `OWNER_EMAIL` was configured and resolved to a current user; `usableAdministratorRemains=true`.
+- Production reports all 16 migrations applied and Prisma schema up to date. `20260713160000_phase1c_a_role_policy` is applied and immutable.
+- After migration, Production roles were `ADMIN=1` and `STUDENT=1`, with `unexpectedRoleCount=0` and `storedAdminCount=1`. `OWNER_EMAIL` still resolved to a current user and `usableAdministratorRemains=true`.
+- Temporary Production credentials used for verification were cleared from the PowerShell process and clipboard. No credential or identity is recorded here.
+- Production health returned HTTP 200 with database connected. Retired assignment API GET/POST returned generic 404; owner sign-out/sign-in and `/admin` access passed; an ordinary student was denied; and independent single-problem submission/persistence passed.
+- Basic contest, diagnostic, and Writing smoke checks passed. This is not comprehensive authorization, persistence, concurrency, or security evidence for those flows.
+- Checked Production logs reported no runtime error or sensitive value.
+- An initial read-only aggregate preflight and migration-status check was recognized as targeting isolated Preview/nonproduction. It performed no mutation and was discarded as Production evidence. The correct Production target was then selected and independently verified before migration.
+- The prior Preview verification remains valid dated history. Production success does not close H-05/H-06 Phase 1C-B work, private-contest smoke, PostgreSQL concurrency/rollback/locking Test debt, or the other unresolved findings.
+- No claim is made that backup/export completed or that role-management writes were paused; those facts were not supplied as operational evidence.
 
 ## What Worked
 
