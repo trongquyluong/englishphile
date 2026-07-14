@@ -20,7 +20,7 @@ Primary navigation:
 
 Gym contains Reading, Writing, Listening, and Use of English. Use of English contains pronunciation, MCQ, cloze, word formation, sentence transformation, error identification, trios, collocations, phrasal verbs, transitions, and grammar focus.
 
-Englishphile is operated by a site owner/admin. Public signup creates normal learner accounts only; users do not choose teacher/admin roles. Classroom and assignment routes exist as hidden legacy tools, but they are not the main student experience.
+Englishphile is operated by a site owner/admin. Public signup creates normal learner accounts only; users do not choose roles. Classroom and assignment application routes are decommissioned, while their historical database rows remain temporarily.
 
 ## Tech Stack
 
@@ -74,9 +74,9 @@ Never commit `.env`. Local development must use a separate PostgreSQL database, 
 After seeding:
 
 - Student: `student@example.com` / `password123`
-- Legacy admin-compatible account: `teacher@example.com` / `password123`
+- Admin account: `admin@example.com` / `password123`
 
-Public signup asks for email, username, password, full name, school, and province/city, then creates a normal learner account. Site-owner/admin access is managed outside public signup. The legacy `teacher@example.com` seed remains for local admin-tool testing during transition.
+Public signup asks for email, username, password, full name, school, and province/city, then creates a normal learner account. Site-owner/admin access is managed outside public signup.
 
 ## Owner/Admin Setup
 
@@ -88,7 +88,7 @@ Recommended local flow:
 2. Sign up with that email through the normal learner signup.
 3. Open `/admin`.
 
-Existing `ADMIN` accounts and legacy `TEACHER` accounts can still access admin tools for compatibility, but the public UI does not offer teacher/admin signup.
+Stored `ADMIN` accounts are global content administrators. A current database user whose normalized email matches `OWNER_EMAIL` receives the same content-admin access even when their stored role is `STUDENT`. `OWNER_EMAIL` is not a separate or stronger database role.
 
 ## Validation Commands
 
@@ -318,93 +318,29 @@ Phase 3 admin routes:
 - `/admin/sources` and `/admin/sources/[id]` - source counts, lifecycle distribution, metadata edits
 - `/admin/topics` and `/admin/topics/[id]` - topic counts, parent topic, related problems
 
-## Phase 4 Classroom And Assignment System
+## Retired Classroom And Assignment Data
 
-Phase 4 added class management, assignments, and a mock-test builder. These routes remain available as hidden legacy/admin-compatible tools, but after Phase 7.5 they are not the core product flow. The primary learner flow is diagnostic plus Gym recommendations and Contests.
+Phase 1C-A decommissions all classroom, assignment, join-code, teacher-dashboard, assignment-submission, and manual-grading application surfaces. Direct page requests resolve as not found, legacy mutation actions cannot reach Prisma, and the retired assignment API returns a generic JSON 404.
 
-Legacy admin-compatible routes:
+This does not retire independent practice. `POST /api/submissions` remains the single-problem practice submission endpoint and continues to persist submission answers, learner progress, and recommendation completion. Contest, diagnostic, random-practice, and Writing persistence remain active. The seed no longer creates classroom or assignment fixtures.
 
-- `/teacher/classes` - create and view classes, student counts, active assignments, and join codes.
-- `/teacher/classes/[id]` - class overview, students, assigned work, results matrix, and settings.
-- `/teacher/assignments/new` - create homework, practice sets, review sets, or mock tests from `PUBLISHED` problems.
-- `/teacher/classes/[id]/assignments/new` - starts the assignment builder with a class preselected.
-- `/teacher/assignments/[id]` - assignment detail, status actions, problem list, completion summary, and student submissions.
+The `Classroom`, `ClassroomMember`, `Assignment`, `AssignmentProblem`, `AssignmentSubmission`, `AssignmentProblemSubmission`, and `ManualGrade` tables remain in the schema temporarily. This pass does not delete historical rows, foreign keys, or audit attribution. These retained models are not active product features.
 
-Student routes:
+## Learner Analytics
 
-- `/classes/join` - join a legacy class with a provided join code.
-- `/classes` - view joined classes and active assignments.
-- `/classes/[id]` - view assigned work, submitted work, scores, and due dates.
-- `/assignments/[id]` - complete assigned work using the existing question renderers.
-- `/assignments/[id]/result` - view score, status, correct/wrong/needs-review counts, and answer review when enabled.
-
-### Creating A Class
-
-1. Sign in with a legacy admin-compatible seeded account.
-2. Open `/teacher/classes`.
-3. Use “Tạo lớp” to create a classroom.
-4. Share the generated `joinCode` with students.
-
-Seed data includes a demo classroom:
-
-- Class: `Chuyên Anh 9A`
-- Join code: `ANH9A`
-- Legacy admin-compatible account: `teacher@example.com`
-- Student: `student@example.com`
-
-### Student Join Flow
-
-Students sign in, open `/classes/join`, enter the join code, then see the class and its active assignments under `/classes`.
-
-### Assignments And Mock Tests
-
-Legacy assignment builders create assignments from existing `PUBLISHED` problems only. The builder supports:
-
-- Basic assignment info: title, description, class, due date, time limit, late-submission policy, answer visibility.
-- Problem filters: skill, difficulty, topic, source, and search.
-- Selected-problem ordering and total estimated time.
-- Mock-test presets such as “Mock cá nhân hóa 45 phút” and custom skill-count selection with “Tự chọn câu phù hợp”.
-
-Assignments can be saved as `DRAFT` or published immediately. Closed and archived assignments are not available for new student submissions.
-
-### Assignment Submissions
-
-`AssignmentSubmission` stores the overall assignment attempt and result. Each completed problem also creates a normal `Submission` record and `SubmissionAnswer` records, so existing wrong-question review and user problem progress continue to work.
-
-Writing and sentence-transformation answers that need manual judgment mark the assignment submission as `NEEDS_REVIEW`. Manual grading is still a future workflow.
-
-### Current Limitations
-
-- No email invitations yet; class joining uses join codes.
-- Classroom analytics are basic; weak-skill detection remains future work.
-- Timer enforcement is basic and records elapsed time on submit.
-- Manual grading for writing and non-exact sentence transformation is not implemented yet.
-- Assignment editing after creation is limited; admin-compatible users can duplicate assignments to revise a draft-style copy.
-
-## Phase 5 Analytics And Manual Grading
-
-Phase 5 adds request-time analytics, weakness detection, deterministic recommendations, and a manual grading workflow.
+Learner analytics use independent-practice submissions, diagnostic results, skill/topic performance, wrong answers, and deterministic recommendations.
 
 Student routes:
 
 - `/analytics` - overall progress, skill/topic breakdowns, recent wrong answers, trends, and recommended practice.
 - `/analytics/skills/[skillType]` - detail view for one skill with related topics, wrong questions, recommendations, and recent submissions.
 
-Legacy/admin-compatible grading routes:
-
-- `/teacher/classes/[id]/analytics` - class average accuracy, assignment completion, weakest skills/topics, difficult problems, students needing support, and grading shortcut.
-- `/teacher/classes/[id]/students/[userId]` - student detail analytics inside a class.
-- `/teacher/assignments/[id]/analytics` - assignment completion, score distribution, problem/question performance, and student scores.
-- `/teacher/grading` - queue of writing, sentence transformation, and other needs-review answers.
-- `/teacher/grading/[submissionAnswerId]` - manual grading form with correctness, score, max score, rubric notes, and teacher feedback.
-
 ### Accuracy Rules
 
 - Auto-markable answers count only when `SubmissionAnswer.isCorrect` is `true` or `false`.
 - Needs-review answers do not enter the accuracy denominator until manually graded.
-- Writing is not counted as correct/incorrect until an admin-compatible grader saves a `ManualGrade`.
-- Sentence transformation exact matches count automatically; non-exact variants stay needs-review until graded.
-- Partial manual grades count proportionally when `score` and `maxScore` are present.
+- Historical `ManualGrade` rows remain readable by learner analytics, but no grading surface can create or update them.
+- Sentence transformation exact matches count automatically; non-exact variants remain needs-review.
 
 ### Recommendation Logic
 
@@ -415,22 +351,6 @@ Recommendations are deterministic, not AI-based:
 - Prefer problems the student has not solved.
 - Include retry links for recent wrong answers.
 - Show Vietnamese reasons such as “Bạn đang sai nhiều ở Word Formation.” or “Topic Inversion có độ chính xác thấp.”
-
-### Manual Grading Workflow
-
-1. Admin-compatible grader opens `/teacher/grading`.
-2. Filter by class, assignment, skill, student, or date.
-3. Open an answer and save correctness, score, max score, rubric notes, and feedback.
-4. The app updates `ManualGrade`, `SubmissionAnswer`, parent `Submission`, related `AssignmentProblemSubmission`, related `AssignmentSubmission`, and `UserProblemStatus` where possible.
-5. Graded answers leave the default grading queue.
-
-### Phase 5 Limitations
-
-- Analytics are computed on request, not snapshotted.
-- Charts are simple Tailwind/CSS UI, not advanced charting.
-- Recommendations are deterministic and do not use AI.
-- Writing grading is manual.
-- Manual grading history is represented by the latest `ManualGrade`; a full grade audit timeline can be added later.
 
 ## Phase 6 Content Packs And QA
 
@@ -445,7 +365,7 @@ Admin routes:
 
 ### File Upload Workflow
 
-1. Open `/admin/import` as an admin-compatible account.
+1. Open `/admin/import` as a content administrator.
 2. Use the default “Tải gói dữ liệu lên” workflow.
 3. Select one or more `.json`/`.csv` files.
 4. Click “Kiểm tra dữ liệu”.
@@ -570,7 +490,7 @@ Important rules:
 - Main student navigation is Trang chủ, Gym, Contests, Wiki, and Về Englishphile.
 - Reading, Writing, Listening, and Use of English live inside Gym, not top-level navigation.
 - Student dashboard centers diagnostic, recommended practice, Gym entry, Contests, progress, analytics, and wrong questions.
-- Classroom/assignment routes stay hidden from primary student UX.
+- Classroom and assignment application routes are retired and cannot mutate retained historical data.
 - Recommendations only use `PUBLISHED` problems.
 - Upload-first import is the preferred admin workflow.
 - Manual paste import is advanced/debug only.
@@ -582,12 +502,16 @@ Phase 7.5 clarifies the product model:
 
 - Public users are learners. Signup creates `STUDENT` accounts only and asks for email, username, password, full name, school, and province/city.
 - The site owner/admin manages content, imports, QA, contests, wiki content, and review/publish workflows.
-- `TEACHER` remains in the database only for compatibility with legacy local data and hidden legacy tools.
+- The only user roles are `STUDENT` and `ADMIN`; the Phase 1C-A migration downgrades every legacy teacher-role user to `STUDENT` before removing that enum value. Owner-attested evidence dated 2026-07-14 records that it is applied and verified only in isolated non-production Preview, remains unapplied in Production, and is now immutable.
+- The Phase 1C-A enum migration is explicitly transactional. Before Production deployment, run aggregate-only checks confirming at least one stored `ADMIN` or a current user matching configured `OWNER_EMAIL`, record the legacy-role count without identities, and pause role-management writes. Preview success does not replace this Production gate.
+- Portable import/export is operator-level tooling: `STUDENT` and explicit `ADMIN` are preserved, legacy `TEACHER` is downgraded to `STUDENT`, and unknown roles are rejected. An explicit `ADMIN` bundle value can assign `ADMIN` only when an authorized operator runs the importer. The importer now resolves its fixed internal filenames from the selected input directory.
 - Gym is the primary practice hub. It contains Reading, Writing, Listening, and Use of English.
 - Contests are for past exam practice and occasional timed English contests created by the admin.
 - Wiki replaces Theory as the knowledge area. `/theory` redirects to `/wiki`.
 - Topic tags should be subtle metadata or deliberate filters. Avoid large chip-only sections like “Topic Reading” that make the UI feel generated or noisy.
 - Student-facing pages should prioritize title, skill/mode, difficulty, short description, reason for recommendation, and the next action.
+
+Owner-attested Preview reconciliation dated 2026-07-14 records that Draft PR #6 passed GitHub/Vercel checks and was deployed to an isolated Vercel Preview while Production application code and data remained unchanged. Preview health, owner and learner authorization boundaries, retired-route 404 behavior, and independent-practice persistence passed. Full evidence boundaries and the still-pending Production gate are documented in `docs/SECURITY_PHASE_1C_REPORT.md`.
 
 Contest routes:
 
@@ -655,7 +579,7 @@ Phase 9 prepares the app for public beta:
 - `OWNER_EMAIL` enables the site owner to access `/admin` without exposing admin signup.
 - Normal learners who try admin routes see a friendly no-access page.
 - Main learner navigation stays Trang chủ, Gym, Contests, Wiki, and Về Englishphile.
-- Classroom/assignment routes remain hidden legacy tools and are not part of the main product flow.
+- Classroom/assignment routes are decommissioned; retained database tables are historical data only.
 - Contests now include filters, availability states, in-progress attempt resume, timed attempt UI, result review, and a leaderboard route.
 - Admin contest builder validates that only `PUBLISHED` problems can be selected.
 - Global loading, not-found, and error states are present for beta polish.

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ProblemClient } from "@/components/problems/ProblemClient";
 import { ProblemHeader } from "@/components/problems/ProblemHeader";
-import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
 import { submissionStatusLabels } from "@/lib/labels";
 import type { ClientProblem } from "@/lib/problem-types";
 import { prisma } from "@/lib/prisma";
@@ -13,7 +13,7 @@ type PageProps = {
 export default async function ProblemDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const user = await getCurrentUser();
-  const canManageContent = isAdminUser(user);
+  const canManageContent = isContentAdminUser(user);
 
   const problem = await prisma.problem.findUnique({
     where: { slug },

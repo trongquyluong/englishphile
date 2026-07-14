@@ -41,26 +41,6 @@ export interface RandomPracticeResultDTO {
 }
 
 /**
- * DTO for assignment submission responses.
- */
-export interface AssignmentSubmissionResultDTO {
-  assignmentSubmissionId: string;
-  status: "LATE" | "NEEDS_REVIEW" | "SUBMITTED";
-  score: number;
-  total: number;
-  problems: ProblemResultDTO[];
-}
-
-export interface ProblemResultDTO {
-  problemId: string;
-  score: number;
-  total: number;
-  status: SubmissionStatus;
-  /** Per-question result WITHOUT correct answers */
-  answers: QuestionResultDTO[];
-}
-
-/**
  * Helper to convert internal check result to safe DTO.
  * Strips correctAnswer before returning to client.
  */

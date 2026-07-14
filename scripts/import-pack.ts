@@ -43,14 +43,19 @@ async function readInputFiles(targetPath: string): Promise<{ displayPath: string
 }
 
 async function getImporterUserId() {
-  const teacher = await prisma.user.findUnique({ where: { email: "teacher@example.com" } });
-  if (teacher && teacher.role !== "STUDENT") return teacher.id;
+  const ownerEmail = String(process.env.OWNER_EMAIL ?? "").trim().toLowerCase();
+  if (ownerEmail) {
+    const owner = await prisma.user.findFirst({
+      where: { email: { equals: ownerEmail, mode: "insensitive" } },
+    });
+    if (owner) return owner.id;
+  }
 
   const user = await prisma.user.findFirst({
-    where: { role: { in: ["TEACHER", "ADMIN"] } },
+    where: { role: "ADMIN" },
     orderBy: { createdAt: "asc" },
   });
-  if (!user) throw new Error("Không tìm thấy tài khoản TEACHER/ADMIN để ghi import batch.");
+  if (!user) throw new Error("Không tìm thấy tài khoản quản trị để ghi import batch.");
   return user.id;
 }
 

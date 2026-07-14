@@ -13,7 +13,7 @@
 
 ## 2. Auth
 
-- [ ] Public signup creates a learner account (not teacher/admin)
+- [ ] Public signup creates a learner account (not an admin account)
 - [ ] Signup required fields: email, username, password, full name, school, province/city
 - [ ] Login works with correct credentials
 - [ ] Wrong password shows friendly error (not raw auth stack trace)

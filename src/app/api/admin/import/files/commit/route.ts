@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { requireContentAdminApi } from "@/lib/auth/content-admin-api";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { importContentPackFiles, type ContentPackInputFile } from "@/lib/content-packs/importer";
-
-async function requireAdminApi() {
-  const user = await getCurrentUser();
-  if (!isAdminUser(user)) {
-    return null;
-  }
-  return user;
-}
 
 function normalizeFiles(value: unknown): ContentPackInputFile[] {
   if (!Array.isArray(value)) return [];
@@ -26,16 +18,16 @@ function normalizeFiles(value: unknown): ContentPackInputFile[] {
 }
 
 export async function POST(request: Request) {
+  const authorization = await requireContentAdminApi();
+  if (!authorization.authorized) return authorization.response;
+
   // Validate request origin (CSRF protection)
   const originCheck = await validateRequestOrigin();
   if (!originCheck.valid) {
     return NextResponse.json({ error: getOriginErrorMessage() }, { status: 403 });
   }
 
-  const user = await requireAdminApi();
-  if (!user) {
-    return NextResponse.json({ error: "Bạn không có quyền import dữ liệu." }, { status: 403 });
-  }
+  const user = authorization.user;
 
   // Rate limit Excel import commit: 5 imports per admin per hour (database-backed)
   const limit = await checkConfiguredRateLimit(RATE_LIMITS.CONTENT_PACK_COMMIT(user.id));

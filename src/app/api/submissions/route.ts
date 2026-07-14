@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatus } from "@/lib/answer-checking";
-import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { prisma } from "@/lib/prisma";
 import { markRecommendationsCompletedForProblem } from "@/lib/recommendations";
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing problemId" }, { status: 400 });
   }
 
-  const canManageContent = isAdminUser(user);
+  const canManageContent = isContentAdminUser(user);
   const questions = await prisma.question.findMany({
     where: {
       problemId: body.problemId,

@@ -14,7 +14,7 @@ import {
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ContentStatusBadge, DifficultyBadge, SkillBadge } from "@/components/ui/Badges";
-import { isAdminUser, requireUser } from "@/lib/auth/session";
+import { isContentAdminUser, requireUser } from "@/lib/auth/session";
 import { getRecommendedProblemsForStudent } from "@/lib/analytics/recommendations";
 import { getStudentSkillStats } from "@/lib/analytics/student";
 import {
@@ -40,7 +40,7 @@ function accuracyText(correct: number, total: number) {
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const canManageContent = isAdminUser(user);
+  const canManageContent = isContentAdminUser(user);
 
   const [
     statuses,
@@ -95,7 +95,6 @@ export default async function DashboardPage() {
       lifecycleCounts,
       contentPacks,
       recentImports,
-      gradingQueueCount,
       betaStats,
       activeContests,
       duplicateSkips,
@@ -111,11 +110,6 @@ export default async function DashboardPage() {
         include: { sourceCollection: true, contentPack: true },
         orderBy: { createdAt: "desc" },
         take: 4,
-      }),
-      prisma.submissionAnswer.count({
-        where: {
-          OR: [{ isCorrect: null }, { manualGrade: { correctness: "NEEDS_REVISION" } }],
-        },
       }),
       Promise.all([
         prisma.user.count(),
@@ -142,7 +136,7 @@ export default async function DashboardPage() {
           <p className="text-sm font-semibold text-accent">Quản trị</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-balance">Chào {user.displayName}</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-ink-soft">
-            Khu vực quản trị tập trung vào import gói dữ liệu, QA, review nội dung, contests và chấm bài cần đánh giá thủ công.
+            Khu vực quản trị tập trung vào import gói dữ liệu, QA, review nội dung và contests.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href="/admin/import" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-foreground px-3 text-sm font-semibold text-background">
@@ -151,9 +145,6 @@ export default async function DashboardPage() {
             </Link>
             <Link href="/admin/content-qa" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
               Kiểm tra chất lượng
-            </Link>
-            <Link href="/teacher/grading" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
-              Chấm bài
             </Link>
             <Link href="/admin/contests-builder" className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
               Contests
@@ -177,7 +168,7 @@ export default async function DashboardPage() {
           <div className="surface rounded-2xl p-4">
             <p className="text-sm text-ink-soft">Gói dữ liệu</p>
             <p className="tabular-nums mt-2 text-2xl font-semibold">{contentPacks}</p>
-            <p className="mt-1 text-xs text-ink-soft">Bài cần chấm: {gradingQueueCount}</p>
+            <p className="mt-1 text-xs text-ink-soft">Kho nội dung dùng chung cho toàn bộ quản trị viên.</p>
           </div>
         </section>
 

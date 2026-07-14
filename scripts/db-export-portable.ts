@@ -40,6 +40,7 @@ import "dotenv/config";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { PrismaClient } from "@prisma/client";
+import { parsePortableUserRole } from "@/lib/import/portable-user-role";
 import { ensureDir, timestampForFile } from "./db-utils";
 
 const prisma = new PrismaClient({
@@ -85,6 +86,12 @@ async function main() {
       },
     },
     orderBy: { createdAt: "asc" },
+  });
+  let legacyTeacherRolesDowngraded = 0;
+  const portableUsers = users.map((user) => {
+    const roleResult = parsePortableUserRole(user.role);
+    if (roleResult.legacyTeacherDowngraded) legacyTeacherRolesDowngraded += 1;
+    return { ...user, role: roleResult.role };
   });
 
   // --- Content & structure data ---
@@ -147,7 +154,7 @@ async function main() {
   ]);
 
   const files = [
-    ["users.safe.json", users],
+    ["users.safe.json", portableUsers],
     ["source-collections.json", sourceCollections],
     ["topics.json", topics],
     ["problem-topics.json", problemTopics],
@@ -173,10 +180,13 @@ async function main() {
     warnings: [
       "users.safe.json intentionally excludes passwordHash.",
       "Submissions, submission answers, user problem statuses, classrooms, and assignments are NOT exported (user-specific data).",
+      ...(legacyTeacherRolesDowngraded > 0
+        ? [`${legacyTeacherRolesDowngraded} legacy role value(s) were downgraded to STUDENT.`]
+        : []),
       "Import into a target database using: npm run db:import:portable",
     ],
     counts: {
-      users: users.length,
+      users: portableUsers.length,
       sourceCollections: sourceCollections.length,
       topics: topics.length,
       problemTopics: problemTopics.length,

@@ -286,12 +286,12 @@ describe("Dependency: xlsx removal", () => {
     const fs = await import("fs");
     const path = await import("path");
     // The parse route is a server-side API route (no "use server" needed in App Router)
-    // but it MUST have requireAdmin for authentication
+    // but it MUST have the shared content-admin API guard for authentication
     const routePath = path.join(process.cwd(), "src/app/api/admin/contests-import/parse/route.ts");
     const routeContent = fs.readFileSync(routePath, "utf-8");
 
     // App Router API routes are server-side by default
-    expect(routeContent).toContain("requireAdmin");
+    expect(routeContent).toContain("requireContentAdminApi");
   });
 
   it("should use exceljs (not xlsx) in parser", async () => {

@@ -16,15 +16,15 @@ Instructions for future Codex agents working on Englishphile:
 - Contest builders must use `PUBLISHED` problems by default and server-validate that selected contest problems are published.
 - Contest leaderboards must not expose user email.
 - Student self-practice and diagnostic recommendations are primary.
-- Do not make classroom or assignment features primary in student navigation, dashboard, landing page, or product positioning. They can remain hidden secondary/legacy admin-compatible tools.
+- Classroom and assignment application features are decommissioned. Do not expose or restore them without an explicit product-policy change.
 - Do not create public teacher signup. Public signup must create normal learner accounts only.
-- Public signup must never expose `STUDENT`/`TEACHER`/`ADMIN` role choices.
-- Owner/admin access is controlled by admin-compatible roles and `OWNER_EMAIL`; do not automatically promote random public users.
+- Public signup must never expose role choices. Supported user roles are `STUDENT` and `ADMIN`.
+- Owner/admin access is controlled by the stored `ADMIN` role or `OWNER_EMAIL`; do not automatically promote random public users.
 - Keep `OWNER_EMAIL` behavior clear in docs and UI. Public users still sign up as learners even when an owner email is configured.
 - Admin/owner route protection is mandatory for `/admin`, `/admin/*`, and admin API routes.
 - Protect admin APIs as well as admin pages; return or redirect with friendly no-access behavior and never leak admin data to learners.
 - Normal learners must not see admin navigation or admin data. Use friendly no-access UI for unauthorized admin access.
-- Hide teacher/classroom/assignment concepts from the main student flow unless the user explicitly asks to revive legacy tools.
+- Do not expose teacher, classroom, assignment, join-code, or manual-grading concepts in the application UI.
 - Site-owner/admin wording should use admin, quản trị, or người điều hành in visible UI.
 - Avoid unnecessary chip/tag sections that make the UI look AI-generated. Topic tags should be subtle metadata or deliberate filters, never large empty chip-only cards.
 - Keep student-facing UI polished, calm, academic, spacious, and human-designed.
@@ -56,18 +56,18 @@ Instructions for future Codex agents working on Englishphile:
 - Do not confuse `ContentStatus` with `UserProblemStatus`; one is editorial lifecycle, the other is learner progress.
 - Always validate JSON fields before saving question edits.
 - Do not bypass publish validation rules. Problems cannot publish without questions, and objective questions need valid answer/options data.
-- Preserve legacy classroom permissions if touching those routes: students can only see their own joined classes and assigned work, admin-compatible managers can manage only their own classes/assignments unless they are `ADMIN`.
-- Do not expose admin-only or legacy class data, student lists, or submission tables to students.
+- Classroom, assignment, join-code, teacher-dashboard, assignment-submission, and manual-grading application surfaces are retired. Do not restore them without an explicit product-policy change.
+- Preserve retained classroom/assignment tables and historical rows until a separately approved data-retention migration.
 - Only `PUBLISHED` problems can be assigned by default.
 - Keep `AssignmentSubmission` separate from single-problem `Submission` unless a future refactor intentionally changes the data model.
 - Assignment completion should continue to create normal `Submission`/`SubmissionAnswer` records so wrong-question review and progress tracking keep working.
 - Do not break existing wrong-question, problem-solving, import, review, or content lifecycle flows while changing classroom features.
-- Preserve analytics permission boundaries: students see only their own analytics; admin-compatible users see only authorized legacy classes/assignments/students unless `ADMIN`.
+- Preserve analytics permission boundaries: students see only their own independent-practice analytics.
 - Do not expose one student’s analytics or submissions to another student.
-- Do not count needs-review writing or non-exact sentence transformation answers as correct/incorrect until an admin-compatible grader saves a manual grade.
+- Do not count needs-review writing or non-exact sentence transformation answers as correct/incorrect; the manual-grading application surface is retired.
 - Keep recommendation logic deterministic unless the user explicitly asks for AI recommendations.
 - Student recommendations must use `PUBLISHED` problems only.
-- Keep manual grading auditable through `ManualGrade`; do not silently overwrite grading behavior without updating recalculation logic.
+- Treat retained `ManualGrade` rows as historical data; no active application surface may create or update them.
 - Preserve the content pack workflow under `/admin/content-packs`, `/admin/content-qa`, and `/admin/import`.
 - Do not bypass content QA for bulk publish. QA `ERROR` items must not be bulk-published.
 - Do not expose content pack pages, QA reports, import batches, or other admin-only pack data to students.

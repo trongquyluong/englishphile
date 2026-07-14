@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Clock, ListChecks, Lock, Trophy } from "lucide-react";
 import { startContestAction, submitAccessCodeAction } from "@/app/contests/actions";
-import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug, getContestAvailability } from "@/lib/contests";
 import { validateContestAccessGrant } from "@/lib/security/access-grant";
 import { contestStatusLabels, contestTypeLabels } from "@/lib/labels";
@@ -43,7 +43,7 @@ export default async function ContestDetailPage({ params, searchParams }: PagePr
   const activeAttempt = latestAttempt?.status === "IN_PROGRESS" ? latestAttempt : null;
 
   // Check private access (admins bypass the gate; students must have a valid grant)
-  const isAdmin = isAdminUser(user);
+  const isAdmin = isContentAdminUser(user);
   const isPrivate = contest.visibility === "PRIVATE";
 
   // Validate grant if user is authenticated

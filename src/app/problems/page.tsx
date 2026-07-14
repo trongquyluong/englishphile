@@ -2,7 +2,7 @@ import type { Difficulty, Prisma, ProblemStatus, SkillType } from "@prisma/clien
 import { EmptyState } from "@/components/common/EmptyState";
 import { ProblemFilters } from "@/components/problems/ProblemFilters";
 import { ProblemTable } from "@/components/problems/ProblemTable";
-import { getCurrentUser, isAdminUser } from "@/lib/auth/session";
+import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
 import { difficultyOrder, skillOrder } from "@/lib/labels";
 import type { ProblemListItem } from "@/lib/problem-types";
 import { prisma } from "@/lib/prisma";
@@ -29,7 +29,7 @@ export default async function ProblemsPage({ searchParams }: PageProps) {
   const source = getParam(params, "source");
   const personalized = getParam(params, "personalized");
   const includeDrafts = getParam(params, "includeDrafts") === "1";
-  const canManageContent = isAdminUser(user);
+  const canManageContent = isContentAdminUser(user);
 
   const where: Prisma.ProblemWhereInput = canManageContent && includeDrafts ? {} : { contentStatus: "PUBLISHED" };
 

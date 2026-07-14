@@ -489,17 +489,17 @@ async function main() {
     },
   });
 
-  const teacher = await prisma.user.create({
+  const admin = await prisma.user.create({
     data: {
-      email: "teacher@example.com",
+      email: "admin@example.com",
       passwordHash: hashPassword("password123"),
-      displayName: "Giáo viên Demo",
-      role: "TEACHER",
+      displayName: "Quản trị Demo",
+      role: "ADMIN",
       profile: {
         create: {
           targetExam: "HSG/Chuyên Anh",
           schoolTarget: "Nhiều trường",
-          level: "Teacher",
+          level: "Admin",
         },
       },
     },
@@ -552,7 +552,7 @@ async function main() {
         contentStatus: "PUBLISHED",
         publishedAt: new Date(),
         reviewedAt: new Date(),
-        reviewedById: teacher.id,
+        reviewedById: admin.id,
         orderIndex: index,
         problemTopics: {
           create: seed.topics.map((topicName) => ({ topicId: topicMap.get(topicName).id })),
@@ -579,7 +579,7 @@ async function main() {
           metadata: question.answer?.note ? { note: question.answer.note } : null,
           contentStatus: "PUBLISHED",
           reviewedAt: new Date(),
-          reviewedById: teacher.id,
+          reviewedById: admin.id,
           orderIndex: question.orderIndex ?? 0,
         },
       });
@@ -619,83 +619,7 @@ async function main() {
     }
   }
 
-  const classroom = await prisma.classroom.create({
-    data: {
-      name: "Chuyên Anh 9A",
-      description: "Lớp demo cho Phase 4 classroom và assignments.",
-      teacherId: teacher.id,
-      joinCode: "ANH9A",
-      members: {
-        create: [
-          { userId: teacher.id, role: "TEACHER" },
-          { userId: student.id, role: "STUDENT" },
-        ],
-      },
-    },
-  });
-
   if (demoProblems.length >= 3) {
-    const demoAssignment = await prisma.assignment.create({
-      data: {
-        title: "Bài giao demo: Use of English nền tảng",
-        description: "Bài giao mẫu dùng nội dung seed đã xuất bản.",
-        classroomId: classroom.id,
-        createdById: teacher.id,
-        assignmentType: "HOMEWORK",
-        status: "PUBLISHED",
-        dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-        timeLimitMinutes: 45,
-        showAnswersAfterSubmit: true,
-        problems: {
-          create: demoProblems.slice(0, 4).map((problem, index) => ({
-            problemId: problem.id,
-            orderIndex: index,
-            points: 1,
-          })),
-        },
-      },
-    });
-
-    await prisma.assignment.create({
-      data: {
-        title: "Mock test draft: Chuyên Anh 45 phút",
-        description: "Đề mock mẫu ở trạng thái nháp để giáo viên chỉnh trước khi giao.",
-        classroomId: classroom.id,
-        createdById: teacher.id,
-        assignmentType: "MOCK_TEST",
-        status: "DRAFT",
-        dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14),
-        timeLimitMinutes: 45,
-        showAnswersAfterSubmit: true,
-        problems: {
-          create: demoProblems.map((problem, index) => ({
-            problemId: problem.id,
-            orderIndex: index,
-            points: 1,
-          })),
-        },
-      },
-    });
-
-    const assignmentSubmission = await prisma.assignmentSubmission.create({
-      data: {
-        assignmentId: demoAssignment.id,
-        userId: student.id,
-        status: "NEEDS_REVIEW",
-        startedAt: new Date(Date.now() - 1000 * 60 * 38),
-        submittedAt: new Date(Date.now() - 1000 * 60 * 4),
-        score: 0,
-        total: 0,
-        timeSpentSeconds: 34 * 60,
-        answers: {},
-        resultJson: {},
-      },
-    });
-
-    let assignmentScore = 0;
-    let assignmentTotal = 0;
-    const problemResultJson = [];
-
     function firstAccepted(answer) {
       if (!answer || typeof answer !== "object") return "";
       if (Array.isArray(answer.accepted)) return answer.accepted[0] ?? "";
@@ -778,17 +702,6 @@ async function main() {
         },
       });
 
-      await prisma.assignmentProblemSubmission.create({
-        data: {
-          assignmentSubmissionId: assignmentSubmission.id,
-          problemId: problem.id,
-          submissionId: submission.id,
-          score,
-          total,
-          status,
-        },
-      });
-
       await prisma.userProblemStatus.upsert({
         where: { userId_problemId: { userId: student.id, problemId: problem.id } },
         create: {
@@ -807,19 +720,7 @@ async function main() {
         },
       });
 
-      assignmentScore += score;
-      assignmentTotal += total;
-      problemResultJson.push({ problemId: problem.id, score, total, status });
     }
-
-    await prisma.assignmentSubmission.update({
-      where: { id: assignmentSubmission.id },
-      data: {
-        score: assignmentScore,
-        total: assignmentTotal,
-        resultJson: { problems: problemResultJson },
-      },
-    });
   }
 }
 

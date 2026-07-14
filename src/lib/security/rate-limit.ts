@@ -153,11 +153,6 @@ export const RATE_LIMITS = {
     subject: userId,
     policy: { limit: 60, windowSeconds: 60 },
   }),
-  ASSIGNMENT_SUBMIT: (userId: string): ConfiguredRateLimit => ({
-    action: "assignment-submit",
-    subject: userId,
-    policy: { limit: 12, windowSeconds: 60 },
-  }),
 } as const;
 
 const RATE_LIMIT_CLEANUP_BATCH = 500;
