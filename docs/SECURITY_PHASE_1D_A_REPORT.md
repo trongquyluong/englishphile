@@ -1,9 +1,10 @@
 # Englishphile Security Phase 1D-A Report
 
 **Date:** 2026-07-17
-**Branch:** `security-phase-1d-a-diagnostic-answer-exposure`
+**Implementation branch:** `security-phase-1d-a-diagnostic-answer-exposure`
+**Production reconciliation branch:** `docs/phase1d-a-production-verification`
 **Finding:** H-10 — diagnostic and learner answer-key exposure
-**State:** Local implementation remediated; owner-attested isolated Preview sentinel verification passed for the tested boundaries at commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b`; Production deployment, Production verification, and PostgreSQL integration remain pending
+**State:** Remediated in repository code; PR #10 merged at `ce8c9bfc7b4f2135158960e11ab486dd7fffbb59`; owner-attested isolated Preview sentinel checks and selected Production structural, response-shape, authorization, regression, and runtime-log checks passed; PostgreSQL integration and ongoing monitoring remain outstanding
 
 ## Scope and disposition
 
@@ -11,7 +12,20 @@ Phase 1D-A applies the confirmed policy that canonical answers remain server-sid
 
 The original H-10 condition was exploitable with High severity because raw question records and answer-derived feedback crossed learner Server Component, Client Component, API, and stored diagnostic-result boundaries. Anonymous visitors could inspect published problem question props; authenticated learners could inspect random-practice/diagnostic props and harvest canonical text from submission feedback. Authorization and replay controls limited cross-user diagnostic reads but did not make answer-key fields learner-safe.
 
-H-10 is remediated in local code through positive allowlists and server-only scoring. Owner-attested isolated Preview evidence dated 2026-07-17 verifies the tested browser/RSC and response boundaries described below. This report does not mark H-10 deployed to or verified in Production.
+H-10 is remediated in repository code through positive allowlists and server-only scoring. PR #10 merged, and owner-attested evidence dated 2026-07-17 records both isolated Preview sentinel verification and selected Production verification at the explicitly bounded levels described below.
+
+## Repository evidence
+
+- PR #10 merged into `main` at merge commit `ce8c9bfc7b4f2135158960e11ab486dd7fffbb59`.
+- Learner question, submission, attempt-summary, and diagnostic-result DTOs use positive field allowlists rather than spreading persistence records.
+- Practice responses use fixed generic feedback that is not derived from canonical answers or explanations.
+- Diagnostic scoring remains server-side and `scoreDiagnosticAttempt` returns no sensitive result object.
+- Newly finalized diagnostic metadata stores only allowlisted scoring/reporting fields; it does not duplicate canonical answers or answer-bearing feedback.
+- Historical diagnostic rows were not rewritten, and learner-facing parsing ignores sensitive legacy keys through an allowlist.
+- Diagnostic result reads require the current user ID, finalized `COMPLETED`/`NEEDS_REVIEW` status, and non-null completion; the DTO mapper independently enforces finalized status and completion.
+- Admin editor/preview mapping remains separate, server-only, and answer-complete.
+- Phase 1D-A has no schema change or migration.
+- The committed local suite remains 366 tests: 242 runtime/helper/handler/action/page tests, 8 simulations, 116 static checks, and 0 PostgreSQL integration tests.
 
 ## Learner payload behavior
 
@@ -80,7 +94,7 @@ Mocked Prisma/transaction collaborators establish production-helper behavior but
 
 The complete suite contains 366 tests: 242 runtime/helper/handler/action/page tests, 8 simulations, 116 explicitly static checks, and 0 PostgreSQL integration tests.
 
-## Verification results
+## Local verification results (historical repository checkpoint)
 
 - `npx.cmd prisma validate` — passed.
 - `npx.cmd prisma generate` — passed with Prisma 6.19.3; no schema change was generated.
@@ -90,11 +104,11 @@ The complete suite contains 366 tests: 242 runtime/helper/handler/action/page te
 - `npm.cmd run build` — passed. Dotenv files were temporarily held by pathname without reading them, and non-URL synthetic configuration caused existing build-time health queries to fail validation before any endpoint or database connection attempt.
 - `git diff --check` and `git diff --cached --check` — passed after all intended Phase 1D-A files were staged.
 
-No online or offline npm audit is part of this correction pass. The four previously documented moderate advisories remain unresolved; the prior offline zero result is not authoritative remediation evidence. No migration, seed, import, export, deployment, commit, or push was run.
+No online or offline npm audit was part of that correction pass. The four previously documented moderate advisories remain unresolved; the prior offline zero result is not authoritative remediation evidence. No migration, seed, import, export, deployment, commit, or push was run during that local verification checkpoint.
 
 ## Owner-attested isolated Preview operational reconciliation (2026-07-17)
 
-PR #10 is recorded as Draft/open for this reconciliation; no provider query or PR-state mutation was performed during the documentation pass. Commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` reached READY in isolated Preview, and health passed with the database connected.
+At this historical Preview checkpoint, PR #10 was Draft/open. It subsequently merged as recorded in the Production section below. Code commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` reached READY in isolated Preview, and health passed with the database connected.
 
 The owner attests that the following tested boundaries passed:
 
@@ -109,22 +123,53 @@ The owner attests that the following tested boundaries passed:
 - ordinary `STUDENT` admin denial passed; and
 - checked Preview runtime logs reported no runtime errors or sensitive values.
 
-The sentinel values were synthetic and non-sensitive, and their exact values are intentionally not recorded. No account identity, cookie, deployment ID, infrastructure hostname, database identifier, or protected URL is recorded. Browser and RSC inspection was owner-attested operational evidence; browser automation is not claimed. This evidence does not establish PostgreSQL integration, transaction/concurrency behavior, database-row contents, or historical-row cleanup. Synthetic Preview fixture cleanup was not reported. Production deployment and Production verification remain pending. H-11 at-rest remediation and dependency-advisory resolution are not claimed.
+The sentinel values were synthetic and non-sensitive, and their exact values are intentionally not recorded. No account identity, cookie, deployment ID, infrastructure hostname, database identifier, or protected URL is recorded. Browser and RSC inspection was owner-attested operational evidence; browser automation is not claimed. This evidence does not establish PostgreSQL integration, transaction/concurrency behavior, database-row contents, or historical-row cleanup. Synthetic Preview fixture cleanup was not reported. At this historical checkpoint Production deployment and verification were still pending; the later selected Production evidence is recorded below. H-11 at-rest remediation and dependency-advisory resolution are not claimed.
+
+## Owner-attested selected Production operational reconciliation (2026-07-17)
+
+### Deployment
+
+- PR #10 is `MERGED`; merge commit `ce8c9bfc7b4f2135158960e11ab486dd7fffbb59` became the canonical READY Production deployment.
+- The Production deployment source was confirmed separately as that merge commit because the Vercel CLI did not report commit metadata.
+- Health returned HTTP 200 with the database connected.
+- No deployment ID, infrastructure hostname, protected URL, or provider-internal identifier is recorded.
+
+### Origin and authentication
+
+- A missing-Origin submission POST returned HTTP 403 at the origin guard.
+- A separate same-origin unauthenticated submission returned HTTP 401 at authentication.
+- These results verify distinct boundaries and are not conflated.
+
+### Learner answer boundaries
+
+- Existing published-problem HTML and its RSC payload contained none of the tested forbidden answer-key tokens.
+- Authenticated single-problem and random-practice responses contained only the expected safe fields and fixed generic feedback.
+- Diagnostic start/result remained learner-safe and aggregate-only; a nonexistent/incomplete own diagnostic attempt followed the unavailable behavior.
+- Analytics, skill analytics, wrong-question review, and contest-result review did not expose canonical-answer fields.
+- Authorized admin preview retained answer and explanation access.
+
+### Authorization, persistence, regression, and logs
+
+- Owner sign-out/sign-in and admin access passed; ordinary `STUDENT` admin denial passed.
+- Independent-practice write and persistence passed.
+- Basic contest, diagnostic, and Writing regression smoke passed.
+- Checked runtime logs reported no runtime errors or sensitive values, limited to the checked deployment/time window.
+- Git branch/status was `main`/clean at the operational checkpoint.
+
+Production used no synthetic sentinel fixtures, so this is not Production sentinel verification. The HTML/RSC evidence was structural forbidden-token inspection and is weaker than the isolated Preview synthetic-sentinel evidence. The supplied facts do not establish comprehensive browser automation, comprehensive security testing, hostile-origin testing, concurrency, rollback, timeout, exactly-once behavior, PostgreSQL integration, database-row inspection, or historical-row cleanup. The contest, diagnostic, and Writing checks were regression smoke only. No Production schema migration was needed or run for Phase 1D-A. H-11 at-rest remediation and dependency-advisory resolution are not claimed.
 
 ## Schema and migration
 
-No Prisma schema change was necessary. No migration was created, applied, or deployed. Existing persisted columns can hold the reduced JSON shape.
+No Prisma schema change was necessary, and no Phase 1D-A migration exists. No Production schema migration was needed or run for this phase. Existing persisted columns can hold the reduced JSON shape.
 
-## Remaining deployment and verification plan
+## Remaining operational verification plan
 
-1. Keep PR #10 Draft/open until the normal review decision; this documentation pass does not modify PR state.
-2. Run isolated PostgreSQL integration for finalization winner/replay behavior if separately authorized; do not inspect or rewrite historical rows as part of H-10 remediation.
-3. Deploy through the normal release process only after approval.
-4. Repeat bounded Production authorization and learner-payload smoke checks without recording identities, secrets, protected URLs, or synthetic answer values.
+1. Run isolated PostgreSQL integration for finalization winner/replay behavior if separately authorized; do not inspect or rewrite historical rows as part of H-10 remediation.
+2. Continue bounded runtime-log monitoring and repeat selected Production authorization and learner-payload checks after relevant releases.
+3. Keep future operational records free of identities, secrets, protected URLs, deployment/provider identifiers, and canonical-answer values.
 
 ## Remaining findings and Test debt
 
-- Production deployment and Production verification remain pending.
 - Synthetic Preview fixture cleanup was not reported.
 - There is no PostgreSQL integration evidence for this phase.
 - H-09 signed-session invalidation remains unresolved.
@@ -134,3 +179,7 @@ No Prisma schema change was necessary. No migration was created, applied, or dep
 - Private-contest Production smoke remains outstanding.
 - Existing PostgreSQL concurrency, rollback, timeout, recovery, and exactly-once Test debt remains.
 - Ongoing runtime-log monitoring remains an operational requirement.
+
+## Documentation-pass safety
+
+This Production reconciliation used only the supplied owner-attested runtime facts and local repository documentation. It did not access a database, environment value, endpoint, browser, logs, GitHub, Vercel, Neon, or another provider, and it did not run Prisma, typecheck, lint, tests, build, audit, migration, seed, import, export, deployment, commit, push, or PR/provider mutation operations.
