@@ -158,11 +158,11 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Independent-practice submission/persistence and basic contest, diagnostic, and Writing regression smoke passed.
 - Checked runtime logs reported no runtime errors or sensitive values.
 
-Duplicate/identity testing was not repeated in Production. The Production mutations were valid low-risk checks followed by restoration; regression checks were basic smoke; and log review covered only the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, PostgreSQL integration, or Production content-pack recovery test is claimed. H-09, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unresolved/outstanding. H-10 has a later Phase 1D-A local remediation and isolated Preview reconciliation below, but no Production deployment or Production verification. Authenticated content-pack recovery and ongoing runtime-log monitoring remain operational requirements.
+Duplicate/identity testing was not repeated in Production. The Production mutations were valid low-risk checks followed by restoration; regression checks were basic smoke; and log review covered only the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, PostgreSQL integration, or Production content-pack recovery test is claimed. H-09, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unresolved/outstanding. H-10 has a later Phase 1D-A merged remediation with isolated Preview and selected Production reconciliation below. Authenticated content-pack recovery and ongoing runtime-log monitoring remain operational requirements.
 
-## Phase 1D-A Diagnostic Answer Exposure — Local Implementation And Isolated Preview
+## Phase 1D-A Diagnostic Answer Exposure — Merged With Selected Production Checks Passed
 
-- Work is on `security-phase-1d-a-diagnostic-answer-exposure`. H-10 is remediated in the local implementation, and owner-attested isolated Preview sentinel verification passed for the tested boundaries at commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b`. It is not deployed to or verified in Production.
+- PR #10 merged into `main` at `ce8c9bfc7b4f2135158960e11ab486dd7fffbb59`. H-10 is remediated in repository code, and owner-attested evidence records that this merge commit became the canonical READY Production deployment. Isolated Preview sentinel verification also passed for the tested boundaries at code commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b`.
 - Central learner DTOs now positive-allowlist question presentation, submission results, diagnostic attempt summaries, and finalized diagnostic results. Prisma records are mapped inside Server Components or server-only selectors before learner Client Component/API/RSC boundaries.
 - Learner options contain only `id` and display `text`. Canonical answers, accepted answers, model answers, corrections, explanations, raw metadata/options, and scoring configuration are excluded. Fixed Vietnamese feedback depends only on `isCorrect`.
 - `/problems/[slug]`, `/practice/random`, `/diagnostic/start`, `/diagnostic/result`, `/api/submissions`, and `/api/practice/random` use the safe mappings. Learner analytics, skill analytics, wrong-question review, and contest-result review no longer render canonical answers or stored answer-bearing feedback.
@@ -171,15 +171,15 @@ Duplicate/identity testing was not repeated in Production. The Production mutati
 - Result reads require attempt ID plus current user ID, finalized `COMPLETED`/`NEEDS_REVIEW` status, and non-null completion. The DTO mapper independently enforces both finalized status and non-null `completedAt`; `getLatestFinishedDiagnosticAttempt` now uses the same completion predicate. Missing, foreign, incomplete, abandoned, and stale/disallowed attempts share the unavailable path.
 - A runtime test imports and invokes the real diagnostic result page. With `requireUser`, result selectors, recommendations, and `redirect` mocked, stored-ADMIN, owner-shaped STUDENT, and ordinary-STUDENT fixtures are scoped only by `requireUser().id`; query `userId`/`ownerId` values cannot select another learner. This is not cookie/session integration, and the owner-shaped fixture does not independently verify `OWNER_EMAIL` matching; existing content-admin policy tests remain that evidence.
 - Admin problem editor/preview behavior remains separate and answer-complete through a server-only admin mapper. STUDENT/ADMIN/OWNER_EMAIL policy is unchanged.
-- Operator-only portable export remains outside learner boundaries and may contain historical server-side diagnostic/contest data. No export, database, environment value, endpoint, or provider was accessed during Phase 1D-A.
+- Operator-only portable export remains outside learner boundaries and may contain historical server-side diagnostic/contest data. No export was run and historical rows were not rewritten during Phase 1D-A.
 - No Prisma schema change or migration was required or created.
 - Runtime coverage uses production DTOs, handlers, selectors, scoring, and actions with mocked Prisma/collaborator boundaries. Static checks are explicitly labeled static. Browser/RSC sentinel inspection passed only as owner-attested isolated Preview operational evidence; real PostgreSQL integration remains Test debt.
 - The complete correction-pass suite has 366 tests: 242 runtime/helper/handler/action/page tests, 8 simulations, 116 static checks, and zero PostgreSQL integration tests. Final command results are recorded in `docs/SECURITY_PHASE_1D_A_REPORT.md`. No npm audit is part of this correction pass; the prior offline zero result is not authoritative, and the four documented moderate advisories remain unresolved.
-- The focused report is `docs/SECURITY_PHASE_1D_A_REPORT.md`. H-09, H-11 at-rest storage, random-email authentication amplification, dependency advisories, private-contest smoke, and existing concurrency/rollback/recovery Test debt remain unresolved.
+- The focused report is `docs/SECURITY_PHASE_1D_A_REPORT.md`. H-09, H-11 at-rest storage, random-email authentication amplification, four moderate dependency advisories, private-contest smoke, PostgreSQL concurrency/rollback/recovery Test debt, synthetic Preview fixture-cleanup confirmation, and ongoing runtime-log monitoring remain unresolved or outstanding.
 
 ### Phase 1D-A isolated Preview reconciliation (owner-attested 2026-07-17)
 
-- PR #10 remains recorded as Draft/open. This documentation pass did not query a provider or modify PR state.
+- At this historical Preview checkpoint PR #10 was Draft/open. It subsequently merged as recorded above and in the Production reconciliation below.
 - Commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` reached READY in isolated Preview, and health passed with the database connected.
 - A missing-Origin POST was rejected with 403 by the origin guard. A same-origin unauthenticated submission was rejected with 401 by authentication.
 - Anonymous published-problem HTML/RSC and diagnostic-start HTML/RSC contained neither synthetic canonical-answer nor explanation sentinel.
@@ -188,8 +188,23 @@ Duplicate/identity testing was not repeated in Production. The Production mutati
 - Authorized admin preview retained answer/explanation access, while ordinary `STUDENT` admin denial passed.
 - Checked Preview runtime logs reported no runtime errors or sensitive values.
 - Sentinel values were synthetic and non-sensitive; their exact values are not recorded. No account identity, cookie, deployment ID, infrastructure hostname, database identifier, or protected URL is recorded.
-- Browser/RSC inspection was owner-attested operational evidence, not a repository test; browser automation is not claimed. PostgreSQL integration, transaction/concurrency verification, database-row inspection, historical-row cleanup, Production deployment, and Production verification are not claimed.
+- Browser/RSC inspection was owner-attested operational evidence, not a repository test; browser automation is not claimed. PostgreSQL integration, transaction/concurrency verification, database-row inspection, and historical-row cleanup are not claimed. Production deployment and selected verification occurred later and are recorded separately below.
 - Synthetic Preview fixture cleanup was not reported.
+
+### Phase 1D-A selected Production reconciliation (owner-attested 2026-07-17)
+
+- PR #10 is `MERGED`. Merge commit `ce8c9bfc7b4f2135158960e11ab486dd7fffbb59` became the canonical READY Production deployment, and its deployment source was confirmed separately because the Vercel CLI did not report commit metadata.
+- Health returned HTTP 200 with the database connected. No deployment ID, infrastructure hostname, protected URL, or provider-internal identifier is recorded.
+- A missing-Origin submission POST returned 403 at the origin guard; a separate same-origin unauthenticated submission returned 401 at authentication.
+- Existing published-problem HTML/RSC contained none of the tested forbidden answer-key tokens. Authenticated single-problem and random-practice responses contained only expected safe fields and fixed generic feedback.
+- Diagnostic start/result remained learner-safe and aggregate-only; a nonexistent/incomplete own diagnostic attempt followed unavailable behavior. Analytics, skill analytics, wrong-question review, and contest-result review exposed no canonical-answer fields.
+- Authorized admin preview retained answer/explanation access. Owner sign-out/sign-in and admin access passed, and ordinary `STUDENT` admin denial passed.
+- Independent-practice write/persistence and basic contest, diagnostic, and Writing regression smoke passed.
+- Checked runtime logs reported no runtime errors or sensitive values within the checked deployment/time window. Git branch/status was `main`/clean at the operational checkpoint.
+- Production used no synthetic sentinel fixtures, so Production sentinel verification is not claimed. Its HTML/RSC evidence was structural forbidden-token inspection and is weaker than isolated Preview sentinel evidence.
+- No comprehensive browser automation, security testing, hostile-origin testing, concurrency, rollback, timeout, exactly-once behavior, PostgreSQL integration, database-row inspection, or historical-row cleanup is claimed. The contest/diagnostic/Writing checks were regression smoke only.
+- No Production schema migration was needed or run for Phase 1D-A. H-11 and dependency-advisory remediation are not claimed.
+- The Production documentation reconciliation used supplied owner-attested facts only; it did not access a database, environment value, endpoint, browser, logs, GitHub, Vercel, Neon, or another provider and did not modify PR/provider state.
 
 ## What Worked
 
