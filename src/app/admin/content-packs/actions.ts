@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createContentAuditLog } from "@/lib/admin/audit";
-import { setProblemContentStatus } from "@/lib/admin/problems";
+import { bulkUpdateProblemStatus } from "@/lib/admin/problems";
 import { requireAdmin } from "@/lib/auth/session";
 import { getContentQaReport } from "@/lib/content-packs/qa";
 import { prisma } from "@/lib/prisma";
+import { ADMIN_RESOURCE_UNAVAILABLE, lockContentPackForAdminMutation } from "@/lib/admin/mutation-locks";
+import { requireContentAdminInTransaction } from "@/lib/auth/content-admin-transaction";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -20,17 +22,17 @@ function redirectWith(path: string, result: { ok: boolean; message: string }): n
 export async function archiveContentPackAction(formData: FormData) {
   const user = await requireAdmin();
   const contentPackId = text(formData, "contentPackId");
-  const before = await prisma.contentPack.findUnique({ where: { id: contentPackId } });
-  if (!before) redirectWith("/admin/content-packs", { ok: false, message: "Không tìm thấy gói dữ liệu." });
-  const updated = await prisma.contentPack.update({ where: { id: contentPackId }, data: { status: "ARCHIVED" } });
-  await createContentAuditLog({
-    userId: user.id,
-    entityType: "ContentPack",
-    entityId: contentPackId,
-    action: "ARCHIVED",
-    beforeJson: before,
-    afterJson: updated,
+  const archived = await prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, user.id);
+    const locked = await lockContentPackForAdminMutation(tx, contentPackId);
+    if (!locked) return false;
+    const before = await tx.contentPack.findUnique({ where: { id: locked.id } });
+    if (!before) return false;
+    const updated = await tx.contentPack.update({ where: { id: contentPackId }, data: { status: "ARCHIVED" } });
+    await createContentAuditLog({ userId: user.id, entityType: "ContentPack", entityId: contentPackId, action: "ARCHIVED", beforeJson: before, afterJson: updated }, tx);
+    return true;
   });
+  if (!archived) redirectWith("/admin/content-packs", { ok: false, message: "Tài nguyên không tồn tại hoặc không còn khả dụng." });
   revalidatePath("/admin/content-packs");
   revalidatePath(`/admin/content-packs/${contentPackId}`);
   redirectWith("/admin/content-packs", { ok: true, message: "Đã lưu trữ gói dữ liệu." });
@@ -44,28 +46,26 @@ export async function contentPackBulkAction(formData: FormData) {
     where: { id: contentPackId },
     include: { problems: { select: { id: true } } },
   });
-  if (!contentPack) redirectWith("/admin/content-packs", { ok: false, message: "Không tìm thấy gói dữ liệu." });
+  if (!contentPack) redirectWith("/admin/content-packs", { ok: false, message: ADMIN_RESOURCE_UNAVAILABLE });
 
   if (intent === "publish-safe") {
     const report = await getContentQaReport({ contentPackId });
     const safeIds = report.problems.filter((problem) => problem.canPublish).map((problem) => problem.problemId);
-    let published = 0;
-    for (const problemId of safeIds) {
-      const result = await setProblemContentStatus(problemId, "PUBLISHED", user.id);
-      if (result.ok) published += 1;
-    }
+    const result = safeIds.length
+      ? await bulkUpdateProblemStatus(safeIds, "PUBLISHED", user.id, { qaRequirement: "safe", contentPackId })
+      : { ok: true, message: "Không có bài an toàn để publish." };
+    if (!result.ok) redirectWith(`/admin/content-packs/${contentPackId}`, result);
     revalidatePath(`/admin/content-packs/${contentPackId}`);
     revalidatePath("/admin/content-qa");
     redirectWith(`/admin/content-packs/${contentPackId}`, {
       ok: true,
-      message: `Đã publish ${published} bài không có lỗi QA. Bài có lỗi bị bỏ qua.`,
+      message: `Đã publish ${safeIds.length} bài không có lỗi QA. Bài có lỗi bị bỏ qua.`,
     });
   }
 
   if (intent === "needs-review") {
-    for (const problem of contentPack.problems) {
-      await setProblemContentStatus(problem.id, "NEEDS_REVIEW", user.id);
-    }
+    const result = await bulkUpdateProblemStatus(contentPack.problems.map((problem) => problem.id), "NEEDS_REVIEW", user.id, { contentPackId });
+    if (!result.ok) redirectWith(`/admin/content-packs/${contentPackId}`, result);
     revalidatePath(`/admin/content-packs/${contentPackId}`);
     redirectWith(`/admin/content-packs/${contentPackId}`, { ok: true, message: "Đã đánh dấu toàn bộ gói cần duyệt." });
   }
@@ -73,8 +73,9 @@ export async function contentPackBulkAction(formData: FormData) {
   if (intent === "archive-errors") {
     const report = await getContentQaReport({ contentPackId });
     const errorIds = report.problems.filter((problem) => problem.errors > 0).map((problem) => problem.problemId);
-    for (const problemId of errorIds) {
-      await setProblemContentStatus(problemId, "ARCHIVED", user.id);
+    if (errorIds.length) {
+      const result = await bulkUpdateProblemStatus(errorIds, "ARCHIVED", user.id, { qaRequirement: "errors", contentPackId });
+      if (!result.ok) redirectWith(`/admin/content-packs/${contentPackId}`, result);
     }
     revalidatePath(`/admin/content-packs/${contentPackId}`);
     redirectWith(`/admin/content-packs/${contentPackId}`, { ok: true, message: `Đã lưu trữ ${errorIds.length} bài có lỗi QA.` });
@@ -92,19 +93,17 @@ export async function contentQaBulkAction(formData: FormData) {
   if (intent === "publish-safe") {
     const report = await getContentQaReport({ problemIds });
     const safeIds = report.problems.filter((problem) => problem.canPublish).map((problem) => problem.problemId);
-    let published = 0;
-    for (const problemId of safeIds) {
-      const result = await setProblemContentStatus(problemId, "PUBLISHED", user.id);
-      if (result.ok) published += 1;
-    }
+    const result = safeIds.length
+      ? await bulkUpdateProblemStatus(safeIds, "PUBLISHED", user.id, { qaRequirement: "safe" })
+      : { ok: true, message: "Không có bài an toàn để publish." };
+    if (!result.ok) redirectWith("/admin/content-qa", result);
     revalidatePath("/admin/content-qa");
-    redirectWith("/admin/content-qa", { ok: true, message: `Đã publish ${published} bài không có lỗi QA.` });
+    redirectWith("/admin/content-qa", { ok: true, message: `Đã publish ${safeIds.length} bài không có lỗi QA.` });
   }
 
   if (intent === "needs-review" || intent === "archive") {
-    for (const problemId of problemIds) {
-      await setProblemContentStatus(problemId, intent === "archive" ? "ARCHIVED" : "NEEDS_REVIEW", user.id);
-    }
+    const result = await bulkUpdateProblemStatus(problemIds, intent === "archive" ? "ARCHIVED" : "NEEDS_REVIEW", user.id);
+    if (!result.ok) redirectWith("/admin/content-qa", result);
     revalidatePath("/admin/content-qa");
     redirectWith("/admin/content-qa", {
       ok: true,

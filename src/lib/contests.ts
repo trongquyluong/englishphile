@@ -8,6 +8,8 @@ import {
   type LockedContestStartSnapshot,
 } from "@/lib/security/contest-start-decision";
 import { claimSingleWinner } from "@/lib/security/replay-guard";
+import { lockContestForAdminMutation, shareLockPublishedProblems } from "@/lib/admin/mutation-locks";
+import { requireContentAdminInTransaction } from "@/lib/auth/content-admin-transaction";
 
 export type ContestWithProblems = Prisma.ContestGetPayload<{
   include: {
@@ -46,6 +48,37 @@ export function parseContestStatus(value: string): ContestStatus {
 export function parseContestVisibility(value: string): ContestVisibility {
   if (value === "PUBLIC" || value === "PRIVATE" || value === "UNLISTED") return value;
   return "PUBLIC";
+}
+
+export type LegacyContestScheduleResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
+export function validateLegacyContestSchedule(data: {
+  status: ContestStatus;
+  durationMinutes?: number | null;
+  startsAt?: Date | null;
+  endsAt?: Date | null;
+}, now = new Date()): LegacyContestScheduleResult {
+  // Draft, archived, and ended records remain editable historical content;
+  // active schedule constraints apply only when the submitted state is active.
+  if (!["SCHEDULED", "LIVE"].includes(data.status)) return { ok: true };
+  if (data.durationMinutes !== null && data.durationMinutes !== undefined && data.durationMinutes <= 0) {
+    return { ok: false, message: "Thời lượng contest phải lớn hơn 0." };
+  }
+  if (data.startsAt && data.endsAt && data.endsAt <= data.startsAt) {
+    return { ok: false, message: "Thời gian kết thúc phải sau thời gian bắt đầu." };
+  }
+  if (data.endsAt && data.endsAt <= now) {
+    return { ok: false, message: "Contest đã kết thúc nên không thể đặt ở trạng thái đang hoạt động." };
+  }
+  if (data.status === "SCHEDULED" && (!data.startsAt || data.startsAt <= now)) {
+    return { ok: false, message: "Contest đã lên lịch cần thời gian bắt đầu trong tương lai." };
+  }
+  if (data.status === "LIVE" && data.startsAt && data.startsAt > now) {
+    return { ok: false, message: "Contest chưa đến thời gian bắt đầu nên chưa thể đặt LIVE." };
+  }
+  return { ok: true };
 }
 
 export function getPublicContestWhere(now = new Date()): Prisma.ContestWhereInput {
@@ -279,6 +312,16 @@ export function scoreContest(
   };
 }
 
+type LegacyContestMutationFailure = {
+  ok: false;
+  kind: "validation" | "unavailable";
+  message: string;
+};
+
+export type LegacyContestMutationResult =
+  | { ok: true; contest: Contest }
+  | LegacyContestMutationFailure;
+
 export async function createContest(data: {
   title: string;
   slug?: string;
@@ -291,12 +334,19 @@ export async function createContest(data: {
   endsAt?: Date | null;
   sourceName?: string | null;
   rules?: string | null;
-  createdById?: string;
   problems: Array<{ problemId: string; section: string; orderIndex: number; points?: number | null }>;
-}) {
+}, userId: string): Promise<LegacyContestMutationResult> {
   const slug = data.slug?.trim() || generateSlug(data.title);
-  return prisma.contest.create({
-    data: {
+  const schedule = validateLegacyContestSchedule(data);
+  if (!schedule.ok) return { ok: false, kind: "validation", message: schedule.message };
+  return prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, userId);
+    const problemIds = data.problems.map((problem) => problem.problemId);
+    const published = await shareLockPublishedProblems(tx, problemIds);
+    if (published.length !== problemIds.length) {
+      return { ok: false, kind: "unavailable", message: "Tài nguyên không tồn tại hoặc không còn khả dụng." };
+    }
+    const contest = await tx.contest.create({ data: {
       title: data.title.trim(),
       slug,
       description: data.description || null,
@@ -308,7 +358,7 @@ export async function createContest(data: {
       endsAt: data.endsAt,
       sourceName: data.sourceName || null,
       rules: data.rules || null,
-      createdById: data.createdById,
+      createdById: userId,
       problems: {
         create: data.problems.map((problem, index) => ({
           problemId: problem.problemId,
@@ -317,7 +367,8 @@ export async function createContest(data: {
           points: problem.points,
         })),
       },
-    },
+    } });
+    return { ok: true, contest };
   });
 }
 
@@ -334,15 +385,25 @@ export async function updateContest(contestId: string, data: {
   sourceName?: string | null;
   rules?: string | null;
   problems: Array<{ problemId: string; section: string; orderIndex: number; points?: number | null }>;
-}) {
+}, userId: string): Promise<LegacyContestMutationResult> {
   const slug = data.slug?.trim() || generateSlug(data.title);
+  const schedule = validateLegacyContestSchedule(data);
+  if (!schedule.ok) return { ok: false, kind: "validation", message: schedule.message };
 
   // This legacy editor always submits visibility. Invalidate grants on every
   // update so concurrent PRIVATE -> PUBLIC -> PRIVATE transitions cannot reuse
   // an earlier grant. The update and deletion share one transaction.
   return prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, userId);
+    const locked = await lockContestForAdminMutation(tx, contestId);
+    if (!locked) return { ok: false, kind: "unavailable", message: "Tài nguyên không tồn tại hoặc không còn khả dụng." };
+    const problemIds = data.problems.map((problem) => problem.problemId);
+    const published = await shareLockPublishedProblems(tx, problemIds);
+    if (published.length !== problemIds.length) {
+      return { ok: false, kind: "unavailable", message: "Tài nguyên không tồn tại hoặc không còn khả dụng." };
+    }
     const contest = await tx.contest.update({
-      where: { id: contestId },
+      where: { id: locked.id },
       data: {
         title: data.title.trim(),
         slug,
@@ -367,8 +428,8 @@ export async function updateContest(contestId: string, data: {
         },
       },
     });
-    await tx.contestAccessGrant.deleteMany({ where: { contestId } });
-    return contest;
+    await tx.contestAccessGrant.deleteMany({ where: { contestId: locked.id } });
+    return { ok: true, contest };
   });
 }
 

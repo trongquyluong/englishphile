@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 function json(value: unknown) {
@@ -11,8 +12,8 @@ export async function createContentAuditLog(input: {
   action: "CREATED" | "UPDATED" | "PUBLISHED" | "ARCHIVED" | "REVIEWED" | "RESTORED";
   beforeJson?: unknown;
   afterJson?: unknown;
-}) {
-  return prisma.contentAuditLog.create({
+}, db: Prisma.TransactionClient | typeof prisma = prisma) {
+  return db.contentAuditLog.create({
     data: {
       userId: input.userId,
       entityType: input.entityType,

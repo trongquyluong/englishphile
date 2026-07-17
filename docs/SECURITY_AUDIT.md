@@ -944,7 +944,7 @@ Only file extension is checked. A file named `malicious.xlsx` containing arbitra
 
 ---
 
-#### M-06: No Transaction Rollback on Partial JSON/CSV Import
+#### M-06: No Transaction Rollback on Partial JSON/CSV Import (original finding; superseded by the Phase 1C-B addendum)
 
 **Severity:** Medium
 **CWE:** CWE-563: Unintended Data Corruption
@@ -955,7 +955,7 @@ Only file extension is checked. A file named `malicious.xlsx` containing arbitra
 - `src/lib/import/json-importer.ts` (lines 59–71)
 - `src/lib/import/csv-importer.ts` (lines 239–251)
 
-**Evidence:** Import batch commits each problem individually without wrapping the entire operation in a transaction. If `createProblemWithQuestions` fails partway through, previously committed problems persist with no rollback.
+**Original audit evidence:** Import batches committed each problem individually without a shared transaction, so a later failure could leave earlier rows committed. The Phase 1C-B addendum records the current bounded atomic helper and the remaining PostgreSQL rollback/duration Test debt.
 
 ---
 
@@ -1283,11 +1283,11 @@ No `.github/workflows/*.yml` files exist in the repository. No CI/CD pipeline to
 
 ### Phase 3 — Medium Term (Post-Launch)
 
-15. **H-05, H-06: Complete Phase 1C-B relational integrity work** — Global admins are intentional peers; bind nested IDs to their supplied parents, close publish TOCTOU, and make authorization-sensitive bulk writes transactional
+15. **H-05, H-06: Review, deploy, and PostgreSQL-test the local Phase 1C-B remediation** — Global admins remain intentional peers; the local implementation binds nested IDs, serializes publication, and makes bounded admin writes atomic or explicitly recoverable per file. Deployment and real lock/race/rollback/duration evidence remain pending.
 16. **H-09: Replace signed cookies with server-side sessions** — Use NextAuth.js or database sessions with invalidation
 17. **M-02: Implement distributed rate limiting** — Use Upstash Redis for Vercel serverless
 18. **M-03: Fix rate limiter memory leak** — Add periodic cleanup of expired entries
-19. **M-06: Add transaction to JSON/CSV import** — Wrap full import in `prisma.$transaction`
+19. **M-06: Review/deploy bounded atomic JSON/CSV commits** — The local Phase 1C-B helper validates normalized bounds before its content transaction and rolls batch/content/pack reconciliation together; real PostgreSQL rollback and duration evidence remains pending.
 20. **H-10: Strip `correctAnswer` from diagnostic result payload** — Store server-side only
 21. **H-11: Encrypt `answersJson`** — Use separate encryption key for contest answer storage
 
@@ -1393,7 +1393,7 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 - **Cleanup Production verification — Passed for the tested scope:** owner-attested health, unauthenticated `GET`, `HEAD`, `POST`, one authenticated manual cleanup, the first automatic scheduled invocation, and initial runtime-log review matched the documented contract. The manual run affected 3 rate-limit rows and no access-grant or Writing rows; the scheduled run reported 3 total affected without a provided component breakdown. This is not permanent-delivery or comprehensive-monitoring evidence.
 - **Cleanup monitoring — Operational requirement:** ongoing Vercel/dashboard and runtime-log monitoring remains required because failed invocations are not automatically retried and one successful scheduled run cannot establish future delivery.
 - **Delivery behavior:** missed runs leave work for later reconciliation; duplicate or overlapping runs may add database work but remain data-safe because modifying statements recheck eligibility. No distributed or process-local scheduler lock exists. Bounded daily cleanup can fall behind sustained unique-subject abuse, so random-email authentication amplification remains Unresolved.
-- **Unresolved security work:** random-email authentication bucket amplification remains Phase 2; H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories remain open. PostgreSQL concurrency integration remains Test debt.
+- **Unresolved security work at this Phase 1B checkpoint:** random-email authentication bucket amplification, H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories were open. The later Phase 1C-B addendum supersedes only the H-05/H-06 local-code disposition; deployment and PostgreSQL concurrency integration remain pending/Test debt.
 
 The complete Phase 1B implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.
 
@@ -1444,6 +1444,36 @@ Current finding disposition:
 | Private-contest Production smoke | Operational requirement | Still not claimed |
 
 Full Phase 1C-A implementation details and required deployment order are recorded in `docs/SECURITY_PHASE_1C_REPORT.md`.
+
+## Phase 1C-B parent-binding and atomic-mutation addendum (2026-07-14; local implementation)
+
+Phase 1C-B does not change the global ADMIN peer policy. It addresses the remaining H-05/H-06 defects at their actual mutation boundaries: contest sections/questions are scoped through their claimed contest, problem questions are scoped through their claimed problem, and missing/cross-parent resources share one generic unavailable result.
+
+Contest builder child edits and publication now serialize on the same locked Contest row. Publication reads schedule/section/question state, validates it, and performs the final status transition within that transaction. Legacy ContestProblem replacement locks the Contest and holds deterministic shared locks on every selected published Problem. The existing learner contest-attempt advisory/row-lock design is unchanged. Every Phase 1C-B content mutation transaction first locks and reloads the current `User` row, then reapplies the stored `ADMIN`/normalized `OWNER_EMAIL` policy before any resource lock or write; a concurrent role/email update or deletion must wait for that transaction.
+
+Problem editor updates reject duplicate or foreign question IDs before writing, preserve omitted stored questions, and commit problem/question/lifecycle/audit effects together under a locked Problem row. Single and bulk status transitions validate before the first write, propagate child status, and write bounded lifecycle-only audits atomically. Bulk status accepts at most 50 unique problems and 1,000 related questions, performs set-based problem/question/audit writes, and does not copy prompts, options, answers, or child arrays into status audits. Content-pack actions lock the selected pack and recheck every target's `contentPackId` under the same ordered problem locks. Content QA selection is rechecked under those locks; global content-QA explicit-ID actions deliberately have no artificial pack requirement. Diagnostic eligibility is one bounded locked `updateMany`.
+
+JSON/CSV parsing and validation remain outside the transaction. Commit limits are recalculated from the normalized payload rather than preview summary counters: at most 25 problems, 250 questions, 100 problem-topic associations, 50 unique topics, and 25 unique sources per content transaction. Invalid or oversized plans can record a separate `FAILED` batch but create no content. Taxonomy lookup/creation is set-based and problem creation remains bounded.
+
+Multi-file content packs deliberately retain per-file partial semantics without one unbounded pack transaction. The pack stores a durable execution plan before file commits. Every entry has a server-derived ordinal key, normalized case-insensitive filename, import type, and SHA-256 digest of the exact UTF-8 content. The digest is an integrity identity, not authorization. Every occurrence of a duplicate normalized filename is rejected before validation/content commit, while its per-entry key keeps the durable failed results unambiguous. A linked `ImportBatch` stores the same complete identity; reconciliation consumes a matching batch at most once, ignores mismatched digests, and refuses multiple imported batches for one entry rather than double-counting or reporting false success.
+
+Each successful file transaction locks the pack, verifies that its complete identity is a current pending plan entry, commits its linked batch/content, and reconciles the pack summary in that same transaction. Invalid files exist as zero-row failed plan entries; infrastructure failures receive a generic durable failed-batch marker in a separate metadata transaction. Final reconciliation rejects rather than returning success if pack persistence fails. The internal `resumeContentPackId` primitive requires the exact ordered identity plan and skips an already committed matching entry, but no active Route Handler, Server Action, or UI supplies it. A normal HTTP retry currently creates a new pack. Exposing authenticated operational recovery remains an explicit future requirement; exactly-once delivery under concurrent serverless execution is not claimed.
+
+Legacy contest schedule validation now returns a typed validation result rather than the missing-resource result. Draft, archived, and ended records remain editable; future `SCHEDULED` and currently active `LIVE` states enforce internally consistent duration/start/end rules.
+
+Current disposition superseding the Phase 1C-A checkpoint:
+
+| Finding | Phase 1C-B status | Evidence boundary |
+|---|---|---|
+| H-05 contest admin IDOR/TOCTOU | Remediated in code; deployment pending | Global ADMIN peers remain intentional; active child paths are parent-bound and publication is serialized. Mocked production-helper runtime tests and static structure checks passed; no PostgreSQL race test exists. |
+| H-06 problem/content IDOR/atomicity | Remediated in local code; deployment pending | Problem/question binding, pack membership rechecks, status/audit bulk atomicity, QA recheck, diagnostic update, normalized import bounds, digest-bound unique per-file reconciliation, and duplicate-name rejection are implemented. Mocked production-helper/runtime-orchestrator tests and static checks passed; no PostgreSQL rollback/concurrency test or active recovery surface exists. |
+| Schema/migration | No change | Applied migrations are untouched; Phase 1C-B requires no migration. |
+| H-09, H-10, H-11 | Unresolved | Outside Phase 1C-B. |
+| Random-email authentication amplification | Unresolved | Outside Phase 1C-B. |
+| Four moderate dependency advisories | Unresolved | No dependency upgrade or audit fix in this pass. |
+| Private-contest Production smoke | Operational requirement | Not performed or claimed in this pass. |
+
+The final local suite contains 320 tests: 206 production runtime/helper/handler/action/orchestrator cases with mocked collaborators where stated, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. Simulated rollback assertions prove callback control flow only; they are not database integration tests. Real isolated PostgreSQL tests remain Test debt for principal/resource lock ordering, parent-lock serialization, publish/child-edit races, pack membership changes, bulk rollback, QA races, duplicate committed-identity contention, transaction duration/timeouts, and scoped predicates. An authenticated operational pack-recovery surface also remains future work. No database, endpoint, deployment, or external infrastructure was accessed by this local implementation pass.
 
 ---
 

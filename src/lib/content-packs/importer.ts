@@ -3,6 +3,30 @@ import { importCsvRows, validateCsvRows } from "@/lib/import/csv-importer";
 import { importJsonPayload, validateJsonImport } from "@/lib/import/json-importer";
 import type { ImportExecutionResult, ImportPlan } from "@/lib/import/types";
 import { prisma } from "@/lib/prisma";
+import {
+  buildContentPackExecutionManifest,
+  contentPackBatchIdentitySummary,
+  readContentPackExecutionPlan,
+  readContentPackBatchIdentity,
+  reconcileContentPackExecutionInTransaction,
+  type ContentPackFileExecution,
+  type ContentPackExecutionPlanEntry,
+} from "@/lib/content-packs/execution";
+import {
+  contentPackFileIdentityKey,
+  createContentPackFileIdentity,
+  normalizeContentPackFileName,
+  type ContentPackFileIdentity,
+} from "@/lib/content-packs/file-identity";
+import {
+  AdminResourceUnavailableError,
+  isAdminResourceUnavailableError,
+  lockContentPackForAdminMutation,
+} from "@/lib/admin/mutation-locks";
+import {
+  isContentAdminTransactionAuthorizationError,
+  requireContentAdminInTransaction,
+} from "@/lib/auth/content-admin-transaction";
 
 export type ContentPackInputFile = {
   fileName: string;
@@ -31,6 +55,7 @@ export type ContentPackManifest = {
 export type ContentPackFilePlan = {
   fileName: string;
   importType: ImportType;
+  identity: ContentPackFileIdentity;
   plan: ImportPlan | null;
   skipped: boolean;
   skipReason?: string;
@@ -62,14 +87,18 @@ export type ContentPackValidationResult = {
 
 export type ContentPackImportResult = ContentPackValidationResult & {
   contentPack: ContentPack;
-  results: Array<{
-    fileName: string;
-    status: string;
-    batchId?: string;
-    problemsImported: number;
-    questionsImported: number;
-  }>;
+  results: ContentPackFileExecution[];
 };
+
+function expectedPlanDoesNotMatchStored(
+  expected: ContentPackExecutionPlanEntry[],
+  stored: ContentPackExecutionPlanEntry[],
+) {
+  return expected.length !== stored.length || expected.some((entry, index) => {
+    const storedEntry = stored[index];
+    return !storedEntry || contentPackFileIdentityKey(entry) !== contentPackFileIdentityKey(storedEntry);
+  });
+}
 
 function safeParseManifest(content: string): ContentPackManifest | null {
   try {
@@ -103,7 +132,7 @@ export function selectImportFiles(files: ContentPackInputFile[]) {
   return {
     manifest,
     manifestFileName: manifestFile?.fileName ?? null,
-    selected: selected.sort((a, b) => a.fileName.localeCompare(b.fileName)),
+    selected,
     ignoredFiles,
   };
 }
@@ -120,13 +149,22 @@ export async function validateContentPackFiles(files: ContentPackInputFile[]): P
   const version = manifest?.version ?? null;
   const description = manifest?.description ?? null;
   const filePlans: ContentPackFilePlan[] = [];
-
+  const normalizedNameCounts = new Map<string, number>();
   for (const file of selected) {
+    const normalized = normalizeContentPackFileName(file.fileName);
+    normalizedNameCounts.set(normalized, (normalizedNameCounts.get(normalized) ?? 0) + 1);
+  }
+
+  for (const [position, file] of selected.entries()) {
     const importType = inferImportType(file.fileName);
     if (!importType) {
+      // selectImportFiles currently excludes this branch. Retain a stable
+      // failed identity if a future selector broadens accepted candidates.
+      const identity = createContentPackFileIdentity(file.fileName, "JSON", file.content, position);
       filePlans.push({
         fileName: file.fileName,
         importType: "JSON",
+        identity,
         plan: null,
         skipped: true,
         skipReason: "Chỉ hỗ trợ JSON/CSV.",
@@ -135,10 +173,25 @@ export async function validateContentPackFiles(files: ContentPackInputFile[]): P
       continue;
     }
 
+    const identity = createContentPackFileIdentity(file.fileName, importType, file.content, position);
+    if ((normalizedNameCounts.get(identity.normalizedFileName) ?? 0) > 1) {
+      filePlans.push({
+        fileName: file.fileName,
+        importType,
+        identity,
+        plan: null,
+        skipped: true,
+        skipReason: "Tên file bị trùng trong cùng gói.",
+        errors: ["Tên file bị trùng trong cùng gói."],
+      });
+      continue;
+    }
+
     const plan = importType === "CSV" ? await validateCsvRows(file.content) : await validateJsonImport(file.content);
     filePlans.push({
       fileName: file.fileName,
       importType,
+      identity,
       plan,
       skipped: false,
       errors: plan.issues.filter((issue) => issue.level === "error").map((issue) => issue.message),
@@ -186,64 +239,119 @@ export async function validateContentPackFiles(files: ContentPackInputFile[]): P
 export async function importContentPackFiles(
   files: ContentPackInputFile[],
   userId: string,
-  options: { publishImmediately?: boolean; fileName?: string } = {},
+  options: { publishImmediately?: boolean; fileName?: string; resumeContentPackId?: string } = {},
 ): Promise<ContentPackImportResult> {
   const validation = await validateContentPackFiles(files);
-  const contentPack = await prisma.contentPack.create({
-    data: {
-      name: validation.packName,
-      version: validation.version,
-      description: validation.description,
-      manifestJson: validation.manifest ? JSON.parse(JSON.stringify(validation.manifest)) : undefined,
-      fileName: options.fileName ?? (files.length === 1 ? files[0].fileName : null),
-      status: validation.summary.validFiles > 0 ? "VALIDATED" : "FAILED",
-      importedById: userId,
-    },
+  const executionPlan: ContentPackExecutionPlanEntry[] = validation.files.map((file) => ({
+    ...file.identity,
+    state: file.skipped || !file.plan?.ok ? "FAILED" : "PENDING",
+  }));
+  const contentPack = await prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, userId);
+    if (options.resumeContentPackId) {
+      const locked = await lockContentPackForAdminMutation(tx, options.resumeContentPackId);
+      if (!locked) throw new AdminResourceUnavailableError();
+      const existing = await tx.contentPack.findUnique({ where: { id: locked.id } });
+      if (!existing) throw new AdminResourceUnavailableError();
+      const storedPlan = readContentPackExecutionPlan(existing.manifestJson);
+      if (
+        expectedPlanDoesNotMatchStored(executionPlan, storedPlan)
+      ) {
+        throw new AdminResourceUnavailableError();
+      }
+      return existing;
+    }
+    return tx.contentPack.create({
+      data: {
+        name: validation.packName,
+        version: validation.version,
+        description: validation.description,
+        manifestJson: JSON.parse(JSON.stringify(buildContentPackExecutionManifest(validation.manifest, executionPlan))),
+        fileName: options.fileName ?? (files.length === 1 ? files[0].fileName : null),
+        status: validation.summary.validFiles > 0 ? "VALIDATED" : "FAILED",
+        importedById: userId,
+      },
+    });
   });
 
-  const results: ContentPackImportResult["results"] = [];
   for (const filePlan of validation.files) {
     const source = files.find((file) => file.fileName === filePlan.fileName);
     if (!source || !filePlan.plan?.ok || filePlan.skipped) {
       continue;
     }
 
-    const result: ImportExecutionResult =
-      filePlan.importType === "CSV"
-        ? await importCsvRows(source.content, userId, {
-            publishImmediately: options.publishImmediately,
+    try {
+      const result: ImportExecutionResult =
+        filePlan.importType === "CSV"
+          ? await importCsvRows(source.content, userId, {
+              publishImmediately: options.publishImmediately,
+              contentPackId: contentPack.id,
+              fileIdentity: filePlan.identity,
+            })
+          : await importJsonPayload(source.content, userId, {
+              publishImmediately: options.publishImmediately,
+              contentPackId: contentPack.id,
+              fileIdentity: filePlan.identity,
+            });
+      if (result.status !== "IMPORTED") {
+        // The atomic helper durably recorded a FAILED batch (for example,
+        // when normalized commit limits reject the plan). Final reconciliation
+        // below will reflect that failure without creating a duplicate marker.
+        continue;
+      }
+    } catch (error) {
+      if (isContentAdminTransactionAuthorizationError(error) || isAdminResourceUnavailableError(error)) {
+        throw error;
+      }
+      await prisma.$transaction(async (tx) => {
+        await requireContentAdminInTransaction(tx, userId);
+        const locked = await lockContentPackForAdminMutation(tx, contentPack.id);
+        if (!locked) throw new AdminResourceUnavailableError();
+        const importedBatches = await tx.importBatch.findMany({
+          where: {
             contentPackId: contentPack.id,
-            fileName: filePlan.fileName,
-          })
-        : await importJsonPayload(source.content, userId, {
-            publishImmediately: options.publishImmediately,
-            contentPackId: contentPack.id,
-            fileName: filePlan.fileName,
+            status: "IMPORTED",
+          },
+          select: { id: true, summary: true },
+        });
+        const identityKey = contentPackFileIdentityKey(filePlan.identity);
+        const alreadyImported = importedBatches.some((batch) => {
+          const identity = readContentPackBatchIdentity(batch.summary);
+          return identity ? contentPackFileIdentityKey(identity) === identityKey : false;
+        });
+        if (!alreadyImported) {
+          await tx.importBatch.create({
+            data: {
+              userId,
+              importType: filePlan.importType,
+              status: "FAILED",
+              summary: {
+                ...filePlan.plan!.summary,
+                ...contentPackBatchIdentitySummary(filePlan.identity),
+                problemsImported: 0,
+                questionsImported: 0,
+              },
+              errorLog: [{ level: "error", path: "import", message: "Không thể commit file này." }],
+              contentPackId: contentPack.id,
+            },
           });
-
-    results.push({
-      fileName: filePlan.fileName,
-      status: result.status,
-      batchId: result.batchId,
-      problemsImported: result.summary.problemsImported,
-      questionsImported: result.summary.questionsImported,
-    });
+        }
+        const reconciled = await reconcileContentPackExecutionInTransaction(tx, contentPack.id);
+        if (!reconciled) throw new AdminResourceUnavailableError();
+      });
+    }
   }
 
-  const importedFiles = results.filter((result) => result.status === "IMPORTED").length;
-  const nextStatus =
-    importedFiles === 0
-      ? "FAILED"
-      : importedFiles < validation.summary.validFiles
-        ? "PARTIALLY_IMPORTED"
-        : validation.summary.invalidFiles > 0
-          ? "PARTIALLY_IMPORTED"
-          : "IMPORTED";
-
-  const updatedPack = await prisma.contentPack.update({
-    where: { id: contentPack.id },
-    data: { status: nextStatus },
+  const finalized = await prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, userId);
+    const locked = await lockContentPackForAdminMutation(tx, contentPack.id);
+    if (!locked) throw new AdminResourceUnavailableError();
+    const reconciled = await reconcileContentPackExecutionInTransaction(tx, contentPack.id);
+    if (!reconciled || reconciled.summary.pendingFiles > 0) {
+      throw new Error("Không thể hoàn tất trạng thái gói dữ liệu.");
+    }
+    return reconciled;
   });
 
-  return { ...validation, contentPack: updatedPack, results };
+  return { ...validation, contentPack: finalized.contentPack, results: finalized.results };
 }
