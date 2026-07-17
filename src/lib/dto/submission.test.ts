@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { toQuestionResult, type QuestionResultDTO } from "@/lib/dto/submission";
+import { LEARNER_FEEDBACK, toQuestionResult, type QuestionResultDTO } from "@/lib/dto/submission";
 import {
   MAX_FILE_SIZE_BYTES,
   MAX_SHEETS,
@@ -25,7 +25,7 @@ import {
 describe("C-01: Correct-answer data exposure", () => {
   describe("toQuestionResult DTO", () => {
     it("should NOT include correctAnswer in the returned DTO", () => {
-      const dto = toQuestionResult("q1", true, "Chính xác.");
+      const dto = toQuestionResult("q1", true);
 
       // The DTO should have these fields
       expect(dto).toHaveProperty("questionId");
@@ -43,21 +43,18 @@ describe("C-01: Correct-answer data exposure", () => {
     });
 
     it("should work with null isCorrect (needs review)", () => {
-      const dto = toQuestionResult("q2", null, "Cần chấm tay.");
+      const dto = toQuestionResult("q2", null);
 
       expect(dto.questionId).toBe("q2");
       expect(dto.isCorrect).toBeNull();
       expect(dto).not.toHaveProperty("correctAnswer");
     });
 
-    it("should preserve feedback content without leaking answer", () => {
-      // Feedback may contain the answer in text form - this is acceptable
-      // as it's shown after submission when the user has already submitted
-      const dto = toQuestionResult("q3", false, "Chưa đúng. Đáp án là A. Giải thích.");
+    it("uses fixed feedback and cannot accept answer-bearing feedback", () => {
+      const dto = toQuestionResult("q3", false);
 
-      expect(dto.feedback).toContain("Đáp án là A");
-      // But the DTO itself should not have a separate correctAnswer field
-      expect(dto).not.toHaveProperty("correctAnswer");
+      expect(dto.feedback).toBe(LEARNER_FEEDBACK.incorrect);
+      expect(JSON.stringify(dto)).not.toContain("Đáp án là A");
     });
   });
 

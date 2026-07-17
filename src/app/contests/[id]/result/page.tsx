@@ -5,6 +5,7 @@ import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import { contestAttemptStatusLabels } from "@/lib/labels";
 import { requireUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug } from "@/lib/contests";
+import { learnerFeedbackForCorrectness } from "@/lib/dto/submission";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -25,8 +26,6 @@ type StoredContestResult = {
       rootWord?: string | null;
       studentAnswer?: unknown;
       isCorrect: boolean | null;
-      feedback?: string | null;
-      correctAnswer?: unknown;
     }>;
   }>;
   sectionResults?: Array<{
@@ -40,8 +39,6 @@ type StoredContestResult = {
       rootWord?: string | null;
       studentAnswer?: unknown;
       isCorrect: boolean | null;
-      feedback?: string | null;
-      correctAnswer?: unknown;
     }>;
   }>;
 };
@@ -129,10 +126,7 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
                         <QuestionRootWord question={{ type: item.type, prompt: item.prompt, rootWord: item.rootWord ?? null }} className="mt-2 bg-white" />
                       ) : null}
                       <p className="mt-2 text-ink-soft">Bài làm: <span className="font-semibold text-foreground">{answerText(item.studentAnswer)}</span></p>
-                      {item.isCorrect === false || item.isCorrect === null ? (
-                        <p className="mt-1 text-ink-soft">Đáp án/model: <span className="font-semibold text-foreground">{answerText(item.correctAnswer)}</span></p>
-                      ) : null}
-                      {item.feedback ? <p className="mt-1 text-ink-soft">{item.feedback}</p> : null}
+                      <p className="mt-1 text-ink-soft">{learnerFeedbackForCorrectness(item.isCorrect)}</p>
                     </div>
                   ))}
                 </div>
@@ -166,10 +160,7 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
                         <QuestionRootWord question={{ type: item.type, prompt: item.prompt, rootWord: item.rootWord ?? null }} className="mt-2 bg-white" />
                       ) : null}
                       <p className="mt-2 text-ink-soft">Bài làm: <span className="font-semibold text-foreground">{answerText(item.studentAnswer)}</span></p>
-                      {item.isCorrect === false || item.isCorrect === null ? (
-                        <p className="mt-1 text-ink-soft">Đáp án/model: <span className="font-semibold text-foreground">{answerText(item.correctAnswer)}</span></p>
-                      ) : null}
-                      {item.feedback ? <p className="mt-1 text-ink-soft">{item.feedback}</p> : null}
+                      <p className="mt-1 text-ink-soft">{learnerFeedbackForCorrectness(item.isCorrect)}</p>
                     </div>
                   ))}
                 </div>

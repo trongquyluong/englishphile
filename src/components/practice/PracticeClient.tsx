@@ -47,6 +47,7 @@ export function PracticeClient({ questions }: PracticeClientProps) {
             skillType: question.skillType,
             questionType: question.type,
             difficulty: question.difficulty,
+            contentStatus: "PUBLISHED",
             statement: question.prompt,
             instructions: null,
             estimatedMinutes: null,

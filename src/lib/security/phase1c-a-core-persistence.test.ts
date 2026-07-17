@@ -82,18 +82,30 @@ describe("Phase 1C-A core persistence runtime regressions", () => {
     mocks.questionFindMany.mockResolvedValue([]);
     mocks.queryRaw.mockResolvedValue([{ locked: "1" }]);
     mocks.diagnosticAttemptFindFirst.mockResolvedValue(null);
-    mocks.diagnosticAttemptCreate.mockResolvedValue({ id: "diagnostic-attempt-1" });
+    const createdAt = new Date("2026-07-17T00:00:00Z");
+    mocks.diagnosticAttemptCreate.mockResolvedValue({
+      id: "diagnostic-attempt-1",
+      status: "IN_PROGRESS",
+      startedAt: createdAt,
+      completedAt: null,
+      score: null,
+      total: null,
+      estimatedLevel: null,
+      createdAt,
+      updatedAt: createdAt,
+    });
 
     const result = await createDiagnosticAttempt("user-1");
 
-    expect(result).toEqual({ id: "diagnostic-attempt-1" });
-    expect(mocks.diagnosticAttemptCreate).toHaveBeenCalledWith({
+    expect(result).toEqual(expect.objectContaining({ id: "diagnostic-attempt-1", status: "IN_PROGRESS" }));
+    expect(mocks.diagnosticAttemptCreate).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({
         userId: "user-1",
         status: "IN_PROGRESS",
         recommendationJson: expect.objectContaining({ questionIds: [] }),
       }),
-    });
+      select: expect.objectContaining({ id: true, status: true }),
+    }));
   });
 
   it("still finalizes a Writing reservation and persists the submission atomically", async () => {

@@ -4,8 +4,7 @@ import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { prisma } from "@/lib/prisma";
 import { markRecommendationsCompletedForProblem } from "@/lib/recommendations";
-import type { SubmissionResultDTO } from "@/lib/dto/submission";
-import { toQuestionResult } from "@/lib/dto/submission";
+import { toSubmissionResultDTO } from "@/lib/dto/submission";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 
 function toJson(value: unknown) {
@@ -128,15 +127,16 @@ export async function POST(request: Request) {
   await markRecommendationsCompletedForProblem(user.id, body.problemId);
 
   // Build learner-safe response — correct answers are NOT sent to the client
-  const response: SubmissionResultDTO = {
+  const response = toSubmissionResultDTO({
     submissionId: submission.id,
     status,
     score,
     total,
-    answers: results.map((result) =>
-      toQuestionResult(result.question.id, result.isCorrect, result.feedback),
-    ),
-  };
+    answers: results.map((result) => ({
+      questionId: result.question.id,
+      isCorrect: result.isCorrect,
+    })),
+  });
 
   return NextResponse.json(response);
 }

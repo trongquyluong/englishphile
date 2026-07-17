@@ -7,7 +7,7 @@ import { DifficultyBadge, SkillBadge, TopicTag } from "@/components/ui/Badges";
 import { requireUser } from "@/lib/auth/session";
 import { getRecommendedProblemsForStudent } from "@/lib/analytics/recommendations";
 import { getStudentOverview, getStudentSkillStats, getStudentTopicStats, getStudentWrongQuestionStats, percent } from "@/lib/analytics/student";
-import { getDiagnosticMetadata, getLatestDiagnosticAttempt } from "@/lib/diagnostic";
+import { getLatestLearnerDiagnosticResult } from "@/lib/diagnostic";
 import { prisma } from "@/lib/prisma";
 
 function formatAnswer(value: unknown) {
@@ -26,9 +26,8 @@ export default async function StudentAnalyticsPage() {
     getStudentTopicStats(user.id),
     getStudentWrongQuestionStats(user.id, 6),
     getRecommendedProblemsForStudent(user.id, 6),
-    getLatestDiagnosticAttempt(user.id),
+    getLatestLearnerDiagnosticResult(user.id),
   ]);
-  const diagnosticMetadata = getDiagnosticMetadata(latestDiagnostic?.recommendationJson);
   const strongestSkills = [...skillStats]
     .filter((stat) => stat.attempted >= 5 && stat.accuracy !== null)
     .sort((a, b) => (b.accuracy ?? 0) - (a.accuracy ?? 0))
@@ -62,7 +61,7 @@ export default async function StudentAnalyticsPage() {
 
       <section className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
         <MetricCard label="Level diagnostic" value={latestDiagnostic?.estimatedLevel ?? "—"} />
-        <MetricCard label="Độ tin cậy" value={diagnosticMetadata.scoring?.confidenceLabel ?? "—"} />
+        <MetricCard label="Độ tin cậy" value={latestDiagnostic?.scoring?.confidenceLabel ?? "—"} />
         <MetricCard label="Problem đã làm" value={overview.attemptedProblems} />
         <MetricCard label="Problem đã đúng" value={overview.solvedProblems} />
         <MetricCard label="Độ chính xác" value={percent(overview.answerStats.accuracy)} />
@@ -75,7 +74,7 @@ export default async function StudentAnalyticsPage() {
             <div>
               <h2 className="text-lg font-semibold">So với diagnostic gần nhất</h2>
               <p className="mt-1 text-sm text-ink-soft">
-                {diagnosticMetadata.scoring?.confidenceReason ?? "Diagnostic đã được dùng để khởi tạo hồ sơ kỹ năng."}
+                {latestDiagnostic.scoring?.confidenceReason ?? "Diagnostic đã được dùng để khởi tạo hồ sơ kỹ năng."}
               </p>
             </div>
             <Link href={`/diagnostic/result?attempt=${latestDiagnostic.id}`} className="inline-flex min-h-10 items-center rounded-lg bg-panel-muted px-3 text-sm font-semibold">
@@ -183,7 +182,7 @@ export default async function StudentAnalyticsPage() {
                   <p className="mt-1 text-sm leading-6 text-ink-soft">{question.prompt}</p>
                   <QuestionRootWord question={{ type: question.questionType, prompt: question.prompt, rootWord: question.rootWord }} className="mt-2" />
                   <p className="mt-2 text-sm text-ink-soft">Câu trả lời: {formatAnswer(question.studentAnswer)}</p>
-                  <p className="text-sm text-ink-soft">Đáp án: {question.correctAnswer}</p>
+                  <p className="text-sm text-ink-soft">{question.feedback}</p>
                 </div>
                 {retrySlugByProblem.get(question.problemId) ? (
                   <Link href={`/problems/${retrySlugByProblem.get(question.problemId)}`} className="inline-flex min-h-10 items-center justify-center rounded-md bg-panel-muted px-3 text-sm font-semibold">

@@ -57,6 +57,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
   if (data.attempt.status === "COMPLETED" || data.attempt.status === "NEEDS_REVIEW") {
     redirect(`/diagnostic/result?attempt=${attemptId}`);
   }
+  if (data.attempt.status !== "IN_PROGRESS") redirect("/diagnostic");
 
   const questionsById = new Map(data.questions.map((q) => [q.id, q]));
   const visibleSections = data.sections
@@ -161,7 +162,7 @@ export default async function DiagnosticStartPage({ searchParams }: PageProps) {
                       <QuestionNumberBadge number={globalIndex + 1} />
                       <SkillBadge skill={question.skillType} />
                       <DifficultyBadge difficulty={question.difficulty} />
-                      <span className="text-xs text-ink-soft">{question.problem.title}</span>
+                      <span className="text-xs text-ink-soft">{question.problemTitle}</span>
                     </div>
 
                     {/* Passage */}

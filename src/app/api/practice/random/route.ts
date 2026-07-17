@@ -3,8 +3,7 @@ import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatu
 import { getCurrentUser } from "@/lib/auth/session";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { prisma } from "@/lib/prisma";
-import type { RandomPracticeResultDTO } from "@/lib/dto/submission";
-import { toQuestionResult } from "@/lib/dto/submission";
+import { toRandomPracticeResultDTO } from "@/lib/dto/submission";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 
 function toJson(value: unknown) {
@@ -108,14 +107,15 @@ export async function POST(request: Request) {
   const score = results.filter((result) => result.isCorrect === true).length;
 
   // Build learner-safe response — correct answers are NOT sent to the client
-  const response: RandomPracticeResultDTO = {
+  const response = toRandomPracticeResultDTO({
     status: getSubmissionStatus(results),
     score,
     total,
-    answers: results.map((result) =>
-      toQuestionResult(result.question.id, result.isCorrect, result.feedback),
-    ),
-  };
+    answers: results.map((result) => ({
+      questionId: result.question.id,
+      isCorrect: result.isCorrect,
+    })),
+  });
 
   return NextResponse.json(response);
 }

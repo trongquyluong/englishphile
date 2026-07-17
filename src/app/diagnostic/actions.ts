@@ -1,7 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createDiagnosticAttempt, getLatestDiagnosticAttempt, scoreDiagnosticAttempt } from "@/lib/diagnostic";
+import {
+  createDiagnosticAttempt,
+  DIAGNOSTIC_UNAVAILABLE_MESSAGE,
+  getLatestDiagnosticAttempt,
+  scoreDiagnosticAttempt,
+} from "@/lib/diagnostic";
 import { requireUser } from "@/lib/auth/session";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { parseDiagnosticAnswerEntries } from "@/lib/security/submission-input";
@@ -33,11 +38,15 @@ export async function submitDiagnosticAction(formData: FormData) {
     const message = limit.status === "infrastructure-error"
       ? "Không thể nộp diagnostic lúc này. Vui lòng thử lại sau."
       : `Bạn nộp diagnostic quá nhanh. Hãy đợi ${limit.retryAfterSeconds} giây rồi thử lại.`;
-    redirect(`/diagnostic/start?attempt=${attemptId}&error=${encodeURIComponent(message)}`);
+    redirect(`/diagnostic?error=${encodeURIComponent(message)}`);
   }
 
   const answers = parseDiagnosticAnswerEntries(formData.entries());
 
-  await scoreDiagnosticAttempt(attemptId, user.id, answers);
+  try {
+    await scoreDiagnosticAttempt(attemptId, user.id, answers);
+  } catch {
+    redirect(`/diagnostic?error=${encodeURIComponent(DIAGNOSTIC_UNAVAILABLE_MESSAGE)}`);
+  }
   redirect(`/diagnostic/result?attempt=${attemptId}`);
 }

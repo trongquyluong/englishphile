@@ -9,8 +9,6 @@ export type DiagnosticScoredResult = {
   skillType: SkillType;
   difficulty: Difficulty;
   isCorrect: boolean | null;
-  feedback: string;
-  correctAnswer: string;
   diagnosticWeight: number;
   topics: Array<{ id: string; name: string; slug: string }>;
 };

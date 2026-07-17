@@ -67,7 +67,8 @@ describe("independent-practice submission route runtime", () => {
     ]);
     mocks.checkQuestionAnswer.mockReturnValue({
       isCorrect: true,
-      feedback: "Chính xác.",
+      feedback: "H10_EXPLANATION_SENTINEL",
+      correctAnswer: "H10_CANONICAL_SENTINEL",
     });
     mocks.createSubmission.mockResolvedValue({ id: "submission-1" });
     mocks.findProblemStatus.mockResolvedValue(null);
@@ -104,8 +105,41 @@ describe("independent-practice submission route runtime", () => {
       }),
     );
     expect(mocks.completeRecommendations).toHaveBeenCalledWith("user-1", "problem-1");
-    expect(await response.json()).toEqual(
-      expect.objectContaining({ submissionId: "submission-1", status: "ACCEPTED" }),
-    );
+    const payload = await response.json();
+    expect(payload).toEqual({
+      submissionId: "submission-1",
+      status: "ACCEPTED",
+      score: 1,
+      total: 1,
+      answers: [{ questionId: "question-1", isCorrect: true, feedback: "Chính xác." }],
+    });
+    expect(JSON.stringify(payload)).not.toContain("H10_CANONICAL_SENTINEL");
+    expect(JSON.stringify(payload)).not.toContain("H10_EXPLANATION_SENTINEL");
+  });
+
+  it("does not reveal answer sentinels for an arbitrary published problem id", async () => {
+    mocks.checkQuestionAnswer.mockReturnValue({
+      isCorrect: false,
+      feedback: "H10_EXPLANATION_SENTINEL",
+      correctAnswer: "H10_CANONICAL_SENTINEL",
+    });
+
+    const response = await POST(new Request("http://localhost/api/submissions", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        problemId: "arbitrary-published-problem",
+        answers: { "question-1": "guess" },
+      }),
+    }));
+    const payload = await response.json();
+
+    expect(payload.answers).toEqual([{
+      questionId: "question-1",
+      isCorrect: false,
+      feedback: "Chưa chính xác. Hãy xem lại kiến thức liên quan.",
+    }]);
+    expect(JSON.stringify(payload)).not.toContain("H10_CANONICAL_SENTINEL");
+    expect(JSON.stringify(payload)).not.toContain("H10_EXPLANATION_SENTINEL");
   });
 });

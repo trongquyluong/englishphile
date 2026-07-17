@@ -122,7 +122,7 @@ export default async function SkillAnalyticsPage({ params }: PageProps) {
               <p className="mt-1 leading-6 text-ink-soft">{answer.prompt}</p>
               <QuestionRootWord question={{ type: answer.questionType, prompt: answer.prompt, rootWord: answer.rootWord }} className="mt-2" />
               <p className="mt-2 text-ink-soft">Câu trả lời: {formatAnswer(answer.studentAnswer)}</p>
-              <p className="text-ink-soft">Đáp án: {answer.correctAnswer}</p>
+              <p className="text-ink-soft">{answer.feedback}</p>
             </article>
           ))}
           {!analytics.wrongQuestions.length ? <p className="rounded-md bg-panel-muted p-4 text-sm text-ink-soft">Chưa có lỗi sai trong skill này.</p> : null}

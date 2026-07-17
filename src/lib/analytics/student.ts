@@ -1,5 +1,5 @@
 import type { SkillType } from "@prisma/client";
-import { summarizeCorrectAnswer } from "@/lib/answer-checking";
+import { learnerFeedbackForCorrectness } from "@/lib/dto/submission";
 import { difficultyOrder, skillLabels, skillOrder } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 import { addAnswer, emptyBucket, finalizeBucket, percent, recommendedAction, skillDisplayName } from "./shared";
@@ -138,13 +138,21 @@ export async function getStudentWrongQuestionStats(userId: string, take = 8) {
         { manualGrade: { correctness: { in: ["INCORRECT", "NEEDS_REVISION"] } } },
       ],
     },
-    include: {
+    select: {
+      id: true,
+      studentAnswer: true,
+      isCorrect: true,
+      createdAt: true,
       manualGrade: true,
-      submission: { include: { problem: true } },
+      submission: { select: { problemId: true, problem: { select: { title: true, slug: true } } } },
       question: {
-        include: {
+        select: {
+          skillType: true,
+          type: true,
+          prompt: true,
+          rootWord: true,
           problem: {
-            include: { problemTopics: { include: { topic: true } } },
+            select: { problemTopics: { select: { topic: { select: { name: true } } } } },
           },
         },
       },
@@ -164,7 +172,7 @@ export async function getStudentWrongQuestionStats(userId: string, take = 8) {
     rootWord: answer.question.rootWord,
     topics: answer.question.problem.problemTopics.map(({ topic }) => topic.name),
     studentAnswer: answer.studentAnswer,
-    correctAnswer: summarizeCorrectAnswer(answer.question),
+    feedback: learnerFeedbackForCorrectness(false),
     createdAt: answer.createdAt,
   }));
 }

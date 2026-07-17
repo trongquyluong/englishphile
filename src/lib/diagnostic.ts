@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { Difficulty, Prisma, QuestionType, SkillType } from "@prisma/client";
 import { checkQuestionAnswer } from "@/lib/answer-checking";
 import {
@@ -14,70 +16,87 @@ import {
   type DiagnosticScoreSummary,
 } from "@/lib/diagnostic-scoring";
 import { diagnosticQuestionDataWhere, hasRequiredDiagnosticQuestionData } from "@/lib/diagnostic-question-readiness";
+import {
+  sanitizeDiagnosticAttemptMetadata,
+  toLearnerDiagnosticAttemptSummaryDTO,
+  toLearnerDiagnosticResultDTO,
+  type LearnerDiagnosticMetadataDTO,
+  type LearnerDiagnosticResultDTO,
+} from "@/lib/dto/diagnostic";
+import {
+  learnerQuestionPresentationSelect,
+  toLearnerQuestionDTO,
+  type LearnerQuestionDTO,
+} from "@/lib/dto/learner-question";
 import { skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 import { runSingleWinnerTransaction } from "@/lib/security/replay-guard";
 
-const diagnosticQuestionSelect = {
+const diagnosticSelectionQuestionSelect = {
+  id: true,
+  type: true,
+  skillType: true,
+  difficulty: true,
+  rootWord: true,
+  orderIndex: true,
+  problem: {
+    select: {
+      isDiagnosticEligible: true,
+      diagnosticWeight: true,
+    },
+  },
+} as const;
+
+const diagnosticPresentationQuestionSelect = {
+  ...learnerQuestionPresentationSelect,
+  problem: { select: { title: true } },
+} as const;
+
+const diagnosticScoringQuestionSelect = {
   id: true,
   problemId: true,
   type: true,
   skillType: true,
   difficulty: true,
-  prompt: true,
-  passage: true,
-  options: true,
   answer: true,
   explanation: true,
-  rootWord: true,
-  keyword: true,
-  targetSentence: true,
-  lineNumber: true,
-  metadata: true,
-  orderIndex: true,
   problem: {
     select: {
-      id: true,
-      title: true,
-      slug: true,
-      statement: true,
-      skillType: true,
-      isDiagnosticEligible: true,
       diagnosticWeight: true,
       problemTopics: { include: { topic: { select: { id: true, name: true, slug: true } } } },
     },
   },
 } as const;
 
-export type DiagnosticQuestion = Prisma.QuestionGetPayload<{ select: typeof diagnosticQuestionSelect }>;
+const diagnosticAttemptSummarySelect = {
+  id: true,
+  status: true,
+  startedAt: true,
+  completedAt: true,
+  score: true,
+  total: true,
+  estimatedLevel: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
 
-export type DiagnosticAttemptMetadata = {
-  questionIds?: string[];
-  sections?: DiagnosticSectionPlan[];
-  coverageWarnings?: string[];
-  results?: Array<{
-    questionId: string;
-    problemId: string;
-    skillType: SkillType;
-    difficulty: Difficulty;
-    isCorrect: boolean | null;
-    feedback: string;
-    correctAnswer: string;
-  }>;
-  scoring?: Pick<
-    DiagnosticScoreSummary,
-    "weightedAccuracy" | "rawCorrect" | "rawAttempted" | "confidence" | "confidenceLabel" | "confidenceReason" | "strengths" | "weakAreas"
-  > & {
-    levelExplanation: string;
-  };
-};
+const diagnosticResultSelect = {
+  ...diagnosticAttemptSummarySelect,
+  skillBreakdownJson: true,
+  topicBreakdownJson: true,
+  recommendationJson: true,
+} as const;
+
+type DiagnosticSelectionQuestion = Prisma.QuestionGetPayload<{ select: typeof diagnosticSelectionQuestionSelect }>;
+type DiagnosticScoringQuestion = Prisma.QuestionGetPayload<{ select: typeof diagnosticScoringQuestionSelect }>;
+
+export type DiagnosticAttemptMetadata = LearnerDiagnosticMetadataDTO;
 
 function parseAttemptMetadata(value: unknown): DiagnosticAttemptMetadata {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as DiagnosticAttemptMetadata;
-  }
-  return {};
+  return sanitizeDiagnosticAttemptMetadata(value);
 }
+
+export const DIAGNOSTIC_UNAVAILABLE_MESSAGE = "Không thể truy cập bài diagnostic này.";
 
 async function findQuestionsForBlueprintItem(
   item: (typeof diagnosticBlueprint)[number]["items"][number],
@@ -98,7 +117,7 @@ async function findQuestionsForBlueprintItem(
         id: { notIn: [...usedQuestionIds] },
         problem: { ...baseWhere.problem, isDiagnosticEligible: true },
       },
-      select: diagnosticQuestionSelect,
+      select: diagnosticSelectionQuestionSelect,
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
       take: item.targetCount * 3,
     }),
@@ -107,7 +126,7 @@ async function findQuestionsForBlueprintItem(
         ...baseWhere,
         id: { notIn: [...usedQuestionIds] },
       },
-      select: diagnosticQuestionSelect,
+      select: diagnosticSelectionQuestionSelect,
       orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
       take: item.targetCount * 4,
     }),
@@ -129,13 +148,13 @@ async function findQuestionsForBlueprintItem(
 }
 
 export async function selectDiagnosticQuestions() {
-  const selected: DiagnosticQuestion[] = [];
+  const selected: DiagnosticSelectionQuestion[] = [];
   const used = new Set<string>();
   const sections: DiagnosticSectionPlan[] = [];
   const coverage = await getDiagnosticCoverage();
 
   for (const section of diagnosticBlueprint) {
-    const sectionQuestions: DiagnosticQuestion[] = [];
+    const sectionQuestions: DiagnosticSelectionQuestion[] = [];
     const scored = section.items.some((item) => item.scored);
     const optional = section.items.every((item) => item.optional);
     const targetCount = section.items.reduce((sum, item) => sum + item.targetCount, 0);
@@ -181,7 +200,7 @@ export async function selectDiagnosticQuestions() {
       type: { in: ["MCQ", "WORD_FORMATION", "OPEN_CLOZE", "GUIDED_CLOZE", "READING_MCQ", "ERROR_IDENTIFICATION"] },
       AND: [diagnosticQuestionDataWhere],
     },
-    select: diagnosticQuestionSelect,
+    select: diagnosticSelectionQuestionSelect,
     orderBy: [{ difficulty: "asc" }, { orderIndex: "asc" }],
     take: 20 - scoredCount,
   });
@@ -219,10 +238,11 @@ export async function createDiagnosticAttempt(userId: string) {
     const existing = await tx.diagnosticAttempt.findFirst({
       where: { userId, status: "IN_PROGRESS" },
       orderBy: { startedAt: "desc" },
+      select: diagnosticAttemptSummarySelect,
     });
-    if (existing) return existing;
+    if (existing) return toLearnerDiagnosticAttemptSummaryDTO(existing);
 
-    return tx.diagnosticAttempt.create({
+    const created = await tx.diagnosticAttempt.create({
       data: {
         userId,
         status: "IN_PROGRESS",
@@ -232,31 +252,46 @@ export async function createDiagnosticAttempt(userId: string) {
           coverageWarnings: selection.coverageWarnings,
         },
       },
+      select: diagnosticAttemptSummarySelect,
     });
+    return toLearnerDiagnosticAttemptSummaryDTO(created);
   });
 }
 
 export async function getDiagnosticQuestionsForAttempt(attemptId: string, userId: string) {
-  const attempt = await prisma.diagnosticAttempt.findFirst({ where: { id: attemptId, userId } });
+  const attempt = await prisma.diagnosticAttempt.findFirst({
+    where: { id: attemptId, userId },
+    select: { ...diagnosticAttemptSummarySelect, recommendationJson: true },
+  });
   if (!attempt) return null;
   const metadata = parseAttemptMetadata(attempt.recommendationJson);
-  const questionIds = metadata.questionIds ?? [];
-  if (!questionIds.length) return { attempt, questions: [] as DiagnosticQuestion[], sections: metadata.sections ?? [] };
+  const questionIds = metadata.questionIds;
+  const attemptSummary = toLearnerDiagnosticAttemptSummaryDTO(attempt);
+  if (!questionIds.length) {
+    return { attempt: attemptSummary, questions: [] as LearnerQuestionDTO[], sections: metadata.sections };
+  }
 
   const questions = await prisma.question.findMany({
-    where: { id: { in: questionIds }, problem: { contentStatus: "PUBLISHED" } },
-    select: diagnosticQuestionSelect,
+    where: {
+      id: { in: questionIds },
+      contentStatus: "PUBLISHED",
+      problem: { contentStatus: "PUBLISHED" },
+    },
+    select: diagnosticPresentationQuestionSelect,
   });
   const order = new Map(questionIds.map((id, index) => [id, index]));
   const sortedQuestions = questions.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0));
+  const learnerQuestions = sortedQuestions.map(toLearnerQuestionDTO);
   return {
-    attempt,
-    questions: sortedQuestions,
-    sections: metadata.sections ?? buildSectionsFromQuestions(sortedQuestions),
+    attempt: attemptSummary,
+    questions: learnerQuestions,
+    sections: metadata.sections.length ? metadata.sections : buildSectionsFromQuestions(learnerQuestions),
   };
 }
 
-function buildSectionsFromQuestions(questions: DiagnosticQuestion[]): DiagnosticSectionPlan[] {
+function buildSectionsFromQuestions(
+  questions: Array<Pick<LearnerQuestionDTO, "id" | "skillType" | "type">>,
+): DiagnosticSectionPlan[] {
   return diagnosticBlueprint.map((section) => {
     const questionIds = questions
       .filter((question) => getSectionForQuestion(question.skillType, question.type as QuestionType).id === section.id)
@@ -273,14 +308,35 @@ function buildSectionsFromQuestions(questions: DiagnosticQuestion[]): Diagnostic
   });
 }
 
-export async function scoreDiagnosticAttempt(attemptId: string, userId: string, answers: Record<string, unknown>) {
-  const data = await getDiagnosticQuestionsForAttempt(attemptId, userId);
-  if (!data) throw new Error("Không tìm thấy diagnostic attempt.");
+async function getDiagnosticScoringDataForAttempt(attemptId: string, userId: string) {
+  const attempt = await prisma.diagnosticAttempt.findFirst({
+    where: { id: attemptId, userId, status: "IN_PROGRESS" },
+    select: { id: true, status: true, recommendationJson: true },
+  });
+  if (!attempt) return null;
+  const metadata = parseAttemptMetadata(attempt.recommendationJson);
+  const questionIds = metadata.questionIds;
+  const questions: DiagnosticScoringQuestion[] = questionIds.length
+    ? await prisma.question.findMany({
+        where: {
+          id: { in: questionIds },
+          contentStatus: "PUBLISHED",
+          problem: { contentStatus: "PUBLISHED" },
+        },
+        select: diagnosticScoringQuestionSelect,
+      })
+    : [];
+  const order = new Map(questionIds.map((id, index) => [id, index]));
+  return {
+    attempt,
+    metadata,
+    questions: questions.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0)),
+  };
+}
 
-  // Check if already completed — prevent duplicate scoring
-  if (data.attempt.status !== "IN_PROGRESS") {
-    throw new Error("Diagnostic này đã hoàn thành.");
-  }
+export async function scoreDiagnosticAttempt(attemptId: string, userId: string, answers: Record<string, unknown>) {
+  const data = await getDiagnosticScoringDataForAttempt(attemptId, userId);
+  if (!data) throw new Error(DIAGNOSTIC_UNAVAILABLE_MESSAGE);
 
   const results = data.questions.map((question) => {
     const studentAnswer = Object.hasOwn(answers, question.id) ? answers[question.id] : undefined;
@@ -291,8 +347,6 @@ export async function scoreDiagnosticAttempt(attemptId: string, userId: string, 
       skillType: question.skillType,
       difficulty: question.difficulty,
       isCorrect: result.isCorrect,
-      feedback: result.feedback,
-      correctAnswer: result.correctAnswer,
       diagnosticWeight: question.problem.diagnosticWeight,
       topics: question.problem.problemTopics.map(({ topic }) => topic),
     };
@@ -310,7 +364,7 @@ export async function scoreDiagnosticAttempt(attemptId: string, userId: string, 
   // If the attempt was already finalized by another request, updateMany returns 0
   // and we throw an error.
   const finalStatus = results.some((result) => result.isCorrect === null) ? "NEEDS_REVIEW" : "COMPLETED";
-  const existingMetadata = parseAttemptMetadata(data.attempt.recommendationJson);
+  const existingMetadata = data.metadata;
 
   await runSingleWinnerTransaction<Prisma.TransactionClient, void>(
     (operation) => prisma.$transaction(operation),
@@ -330,15 +384,15 @@ export async function scoreDiagnosticAttempt(attemptId: string, userId: string, 
           skillBreakdownJson: scoreSummary.skillBreakdown,
           topicBreakdownJson: scoreSummary.topicBreakdown,
           recommendationJson: {
-            ...existingMetadata,
+            questionIds: existingMetadata.questionIds,
+            sections: existingMetadata.sections,
+            coverageWarnings: existingMetadata.coverageWarnings,
             results: results.map((result) => ({
               questionId: result.questionId,
               problemId: result.problemId,
               skillType: result.skillType,
               difficulty: result.difficulty,
               isCorrect: result.isCorrect,
-              feedback: result.feedback,
-              correctAnswer: result.correctAnswer,
             })),
             scoring: {
               weightedAccuracy: scoreSummary.weightedAccuracy,
@@ -409,10 +463,8 @@ export async function scoreDiagnosticAttempt(attemptId: string, userId: string, 
       });
       await createDiagnosticRecommendationsTx(tx, userId, scoreSummary, estimatedLevel);
     },
-    "Diagnostic này đã hoàn thành.",
+    DIAGNOSTIC_UNAVAILABLE_MESSAGE,
   );
-
-  return prisma.diagnosticAttempt.findUniqueOrThrow({ where: { id: attemptId } });
 }
 
 /**
@@ -498,10 +550,12 @@ async function createDiagnosticRecommendationsTx(
 }
 
 export async function getLatestDiagnosticAttempt(userId: string, status?: "IN_PROGRESS" | "COMPLETED" | "NEEDS_REVIEW" | "ABANDONED") {
-  return prisma.diagnosticAttempt.findFirst({
+  const attempt = await prisma.diagnosticAttempt.findFirst({
     where: { userId, ...(status ? { status } : {}) },
     orderBy: { createdAt: "desc" },
+    select: diagnosticAttemptSummarySelect,
   });
+  return attempt ? toLearnerDiagnosticAttemptSummaryDTO(attempt) : null;
 }
 
 // A finished attempt = the learner submitted the test. NEEDS_REVIEW counts as
@@ -509,10 +563,47 @@ export async function getLatestDiagnosticAttempt(userId: string, status?: "IN_PR
 const FINISHED_DIAGNOSTIC_STATUSES = ["COMPLETED", "NEEDS_REVIEW"] as const;
 
 export async function getLatestFinishedDiagnosticAttempt(userId: string) {
-  return prisma.diagnosticAttempt.findFirst({
-    where: { userId, status: { in: [...FINISHED_DIAGNOSTIC_STATUSES] } },
+  const attempt = await prisma.diagnosticAttempt.findFirst({
+    where: {
+      userId,
+      status: { in: [...FINISHED_DIAGNOSTIC_STATUSES] },
+      completedAt: { not: null },
+    },
     orderBy: { createdAt: "desc" },
+    select: diagnosticAttemptSummarySelect,
   });
+  return attempt ? toLearnerDiagnosticAttemptSummaryDTO(attempt) : null;
+}
+
+export async function getLearnerDiagnosticResult(
+  attemptId: string,
+  userId: string,
+): Promise<LearnerDiagnosticResultDTO | null> {
+  const attempt = await prisma.diagnosticAttempt.findFirst({
+    where: {
+      id: attemptId,
+      userId,
+      status: { in: [...FINISHED_DIAGNOSTIC_STATUSES] },
+      completedAt: { not: null },
+    },
+    select: diagnosticResultSelect,
+  });
+  return attempt ? toLearnerDiagnosticResultDTO(attempt) : null;
+}
+
+export async function getLatestLearnerDiagnosticResult(
+  userId: string,
+): Promise<LearnerDiagnosticResultDTO | null> {
+  const attempt = await prisma.diagnosticAttempt.findFirst({
+    where: {
+      userId,
+      status: { in: [...FINISHED_DIAGNOSTIC_STATUSES] },
+      completedAt: { not: null },
+    },
+    orderBy: { createdAt: "desc" },
+    select: diagnosticResultSelect,
+  });
+  return attempt ? toLearnerDiagnosticResultDTO(attempt) : null;
 }
 
 export async function hasCompletedDiagnostic(userId: string) {
