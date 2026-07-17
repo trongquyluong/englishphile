@@ -1283,11 +1283,11 @@ No `.github/workflows/*.yml` files exist in the repository. No CI/CD pipeline to
 
 ### Phase 3 — Medium Term (Post-Launch)
 
-15. **H-05, H-06: Review, deploy, and PostgreSQL-test the local Phase 1C-B remediation** — Global admins remain intentional peers; the local implementation binds nested IDs, serializes publication, and makes bounded admin writes atomic or explicitly recoverable per file. Deployment and real lock/race/rollback/duration evidence remain pending.
+15. **H-05, H-06: PostgreSQL-test and operationally maintain the merged Phase 1C-B remediation** — Global admins remain intentional peers; PR #8 is merged and owner-attested evidence records deployment plus selected Production verification. Real lock/race/rollback/timeout/duration evidence remains Test debt.
 16. **H-09: Replace signed cookies with server-side sessions** — Use NextAuth.js or database sessions with invalidation
 17. **M-02: Implement distributed rate limiting** — Use Upstash Redis for Vercel serverless
 18. **M-03: Fix rate limiter memory leak** — Add periodic cleanup of expired entries
-19. **M-06: Review/deploy bounded atomic JSON/CSV commits** — The local Phase 1C-B helper validates normalized bounds before its content transaction and rolls batch/content/pack reconciliation together; real PostgreSQL rollback and duration evidence remains pending.
+19. **M-06: PostgreSQL-test bounded atomic JSON/CSV commits and provide operational recovery** — The committed Phase 1C-B helper validates normalized bounds before its content transaction and rolls batch/content/pack reconciliation together. Real PostgreSQL rollback/duration evidence and an authenticated recovery surface remain pending.
 20. **H-10: Strip `correctAnswer` from diagnostic result payload** — Store server-side only
 21. **H-11: Encrypt `answersJson`** — Use separate encryption key for contest answer storage
 
@@ -1393,7 +1393,7 @@ PostgreSQL verification of the real limiter statement, Writing slot uniqueness a
 - **Cleanup Production verification — Passed for the tested scope:** owner-attested health, unauthenticated `GET`, `HEAD`, `POST`, one authenticated manual cleanup, the first automatic scheduled invocation, and initial runtime-log review matched the documented contract. The manual run affected 3 rate-limit rows and no access-grant or Writing rows; the scheduled run reported 3 total affected without a provided component breakdown. This is not permanent-delivery or comprehensive-monitoring evidence.
 - **Cleanup monitoring — Operational requirement:** ongoing Vercel/dashboard and runtime-log monitoring remains required because failed invocations are not automatically retried and one successful scheduled run cannot establish future delivery.
 - **Delivery behavior:** missed runs leave work for later reconciliation; duplicate or overlapping runs may add database work but remain data-safe because modifying statements recheck eligibility. No distributed or process-local scheduler lock exists. Bounded daily cleanup can fall behind sustained unique-subject abuse, so random-email authentication amplification remains Unresolved.
-- **Unresolved security work at this Phase 1B checkpoint:** random-email authentication bucket amplification, H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories were open. The later Phase 1C-B addendum supersedes only the H-05/H-06 local-code disposition; deployment and PostgreSQL concurrency integration remain pending/Test debt.
+- **Unresolved security work at this Phase 1B checkpoint:** random-email authentication bucket amplification, H-05, H-06, H-09, H-10, H-11, and four moderate dependency advisories were open. This remains dated Phase 1B history. The later Phase 1C-B addendum supersedes the current H-05/H-06 disposition after merge, deployment, and selected Production verification; PostgreSQL concurrency integration remains Test debt.
 
 The complete Phase 1B implementation, caller inventory, schema/migration assessment, command outcomes, audit results, file inventory, and deployment order are maintained in `docs/SECURITY_PHASE_1B_REPORT.md`.
 
@@ -1445,7 +1445,7 @@ Current finding disposition:
 
 Full Phase 1C-A implementation details and required deployment order are recorded in `docs/SECURITY_PHASE_1C_REPORT.md`.
 
-## Phase 1C-B parent-binding and atomic-mutation addendum (2026-07-14; local implementation)
+## Phase 1C-B parent-binding and atomic-mutation addendum (implemented 2026-07-14; operationally reconciled 2026-07-17)
 
 Phase 1C-B does not change the global ADMIN peer policy. It addresses the remaining H-05/H-06 defects at their actual mutation boundaries: contest sections/questions are scoped through their claimed contest, problem questions are scoped through their claimed problem, and missing/cross-parent resources share one generic unavailable result.
 
@@ -1461,19 +1461,41 @@ Each successful file transaction locks the pack, verifies that its complete iden
 
 Legacy contest schedule validation now returns a typed validation result rather than the missing-resource result. Draft, archived, and ended records remain editable; future `SCHEDULED` and currently active `LIVE` states enforce internally consistent duration/start/end rules.
 
+### Owner-attested isolated Preview evidence (2026-07-17)
+
+- Commit `8f1073a0638b4de24923adc9c537b1e0f348228f` reached READY in isolated Preview with database connected.
+- The tested unauthenticated admin API request returned HTTP 401; owner-equivalent access passed and an ordinary `STUDENT` was denied.
+- A valid contest edit/publication and a valid problem/question edit with lifecycle propagation passed.
+- An exact duplicate pack was rejected with zero content writes. Case-only duplicate filenames were rejected while one distinct file imported exactly once. A normal unique pack produced the expected totals.
+- A manifest-only/zero-entry submission was blocked by the UI with zero content writes.
+- Independent practice and basic contest, diagnostic, and Writing regression smoke passed.
+- The checked Preview runtime logs reported no runtime errors or sensitive values, and the Git worktree was clean.
+
+### Owner-attested selected Production evidence (2026-07-17)
+
+- PR #8 is `MERGED` at merge commit `e17105e6e65d30a009dffd56fe20d29d3ca69bd1`.
+- That merge commit was deployed to Production, reached READY, and became the canonical Production deployment.
+- Production health passed with database connected. The tested unauthenticated admin multi-file commit request returned HTTP 401.
+- Owner sign-out/sign-in and admin access passed; an ordinary `STUDENT` was denied admin access.
+- A valid low-risk contest mutation and a valid low-risk problem/question mutation both passed and were successfully restored.
+- Independent-practice submission/persistence and basic contest, diagnostic, and Writing regression smoke passed.
+- The checked Production runtime logs reported no runtime errors or sensitive values.
+
+Production did not repeat destructive or synthetic duplicate-pack testing; the duplicate/identity evidence above is Preview-only. The Production contest/problem checks were valid low-risk mutations followed by successful restoration. Contest, diagnostic, and Writing checks were basic regression smoke only, and runtime-log review covered only the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, or general security test is claimed. No PostgreSQL integration test or Production content-pack recovery test was run. There is no ordinary HTTP/UI recovery surface; normal HTTP retry creates a new pack, and the internal `resumeContentPackId` primitive remains repository-only.
+
 Current disposition superseding the Phase 1C-A checkpoint:
 
 | Finding | Phase 1C-B status | Evidence boundary |
 |---|---|---|
-| H-05 contest admin IDOR/TOCTOU | Remediated in code; deployment pending | Global ADMIN peers remain intentional; active child paths are parent-bound and publication is serialized. Mocked production-helper runtime tests and static structure checks passed; no PostgreSQL race test exists. |
-| H-06 problem/content IDOR/atomicity | Remediated in local code; deployment pending | Problem/question binding, pack membership rechecks, status/audit bulk atomicity, QA recheck, diagnostic update, normalized import bounds, digest-bound unique per-file reconciliation, and duplicate-name rejection are implemented. Mocked production-helper/runtime-orchestrator tests and static checks passed; no PostgreSQL rollback/concurrency test or active recovery surface exists. |
+| H-05 contest admin IDOR/TOCTOU | Remediated, merged, deployed, and selected Production paths verified | Global ADMIN/`OWNER_EMAIL` peers remain intentional. Repository evidence confirms active child parent-binding and publication serialization; selected Production owner/student boundaries and restored low-risk contest mutation passed. No PostgreSQL race/concurrency test exists. |
+| H-06 problem/content IDOR/atomicity | Remediated, merged, deployed, and selected Production paths verified | Repository evidence confirms problem/question binding, pack membership rechecks, bounded atomic status/audit/QA/diagnostic/import work, digest-bound identities, duplicate-name rejection, and one-to-one plan-entry/batch reconciliation. Duplicate/identity behavior was verified only in isolated Preview. No PostgreSQL rollback/concurrency/duration test or active recovery surface exists. |
 | Schema/migration | No change | Applied migrations are untouched; Phase 1C-B requires no migration. |
 | H-09, H-10, H-11 | Unresolved | Outside Phase 1C-B. |
 | Random-email authentication amplification | Unresolved | Outside Phase 1C-B. |
 | Four moderate dependency advisories | Unresolved | No dependency upgrade or audit fix in this pass. |
 | Private-contest Production smoke | Operational requirement | Not performed or claimed in this pass. |
 
-The final local suite contains 320 tests: 206 production runtime/helper/handler/action/orchestrator cases with mocked collaborators where stated, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. Simulated rollback assertions prove callback control flow only; they are not database integration tests. Real isolated PostgreSQL tests remain Test debt for principal/resource lock ordering, parent-lock serialization, publish/child-edit races, pack membership changes, bulk rollback, QA races, duplicate committed-identity contention, transaction duration/timeouts, and scoped predicates. An authenticated operational pack-recovery surface also remains future work. No database, endpoint, deployment, or external infrastructure was accessed by this local implementation pass.
+The final committed suite contains 320 tests across 22 files: 206 production runtime/helper/handler/action/orchestrator cases with mocked collaborators where stated, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. Simulated rollback assertions prove callback control flow only; they are not database integration tests. Real isolated PostgreSQL tests remain Test debt for principal/resource lock ordering, parent-lock serialization, publish/child-edit races, pack membership changes, bulk rollback, QA races, duplicate committed-identity contention, transaction duration/timeouts, and scoped predicates. Authenticated operational pack recovery and ongoing runtime-log monitoring remain operational requirements. No database, endpoint, deployment, or external infrastructure was accessed by the historical implementation pass or this documentation reconciliation.
 
 ---
 

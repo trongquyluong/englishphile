@@ -513,6 +513,8 @@ Phase 7.5 clarifies the product model:
 
 Owner-attested operational evidence dated 2026-07-14 records that PR #6 merged at `df89089c89e56abed1feb0ab0569e77656d51598`, the canonical Vercel Production deployment reached READY, all 16 Production migrations are applied, and selected Production authorization, retired-route, independent-practice, contest, diagnostic, and Writing smoke checks passed. Contest/diagnostic/Writing coverage was basic smoke only. Full evidence boundaries and remaining Test debt are documented in `docs/SECURITY_PHASE_1C_REPORT.md`.
 
+Phase 1C-B is also complete at the repository and selected operational-verification boundaries. PR #8 merged at `e17105e6e65d30a009dffd56fe20d29d3ca69bd1`; owner-attested evidence dated 2026-07-17 records that this merge commit reached READY in Production, became the canonical Production deployment, passed health with database connected, enforced the tested anonymous/owner/student admin boundaries, and passed restored low-risk contest/problem mutations plus independent-practice and basic contest/diagnostic/Writing smoke. Isolated Preview evidence at `8f1073a0638b4de24923adc9c537b1e0f348228f` additionally verifies the tested duplicate-pack, case-only filename, unique-pack total, and zero-entry UI behavior. H-05 and H-06 are remediated, merged, deployed, and verified on those selected Production paths; this is not PostgreSQL concurrency, rollback, timeout, exactly-once, hostile-origin, or comprehensive security evidence. Phase 1C-B required no schema change or migration. Authenticated content-pack recovery and real PostgreSQL integration remain outstanding, and normal HTTP retry still creates a new pack.
+
 Contest routes:
 
 - `/contests` - public contest list.

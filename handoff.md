@@ -110,7 +110,7 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Classroom/assignment pages and UI components were removed. Legacy action names and the assignment API are safe not-found tombstones with no Prisma mutation path.
 - `/api/submissions` remains the active independent-practice `SINGLE_PROBLEM` submission path; only `/api/assignments/[id]/submit` is retired. The seed no longer recreates classroom or assignment fixtures.
 - Portable import is operator-level tooling. Explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The selected input-directory argument is now correctly used when resolving the fixed internal import-step filenames; this has pure helper coverage but no end-to-end import run.
-- Phase 1C-B is implemented locally and remains uncommitted: contest/problem child IDs are parent-bound, publish boundaries are serialized, and bulk/import mutations are atomic or explicitly per-file partial. H-05/H-06 are remediated in code but not deployed or PostgreSQL race-tested.
+- Phase 1C-B is merged and deployed: contest/problem child IDs are parent-bound, publish boundaries are serialized, and bulk/import mutations are atomic or explicitly per-file partial. H-05/H-06 are remediated, merged, deployed, and verified on selected Production paths; real PostgreSQL race/concurrency/rollback/duration evidence remains Test debt.
 
 ### Phase 1C-A Production reconciliation (owner-attested 2026-07-14)
 
@@ -123,11 +123,12 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Basic contest, diagnostic, and Writing smoke checks passed. This is not comprehensive authorization, persistence, concurrency, or security evidence for those flows.
 - Checked Production logs reported no runtime error or sensitive value.
 - An initial read-only aggregate preflight and migration-status check was recognized as targeting isolated Preview/nonproduction. It performed no mutation and was discarded as Production evidence. The correct Production target was then selected and independently verified before migration.
-- The prior Preview verification remains valid dated history. Phase 1C-A Production success did not itself close H-05/H-06; the local Phase 1C-B section below records their code remediation. Private-contest smoke, Phase 1C-B deployment, PostgreSQL concurrency/rollback/locking/duration evidence, and the other unresolved findings remain pending.
+- The prior Preview verification remains valid dated history. At this 2026-07-14 Phase 1C-A checkpoint, Production success did not itself close H-05/H-06. The later Phase 1C-B reconciliation below records their subsequent merge, deployment, and selected Production verification. Private-contest smoke, PostgreSQL concurrency/rollback/locking/duration evidence, and the other unresolved findings remain pending.
 - No claim is made that backup/export completed or that role-management writes were paused; those facts were not supplied as operational evidence.
 
 ## Phase 1C-B Parent Binding And Atomic Admin Mutations
 
+- PR #8 is merged at `e17105e6e65d30a009dffd56fe20d29d3ca69bd1`. Owner-attested evidence dated 2026-07-17 records that the merge commit reached READY in Production and became the canonical Production deployment.
 - Global `ADMIN` and `OWNER_EMAIL` peer policy is unchanged; no creator ownership was introduced.
 - Contest section/question create, update, and delete paths lock the claimed contest and scope child IDs through actual relations. Cross-parent and missing resources use the same generic unavailable result.
 - Contest publication locks the contest, validates schedule/sections/questions, and transitions status within one transaction. Builder metadata/archive and legacy contest problem replacement use the same parent lock discipline; learner contest-attempt locking remains unchanged.
@@ -137,9 +138,27 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - JSON/CSV parsing and validation stay outside the content transaction. Normalized commit limits are 25 problems, 250 questions, 100 topic associations, 50 unique topics, and 25 unique sources. Invalid/oversized plans create no content.
 - Multi-file packs store an ordered durable plan whose entries and linked batches carry a server-derived entry key, normalized filename, import type, ordinal, and SHA-256 of exact UTF-8 content. Every occurrence of a duplicate normalized filename is rejected before content import; reconciliation consumes one exact batch per entry, refuses duplicate imported identities, and never counts failed entries.
 - The internal exact-plan `resumeContentPackId` primitive is runtime-tested with mocked collaborators, but no active API, Server Action, or UI exposes it. Normal HTTP retry creates a new pack. Authenticated operational recovery and real concurrent exactly-once behavior remain future work/Test debt.
-- No schema or migration changed. No database or deployed endpoint was used. Phase 1C-B remains uncommitted and undeployed pending owner review.
+- No schema or migration changed, and no Phase 1C-B migration exists or was required. All applied migrations remain immutable.
 - Runtime tests use production helpers/orchestrators with mocked transaction and repository collaborators. Simulated rollback is callback evidence only; static structure tests remain labeled static. Real PostgreSQL lock, race, rollback, timeout, duration, and contention tests remain Test debt.
 - The corrected suite contains 320 tests: 206 runtime/helper/handler/action/orchestrator tests, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. Final correction-pass command results are recorded in `docs/SECURITY_PHASE_1C_REPORT.md`.
+
+### Phase 1C-B isolated Preview reconciliation (owner-attested 2026-07-17)
+
+- Commit `8f1073a0638b4de24923adc9c537b1e0f348228f` reached READY with database connected. The tested unauthenticated admin API request returned 401; owner-equivalent access passed and an ordinary `STUDENT` was denied.
+- Valid contest edit/publication and problem/question edit with lifecycle propagation passed.
+- An exact duplicate pack was rejected with zero content writes. Case-only duplicate filenames were rejected while one distinct file imported exactly once. A normal unique pack produced the expected totals.
+- A manifest-only/zero-entry submission was blocked by the UI with zero content writes.
+- Independent practice and basic contest, diagnostic, and Writing regression smoke passed. Checked runtime logs reported no runtime errors or sensitive values, and the Git worktree was clean.
+
+### Phase 1C-B selected Production reconciliation (owner-attested 2026-07-17)
+
+- Production health passed with database connected. The tested unauthenticated admin multi-file commit request returned 401.
+- Owner sign-out/sign-in and admin access passed; an ordinary `STUDENT` was denied.
+- Valid low-risk contest and problem/question mutations passed and were successfully restored.
+- Independent-practice submission/persistence and basic contest, diagnostic, and Writing regression smoke passed.
+- Checked runtime logs reported no runtime errors or sensitive values.
+
+Duplicate/identity testing was not repeated in Production. The Production mutations were valid low-risk checks followed by restoration; regression checks were basic smoke; and log review covered only the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, PostgreSQL integration, or Production content-pack recovery test is claimed. H-09, H-10, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unresolved/outstanding. Authenticated content-pack recovery and ongoing runtime-log monitoring remain operational requirements.
 
 ## What Worked
 
