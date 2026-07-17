@@ -1,16 +1,16 @@
 # Englishphile Security Phase 1C Report
 
-**Date:** 2026-07-13
+**Date:** 2026-07-13; Phase 1C-B operational reconciliation 2026-07-17
 **Branch:** `security-phase-1c-admin-authorization-idor`
 **Base commit:** `a887b6f3d2a07f464aa2f3a2a2123f6b095b35ff`
 **Scope:** Phase 1C-A role policy/decommissioning plus Phase 1C-B parent binding, publish serialization, and atomic admin mutations
-**State:** PR #6 merged at `df89089c89e56abed1feb0ab0569e77656d51598`; migration applied in Preview and Production; application deployed to Production; selected Production smoke passed
+**State:** PR #6 merged at `df89089c89e56abed1feb0ab0569e77656d51598` with the Phase 1C-A migration applied in Preview and Production; PR #8 merged at `e17105e6e65d30a009dffd56fe20d29d3ca69bd1`, deployed to Production, and selected Phase 1C-B Production paths verified
 
 ## Evidence boundary and operational reconciliation
 
-Repository evidence confirms the committed role policy, authorization helpers, admin layout/API wiring, retired-feature tombstones, independent-practice persistence path, tests, and migration SQL. It does not independently establish GitHub/Vercel state, deployed environment configuration, database contents, HTTP results, or runtime logs.
+Repository evidence confirms the committed role policy, authorization helpers, admin layout/API wiring, retired-feature tombstones, independent-practice persistence path, Phase 1C-B transaction principal revalidation, relational parent binding, publication serialization, bounded atomic operations, digest-bound pack identities, duplicate rejection/reconciliation, tests, and migration history. It does not independently establish provider state, deployed environment configuration, database contents, HTTP results, or runtime logs.
 
-The following operational facts are owner-attested evidence dated 2026-07-14. Neither the Preview documentation reconciliation nor this Production documentation reconciliation queried GitHub/Vercel/Neon, accessed a database, inspected environment values, or invoked an endpoint.
+The Phase 1C-A operational facts below are owner-attested evidence dated 2026-07-14. The Phase 1C-B Preview and Production facts are separately owner-attested evidence dated 2026-07-17. The documentation reconciliations did not query an external provider, access a database, inspect environment values, or invoke an endpoint.
 
 ### Preview history
 
@@ -42,6 +42,28 @@ During manual Preview setup, a Preview-only non-production database credential w
 - Checked Production runtime logs contained no reported runtime error or sensitive value.
 
 An initial read-only aggregate preflight and migration-status check was recognized as targeting isolated Preview/nonproduction. It performed no mutation and was discarded as Production evidence. The correct Production target was then selected and independently verified before the Production migration was applied. No database or infrastructure identifier is recorded.
+
+### Phase 1C-B isolated Preview evidence
+
+- Commit `8f1073a0638b4de24923adc9c537b1e0f348228f` reached READY in isolated Preview with database connected.
+- The tested unauthenticated admin API request returned HTTP 401; owner-equivalent access passed and an ordinary `STUDENT` was denied.
+- A valid contest edit/publication passed. A valid problem/question edit and lifecycle propagation passed.
+- An exact duplicate pack was rejected with zero content writes. Case-only duplicate filenames were rejected while one distinct file imported exactly once. A normal unique pack produced the expected totals.
+- A manifest-only/zero-entry submission was blocked by the UI with zero content writes.
+- Independent practice and basic contest, diagnostic, and Writing regression smoke passed.
+- Checked Preview runtime logs reported no runtime errors or sensitive values, and the Git worktree was clean.
+
+### Phase 1C-B selected Production evidence
+
+- PR #8 is `MERGED` at merge commit `e17105e6e65d30a009dffd56fe20d29d3ca69bd1`.
+- The merge commit was deployed to Production, reached READY, and became the canonical Production deployment.
+- Production health passed with database connected. The tested unauthenticated admin multi-file commit request returned HTTP 401.
+- Owner sign-out/sign-in and admin access passed; an ordinary `STUDENT` was denied admin access.
+- A valid low-risk contest mutation and a valid low-risk problem/question mutation both passed and were successfully restored.
+- Independent-practice submission/persistence and basic contest, diagnostic, and Writing regression smoke passed.
+- Checked Production runtime logs reported no runtime errors or sensitive values.
+
+Production did not repeat destructive or synthetic duplicate-pack testing; duplicate/identity behavior is supported by repository evidence and was operationally verified only in isolated Preview. The Production contest/problem checks were valid low-risk mutations followed by successful restoration. Contest, diagnostic, and Writing checks were basic regression smoke only. Runtime logs were manually reviewed only for the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, or general security verification is claimed. No PostgreSQL integration test or Production content-pack recovery test was run.
 
 ## Selected product policy
 
@@ -174,7 +196,7 @@ The final suite contains 235 tests: 134 runtime tests that import production hel
 
 Phase 1C-B must bind every nested contest/problem/question mutation to the supplied parent, use scoped atomic mutations where sufficient, close publish read-check-write races, and make authorization-sensitive bulk mutations transactional. Phase 1C-A does not claim those defects are fixed.
 
-## Phase 1C-B implementation (2026-07-14; local and uncommitted)
+## Phase 1C-B implementation (2026-07-14; merged and operationally reconciled 2026-07-17)
 
 Phase 1C-B preserves the selected global-editorial policy: stored `ADMIN` users and the current `OWNER_EMAIL`-matching user are global content-admin peers. Creator, importer, and reviewer fields remain attribution. No per-admin ownership condition, teacher/classroom workflow, schema change, or migration was added.
 
@@ -218,16 +240,16 @@ New static structural tests verify action-to-helper wiring, relation predicates,
 
 The corrected suite contains 320 tests: 206 production runtime/helper/handler/action/orchestrator tests with mocked collaborators where stated, 8 simulations, and 106 static source/structure tests. None is a PostgreSQL integration test.
 
-No `TEST_DATABASE_URL` was configured or used. Mocked transaction callbacks and simulated rollback exercise production control flow but do not prove PostgreSQL rollback, row-lock conflicts, deadlock behavior, timeout safety, exactly-once delivery, or concurrency. Real PostgreSQL evidence remains Test debt for principal/resource lock ordering, parent-row/`FOR SHARE` serialization, publish-versus-child-edit races, content-pack membership changes, duplicate committed identities under contention, bulk rollback, QA recheck races, scoped predicates, and transaction duration/contention. No deployment or Production verification is claimed for Phase 1C-B.
+No `TEST_DATABASE_URL` was configured or used. Mocked transaction callbacks and simulated rollback exercise production control flow but do not prove PostgreSQL rollback, row-lock conflicts, deadlock behavior, timeout safety, exactly-once delivery, or concurrency. Real PostgreSQL evidence remains Test debt for principal/resource lock ordering, parent-row/`FOR SHARE` serialization, publish-versus-child-edit races, content-pack membership changes, duplicate committed identities under contention, bulk rollback, QA recheck races, scoped predicates, and transaction duration/contention. Merge, deployment, and the selected operational checks are owner-attested evidence; they do not change this test classification.
 
 ### Current Phase 1C disposition
 
-- H-05: **Remediated in code; local review pending final owner/deployment review.** Global ADMIN-to-ADMIN contest editing remains intentional. Active builder child paths are parent-bound; legacy problem links are published-and-locked; publish validation and transition share the contest lock/transaction. PostgreSQL race integration and deployment remain Test debt/operational work.
-- H-06: **Remediated in local code; final owner/deployment review pending.** Global shared content administration remains intentional. Problem/question IDs are parent-bound; pack membership is rechecked; status audits are bounded; bulk, diagnostic, and JSON/CSV effects are atomic; multi-file identities are digest-bound, duplicate names are rejected, and ambiguous committed identities cannot false-count. No ordinary HTTP recovery path exists yet. PostgreSQL rollback/concurrency/duration integration and deployment remain Test debt/operational work.
+- H-05: **Remediated, merged, deployed, and selected Production paths verified.** Global `ADMIN`/`OWNER_EMAIL` peer editing remains intentional. Repository evidence confirms active builder child parent-binding, published-and-locked legacy problem links, and contest-lock publication serialization; selected Production owner/student boundaries and a restored low-risk contest mutation passed. Real PostgreSQL race/concurrency evidence remains Test debt.
+- H-06: **Remediated, merged, deployed, and selected Production paths verified.** Global shared content administration remains intentional. Repository evidence confirms problem/question parent binding, bounded atomic bulk/diagnostic/import effects, pack membership rechecks, digest-bound identities, duplicate rejection, and one-to-one plan-entry/batch reconciliation. Duplicate/identity behavior was verified in isolated Preview, not repeated in Production. No ordinary HTTP/UI recovery path exists. PostgreSQL rollback/concurrency/duration evidence and operational recovery remain Test debt/operational work.
 - H-09, H-10, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unchanged.
 - Schema/migrations: **No change.** All applied migrations remain untouched.
 
-### Phase 1C-B local verification
+### Phase 1C-B implementation-pass local verification (historical)
 
 - `npx.cmd prisma validate`: passed; schema valid; Prisma 7 configuration deprecation warning only.
 - `npx.cmd prisma generate`: passed; Prisma Client 6.19.3 generated.
@@ -237,7 +259,7 @@ No `TEST_DATABASE_URL` was configured or used. Mocked transaction callbacks and 
 - `npm.cmd run build`: passed; Next.js 16.2.10 compiled and generated 63 page-data entries. Active independent-practice, contest, diagnostic, Writing, and admin routes remain present; retired pages remain absent.
 - `npm.cmd audit` and `npm.cmd audit --omit=dev`: exited 1 with the same four moderate transitive advisories (`postcss` through Next.js and `uuid` through ExcelJS). No audit fix ran.
 
-### Phase 1C-B final integrity correction verification
+### Phase 1C-B final integrity correction verification before merge (historical)
 
 The final integrity and identity corrections add transaction-bound principal revalidation, pack-membership checks, digest-bound unique multi-file reconciliation, normalized commit bounds, minimized status audits, typed legacy schedule results, and bounded contest placeholders. The final suite contains 320 tests: 206 runtime/helper/handler/action/orchestrator tests with mocked collaborators where stated, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. No database or endpoint was part of these checks.
 
@@ -249,11 +271,11 @@ The final integrity and identity corrections add transaction-bound principal rev
 - `npm.cmd run build`: passed; Next.js 16.2.10 compiled and generated 63 page-data entries. Active independent-practice, contest, diagnostic, Writing, and admin routes remain present; retired page routes remain absent and the assignment API tombstone remains.
 - `npm.cmd audit` and `npm.cmd audit --omit=dev`: exited 1 with the unchanged four moderate transitive advisories (`postcss` through Next.js and `uuid` through ExcelJS). No audit fix ran.
 
-## Production outcome and remaining operational requirements
+## Phase 1C outcome and remaining operational requirements
 
-The supplied owner-attested evidence establishes that the aggregate admin-lockout gate passed, the immutable migration was applied, PR #6 was deployed, the canonical deployment reached READY, and selected runtime smoke passed. No claim is made that a Production backup/export completed or that role-management writes were paused because those facts were not supplied.
+The supplied owner-attested evidence establishes that the Phase 1C-A admin-lockout gate passed, the immutable migration was applied, PR #6 was deployed, and selected Phase 1C-A smoke passed. It also establishes that PR #8 merged, its merge commit became the READY canonical Production deployment, and the selected Phase 1C-B authorization, restored mutation, independent-practice, regression-smoke, and runtime-log checks passed. No backup/export, migration work for Phase 1C-B, or provider configuration change is claimed.
 
-Remaining operational requirements include private-contest Production smoke, continued runtime-log monitoring, comprehensive regression testing beyond the selected smoke, and preserving the applied migration unchanged. Future database corrections must use new additive migrations.
+Remaining operational requirements include private-contest Production smoke, authenticated content-pack recovery, continued runtime-log monitoring, comprehensive regression/security testing beyond the selected smoke, and preserving every applied migration unchanged. A normal HTTP retry creates a new pack; the internal `resumeContentPackId` primitive is repository-only and no ordinary HTTP/UI recovery surface exists. Future database corrections must use new additive migrations.
 
 ## Historical implementation-pass local verification
 
@@ -270,7 +292,7 @@ The 2026-07-13 implementation/integrity pass completed these local non-database 
 
 No automated audit fix was run because the suggested forced resolutions are breaking dependency changes. At that time, no database or deployed endpoint was tested. The later Preview and Production operational evidence is recorded above; comprehensive Production regression and PostgreSQL concurrency/failure behavior remain unverified.
 
-## Preview documentation-reconciliation local verification (2026-07-14)
+## Phase 1C-A Preview documentation-reconciliation local verification (2026-07-14; historical)
 
 The Preview documentation-only reconciliation reran the required local checks against commit `5a17d56` plus its documentation changes:
 
@@ -284,7 +306,7 @@ The Preview documentation-only reconciliation reran the required local checks ag
 
 No audit fix was run. The audit result is unchanged and remains Unresolved.
 
-## Production documentation-reconciliation local verification
+## Phase 1C-A Production documentation-reconciliation local verification (2026-07-14; historical)
 
 This documentation-only reconciliation reran the required repository-local checks against merge commit `df89089c89e56abed1feb0ab0569e77656d51598` plus the documentation changes:
 
@@ -296,10 +318,23 @@ This documentation-only reconciliation reran the required repository-local check
 
 `npm audit` was not rerun. The last known result remains four moderate transitive advisories: `postcss` through Next.js and `uuid` through ExcelJS. No audit fix was run.
 
+## Phase 1C-B Production operational-reconciliation local verification (2026-07-17)
+
+This documentation-only reconciliation verified merge commit `e17105e6e65d30a009dffd56fe20d29d3ca69bd1` plus the uncommitted documentation changes without accessing a database or endpoint:
+
+- `npm.cmd run typecheck`: passed in 24 seconds.
+- `npm.cmd run lint`: passed in 37.7 seconds with no reported warnings.
+- `npm.cmd test`: passed in 6.7 seconds, 22 files and 320 tests. The evidence classification remains 206 production runtime/helper/handler/action/orchestrator tests with mocked collaborators where stated, 8 simulations, 106 static checks, and zero PostgreSQL integration tests.
+- `npm.cmd run build`: passed in 61.9 seconds with Next.js 16.2.10 and 63 generated page-data entries. The configured script generated Prisma Client 6.19.3 locally and then ran `next build`; it did not run a migration command.
+- `git diff --check`: passed.
+- `npm audit` was not rerun. The last known result remains four moderate transitive advisories, and no audit fix ran.
+
 ## Safety boundary
 
 The 2026-07-13 implementation pass did not access a database, apply or inspect migration status, run seed/backup/export/import, inspect environment values, invoke deployed endpoints, modify Vercel/GitHub configuration, deploy, commit, or push. Those statements remain historical facts about that pass.
 
 The 2026-07-14 Preview documentation reconciliation likewise did not access a database, run a migration command, change schema or migration files, run seed/backup/export/import, inspect environment values, invoke endpoints, query or modify GitHub/Vercel state, deploy, commit, or push. Those statements remain historical facts about that pass.
 
-This Production documentation reconciliation does not access a database, invoke an endpoint, inspect environment values, run a migration command, modify schema/migrations, or query or modify Vercel/Neon/GitHub state. Its documentation changes remain uncommitted for owner review.
+The 2026-07-14 Phase 1C-A Production documentation reconciliation did not access a database, invoke an endpoint, inspect environment values, run a migration command, modify schema/migrations, or query or modify an external provider. Those statements remain historical facts about that pass.
+
+The 2026-07-17 Phase 1C-B documentation reconciliation did not access a database; invoke a local, Preview, or Production endpoint; inspect environment values; run a migration, seed, backup, export, import, or audit command; modify code, tests, dependencies, schema, seed, scripts, configuration, or migrations; query or modify an external provider; deploy; commit; or push. The changes remain uncommitted for owner review.
