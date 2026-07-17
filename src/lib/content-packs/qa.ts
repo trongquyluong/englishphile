@@ -1,4 +1,4 @@
-import type { Problem, Question } from "@prisma/client";
+import type { Prisma, Problem, Question } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type QaSeverity = "ERROR" | "WARNING" | "INFO";
@@ -294,13 +294,16 @@ function checkProblem(problem: ProblemForQa): QaIssue[] {
   return issues;
 }
 
-export async function getContentQaReport(options: { contentPackId?: string; problemIds?: string[] } = {}): Promise<QaReport> {
+export async function getContentQaReport(
+  options: { contentPackId?: string; problemIds?: string[] } = {},
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+): Promise<QaReport> {
   const where = options.contentPackId
     ? { contentPackId: options.contentPackId }
     : options.problemIds?.length
       ? { id: { in: options.problemIds } }
       : {};
-  const problems = await prisma.problem.findMany({
+  const problems = await db.problem.findMany({
     where,
     include: {
       sourceCollection: true,

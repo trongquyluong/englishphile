@@ -4,6 +4,7 @@ import { importJsonPayload } from "@/lib/import/json-importer";
 import { requireContentAdminApi } from "@/lib/auth/content-admin-api";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
+import { isContentAdminTransactionAuthorizationError } from "@/lib/auth/content-admin-transaction";
 
 export async function POST(request: Request) {
   const authorization = await requireContentAdminApi();
@@ -34,9 +35,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nội dung import đang trống." }, { status: 400 });
   }
 
-  const result =
-    body.importType === "CSV"
-      ? await importCsvRows(body.content, user.id, { publishImmediately: body.publishImmediately })
-      : await importJsonPayload(body.content, user.id, { publishImmediately: body.publishImmediately });
-  return NextResponse.json(result, { status: result.status === "FAILED" ? 422 : 200 });
+  try {
+    const result =
+      body.importType === "CSV"
+        ? await importCsvRows(body.content, user.id, { publishImmediately: body.publishImmediately })
+        : await importJsonPayload(body.content, user.id, { publishImmediately: body.publishImmediately });
+    return NextResponse.json(result, { status: result.status === "FAILED" ? 422 : 200 });
+  } catch (error) {
+    if (isContentAdminTransactionAuthorizationError(error)) {
+      return NextResponse.json({ error: "Không có quyền truy cập." }, { status: 403 });
+    }
+    return NextResponse.json({ error: "Không thể commit dữ liệu import." }, { status: 500 });
+  }
 }

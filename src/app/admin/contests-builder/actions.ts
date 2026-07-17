@@ -5,9 +5,27 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import type { ContestVisibility, QuestionType, SkillType } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth/session";
+import { requireContentAdminInTransaction } from "@/lib/auth/content-admin-transaction";
+import {
+  archiveContestAtomically,
+  createContestQuestion,
+  createContestSection,
+  createContestSectionWithQuestions,
+  deleteContestQuestion,
+  deleteContestSection,
+  getContestPublishErrors,
+  publishContestAtomically,
+  updateContestQuestion,
+  updateContestSection,
+} from "@/lib/admin/contest-mutations";
+import { ADMIN_RESOURCE_UNAVAILABLE, lockContestForAdminMutation } from "@/lib/admin/mutation-locks";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/import/duplicates";
 import type { ParsedContest } from "@/lib/import/excel-contest-parser";
+import {
+  MAX_CONTEST_SECTION_PLACEHOLDER_QUESTIONS,
+  parseContestSectionPlaceholderCount,
+} from "@/lib/admin/contest-section-placeholders";
 
 // --- Helpers (shared from existing actions.ts — duplicated here for the new import flow) ---
 
@@ -65,10 +83,14 @@ function redirectBack(path: string, ok: boolean, message: string): never {
   redirect(`${path}?${ok ? "message" : "error"}=${encodeURIComponent(message)}`);
 }
 
-async function ensureUniqueSlug(base: string, excludeContestId?: string) {
+async function ensureUniqueSlug(
+  base: string,
+  excludeContestId?: string,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+) {
   let slug = base;
   for (let suffix = 2; suffix < 50; suffix += 1) {
-    const existing = await prisma.contest.findFirst({
+    const existing = await db.contest.findFirst({
       where: { slug, ...(excludeContestId ? { id: { not: excludeContestId } } : {}) },
       select: { id: true },
     });
@@ -274,7 +296,6 @@ export async function importContestFromParsedAction(
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 60);
-  const slug = await ensureUniqueSlug(baseSlug);
 
   // Parse dates
   const startsAt = info.startAt ? new Date(info.startAt) : null;
@@ -306,6 +327,8 @@ export async function importContestFromParsedAction(
   // Use Prisma transaction to ensure atomicity
   // All-or-nothing: if any step fails, no partial contest is created
   const contest = await prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, user.id);
+    const slug = await ensureUniqueSlug(baseSlug, undefined, tx);
     // Create contest as DRAFT
     // For private contests, set accessCodeUpdatedAt to invalidate any stale grants
     const isPrivate = info.visibility === "PRIVATE";
@@ -351,7 +374,7 @@ export async function importContestFromParsedAction(
         .filter((q) => q.sectionId === section.sectionId)
         .sort((a, b) => a.orderIndex - b.orderIndex);
 
-      for (const q of sectionQuestions) {
+      const questionRows = sectionQuestions.map((q) => {
         const qType = QUESTION_TYPE_MAP[q.questionType.trim().toUpperCase()] ?? "MCQ";
         const isMCQ = MCQ_QUESTION_TYPES.includes(qType);
 
@@ -374,19 +397,20 @@ export async function importContestFromParsedAction(
               ? { acceptedAnswers: (q.acceptedAnswers ?? q.correctAnswer ?? "").split("|").map((a) => a.trim()).filter(Boolean) }
               : undefined;
 
-        await tx.contestQuestion.create({
-          data: {
-            sectionId: sectionRecord.id,
-            orderIndex: q.orderIndex,
-            type: qType,
-            prompt: q.prompt ?? null,
-            optionsJson: optionsJson as Prisma.InputJsonValue | undefined,
-            answerJson: answerJson as Prisma.InputJsonValue | undefined,
-            points: q.points ?? 1,
-            explanation: q.explanation ?? null,
-            rootWord: q.rootWord ?? null,
-          },
-        });
+        return {
+          sectionId: sectionRecord.id,
+          orderIndex: q.orderIndex,
+          type: qType,
+          prompt: q.prompt ?? null,
+          optionsJson: optionsJson as Prisma.InputJsonValue | undefined,
+          answerJson: answerJson as Prisma.InputJsonValue | undefined,
+          points: q.points ?? 1,
+          explanation: q.explanation ?? null,
+          rootWord: q.rootWord ?? null,
+        };
+      });
+      if (questionRows.length) {
+        await tx.contestQuestion.createMany({ data: questionRows });
       }
     }
 
@@ -409,12 +433,14 @@ export async function createContestAction(formData: FormData) {
   const title = text(formData, "title");
   if (!title) redirectBack("/admin/contests-builder/new", false, "Tiêu đề không được để trống.");
 
-  const slug = await ensureUniqueSlug(text(formData, "slug") || generateSlug(title));
+  const baseSlug = text(formData, "slug") || generateSlug(title);
   const visibility = parseVisibility(text(formData, "visibility"));
   const accessCode = visibility === "PRIVATE" ? nullableText(formData, "accessCode") : null;
 
-  const contest = await prisma.contest.create({
-    data: {
+  const contest = await prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, user.id);
+    const slug = await ensureUniqueSlug(baseSlug, undefined, tx);
+    return tx.contest.create({ data: {
       title,
       slug,
       description: nullableText(formData, "description"),
@@ -426,7 +452,7 @@ export async function createContestAction(formData: FormData) {
       startsAt: dateOrNull(formData, "startsAt"),
       endsAt: dateOrNull(formData, "endsAt"),
       createdById: user.id,
-    },
+    } });
   });
 
   revalidatePath("/admin/contests-builder");
@@ -435,7 +461,7 @@ export async function createContestAction(formData: FormData) {
 }
 
 export async function updateContestMetaAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
   const title = text(formData, "title");
@@ -444,18 +470,14 @@ export async function updateContestMetaAction(formData: FormData) {
   const visibility = parseVisibility(text(formData, "visibility"));
   const newAccessCode = visibility === "PRIVATE" ? nullableText(formData, "accessCode") : null;
 
-  // Reject missing contests before entering the mutation transaction.
-  const current = await prisma.contest.findUnique({
-    where: { id: contestId },
-    select: { id: true },
-  });
-
-  if (!current) redirectBack(returnTo, false, "Không tìm thấy contest.");
-
-  const slug = await ensureUniqueSlug(text(formData, "slug") || generateSlug(title), contestId);
-  await prisma.$transaction(async (tx) => {
+  const baseSlug = text(formData, "slug") || generateSlug(title);
+  const updated = await prisma.$transaction(async (tx) => {
+    await requireContentAdminInTransaction(tx, user.id);
+    const contest = await lockContestForAdminMutation(tx, contestId);
+    if (!contest) return false;
+    const slug = await ensureUniqueSlug(baseSlug, contest.id, tx);
     await tx.contest.update({
-      where: { id: contestId },
+      where: { id: contest.id },
       data: {
         title,
         slug,
@@ -469,8 +491,10 @@ export async function updateContestMetaAction(formData: FormData) {
         accessCodeUpdatedAt: new Date(),
       },
     });
-    await tx.contestAccessGrant.deleteMany({ where: { contestId } });
+    await tx.contestAccessGrant.deleteMany({ where: { contestId: contest.id } });
+    return true;
   });
+  if (!updated) redirectBack("/admin/contests-builder", false, ADMIN_RESOURCE_UNAVAILABLE);
 
   revalidatePath("/contests");
   revalidatePath(`/admin/contests-builder/${contestId}`);
@@ -478,61 +502,53 @@ export async function updateContestMetaAction(formData: FormData) {
 }
 
 export async function createSectionAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
-  await prisma.contestSection.create({
-    data: {
-      contestId,
-      title: text(formData, "title") || "Section mới",
-      skillType: parseSkillType(text(formData, "skillType")),
-      orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
-      instructions: nullableText(formData, "instructions"),
-      points: numberOrNull(formData, "points"),
-      audioUrl: nullableText(formData, "audioUrl"),
-      transcript: nullableText(formData, "transcript"),
-      passageText: nullableText(formData, "passageText"),
-    },
-  });
+  const result = await createContestSection(contestId, {
+    title: text(formData, "title") || "Section mới",
+    skillType: parseSkillType(text(formData, "skillType")),
+    orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
+    instructions: nullableText(formData, "instructions"),
+    points: numberOrNull(formData, "points"),
+    audioUrl: nullableText(formData, "audioUrl"),
+    transcript: nullableText(formData, "transcript"),
+    passageText: nullableText(formData, "passageText"),
+  }, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirect(returnTo);
 }
 
 export async function createSectionWithQuestionsAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
   const skillType = parseSkillType(text(formData, "skillType"));
   const questionType = parseQuestionType(text(formData, "questionType"));
-  const questionCount = Math.min(100, Math.max(0, Math.round(numberOrNull(formData, "questionCount") ?? 0)));
+  const questionCount = parseContestSectionPlaceholderCount(formData.get("questionCount"));
+  if (questionCount === null) {
+    redirectBack(
+      returnTo,
+      false,
+      `Số câu hỏi phải là số nguyên từ 0 đến ${MAX_CONTEST_SECTION_PLACEHOLDER_QUESTIONS}.`,
+    );
+  }
   const totalPoints = numberOrNull(formData, "points");
   const pointsPerQuestion =
     questionCount > 0 && totalPoints && totalPoints > 0
       ? Math.round((totalPoints / questionCount) * 100) / 100
       : null;
 
-  const section = await prisma.contestSection.create({
-    data: {
-      contestId,
-      title: text(formData, "title") || "Phần thi mới",
-      skillType,
-      orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
-      points: totalPoints,
-    },
-  });
-
-  if (questionCount > 0) {
-    await prisma.contestQuestion.createMany({
-      data: Array.from({ length: questionCount }, (_, index) => ({
-        sectionId: section.id,
-        orderIndex: index,
-        type: questionType,
-        points: pointsPerQuestion,
-      })),
-    });
-  }
+  const result = await createContestSectionWithQuestions(
+    contestId,
+    { title: text(formData, "title") || "Phần thi mới", skillType, orderIndex: numberOrNull(formData, "orderIndex") ?? 0, points: totalPoints },
+    Array.from({ length: questionCount }, (_, index) => ({ orderIndex: index, type: questionType, points: pointsPerQuestion })),
+    user.id,
+  );
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirectBack(
@@ -545,61 +561,58 @@ export async function createSectionWithQuestionsAction(formData: FormData) {
 }
 
 export async function updateSectionAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const sectionId = text(formData, "sectionId");
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
-  await prisma.contestSection.update({
-    where: { id: sectionId },
-    data: {
-      title: text(formData, "title") || "Section không tiêu đề",
-      skillType: parseSkillType(text(formData, "skillType")),
-      orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
-      instructions: nullableText(formData, "instructions"),
-      points: numberOrNull(formData, "points"),
-      audioUrl: nullableText(formData, "audioUrl"),
-      transcript: nullableText(formData, "transcript"),
-      passageText: nullableText(formData, "passageText"),
-    },
-  });
+  const result = await updateContestSection(contestId, sectionId, {
+    title: text(formData, "title") || "Section không tiêu đề",
+    skillType: parseSkillType(text(formData, "skillType")),
+    orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
+    instructions: nullableText(formData, "instructions"),
+    points: numberOrNull(formData, "points"),
+    audioUrl: nullableText(formData, "audioUrl"),
+    transcript: nullableText(formData, "transcript"),
+    passageText: nullableText(formData, "passageText"),
+  }, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirect(returnTo);
 }
 
 export async function deleteSectionAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const sectionId = text(formData, "sectionId");
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
-  await prisma.contestSection.delete({ where: { id: sectionId } });
+  const result = await deleteContestSection(contestId, sectionId, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirect(returnTo);
 }
 
 export async function createQuestionAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const sectionId = text(formData, "sectionId");
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
   const type = parseQuestionType(text(formData, "type"));
-  await prisma.contestQuestion.create({
-    data: {
-      sectionId,
-      orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
-      type,
-      prompt: nullableText(formData, "prompt"),
-      optionsJson: parseOptionsInput(formData) ?? Prisma.DbNull,
-      answerJson: parseAnswerInput(formData, type) ?? Prisma.DbNull,
-      points: numberOrNull(formData, "points"),
-      explanation: nullableText(formData, "explanation"),
-      rootWord: nullableText(formData, "rootWord"),
-    },
-  });
+  const result = await createContestQuestion(contestId, sectionId, {
+    orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
+    type,
+    prompt: nullableText(formData, "prompt"),
+    optionsJson: parseOptionsInput(formData) ?? Prisma.DbNull,
+    answerJson: parseAnswerInput(formData, type) ?? Prisma.DbNull,
+    points: numberOrNull(formData, "points"),
+    explanation: nullableText(formData, "explanation"),
+    rootWord: nullableText(formData, "rootWord"),
+  }, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirect(returnTo);
@@ -654,37 +667,36 @@ function parseAnswerInput(formData: FormData, type: QuestionType, key = "answerJ
 }
 
 export async function updateQuestionAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const questionId = text(formData, "questionId");
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
   const type = parseQuestionType(text(formData, "type"));
-  await prisma.contestQuestion.update({
-    where: { id: questionId },
-    data: {
-      orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
-      type,
-      prompt: nullableText(formData, "prompt"),
-      optionsJson: parseOptionsInput(formData) ?? Prisma.DbNull,
-      answerJson: parseAnswerInput(formData, type) ?? Prisma.DbNull,
-      points: numberOrNull(formData, "points"),
-      explanation: nullableText(formData, "explanation"),
-      rootWord: nullableText(formData, "rootWord"),
-    },
-  });
+  const result = await updateContestQuestion(contestId, questionId, {
+    orderIndex: numberOrNull(formData, "orderIndex") ?? 0,
+    type,
+    prompt: nullableText(formData, "prompt"),
+    optionsJson: parseOptionsInput(formData) ?? Prisma.DbNull,
+    answerJson: parseAnswerInput(formData, type) ?? Prisma.DbNull,
+    points: numberOrNull(formData, "points"),
+    explanation: nullableText(formData, "explanation"),
+    rootWord: nullableText(formData, "rootWord"),
+  }, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirect(returnTo);
 }
 
 export async function deleteQuestionAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const questionId = text(formData, "questionId");
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
-  await prisma.contestQuestion.delete({ where: { id: questionId } });
+  const result = await deleteContestQuestion(contestId, questionId, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath(returnTo);
   redirect(returnTo);
@@ -702,7 +714,6 @@ export async function validateContestForPublish(contestId: string): Promise<Vali
   // Note: callers should call requireAdmin() before this to avoid redirect throws
   await requireAdmin();
 
-  const errors: ValidationError[] = [];
   const contest = await prisma.contest.findUnique({
     where: { id: contestId },
     include: {
@@ -714,89 +725,40 @@ export async function validateContestForPublish(contestId: string): Promise<Vali
   });
 
   if (!contest) {
-    errors.push({ field: "contest", message: "Không tìm thấy contest." });
-    return errors;
+    return [{ field: "contest", message: ADMIN_RESOURCE_UNAVAILABLE }];
   }
-
-  if (!contest.title.trim()) {
-    errors.push({ field: "title", message: "Tiêu đề contest không được để trống." });
-  }
-
-  if (!contest.sections.length) {
-    errors.push({ field: "sections", message: "Contest cần có ít nhất một section." });
-  }
-
-  for (const section of contest.sections) {
-    const sectionErrors = [];
-    if (section.skillType === "LISTENING" && !section.audioUrl?.trim()) {
-      sectionErrors.push("Listening section cần có đường dẫn audio (audioUrl).");
-    }
-    if (section.questions.length === 0 && section.skillType !== "WRITING") {
-      sectionErrors.push(`Section "${section.title}" cần có ít nhất một câu hỏi.`);
-    }
-
-    for (let i = 0; i < section.questions.length; i++) {
-      const q = section.questions[i];
-      if (!q.prompt?.trim()) {
-        sectionErrors.push(`Câu hỏi ${i + 1} trong "${section.title}" chưa có nội dung (prompt).`);
-      }
-      if (["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(q.type) && !q.optionsJson) {
-        sectionErrors.push(`Câu hỏi ${i + 1} trong "${section.title}" là trắc nghiệm nhưng chưa có đáp án (options).`);
-      }
-      if (["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ", "SHORT_ANSWER", "OPEN_CLOZE", "WORD_FORMATION", "LISTENING_SHORT_ANSWER"].includes(q.type) && !q.answerJson) {
-        sectionErrors.push(`Câu hỏi ${i + 1} trong "${section.title}" chưa có đáp án đúng (answerJson).`);
-      }
-    }
-
-    if (sectionErrors.length) {
-      const shown = sectionErrors.slice(0, 3);
-      const hidden = sectionErrors.length - shown.length;
-      errors.push({
-        field: `section:${section.id}`,
-        message: shown.join(" ") + (hidden > 0 ? ` (+${hidden} lỗi khác trong section này)` : ""),
-      });
-    }
-  }
-
-  return errors;
+  return getContestPublishErrors(contest);
 }
 
 export async function publishContestAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
-  const errors = await validateContestForPublish(contestId);
-  if (errors.length) {
-    redirectBack(returnTo, false, `Chưa thể xuất bản: còn ${errors.length} mục cần hoàn thiện (xem danh sách trong trang).`);
+  const result = await publishContestAtomically(contestId, user.id);
+  if (!result.ok) {
+    if (result.validationErrors?.length) {
+      redirectBack(returnTo, false, `Chưa thể xuất bản: còn ${result.validationErrors.length} mục cần hoàn thiện.`);
+    }
+    redirectBack("/admin/contests-builder", false, result.message);
   }
-
-  const contest = await prisma.contest.findUnique({ where: { id: contestId }, select: { startsAt: true } });
-  const nextStatus: "SCHEDULED" | "LIVE" = contest?.startsAt && contest.startsAt > new Date() ? "SCHEDULED" : "LIVE";
-
-  await prisma.contest.update({
-    where: { id: contestId },
-    data: { status: nextStatus },
-  });
 
   revalidatePath("/contests");
   revalidatePath(returnTo);
   redirectBack(
     returnTo,
     true,
-    nextStatus === "SCHEDULED" ? "Đã xuất bản. Contest sẽ mở khi đến thời gian bắt đầu." : "Đã xuất bản contest.",
+    result.status === "SCHEDULED" ? "Đã xuất bản. Contest sẽ mở khi đến thời gian bắt đầu." : "Đã xuất bản contest.",
   );
 }
 
 export async function archiveContestAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests-builder/${contestId}/edit`;
 
-  await prisma.contest.update({
-    where: { id: contestId },
-    data: { status: "ARCHIVED" },
-  });
+  const result = await archiveContestAtomically(contestId, user.id);
+  if (!result.ok) redirectBack("/admin/contests-builder", false, result.message);
 
   revalidatePath("/contests");
   revalidatePath(returnTo);

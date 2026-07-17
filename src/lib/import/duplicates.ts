@@ -1,4 +1,4 @@
-import type { ContentStatus, PrismaClient } from "@prisma/client";
+import type { ContentStatus, Prisma, PrismaClient } from "@prisma/client";
 import type {
   ImportIssue,
   ImportPlan,
@@ -10,7 +10,7 @@ import type {
 import { attachDuplicateRiskMetadata, detectImportDuplicates, getQuestionFingerprint } from "@/lib/import/duplicate-detection";
 import { prisma } from "@/lib/prisma";
 
-type Db = PrismaClient | typeof prisma;
+type Db = PrismaClient | Prisma.TransactionClient | typeof prisma;
 
 export function generateSlug(value: string) {
   const slug = value

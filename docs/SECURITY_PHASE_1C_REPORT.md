@@ -1,9 +1,9 @@
-# Englishphile Security Phase 1C-A Report
+# Englishphile Security Phase 1C Report
 
 **Date:** 2026-07-13
 **Branch:** `security-phase-1c-admin-authorization-idor`
 **Base commit:** `a887b6f3d2a07f464aa2f3a2a2123f6b095b35ff`
-**Scope:** Role policy, content-admin authorization, admin guard consistency, and classroom/assignment application decommissioning
+**Scope:** Phase 1C-A role policy/decommissioning plus Phase 1C-B parent binding, publish serialization, and atomic admin mutations
 **State:** PR #6 merged at `df89089c89e56abed1feb0ab0569e77656d51598`; migration applied in Preview and Production; application deployed to Production; selected Production smoke passed
 
 ## Evidence boundary and operational reconciliation
@@ -156,7 +156,7 @@ These tests are not PostgreSQL integration tests. Owner-attested Preview and Pro
 
 The final suite contains 235 tests: 134 runtime tests that import production helpers, handlers, actions, parsers, or persistence functions (with mocked collaborators where stated); 8 simulated resource-limit calculations that do not invoke a production enforcement boundary; and 93 static source/structure checks. The runtime category is not database integration evidence.
 
-## Finding status
+## Phase 1C-A finding status (historical checkpoint)
 
 - Teacher-role global-admin overprivilege: **Remediated, deployed to Production, and verified by Production role/admin-boundary checks.**
 - Missing admin import page guard: **Remediated and deployed; selected Production owner/student access checks passed.**
@@ -173,6 +173,81 @@ The final suite contains 235 tests: 134 runtime tests that import production hel
 - Private-contest Production smoke: **Operational requirement; not claimed.**
 
 Phase 1C-B must bind every nested contest/problem/question mutation to the supplied parent, use scoped atomic mutations where sufficient, close publish read-check-write races, and make authorization-sensitive bulk mutations transactional. Phase 1C-A does not claim those defects are fixed.
+
+## Phase 1C-B implementation (2026-07-14; local and uncommitted)
+
+Phase 1C-B preserves the selected global-editorial policy: stored `ADMIN` users and the current `OWNER_EMAIL`-matching user are global content-admin peers. Creator, importer, and reviewer fields remain attribution. No per-admin ownership condition, teacher/classroom workflow, schema change, or migration was added.
+
+### Mutation inventory and transaction policy
+
+| Boundary | Implemented policy |
+|---|---|
+| Contest builder section create/update/delete | Lock the claimed `Contest`; update/delete use both child ID and `contestId`; a missing or foreign child returns the same generic unavailable result. Placeholder creation accepts only integer counts from 0 through 100 and rejects invalid/excessive input before `Array.from` or the transactional helper. |
+| Contest builder question create/update/delete | Lock the claimed `Contest`; creation verifies the selected section belongs to it; update/delete scope through `ContestQuestion -> ContestSection -> Contest`. |
+| Builder metadata, visibility, access code, archive | Revalidate/lock the current principal first, then lock the current `Contest`; metadata and access-grant invalidation share one bounded transaction. No Production duration claim is made. |
+| Builder publish | Lock the `Contest`, then read schedule, sections, and questions, validate that locked snapshot, and transition to `SCHEDULED` or `LIVE` in the same transaction. Every active builder child mutation acquires the same parent-row lock first. |
+| Legacy contest create/update and `ContestProblem` replacement | Require every referenced problem to remain `PUBLISHED` under deterministic `FOR SHARE` locks; update also locks the `Contest`, replaces links, and invalidates access grants atomically. |
+| Problem/question editor | Reject edits over 50 questions or 20 normalized topic associations before opening the content transaction; lock the claimed `Problem`; reject duplicate question IDs and any question not belonging to that problem before the first write; update the problem, relation-scoped questions, lifecycle propagation, and audit records in one transaction. Omitted stored questions are preserved; outside `DRAFT`, their lifecycle status follows the parent atomically. The editor does not accept client-generated IDs as a question-create path. |
+| Single problem status/publish | Lock the `Problem`; validate the current child snapshot; update problem/question lifecycle fields and write the audit record in one transaction. |
+| Problem/QA/content-pack bulk status | Reject empty, duplicate, unknown, over-50 problem sets, or sets with over 1,000 related questions; lock problem IDs deterministically; validate before writing; use set-based problem/question/audit mutations. Pack actions lock the pack and recheck every target's membership. QA predicates are rechecked under those locks. |
+| Diagnostic eligibility | Reject invalid bounded ID sets; lock and verify that all targets are current published problems; execute one scoped `updateMany` in the transaction. |
+| Source, topic, and content-pack metadata/status | Metadata/status and the corresponding audit record commit or roll back together. Topic parent IDs are checked server-side. |
+| JSON/CSV commit | Parsing, normalization, duplicate detection, and plan validation remain outside the content transaction. Commit preconditions are recalculated from normalized payloads and capped at 25 problems, 250 questions, 100 topic associations, 50 unique topics, and 25 unique sources. Invalid/oversized plans create no content. Set-based taxonomy preparation and bounded problem creation share the valid content transaction. |
+| Multi-file content pack | Explicit per-file partial-result mode is retained. A durable ordered plan precedes file commits. Entries and linked batches carry a server-derived entry key, normalized filename, import type, ordinal, and SHA-256 of exact UTF-8 content. Every occurrence of a duplicate normalized filename is rejected before content validation/import. Reconciliation consumes each exact imported identity once, refuses duplicate committed identities, and rejects finalization failures instead of returning success. |
+| Failed validation | May create one `FAILED` `ImportBatch` but creates no content rows. |
+
+Every Phase 1C-B mutation transaction revalidates the authenticated `userId` by locking and reloading the current `User` row, then applying the same stored `ADMIN`/normalized `OWNER_EMAIL` policy. Lock order is principal first, parent resource second, and deterministic child IDs third. Missing, deleted, or downgraded users fail before the transaction's resource lookup/write. Outer action/API guards remain in place.
+
+The shared locking helpers use parameterized Prisma tagged templates. Contest mutations lock one parent row. Multi-problem mutations lock IDs in deterministic order. No network request, file parsing, redirect, cache invalidation, or external service call occurs inside these database transactions. Existing contest-attempt advisory locking remains separate and unchanged. The numeric/query bounds reduce work but are not empirical evidence that a transaction is short or Production-safe.
+
+Problem lifecycle audits contain only problem ID, content status, publication/review timestamps, and reviewer attribution before/after the transition. Full questions remain available to validation inside the transaction but prompts, options, answers, metadata, and child arrays are not duplicated into status audits.
+
+Legacy contest schedule checks now return typed validation failures. They do not use the generic missing/cross-parent message for malformed duration/times; draft, archived, and ended records retain their historical edit behavior, while future scheduled/current live states use consistent time rules.
+
+### Generic failure and authorization boundary
+
+Cross-parent and missing contest/problem resources use the same Vietnamese unavailable result and do not disclose the actual parent. Success redirects use the verified parent; mismatch failures return to a neutral admin list. Problem status return paths are restricted to `/admin` paths. Raw Prisma errors and attribution identities are not returned as scoped authorization failures.
+
+Every Server Action still calls `requireAdmin()` before the production mutation helper. The five admin APIs still call `requireContentAdminApi()` before origin validation, database-backed rate limiting, or body/file parsing. The commit APIs repeat current-user authorization on the commit request; a validation request is not treated as commit authorization. Existing runtime policy/API tests continue to cover anonymous, ordinary `STUDENT`, stored `ADMIN`, current `OWNER_EMAIL`, and missing/deleted-user decisions. Phase 1C-B adds no ADMIN-versus-ADMIN denial.
+
+### Phase 1C-B test evidence and limits
+
+Runtime tests import production contest/problem/import/content-admin helpers, production Server Actions, and the production multi-file orchestrator with mocked Prisma transaction/repository collaborators. They cover current `ADMIN` and normalized owner acceptance; deleted/downgraded-user rejection before resource access; accepted/cross-parent child IDs; locked contest/problem publication; duplicate/mixed question IDs; pack membership success/change rejection; set-based status mutations; minimized audit JSON; actual normalized import bounds and invalid-plan invocation; legacy schedule result mapping; bounded placeholder counts; exact/case-only duplicate file rejection; digest/filename/order resume mismatch; digest-safe reconciliation; duplicate committed-identity refusal; durable all-success/partial/invalid results; and finalization failure.
+
+New static structural tests verify action-to-helper wiring, relation predicates, parameterized lock structure, locked publish wiring, problem/audit transaction structure, JSON/CSV atomic-helper wiring, action-local guards, and API authorization ordering. They are not runtime authorization tests.
+
+The corrected suite contains 320 tests: 206 production runtime/helper/handler/action/orchestrator tests with mocked collaborators where stated, 8 simulations, and 106 static source/structure tests. None is a PostgreSQL integration test.
+
+No `TEST_DATABASE_URL` was configured or used. Mocked transaction callbacks and simulated rollback exercise production control flow but do not prove PostgreSQL rollback, row-lock conflicts, deadlock behavior, timeout safety, exactly-once delivery, or concurrency. Real PostgreSQL evidence remains Test debt for principal/resource lock ordering, parent-row/`FOR SHARE` serialization, publish-versus-child-edit races, content-pack membership changes, duplicate committed identities under contention, bulk rollback, QA recheck races, scoped predicates, and transaction duration/contention. No deployment or Production verification is claimed for Phase 1C-B.
+
+### Current Phase 1C disposition
+
+- H-05: **Remediated in code; local review pending final owner/deployment review.** Global ADMIN-to-ADMIN contest editing remains intentional. Active builder child paths are parent-bound; legacy problem links are published-and-locked; publish validation and transition share the contest lock/transaction. PostgreSQL race integration and deployment remain Test debt/operational work.
+- H-06: **Remediated in local code; final owner/deployment review pending.** Global shared content administration remains intentional. Problem/question IDs are parent-bound; pack membership is rechecked; status audits are bounded; bulk, diagnostic, and JSON/CSV effects are atomic; multi-file identities are digest-bound, duplicate names are rejected, and ambiguous committed identities cannot false-count. No ordinary HTTP recovery path exists yet. PostgreSQL rollback/concurrency/duration integration and deployment remain Test debt/operational work.
+- H-09, H-10, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unchanged.
+- Schema/migrations: **No change.** All applied migrations remain untouched.
+
+### Phase 1C-B local verification
+
+- `npx.cmd prisma validate`: passed; schema valid; Prisma 7 configuration deprecation warning only.
+- `npx.cmd prisma generate`: passed; Prisma Client 6.19.3 generated.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run lint`: passed with no reported warnings.
+- `npm.cmd test`: superseded by the final integrity correction result below; the pre-correction staged implementation had 19 files and 271 tests.
+- `npm.cmd run build`: passed; Next.js 16.2.10 compiled and generated 63 page-data entries. Active independent-practice, contest, diagnostic, Writing, and admin routes remain present; retired pages remain absent.
+- `npm.cmd audit` and `npm.cmd audit --omit=dev`: exited 1 with the same four moderate transitive advisories (`postcss` through Next.js and `uuid` through ExcelJS). No audit fix ran.
+
+### Phase 1C-B final integrity correction verification
+
+The final integrity and identity corrections add transaction-bound principal revalidation, pack-membership checks, digest-bound unique multi-file reconciliation, normalized commit bounds, minimized status audits, typed legacy schedule results, and bounded contest placeholders. The final suite contains 320 tests: 206 runtime/helper/handler/action/orchestrator tests with mocked collaborators where stated, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. No database or endpoint was part of these checks.
+
+- `npx.cmd prisma validate`: passed; the schema is valid.
+- `npx.cmd prisma generate`: passed; Prisma Client 6.19.3 generated. Prisma emitted the existing package-configuration deprecation warning.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run lint`: passed with no reported warnings.
+- `npm.cmd test`: passed, 22 files and 320 tests (206 runtime/helper/handler/action/orchestrator, 8 simulated, 106 static, zero PostgreSQL integration).
+- `npm.cmd run build`: passed; Next.js 16.2.10 compiled and generated 63 page-data entries. Active independent-practice, contest, diagnostic, Writing, and admin routes remain present; retired page routes remain absent and the assignment API tombstone remains.
+- `npm.cmd audit` and `npm.cmd audit --omit=dev`: exited 1 with the unchanged four moderate transitive advisories (`postcss` through Next.js and `uuid` through ExcelJS). No audit fix ran.
 
 ## Production outcome and remaining operational requirements
 

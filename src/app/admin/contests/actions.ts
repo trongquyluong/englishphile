@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { createContest, parseContestStatus, parseContestType, parseContestVisibility, updateContest } from "@/lib/contests";
-import { prisma } from "@/lib/prisma";
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -43,25 +42,14 @@ function parseProblems(formData: FormData) {
   }));
 }
 
-async function ensurePublishedProblems(problemIds: string[]) {
-  const published = await prisma.problem.findMany({
-    where: { id: { in: problemIds }, contentStatus: "PUBLISHED" },
-    select: { id: true },
-  });
-  return published.length === problemIds.length;
-}
-
 export async function createContestAction(formData: FormData) {
   const user = await requireAdmin();
   const title = text(formData, "title");
   const problems = parseProblems(formData);
   if (!title) redirectBack("/admin/contests/new", false, "Tiêu đề không được để trống.");
   if (!problems.length) redirectBack("/admin/contests/new", false, "Contest cần có ít nhất một problem đã xuất bản.");
-  if (!(await ensurePublishedProblems(problems.map((problem) => problem.problemId)))) {
-    redirectBack("/admin/contests/new", false, "Contest chỉ được dùng problem đã xuất bản.");
-  }
 
-  const contest = await createContest({
+  const result = await createContest({
     title,
     slug: text(formData, "slug"),
     description: nullableText(formData, "description"),
@@ -73,9 +61,12 @@ export async function createContestAction(formData: FormData) {
     endsAt: dateOrNull(formData, "endsAt"),
     sourceName: nullableText(formData, "sourceName"),
     rules: nullableText(formData, "rules"),
-    createdById: user.id,
     problems,
-  });
+  }, user.id);
+  if (!result.ok) {
+    redirectBack(result.kind === "validation" ? "/admin/contests/new" : "/admin/contests", false, result.message);
+  }
+  const contest = result.contest;
 
   revalidatePath("/contests");
   revalidatePath("/admin/contests");
@@ -83,7 +74,7 @@ export async function createContestAction(formData: FormData) {
 }
 
 export async function updateContestAction(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
   const contestId = text(formData, "contestId");
   const returnTo = `/admin/contests/${contestId}/edit`;
   const title = text(formData, "title");
@@ -91,18 +82,8 @@ export async function updateContestAction(formData: FormData) {
   const newVisibility = parseContestVisibility(text(formData, "visibility"));
   if (!title) redirectBack(returnTo, false, "Tiêu đề không được để trống.");
   if (!problems.length) redirectBack(returnTo, false, "Contest cần có ít nhất một problem đã xuất bản.");
-  if (!(await ensurePublishedProblems(problems.map((problem) => problem.problemId)))) {
-    redirectBack(returnTo, false, "Contest chỉ được dùng problem đã xuất bản.");
-  }
 
-  // Reject missing contests before entering the mutation transaction.
-  const current = await prisma.contest.findUnique({
-    where: { id: contestId },
-    select: { id: true },
-  });
-  if (!current) redirectBack(returnTo, false, "Không tìm thấy contest.");
-
-  const contest = await updateContest(contestId, {
+  const result = await updateContest(contestId, {
     title,
     slug: text(formData, "slug"),
     description: nullableText(formData, "description"),
@@ -115,7 +96,11 @@ export async function updateContestAction(formData: FormData) {
     sourceName: nullableText(formData, "sourceName"),
     rules: nullableText(formData, "rules"),
     problems,
-  });
+  }, user.id);
+  if (!result.ok) {
+    redirectBack(result.kind === "validation" ? returnTo : "/admin/contests", false, result.message);
+  }
+  const contest = result.contest;
 
   revalidatePath("/contests");
   revalidatePath("/admin/contests");

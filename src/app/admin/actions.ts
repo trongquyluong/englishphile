@@ -122,7 +122,8 @@ export async function problemStatusAction(formData: FormData) {
   const user = await requireAdmin();
   const problemId = text(formData, "problemId");
   const intent = text(formData, "intent");
-  const returnTo = text(formData, "returnTo") || `/admin/problems/${problemId}`;
+  const requestedReturnTo = text(formData, "returnTo");
+  const returnTo = /^\/admin(?:\/|$)/.test(requestedReturnTo) ? requestedReturnTo : `/admin/problems/${problemId}`;
   const result =
     intent === "publish"
       ? await publishProblem(problemId, user.id)

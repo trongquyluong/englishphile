@@ -3,6 +3,7 @@ import { requireContentAdminApi } from "@/lib/auth/content-admin-api";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { importContentPackFiles, type ContentPackInputFile } from "@/lib/content-packs/importer";
+import { isContentAdminTransactionAuthorizationError } from "@/lib/auth/content-admin-transaction";
 
 function normalizeFiles(value: unknown): ContentPackInputFile[] {
   if (!Array.isArray(value)) return [];
@@ -53,9 +54,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Chưa có file JSON/CSV hợp lệ." }, { status: 400 });
   }
 
-  const result = await importContentPackFiles(files, user.id, {
-    publishImmediately: body.publishImmediately === true,
-    fileName: files.length === 1 ? files[0].fileName : undefined,
-  });
-  return NextResponse.json(result, { status: result.summary.validFiles > 0 ? 200 : 422 });
+  try {
+    const result = await importContentPackFiles(files, user.id, {
+      publishImmediately: body.publishImmediately === true,
+      fileName: files.length === 1 ? files[0].fileName : undefined,
+    });
+    return NextResponse.json(result, { status: result.summary.validFiles > 0 ? 200 : 422 });
+  } catch (error) {
+    if (isContentAdminTransactionAuthorizationError(error)) {
+      return NextResponse.json({ error: "Không có quyền truy cập." }, { status: 403 });
+    }
+    return NextResponse.json({ error: "Không thể hoàn tất gói dữ liệu." }, { status: 500 });
+  }
 }

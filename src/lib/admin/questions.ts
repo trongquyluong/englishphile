@@ -1,7 +1,6 @@
-import type { ContentStatus, Difficulty, QuestionType, SkillType } from "@prisma/client";
+import { Prisma, type ContentStatus, type Difficulty, type QuestionType, type SkillType } from "@prisma/client";
 import { questionTypeValues, skillTypeValues, difficultyValues } from "@/lib/import/types";
 import { createContentAuditLog } from "@/lib/admin/audit";
-import { prisma } from "@/lib/prisma";
 
 export type AdminResult = {
   ok: boolean;
@@ -85,37 +84,45 @@ export function validateQuestionEditPayload(payload: QuestionEditPayload): Admin
   return { ok: true, message: "OK" };
 }
 
-export async function updateQuestion(payload: QuestionEditPayload, userId: string): Promise<AdminResult> {
+export async function updateQuestion(
+  payload: QuestionEditPayload,
+  problemId: string,
+  userId: string,
+  tx: Prisma.TransactionClient,
+): Promise<AdminResult> {
   const validation = validateQuestionEditPayload(payload);
   if (!validation.ok) return validation;
 
-  const before = await prisma.question.findUnique({ where: { id: payload.id } });
-  if (!before) return { ok: false, message: "Không tìm thấy câu hỏi." };
+  const before = await tx.question.findFirst({ where: { id: payload.id, problemId } });
+  if (!before) return { ok: false, message: "Tài nguyên không tồn tại hoặc không còn khả dụng." };
 
   const reviewedAt = payload.contentStatus === "PUBLISHED" ? new Date() : payload.contentStatus === "NEEDS_REVIEW" ? new Date() : null;
 
-  const updated = await prisma.question.update({
-    where: { id: payload.id },
+  const result = await tx.question.updateMany({
+    where: { id: payload.id, problemId },
     data: {
       type: payload.type,
       skillType: payload.skillType,
       difficulty: payload.difficulty,
       prompt: payload.prompt.trim(),
       passage: payload.passage?.trim() || null,
-      options: payload.options === undefined ? null : JSON.parse(JSON.stringify(payload.options)),
+      options: payload.options === undefined ? Prisma.JsonNull : JSON.parse(JSON.stringify(payload.options)),
       answer: JSON.parse(JSON.stringify(payload.answer ?? {})),
       explanation: payload.explanation?.trim() || null,
       rootWord: payload.rootWord?.trim() || null,
       keyword: payload.keyword?.trim() || null,
       targetSentence: payload.targetSentence?.trim() || null,
       lineNumber: payload.lineNumber,
-      metadata: payload.metadata === undefined ? null : JSON.parse(JSON.stringify(payload.metadata)),
+      metadata: payload.metadata === undefined ? Prisma.JsonNull : JSON.parse(JSON.stringify(payload.metadata)),
       orderIndex: payload.orderIndex,
       contentStatus: payload.contentStatus,
       reviewedAt,
       reviewedById: reviewedAt ? userId : null,
     },
   });
+  if (result.count !== 1) throw new Error("Scoped question update invariant failed after parent validation.");
+  const updated = await tx.question.findUnique({ where: { id: payload.id } });
+  if (!updated) throw new Error("Updated question disappeared inside the locked transaction.");
 
   await createContentAuditLog({
     userId,
@@ -124,7 +131,7 @@ export async function updateQuestion(payload: QuestionEditPayload, userId: strin
     action: "UPDATED",
     beforeJson: before,
     afterJson: updated,
-  });
+  }, tx);
 
   return { ok: true, message: "Đã cập nhật câu hỏi." };
 }

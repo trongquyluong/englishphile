@@ -110,7 +110,7 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Classroom/assignment pages and UI components were removed. Legacy action names and the assignment API are safe not-found tombstones with no Prisma mutation path.
 - `/api/submissions` remains the active independent-practice `SINGLE_PROBLEM` submission path; only `/api/assignments/[id]/submit` is retired. The seed no longer recreates classroom or assignment fixtures.
 - Portable import is operator-level tooling. Explicit `ADMIN` remains or assigns `ADMIN`, legacy `TEACHER` becomes `STUDENT`, and unknown roles are rejected. The selected input-directory argument is now correctly used when resolving the fixed internal import-step filenames; this has pure helper coverage but no end-to-end import run.
-- H-05 and H-06 are only partially remediated: global-peer policy is clarified, but cross-parent ID binding, publish TOCTOU, and bulk transaction work remains Phase 1C-B.
+- Phase 1C-B is implemented locally and remains uncommitted: contest/problem child IDs are parent-bound, publish boundaries are serialized, and bulk/import mutations are atomic or explicitly per-file partial. H-05/H-06 are remediated in code but not deployed or PostgreSQL race-tested.
 
 ### Phase 1C-A Production reconciliation (owner-attested 2026-07-14)
 
@@ -123,8 +123,23 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Basic contest, diagnostic, and Writing smoke checks passed. This is not comprehensive authorization, persistence, concurrency, or security evidence for those flows.
 - Checked Production logs reported no runtime error or sensitive value.
 - An initial read-only aggregate preflight and migration-status check was recognized as targeting isolated Preview/nonproduction. It performed no mutation and was discarded as Production evidence. The correct Production target was then selected and independently verified before migration.
-- The prior Preview verification remains valid dated history. Production success does not close H-05/H-06 Phase 1C-B work, private-contest smoke, PostgreSQL concurrency/rollback/locking Test debt, or the other unresolved findings.
+- The prior Preview verification remains valid dated history. Phase 1C-A Production success did not itself close H-05/H-06; the local Phase 1C-B section below records their code remediation. Private-contest smoke, Phase 1C-B deployment, PostgreSQL concurrency/rollback/locking/duration evidence, and the other unresolved findings remain pending.
 - No claim is made that backup/export completed or that role-management writes were paused; those facts were not supplied as operational evidence.
+
+## Phase 1C-B Parent Binding And Atomic Admin Mutations
+
+- Global `ADMIN` and `OWNER_EMAIL` peer policy is unchanged; no creator ownership was introduced.
+- Contest section/question create, update, and delete paths lock the claimed contest and scope child IDs through actual relations. Cross-parent and missing resources use the same generic unavailable result.
+- Contest publication locks the contest, validates schedule/sections/questions, and transitions status within one transaction. Builder metadata/archive and legacy contest problem replacement use the same parent lock discipline; learner contest-attempt locking remains unchanged.
+- Problem/question editing locks the problem, rejects duplicate/foreign question IDs before writing, preserves omitted questions, and commits content, lifecycle, and audits together.
+- Every Phase 1C-B mutation transaction locks/reloads the current user and reapplies the `ADMIN`/normalized `OWNER_EMAIL` policy before parent/resource locks. Principal, parent, then deterministic-child lock order is documented; outer action/API guards remain.
+- Single/bulk problem status, QA-safe/error bulk flows, diagnostic eligibility, source/topic audit writes, and content-pack archive are atomic. Bulk status is limited to 50 unique problems and 1,000 related questions, rechecks pack membership where applicable, and uses set-based writes with lifecycle-only audit payloads.
+- JSON/CSV parsing and validation stay outside the content transaction. Normalized commit limits are 25 problems, 250 questions, 100 topic associations, 50 unique topics, and 25 unique sources. Invalid/oversized plans create no content.
+- Multi-file packs store an ordered durable plan whose entries and linked batches carry a server-derived entry key, normalized filename, import type, ordinal, and SHA-256 of exact UTF-8 content. Every occurrence of a duplicate normalized filename is rejected before content import; reconciliation consumes one exact batch per entry, refuses duplicate imported identities, and never counts failed entries.
+- The internal exact-plan `resumeContentPackId` primitive is runtime-tested with mocked collaborators, but no active API, Server Action, or UI exposes it. Normal HTTP retry creates a new pack. Authenticated operational recovery and real concurrent exactly-once behavior remain future work/Test debt.
+- No schema or migration changed. No database or deployed endpoint was used. Phase 1C-B remains uncommitted and undeployed pending owner review.
+- Runtime tests use production helpers/orchestrators with mocked transaction and repository collaborators. Simulated rollback is callback evidence only; static structure tests remain labeled static. Real PostgreSQL lock, race, rollback, timeout, duration, and contention tests remain Test debt.
+- The corrected suite contains 320 tests: 206 runtime/helper/handler/action/orchestrator tests, 8 simulations, 106 static checks, and zero PostgreSQL integration tests. Final correction-pass command results are recorded in `docs/SECURITY_PHASE_1C_REPORT.md`.
 
 ## What Worked
 

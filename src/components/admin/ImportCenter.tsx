@@ -47,6 +47,7 @@ type UploadedContentFile = {
 type ContentPackFilePlan = {
   fileName: string;
   importType: ImportKind;
+  identity: { entryId: string };
   plan: ImportPlan | null;
   skipped: boolean;
   skipReason?: string;
@@ -83,6 +84,7 @@ type ContentPackImportResult = ContentPackValidationResult & {
     status: string;
   };
   results: Array<{
+    entryId: string;
     fileName: string;
     status: string;
     batchId?: string;
@@ -668,7 +670,7 @@ export function ImportCenter({ history, templates }: ImportCenterProps) {
                   </div>
                   <div className="divide-y divide-line">
                     {fileImportResult.results.map((result) => (
-                      <div key={result.fileName} className="grid gap-2 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_110px_120px_120px] sm:items-center">
+                      <div key={result.entryId} className="grid gap-2 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_110px_120px_120px] sm:items-center">
                         <p className="font-semibold">{result.fileName}</p>
                         <StatusBadge status={result.status} />
                         <span className="tabular text-sm text-ink-soft">{result.problemsImported} problems</span>
@@ -680,7 +682,7 @@ export function ImportCenter({ history, templates }: ImportCenterProps) {
               ) : null}
 
               {filePlan.files.map((file) => (
-                <article key={file.fileName} className="surface overflow-hidden rounded-lg">
+                <article key={file.identity.entryId} className="surface overflow-hidden rounded-lg">
                   <div className="flex flex-col gap-3 border-b border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h3 className="font-semibold">{file.fileName}</h3>

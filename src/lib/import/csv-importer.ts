@@ -1,8 +1,14 @@
 import type { ContentStatus, Difficulty, QuestionType, SkillType, SourceType } from "@prisma/client";
 import type { ImportExecutionResult, ImportIssue, ImportPlan, NormalizedImportPayload, NormalizedProblem } from "@/lib/import/types";
-import { buildImportPlan, createOrReuseSourceCollection, createOrReuseTopic, createProblemWithQuestions, generateSlug } from "@/lib/import/duplicates";
+import { buildImportPlan, generateSlug } from "@/lib/import/duplicates";
 import { normalizeQuestion, normalizeSourceCollection } from "@/lib/import/validation";
-import { prisma } from "@/lib/prisma";
+import { executeImportPlanAtomically } from "@/lib/import/atomic-import";
+import { AdminResourceUnavailableError } from "@/lib/admin/mutation-locks";
+import {
+  contentPackFileIdentityMatches,
+  createContentPackFileIdentity,
+  type ContentPackFileIdentity,
+} from "@/lib/content-packs/file-identity";
 
 const requiredColumns = [
   "sourceName",
@@ -201,63 +207,23 @@ export async function validateCsvRows(text: string): Promise<ImportPlan> {
 export async function importCsvRows(
   text: string,
   userId: string,
-  options: { publishImmediately?: boolean; contentPackId?: string; fileName?: string } = {},
+  options: { publishImmediately?: boolean; contentPackId?: string; fileIdentity?: ContentPackFileIdentity } = {},
 ): Promise<ImportExecutionResult> {
   const plan = await validateCsvRows(text);
-
-  if (!plan.ok) {
-    const batch = await prisma.importBatch.create({
-      data: {
-        userId,
-        importType: "CSV",
-        status: "FAILED",
-        summary: JSON.parse(JSON.stringify(plan.summary)),
-        errorLog: JSON.parse(JSON.stringify(plan.issues)),
-        contentPackId: options.contentPackId,
-      },
-    });
-    return { ...plan, batchId: batch.id, status: "FAILED" };
+  const fileIdentity = options.fileIdentity
+    ? createContentPackFileIdentity(options.fileIdentity.fileName, "CSV", text, options.fileIdentity.position)
+    : undefined;
+  if (options.contentPackId && (!fileIdentity || !contentPackFileIdentityMatches(fileIdentity, options.fileIdentity!))) {
+    throw new AdminResourceUnavailableError();
   }
 
-  let sourceCollectionId: string | undefined;
-  let problemsImported = 0;
-  let questionsImported = 0;
   const contentStatus: ContentStatus =
     options.publishImmediately && plan.summary.possibleDuplicateQuestionsFlagged === 0 ? "PUBLISHED" : "NEEDS_REVIEW";
-
-  const batch = await prisma.importBatch.create({
-    data: {
-      userId,
-      importType: "CSV",
-      status: "IMPORTED",
-      summary: JSON.parse(JSON.stringify(plan.summary)),
-      errorLog: plan.issues.length ? JSON.parse(JSON.stringify(plan.issues)) : undefined,
-      contentPackId: options.contentPackId,
-    },
+  return executeImportPlanAtomically(plan, {
+    importType: "CSV",
+    userId,
+    contentStatus,
+    contentPackId: options.contentPackId,
+    fileIdentity,
   });
-
-  for (const problem of plan.payload.problems) {
-    const sourceCollection = await createOrReuseSourceCollection(problem.sourceCollection);
-    sourceCollectionId ??= sourceCollection.id;
-    const topics = await Promise.all(problem.topics.map((topicName) => createOrReuseTopic(topicName)));
-    await createProblemWithQuestions(
-      problem,
-      sourceCollection.id,
-      topics.map((topic) => topic.id),
-      { contentStatus, reviewedById: userId, importedBatchId: batch.id, contentPackId: options.contentPackId },
-    );
-    problemsImported += 1;
-    questionsImported += problem.questions.length;
-  }
-
-  const summary = { ...plan.summary, problemsImported, questionsImported, fileName: options.fileName };
-  const updatedBatch = await prisma.importBatch.update({
-    where: { id: batch.id },
-    data: {
-      sourceCollectionId,
-      summary: JSON.parse(JSON.stringify(summary)),
-    },
-  });
-
-  return { ...plan, summary, batchId: updatedBatch.id, status: "IMPORTED" };
 }
