@@ -4,12 +4,6 @@ import { Headphones } from "lucide-react";
 import type { ClientQuestion } from "@/lib/problem-types";
 import { MultipleChoiceQuestion } from "@/components/questions/MultipleChoiceQuestion";
 
-type ListeningMetadata = {
-  audioUrl?: string;
-  transcript?: string;
-  sectionType?: string;
-};
-
 type Props = {
   question: ClientQuestion;
   value: unknown;
@@ -17,31 +11,19 @@ type Props = {
   disabled?: boolean;
 };
 
-function getMetadata(value: unknown): ListeningMetadata {
-  if (!value || typeof value !== "object") return {};
-  const metadata = value as Record<string, unknown>;
-  return {
-    audioUrl: typeof metadata.audioUrl === "string" ? metadata.audioUrl : undefined,
-    transcript: typeof metadata.transcript === "string" ? metadata.transcript : undefined,
-    sectionType: typeof metadata.sectionType === "string" ? metadata.sectionType : undefined,
-  };
-}
-
 export function ListeningQuestion({ question, value, onChange, disabled }: Props) {
-  const metadata = getMetadata(question.metadata);
-
   return (
     <div className="grid gap-4 rounded-2xl bg-panel-muted p-4">
       <div className="flex items-center gap-2">
         <Headphones className="size-5 text-accent" aria-hidden="true" />
         <div>
           <p className="text-sm font-semibold">Listening</p>
-          {metadata.sectionType ? <p className="text-xs text-ink-soft">{metadata.sectionType}</p> : null}
+          {question.sectionType ? <p className="text-xs text-ink-soft">{question.sectionType}</p> : null}
         </div>
       </div>
 
-      {metadata.audioUrl ? (
-        <audio controls src={metadata.audioUrl} className="w-full">
+      {question.audioUrl ? (
+        <audio controls src={question.audioUrl} className="w-full">
           Trình duyệt không hỗ trợ audio.
         </audio>
       ) : (
@@ -65,12 +47,6 @@ export function ListeningQuestion({ question, value, onChange, disabled }: Props
         </label>
       )}
 
-      {metadata.transcript ? (
-        <details className="rounded-2xl bg-panel px-3 py-2 text-sm shadow-[inset_0_0_0_1px_var(--line)]">
-          <summary className="cursor-pointer font-semibold">Xem transcript</summary>
-          <p className="mt-2 whitespace-pre-line leading-6 text-ink-soft">{metadata.transcript}</p>
-        </details>
-      ) : null}
     </div>
   );
 }

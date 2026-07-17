@@ -726,7 +726,13 @@ Sessions are HMAC-signed cookies with no server-side state. This means:
 **Severity:** High
 **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 **Confidence:** High
-**Release-blocking:** No (correct answers shown only for wrong answers, but present in DOM)
+**Historical Phase 0 release classification:** No, based on the then-narrow claim that answers appeared only in wrong-answer review. That classification is retained only as audit history and is not the current assessment.
+
+**Current Phase 1D-A reassessment:** High severity and directly exploitable before the local remediation. The original narrow diagnostic-result-page rendering claim became stale, but the broader exposure remained real: answer-bearing Prisma question data crossed learner Server/Client boundaries before submission, and canonical-answer-derived feedback crossed practice API boundaries after submission. Diagnostic finalization also duplicated answer material in stored recommendation metadata. The correction is local-code only; isolated Preview browser/page-source/RSC verification, deployment, and Production verification remain pending.
+
+**Phase 1D-A local-code disposition (2026-07-17):** Remediated in the current working tree, not deployed and not Production-verified. The implementation replaces learner presentation, submission, and diagnostic-result boundaries with positive allowlist DTOs; fixed generic feedback replaces answer-bearing checker feedback; diagnostic scoring remains server-only; newly finalized diagnostic metadata no longer duplicates `correctAnswer` or feedback; and ownership/finalization-scoped result reads return aggregate data only. Historical `recommendationJson` rows were not rewritten and are parsed through an allowlist. Learner analytics, wrong-question review, and contest result rendering were also changed to stop displaying canonical answers or stored answer-bearing feedback. Admin editor/preview mappings remain explicitly separate and retain full answer access.
+
+The focused evidence and limitations are recorded in `docs/SECURITY_PHASE_1D_A_REPORT.md`. Runtime helper/handler/action tests, a runtime test importing and invoking the actual diagnostic result page, and explicitly labeled static wiring tests pass locally. The page test mocks `requireUser`, result/recommendation selectors, and redirect control flow; it proves that the page scopes results only with `requireUser().id`, including stored-ADMIN, owner-shaped STUDENT, and ordinary-STUDENT fixtures. It is not an end-to-end cookie/session test and does not independently verify `OWNER_EMAIL` configuration matching; existing content-admin policy tests remain that evidence. No browser/RSC-flight sentinel inspection, deployed endpoint test, PostgreSQL integration test, database access, environment inspection, or provider verification was performed. Therefore H-10 is **local-code remediated only**; Preview and Production verification remain pending.
 
 **Affected Files:**
 - `src/lib/diagnostic.ts` — `scoreDiagnosticAttempt` stores `correctAnswer` in `recommendationJson`
@@ -751,9 +757,9 @@ recommendationJson: {
 ) : null}
 ```
 
-The `correctAnswer` is stored server-side and sent to the client. The UI only shows it for wrong/null answers, but it is present in the React component tree and accessible via browser DevTools.
+**Historical Phase 0 evidence note:** The result-page rendering example above became stale before Phase 1D-A and did not describe the complete exposure. Phase 1D-A confirmed the broader learner-boundary paths in problem presentation, random practice, answer-derived API feedback, and diagnostic persistence. Those paths made H-10 directly exploitable even where the current result page no longer rendered `correctAnswer` itself.
 
-**Note:** This is partially mitigated by the UI design (correct answers shown only for wrong answers, not for all questions). However, a motivated student can extract all answers via DevTools.
+The local remediation does not constitute browser, Preview, deployment, or Production evidence.
 
 **Minimal Fix:** Strip `correctAnswer` from the data sent to the client. Store it server-side only and retrieve it for display via a separate admin-only endpoint.
 
@@ -1351,7 +1357,7 @@ For the cleanup scheduler, repository evidence is limited to the route, authenti
 | H-05 contest admin ownership | Unresolved | No ownership remediation in Phase 1B |
 | H-06 content admin ownership | Unresolved | No ownership remediation in Phase 1B |
 | H-09 signed-session invalidation | Unresolved | Stateless session invalidation limitation remains |
-| H-10 diagnostic result answer data | Unresolved | Outside Phase 1B |
+| H-10 diagnostic/learner answer data | Local-code remediated | Phase 1D-A allowlist DTOs and fixed feedback are implemented locally; Preview browser/RSC and Production verification remain pending |
 | H-11 contest result answer data at rest | Unresolved | Outside Phase 1B |
 | Four moderate dependency advisories | Unresolved | Previously recorded `postcss` and `uuid` dependency-chain advisories remain; breaking dependency upgrades require a separate reviewed pass |
 | Cleanup scheduler implementation | Deployed | PR #4 merged at `e5c6f38`; repository confirms the bounded implementation and owner attests that the merge commit is deployed to Production |

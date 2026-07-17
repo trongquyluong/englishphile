@@ -7,10 +7,9 @@ import { cn } from "@/lib/utils";
 import { requireUser } from "@/lib/auth/session";
 import {
 	getActiveLearningRecommendations,
-	getDiagnosticMetadata,
-	getLatestDiagnosticAttempt,
+	getLatestLearnerDiagnosticResult,
+	getLearnerDiagnosticResult,
 } from "@/lib/diagnostic";
-import { prisma } from "@/lib/prisma";
 
 function pct(value: number | null | undefined) {
 	return value === null || value === undefined ? "—" : `${Math.round(value * 100)}%`;
@@ -18,19 +17,6 @@ function pct(value: number | null | undefined) {
 
 function barWidth(value: number | null | undefined) {
 	return `${Math.max(0, Math.min(100, Math.round((value ?? 0) * 100)))}%`;
-}
-
-function parseBreakdown(value: unknown) {
-	return Array.isArray(value)
-		? (value as Array<{
-				label?: string;
-				topicName?: string;
-				statusLabel?: string;
-				accuracy?: number | null;
-				attempted?: number;
-				correct?: number;
-		  }>)
-		: [];
 }
 
 type PageProps = {
@@ -42,16 +28,15 @@ export default async function DiagnosticResultPage({ searchParams }: PageProps) 
 	const params = await searchParams;
 	const attemptId = typeof params.attempt === "string" ? params.attempt : "";
 	const attempt = attemptId
-		? await prisma.diagnosticAttempt.findFirst({ where: { id: attemptId, userId: user.id } })
-		: await getLatestDiagnosticAttempt(user.id);
+		? await getLearnerDiagnosticResult(attemptId, user.id)
+		: await getLatestLearnerDiagnosticResult(user.id);
 	if (!attempt) redirect("/diagnostic");
 
-	const skillBreakdown = parseBreakdown(attempt.skillBreakdownJson);
-	const topicBreakdown = parseBreakdown(attempt.topicBreakdownJson);
+	const skillBreakdown = attempt.skillBreakdown;
+	const topicBreakdown = attempt.topicBreakdown;
 	const recommendations = await getActiveLearningRecommendations(user.id, 5);
 	const accuracy = attempt.total ? (attempt.score ?? 0) / attempt.total : null;
-	const metadata = getDiagnosticMetadata(attempt.recommendationJson);
-	const scoring = metadata.scoring;
+	const scoring = attempt.scoring;
 
 	return (
 		<div className="grid gap-6">

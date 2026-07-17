@@ -3,8 +3,11 @@ import { randomInt } from "crypto";
 import Link from "next/link";
 import { PracticeClient } from "@/components/practice/PracticeClient";
 import { requireUser } from "@/lib/auth/session";
+import {
+  learnerQuestionPresentationSelect,
+  toLearnerQuestionDTO,
+} from "@/lib/dto/learner-question";
 import { difficultyLabels, difficultyOrder, skillLabels, skillOrder } from "@/lib/labels";
-import type { ClientQuestion } from "@/lib/problem-types";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
@@ -99,29 +102,12 @@ export default async function RandomPracticePage({ searchParams }: PageProps) {
       ...(selectedSkills.length ? { skillType: { in: selectedSkills } } : {}),
       ...(selectedDifficulties.length ? { difficulty: { in: selectedDifficulties } } : {}),
     },
+    select: learnerQuestionPresentationSelect,
   });
 
   const randomQuestions = shuffleWithCrypto(questions)
     .slice(0, take)
-    .map(
-      (question): ClientQuestion => ({
-        id: question.id,
-        type: question.type,
-        skillType: question.skillType,
-        difficulty: question.difficulty,
-        prompt: question.prompt,
-        passage: question.passage,
-        options: question.options,
-        answer: question.answer,
-        explanation: question.explanation,
-        rootWord: question.rootWord,
-        keyword: question.keyword,
-        targetSentence: question.targetSentence,
-        lineNumber: question.lineNumber,
-        metadata: question.metadata,
-        orderIndex: question.orderIndex,
-      }),
-    );
+    .map(toLearnerQuestionDTO);
 
   if (!randomQuestions.length) {
     return (

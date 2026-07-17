@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, TriangleAlert } from "lucide-react";
 import { ContentStatusBadge, DifficultyBadge, SkillBadge, TopicTag } from "@/components/ui/Badges";
-import { summarizeCorrectAnswer } from "@/lib/answer-checking";
 import { requireUser } from "@/lib/auth/session";
+import { LEARNER_FEEDBACK } from "@/lib/dto/submission";
 import { prisma } from "@/lib/prisma";
 
 function formatStudentAnswer(value: unknown) {
@@ -22,17 +22,24 @@ export default async function WrongQuestionsPage() {
       isCorrect: false,
       submission: { userId: user.id },
     },
-    include: {
+    select: {
+      id: true,
+      studentAnswer: true,
+      createdAt: true,
       question: {
-        include: {
+        select: {
+          skillType: true,
+          difficulty: true,
           problem: {
-            include: {
-              problemTopics: { include: { topic: true } },
+            select: {
+              title: true,
+              slug: true,
+              contentStatus: true,
+              problemTopics: { select: { topic: { select: { id: true, name: true } } } },
             },
           },
         },
       },
-      submission: true,
     },
     orderBy: { createdAt: "desc" },
     take: 40,
@@ -75,8 +82,8 @@ export default async function WrongQuestionsPage() {
                       <dd className="mt-1 text-ink-soft">{formatStudentAnswer(answer.studentAnswer)}</dd>
                     </div>
                     <div>
-                      <dt className="font-semibold">Đáp án đúng</dt>
-                      <dd className="mt-1 text-ink-soft">{summarizeCorrectAnswer(answer.question)}</dd>
+                      <dt className="font-semibold">Phản hồi</dt>
+                      <dd className="mt-1 text-ink-soft">{LEARNER_FEEDBACK.incorrect}</dd>
                     </div>
                   </dl>
                 </div>
