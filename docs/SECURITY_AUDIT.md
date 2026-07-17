@@ -728,17 +728,21 @@ Sessions are HMAC-signed cookies with no server-side state. This means:
 **Confidence:** High
 **Historical Phase 0 release classification:** No, based on the then-narrow claim that answers appeared only in wrong-answer review. That classification is retained only as audit history and is not the current assessment.
 
-**Current Phase 1D-A reassessment:** High severity and directly exploitable before the local remediation. The original narrow diagnostic-result-page rendering claim became stale, but the broader exposure remained real: answer-bearing Prisma question data crossed learner Server/Client boundaries before submission, and canonical-answer-derived feedback crossed practice API boundaries after submission. Diagnostic finalization also duplicated answer material in stored recommendation metadata. The correction is local-code only; isolated Preview browser/page-source/RSC verification, deployment, and Production verification remain pending.
+**Current Phase 1D-A reassessment:** High severity and directly exploitable before the local remediation. The original narrow diagnostic-result-page rendering claim became stale, but the broader exposure remained real: answer-bearing Prisma question data crossed learner Server/Client boundaries before submission, and canonical-answer-derived feedback crossed practice API boundaries after submission. Diagnostic finalization also duplicated answer material in stored recommendation metadata. The local implementation is remediated, and owner-attested isolated Preview sentinel verification passed for the tested boundaries. Production deployment and Production verification remain pending.
 
-**Phase 1D-A local-code disposition (2026-07-17):** Remediated in the current working tree, not deployed and not Production-verified. The implementation replaces learner presentation, submission, and diagnostic-result boundaries with positive allowlist DTOs; fixed generic feedback replaces answer-bearing checker feedback; diagnostic scoring remains server-only; newly finalized diagnostic metadata no longer duplicates `correctAnswer` or feedback; and ownership/finalization-scoped result reads return aggregate data only. Historical `recommendationJson` rows were not rewritten and are parsed through an allowlist. Learner analytics, wrong-question review, and contest result rendering were also changed to stop displaying canonical answers or stored answer-bearing feedback. Admin editor/preview mappings remain explicitly separate and retain full answer access.
+**Phase 1D-A disposition (2026-07-17):** The local implementation at commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` is remediated but is not deployed to or verified in Production. The implementation replaces learner presentation, submission, and diagnostic-result boundaries with positive allowlist DTOs; fixed generic feedback replaces answer-bearing checker feedback; diagnostic scoring remains server-only; newly finalized diagnostic metadata no longer duplicates `correctAnswer` or feedback; and ownership/finalization-scoped result reads return aggregate data only. Historical `recommendationJson` rows were not rewritten and are parsed through an allowlist. Learner analytics, wrong-question review, and contest result rendering were also changed to stop displaying canonical answers or stored answer-bearing feedback. Admin editor/preview mappings remain explicitly separate and retain full answer access. No schema change or migration was required.
 
-The focused evidence and limitations are recorded in `docs/SECURITY_PHASE_1D_A_REPORT.md`. Runtime helper/handler/action tests, a runtime test importing and invoking the actual diagnostic result page, and explicitly labeled static wiring tests pass locally. The page test mocks `requireUser`, result/recommendation selectors, and redirect control flow; it proves that the page scopes results only with `requireUser().id`, including stored-ADMIN, owner-shaped STUDENT, and ordinary-STUDENT fixtures. It is not an end-to-end cookie/session test and does not independently verify `OWNER_EMAIL` configuration matching; existing content-admin policy tests remain that evidence. No browser/RSC-flight sentinel inspection, deployed endpoint test, PostgreSQL integration test, database access, environment inspection, or provider verification was performed. Therefore H-10 is **local-code remediated only**; Preview and Production verification remain pending.
+The focused evidence and limitations are recorded in `docs/SECURITY_PHASE_1D_A_REPORT.md`. Runtime helper/handler/action tests, a runtime test importing and invoking the actual diagnostic result page, and explicitly labeled static wiring tests pass locally. The page test mocks `requireUser`, result/recommendation selectors, and redirect control flow; it proves that the page scopes results only with `requireUser().id`, including stored-ADMIN, owner-shaped STUDENT, and ordinary-STUDENT fixtures. It is not an end-to-end cookie/session test and does not independently verify `OWNER_EMAIL` configuration matching; existing content-admin policy tests remain that evidence. Separately, the owner-attested isolated Preview evidence below covers tested browser/RSC and response boundaries. No PostgreSQL integration, transaction/concurrency verification, database-row inspection, historical-row cleanup, Production deployment, or Production verification is claimed.
 
-**Affected Files:**
+**Owner-attested isolated Preview evidence (2026-07-17):** Commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` reached READY, and health passed with the database connected. A missing-Origin POST returned 403 at the origin guard; a same-origin unauthenticated submission returned 401 at authentication. Anonymous published-problem HTML/RSC and diagnostic-start HTML/RSC contained neither synthetic canonical-answer nor explanation sentinel. Authenticated single-problem and random-practice responses contained only safe result fields and fixed generic feedback. Diagnostic-result HTML/RSC contained neither sentinel and remained aggregate-only. Foreign and incomplete attempts followed the unavailable flow. Authorized admin preview retained answer/explanation access, ordinary `STUDENT` admin denial passed, and checked Preview runtime logs reported no runtime errors or sensitive values.
+
+The sentinels were synthetic and non-sensitive; their exact values are not recorded. Browser/RSC inspection was owner-attested operational evidence, not a repository test, and browser automation is not claimed. No identity, cookie, deployment ID, infrastructure hostname, database identifier, or protected URL is recorded. Synthetic fixture cleanup was not reported. PR #10 remains recorded as Draft/open; this documentation pass did not query or modify provider state.
+
+**Historical Phase 0 affected files:**
 - `src/lib/diagnostic.ts` — `scoreDiagnosticAttempt` stores `correctAnswer` in `recommendationJson`
 - `src/app/diagnostic/result/page.tsx`
 
-**Evidence:**
+**Historical Phase 0 evidence:**
 
 ```typescript
 // src/lib/diagnostic.ts:351–359
@@ -759,7 +763,7 @@ recommendationJson: {
 
 **Historical Phase 0 evidence note:** The result-page rendering example above became stale before Phase 1D-A and did not describe the complete exposure. Phase 1D-A confirmed the broader learner-boundary paths in problem presentation, random practice, answer-derived API feedback, and diagnostic persistence. Those paths made H-10 directly exploitable even where the current result page no longer rendered `correctAnswer` itself.
 
-The local remediation does not constitute browser, Preview, deployment, or Production evidence.
+The local remediation alone did not constitute browser or deployment evidence; the later owner-attested Preview evidence above verifies only the tested isolated Preview boundaries. Production deployment and Production verification remain pending.
 
 **Minimal Fix:** Strip `correctAnswer` from the data sent to the client. Store it server-side only and retrieve it for display via a separate admin-only endpoint.
 
@@ -1294,7 +1298,7 @@ No `.github/workflows/*.yml` files exist in the repository. No CI/CD pipeline to
 17. **M-02: Implement distributed rate limiting** — Use Upstash Redis for Vercel serverless
 18. **M-03: Fix rate limiter memory leak** — Add periodic cleanup of expired entries
 19. **M-06: PostgreSQL-test bounded atomic JSON/CSV commits and provide operational recovery** — The committed Phase 1C-B helper validates normalized bounds before its content transaction and rolls batch/content/pack reconciliation together. Real PostgreSQL rollback/duration evidence and an authenticated recovery surface remain pending.
-20. **H-10: Strip `correctAnswer` from diagnostic result payload** — Store server-side only
+20. **H-10: Complete release reconciliation** — Local implementation and tested isolated Preview boundaries are remediated; Production deployment and Production verification remain pending
 21. **H-11: Encrypt `answersJson`** — Use separate encryption key for contest answer storage
 
 ### Phase 4 — Long Term
@@ -1357,7 +1361,7 @@ For the cleanup scheduler, repository evidence is limited to the route, authenti
 | H-05 contest admin ownership | Unresolved | No ownership remediation in Phase 1B |
 | H-06 content admin ownership | Unresolved | No ownership remediation in Phase 1B |
 | H-09 signed-session invalidation | Unresolved | Stateless session invalidation limitation remains |
-| H-10 diagnostic/learner answer data | Local-code remediated | Phase 1D-A allowlist DTOs and fixed feedback are implemented locally; Preview browser/RSC and Production verification remain pending |
+| H-10 diagnostic/learner answer data | Local implementation remediated; isolated Preview tested boundaries passed | Owner-attested HTML/RSC/API/authorization checks passed at `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b`; PR #10 remains Draft/open, and Production deployment/verification plus PostgreSQL integration remain pending |
 | H-11 contest result answer data at rest | Unresolved | Outside Phase 1B |
 | Four moderate dependency advisories | Unresolved | Previously recorded `postcss` and `uuid` dependency-chain advisories remain; breaking dependency upgrades require a separate reviewed pass |
 | Cleanup scheduler implementation | Deployed | PR #4 merged at `e5c6f38`; repository confirms the bounded implementation and owner attests that the merge commit is deployed to Production |
@@ -1444,7 +1448,8 @@ Current finding disposition:
 | Selected Production runtime smoke | Passed | Health/database, assignment tombstone GET/POST, owner/student admin boundary, independent submission, and basic contest/diagnostic/Writing checks passed |
 | PostgreSQL integration | Test debt | Successful migration execution is operational evidence, not rollback-failure, lock-duration, authorization-race, or concurrency integration testing |
 | Publish/QA race integration | Test debt | Basic smoke does not test publish TOCTOU, QA races, cross-parent binding, or transactional bulk behavior |
-| H-09, H-10, H-11 | Unresolved | Outside Phase 1C-A |
+| H-09 and H-11 | Unresolved | Outside Phase 1C-A |
+| H-10 diagnostic/learner answer data | Unresolved at this historical Phase 1C-A checkpoint | Superseded by the current Phase 1D-A local-remediation and isolated-Preview disposition above; Production deployment and verification remain pending |
 | Random-email authentication amplification | Unresolved | Outside Phase 1C-A |
 | Dependency advisories | Unresolved | No automated dependency fix was run |
 | Private-contest Production smoke | Operational requirement | Still not claimed |
@@ -1496,7 +1501,8 @@ Current disposition superseding the Phase 1C-A checkpoint:
 | H-05 contest admin IDOR/TOCTOU | Remediated, merged, deployed, and selected Production paths verified | Global ADMIN/`OWNER_EMAIL` peers remain intentional. Repository evidence confirms active child parent-binding and publication serialization; selected Production owner/student boundaries and restored low-risk contest mutation passed. No PostgreSQL race/concurrency test exists. |
 | H-06 problem/content IDOR/atomicity | Remediated, merged, deployed, and selected Production paths verified | Repository evidence confirms problem/question binding, pack membership rechecks, bounded atomic status/audit/QA/diagnostic/import work, digest-bound identities, duplicate-name rejection, and one-to-one plan-entry/batch reconciliation. Duplicate/identity behavior was verified only in isolated Preview. No PostgreSQL rollback/concurrency/duration test or active recovery surface exists. |
 | Schema/migration | No change | Applied migrations are untouched; Phase 1C-B requires no migration. |
-| H-09, H-10, H-11 | Unresolved | Outside Phase 1C-B. |
+| H-09 and H-11 | Unresolved | Outside Phase 1C-B. |
+| H-10 diagnostic/learner answer data | Unresolved at this historical Phase 1C-B checkpoint | Superseded by the current Phase 1D-A local-remediation and isolated-Preview disposition above; Production deployment and verification remain pending. |
 | Random-email authentication amplification | Unresolved | Outside Phase 1C-B. |
 | Four moderate dependency advisories | Unresolved | No dependency upgrade or audit fix in this pass. |
 | Private-contest Production smoke | Operational requirement | Not performed or claimed in this pass. |

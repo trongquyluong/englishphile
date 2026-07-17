@@ -3,7 +3,7 @@
 **Date:** 2026-07-17
 **Branch:** `security-phase-1d-a-diagnostic-answer-exposure`
 **Finding:** H-10 — diagnostic and learner answer-key exposure
-**State:** Local-code remediated; not committed, pushed, deployed, Preview-verified, Production-verified, or PostgreSQL-integrated
+**State:** Local implementation remediated; owner-attested isolated Preview sentinel verification passed for the tested boundaries at commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b`; Production deployment, Production verification, and PostgreSQL integration remain pending
 
 ## Scope and disposition
 
@@ -11,7 +11,7 @@ Phase 1D-A applies the confirmed policy that canonical answers remain server-sid
 
 The original H-10 condition was exploitable with High severity because raw question records and answer-derived feedback crossed learner Server Component, Client Component, API, and stored diagnostic-result boundaries. Anonymous visitors could inspect published problem question props; authenticated learners could inspect random-practice/diagnostic props and harvest canonical text from submission feedback. Authorization and replay controls limited cross-user diagnostic reads but did not make answer-key fields learner-safe.
 
-H-10 is now remediated in local code through positive allowlists and server-only scoring. This report does not mark it deployed or Production-verified.
+H-10 is remediated in local code through positive allowlists and server-only scoring. Owner-attested isolated Preview evidence dated 2026-07-17 verifies the tested browser/RSC and response boundaries described below. This report does not mark H-10 deployed to or verified in Production.
 
 ## Learner payload behavior
 
@@ -76,7 +76,7 @@ The production-page test is not an end-to-end cookie/session test. Its owner-sha
 
 Static tests are labeled `Phase 1D-A static wiring checks (not runtime/browser evidence)`. They cover Server Component DTO wiring, practice response serializers, diagnostic result selector wiring, allowlisted diagnostic persistence, separate admin mappings, and removal of canonical-answer rendering from learner review pages.
 
-Mocked Prisma/transaction collaborators establish production-helper behavior but are not PostgreSQL integration evidence. The production-page test imports the actual page but mocks its session and repository/result collaborators. No browser automation, cookie/session integration, page-source inspection, RSC flight-payload inspection, deployed endpoint invocation, real database access, environment-value inspection, or provider access was performed.
+Mocked Prisma/transaction collaborators establish production-helper behavior but are not PostgreSQL integration evidence. The production-page test imports the actual page but mocks its session and repository/result collaborators. At the local repository-verification checkpoint, no browser automation, cookie/session integration, page-source inspection, RSC flight-payload inspection, deployed endpoint invocation, real database access, environment-value inspection, or provider access was performed. The later browser/RSC observations below are separate owner-attested isolated Preview operational evidence, not repository tests.
 
 The complete suite contains 366 tests: 242 runtime/helper/handler/action/page tests, 8 simulations, 116 explicitly static checks, and 0 PostgreSQL integration tests.
 
@@ -92,28 +92,45 @@ The complete suite contains 366 tests: 242 runtime/helper/handler/action/page te
 
 No online or offline npm audit is part of this correction pass. The four previously documented moderate advisories remain unresolved; the prior offline zero result is not authoritative remediation evidence. No migration, seed, import, export, deployment, commit, or push was run.
 
+## Owner-attested isolated Preview operational reconciliation (2026-07-17)
+
+PR #10 is recorded as Draft/open for this reconciliation; no provider query or PR-state mutation was performed during the documentation pass. Commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` reached READY in isolated Preview, and health passed with the database connected.
+
+The owner attests that the following tested boundaries passed:
+
+- a missing-Origin POST was rejected with HTTP 403 by the origin guard;
+- a same-origin unauthenticated submission was rejected with HTTP 401 by the authentication boundary;
+- anonymous published-problem HTML and its RSC payload contained neither synthetic canonical-answer nor explanation sentinel;
+- authenticated single-problem and random-practice responses contained only learner-safe result fields and fixed generic feedback;
+- diagnostic-start HTML and RSC payloads contained neither sentinel;
+- diagnostic-result HTML and RSC payloads contained neither sentinel and remained aggregate-only;
+- foreign and incomplete diagnostic attempts followed the unavailable flow;
+- an authorized admin preview retained answer and explanation access;
+- ordinary `STUDENT` admin denial passed; and
+- checked Preview runtime logs reported no runtime errors or sensitive values.
+
+The sentinel values were synthetic and non-sensitive, and their exact values are intentionally not recorded. No account identity, cookie, deployment ID, infrastructure hostname, database identifier, or protected URL is recorded. Browser and RSC inspection was owner-attested operational evidence; browser automation is not claimed. This evidence does not establish PostgreSQL integration, transaction/concurrency behavior, database-row contents, or historical-row cleanup. Synthetic Preview fixture cleanup was not reported. Production deployment and Production verification remain pending. H-11 at-rest remediation and dependency-advisory resolution are not claimed.
+
 ## Schema and migration
 
 No Prisma schema change was necessary. No migration was created, applied, or deployed. Existing persisted columns can hold the reduced JSON shape.
 
-## Deployment and verification plan
+## Remaining deployment and verification plan
 
-1. Review and commit through the normal repository process after approval.
-2. Deploy to an isolated Preview without reusing Production data or credentials.
-3. Seed only purpose-built non-sensitive sentinel fixtures through an approved isolated workflow; do not copy real answer keys.
-4. Verify anonymous published problem source, authenticated problem/random/diagnostic Client props, API JSON, rendered HTML, and RSC flight payloads contain no answer sentinel before or after submission.
-5. Verify an owned finalized diagnostic succeeds while foreign/missing/incomplete/abandoned/stale IDs share the unavailable behavior. Repeat page-level own-user scoping checks for STUDENT, ADMIN, and an owner-resolved user without treating the page test as independent `OWNER_EMAIL` resolution evidence.
-6. Verify admin editor/preview still receives the sentinel answer through authenticated admin-only surfaces.
-7. Run isolated PostgreSQL integration for finalization winner/replay behavior and confirm newly stored diagnostic JSON has no answer material; do not rewrite historical rows.
-8. Only after Preview evidence passes, deploy under the normal release process and repeat bounded Production smoke without synthetic destructive data.
+1. Keep PR #10 Draft/open until the normal review decision; this documentation pass does not modify PR state.
+2. Run isolated PostgreSQL integration for finalization winner/replay behavior if separately authorized; do not inspect or rewrite historical rows as part of H-10 remediation.
+3. Deploy through the normal release process only after approval.
+4. Repeat bounded Production authorization and learner-payload smoke checks without recording identities, secrets, protected URLs, or synthetic answer values.
 
 ## Remaining findings and Test debt
 
-- Preview browser/page-source/RSC sentinel verification is still required.
+- Production deployment and Production verification remain pending.
+- Synthetic Preview fixture cleanup was not reported.
 - There is no PostgreSQL integration evidence for this phase.
 - H-09 signed-session invalidation remains unresolved.
 - H-11 contest answer-key storage at rest remains unresolved.
 - Random-email authentication bucket amplification remains unresolved.
-- Dependency advisories remain to be reconciled from the final audit output.
+- Four moderate dependency advisories remain unresolved.
 - Private-contest Production smoke remains outstanding.
 - Existing PostgreSQL concurrency, rollback, timeout, recovery, and exactly-once Test debt remains.
+- Ongoing runtime-log monitoring remains an operational requirement.

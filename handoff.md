@@ -158,11 +158,11 @@ Current local data stats from `npm run db:stats` at the time of handoff:
 - Independent-practice submission/persistence and basic contest, diagnostic, and Writing regression smoke passed.
 - Checked runtime logs reported no runtime errors or sensitive values.
 
-Duplicate/identity testing was not repeated in Production. The Production mutations were valid low-risk checks followed by restoration; regression checks were basic smoke; and log review covered only the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, PostgreSQL integration, or Production content-pack recovery test is claimed. H-09, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unresolved/outstanding. H-10 has a later Phase 1D-A local-code remediation below, but no Preview, deployment, or Production verification. Authenticated content-pack recovery and ongoing runtime-log monitoring remain operational requirements.
+Duplicate/identity testing was not repeated in Production. The Production mutations were valid low-risk checks followed by restoration; regression checks were basic smoke; and log review covered only the checked deployment/time window. No comprehensive authorization, concurrency, rollback, timeout, deadlock, exactly-once, hostile-origin, PostgreSQL integration, or Production content-pack recovery test is claimed. H-09, H-11, random-email authentication amplification, four moderate dependency advisories, and private-contest Production smoke remain unresolved/outstanding. H-10 has a later Phase 1D-A local remediation and isolated Preview reconciliation below, but no Production deployment or Production verification. Authenticated content-pack recovery and ongoing runtime-log monitoring remain operational requirements.
 
-## Phase 1D-A Diagnostic Answer Exposure — Local Code Only
+## Phase 1D-A Diagnostic Answer Exposure — Local Implementation And Isolated Preview
 
-- Work is on `security-phase-1d-a-diagnostic-answer-exposure`. H-10 is remediated at the local-code boundary only; it is not committed, pushed, deployed, Preview-verified, or Production-verified.
+- Work is on `security-phase-1d-a-diagnostic-answer-exposure`. H-10 is remediated in the local implementation, and owner-attested isolated Preview sentinel verification passed for the tested boundaries at commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b`. It is not deployed to or verified in Production.
 - Central learner DTOs now positive-allowlist question presentation, submission results, diagnostic attempt summaries, and finalized diagnostic results. Prisma records are mapped inside Server Components or server-only selectors before learner Client Component/API/RSC boundaries.
 - Learner options contain only `id` and display `text`. Canonical answers, accepted answers, model answers, corrections, explanations, raw metadata/options, and scoring configuration are excluded. Fixed Vietnamese feedback depends only on `isCorrect`.
 - `/problems/[slug]`, `/practice/random`, `/diagnostic/start`, `/diagnostic/result`, `/api/submissions`, and `/api/practice/random` use the safe mappings. Learner analytics, skill analytics, wrong-question review, and contest-result review no longer render canonical answers or stored answer-bearing feedback.
@@ -173,9 +173,23 @@ Duplicate/identity testing was not repeated in Production. The Production mutati
 - Admin problem editor/preview behavior remains separate and answer-complete through a server-only admin mapper. STUDENT/ADMIN/OWNER_EMAIL policy is unchanged.
 - Operator-only portable export remains outside learner boundaries and may contain historical server-side diagnostic/contest data. No export, database, environment value, endpoint, or provider was accessed during Phase 1D-A.
 - No Prisma schema change or migration was required or created.
-- Runtime coverage uses production DTOs, handlers, selectors, scoring, and actions with mocked Prisma/collaborator boundaries. Static checks are explicitly labeled static. Browser/RSC-flight sentinel inspection in isolated Preview and real PostgreSQL integration remain Test debt.
+- Runtime coverage uses production DTOs, handlers, selectors, scoring, and actions with mocked Prisma/collaborator boundaries. Static checks are explicitly labeled static. Browser/RSC sentinel inspection passed only as owner-attested isolated Preview operational evidence; real PostgreSQL integration remains Test debt.
 - The complete correction-pass suite has 366 tests: 242 runtime/helper/handler/action/page tests, 8 simulations, 116 static checks, and zero PostgreSQL integration tests. Final command results are recorded in `docs/SECURITY_PHASE_1D_A_REPORT.md`. No npm audit is part of this correction pass; the prior offline zero result is not authoritative, and the four documented moderate advisories remain unresolved.
 - The focused report is `docs/SECURITY_PHASE_1D_A_REPORT.md`. H-09, H-11 at-rest storage, random-email authentication amplification, dependency advisories, private-contest smoke, and existing concurrency/rollback/recovery Test debt remain unresolved.
+
+### Phase 1D-A isolated Preview reconciliation (owner-attested 2026-07-17)
+
+- PR #10 remains recorded as Draft/open. This documentation pass did not query a provider or modify PR state.
+- Commit `e0f1c340a75cbc98c77b267ee1a804c2b1ecd55b` reached READY in isolated Preview, and health passed with the database connected.
+- A missing-Origin POST was rejected with 403 by the origin guard. A same-origin unauthenticated submission was rejected with 401 by authentication.
+- Anonymous published-problem HTML/RSC and diagnostic-start HTML/RSC contained neither synthetic canonical-answer nor explanation sentinel.
+- Authenticated single-problem and random-practice responses contained only safe result fields and fixed generic feedback.
+- Diagnostic-result HTML/RSC contained neither sentinel and remained aggregate-only. Foreign and incomplete diagnostic attempts followed the unavailable flow.
+- Authorized admin preview retained answer/explanation access, while ordinary `STUDENT` admin denial passed.
+- Checked Preview runtime logs reported no runtime errors or sensitive values.
+- Sentinel values were synthetic and non-sensitive; their exact values are not recorded. No account identity, cookie, deployment ID, infrastructure hostname, database identifier, or protected URL is recorded.
+- Browser/RSC inspection was owner-attested operational evidence, not a repository test; browser automation is not claimed. PostgreSQL integration, transaction/concurrency verification, database-row inspection, historical-row cleanup, Production deployment, and Production verification are not claimed.
+- Synthetic Preview fixture cleanup was not reported.
 
 ## What Worked
 
