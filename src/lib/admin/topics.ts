@@ -1,4 +1,5 @@
 import { createContentAuditLog } from "@/lib/admin/audit";
+import { topicAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import type { AdminResult } from "@/lib/admin/questions";
 import { generateSlug } from "@/lib/import/duplicates";
 import { prisma } from "@/lib/prisma";
@@ -39,7 +40,7 @@ export async function updateTopic(payload: TopicEditPayload, userId: string): Pr
       where: { id: payload.id },
       data: { name: payload.name.trim(), slug, description: payload.description?.trim() || null, parentId: payload.parentId || null },
     });
-    await createContentAuditLog({ userId, entityType: "Topic", entityId: payload.id, action: "UPDATED", beforeJson: before, afterJson: updated }, tx);
+    await createContentAuditLog({ userId, entityType: "Topic", entityId: payload.id, action: "UPDATED", ...topicAuditSnapshots(before, updated) }, tx);
     return { ok: true, message: "Đã cập nhật topic." };
   });
 }

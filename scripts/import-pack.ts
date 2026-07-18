@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { importContentPackFiles, selectImportFiles, validateContentPackFiles, type ContentPackInputFile } from "@/lib/content-packs/importer";
 import { prisma } from "@/lib/prisma";
+import { classifySafeError } from "@/lib/operations/safe-error";
 
 function printUsage() {
   console.error("Usage: npm run import:pack -- content-packs/pilot-pack-001");
@@ -82,13 +83,12 @@ async function main() {
   console.log("");
   console.log("Englishphile content pack import");
   console.log("--------------------------------");
-  console.log(`Content pack: ${result.contentPack.name}`);
-  console.log(`Version: ${result.contentPack.version ?? "n/a"}`);
+  console.log("Content pack: selected operator bundle");
   console.log(`Status: ${result.contentPack.status}`);
-  console.log(`Source path: ${displayPath}`);
-  console.log(`Files selected: ${selected.selected.map((file) => file.fileName).join(", ") || "none"}`);
+  console.log("Source path: configured operator path");
+  console.log(`Files selected: ${selected.selected.length}`);
   if (selected.ignoredFiles.length) {
-    console.log(`Files ignored: ${selected.ignoredFiles.join(", ")}`);
+    console.log(`Files ignored: ${selected.ignoredFiles.length}`);
   }
   console.log(`Valid files: ${validation.summary.validFiles}`);
   console.log(`Invalid files: ${validation.summary.invalidFiles}`);
@@ -101,8 +101,8 @@ async function main() {
   console.log(`Errors: ${validation.summary.errors}`);
   console.log("");
   console.log("Next steps:");
-  console.log(`- Review pack: /admin/content-packs/${result.contentPack.id}`);
-  console.log(`- Run QA: /admin/content-qa?contentPackId=${result.contentPack.id}`);
+  console.log("- Review the created pack in the admin content-pack page.");
+  console.log("- Run QA from the admin content-QA page.");
   console.log("- Imported problems default to NEEDS_REVIEW.");
   console.log("");
 
@@ -113,7 +113,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error instanceof Error ? error.message : error);
+    console.error(`Content-pack import failed (${classifySafeError(error)}).`);
     process.exitCode = 1;
   })
   .finally(async () => {

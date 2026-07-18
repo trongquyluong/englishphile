@@ -41,14 +41,14 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { PrismaClient } from "@prisma/client";
 import { parsePortableUserRole } from "@/lib/import/portable-user-role";
+import { PORTABLE_CONTEST_SELECT, PORTABLE_USER_SELECT, serializePortableExportArtifact } from "@/lib/operations/portable-data";
+import { classifySafeError } from "@/lib/operations/safe-error";
 import { ensureDir, timestampForFile } from "./db-utils";
 
-const prisma = new PrismaClient({
-  log: ["error"],
-});
+const prisma = new PrismaClient();
 
 async function writeJson(dir: string, fileName: string, data: unknown) {
-  await fs.writeFile(path.join(dir, fileName), JSON.stringify(data, null, 2), "utf8");
+  await fs.writeFile(path.join(dir, fileName), serializePortableExportArtifact(fileName, data), "utf8");
 }
 
 async function main() {
@@ -61,30 +61,7 @@ async function main() {
 
   // --- Safe user export (no passwordHash) ---
   const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      email: true,
-      username: true,
-      displayName: true,
-      fullName: true,
-      role: true,
-      createdAt: true,
-      updatedAt: true,
-      profile: {
-        select: {
-          id: true,
-          targetExam: true,
-          schoolTarget: true,
-          school: true,
-          province: true,
-          avatarUrl: true,
-          bio: true,
-          level: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-    },
+    select: PORTABLE_USER_SELECT,
     orderBy: { createdAt: "asc" },
   });
   let legacyTeacherRolesDowngraded = 0;
@@ -125,7 +102,7 @@ async function main() {
       orderBy: [{ problemId: "asc" }, { orderIndex: "asc" }],
     }),
     prisma.theoryNote.findMany({ orderBy: { orderIndex: "asc" } }),
-    prisma.contest.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.contest.findMany({ select: PORTABLE_CONTEST_SELECT, orderBy: { createdAt: "asc" } }),
     prisma.contestProblem.findMany({
       orderBy: [{ contestId: "asc" }, { orderIndex: "asc" }],
     }),
@@ -204,7 +181,7 @@ async function main() {
     },
   });
 
-  console.log(`\nPortable export written: ${exportDir}`);
+  console.log("\nPortable export completed in the configured export directory.");
   console.log(
     "NOTE: Submissions, submission answers, user problem statuses, classrooms, and assignments were NOT exported.",
   );
@@ -216,7 +193,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    console.error(`Portable export failed (${classifySafeError(error)}).`);
     process.exitCode = 1;
   })
   .finally(async () => {

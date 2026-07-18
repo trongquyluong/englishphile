@@ -52,41 +52,15 @@ import { createInterface } from "node:readline";
 import { PrismaClient } from "@prisma/client";
 import { resolvePortableImportFile } from "@/lib/import/portable-import-path";
 import { parsePortableUserRole } from "@/lib/import/portable-user-role";
-
-interface ImportOptions {
-  inputDir: string;
-  targetUrl: string;
-  dryRun: boolean;
-}
-
-function parseArgs(): ImportOptions {
-  const args = process.argv.slice(2);
-  let inputDir = "";
-  let targetUrl = "";
-  let dryRun = false;
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--input" && i + 1 < args.length) {
-      inputDir = args[++i];
-    } else if (args[i] === "--url" && i + 1 < args.length) {
-      targetUrl = args[++i];
-    } else if (args[i] === "--dry-run") {
-      dryRun = true;
-    }
-  }
-
-  if (!inputDir) {
-    console.error("Usage: npm run db:import:portable -- --input <export-dir> [--url <connection-url>] [--dry-run]");
-    console.error("Example: npm run db:import:portable -- --input exports/englishphile-portable-2026-07-07");
-    process.exit(1);
-  }
-
-  return {
-    inputDir: path.resolve(inputDir),
-    targetUrl: targetUrl || process.env.DIRECT_URL || process.env.DATABASE_URL || "",
-    dryRun,
-  };
-}
+import {
+  PORTABLE_MANIFEST_MAX_BYTES,
+  createAuthorizedPortableImportRuntime,
+  parsePortableImportArguments,
+  parsePortableManifestBytes,
+  portableManifestCountLines,
+  type PortableManifest,
+} from "@/lib/operations/portable-data";
+import { classifySafeError } from "@/lib/operations/safe-error";
 
 function readJson<T>(dir: string, file: string): T[] {
   const filePath = resolvePortableImportFile(dir, file);
@@ -95,12 +69,6 @@ function readJson<T>(dir: string, file: string): T[] {
 }
 
 async function confirm(question: string): Promise<boolean> {
-  // On CI/non-TTY, default to no (fail-safe).
-  if (!process.stdin.isTTY) {
-    console.warn("\nWARNING: Not a TTY — proceeding without confirmation for safety.\n");
-    return true;
-  }
-
   return new Promise((resolve) => {
     const rl = createInterface({
       input: process.stdin,
@@ -119,81 +87,93 @@ function looksLikeProduction(url: string): boolean {
 }
 
 async function main() {
-  const opts = parseArgs();
+  const parsedArgs = parsePortableImportArguments(process.argv.slice(2));
+  if (!parsedArgs.ok) {
+    console.error("Usage: npm run db:import:portable -- --input <export-dir> [--url <connection-url>] [--dry-run] [--yes]");
+    process.exitCode = 1;
+    return;
+  }
+  const opts = {
+    ...parsedArgs.value,
+    inputDir: path.resolve(parsedArgs.value.inputDir),
+    targetUrl: parsedArgs.value.targetUrl || process.env.DIRECT_URL || process.env.DATABASE_URL || "",
+  };
 
-  if (!opts.targetUrl) {
+  if (!opts.dryRun && !opts.targetUrl) {
     console.error("\nERROR: No connection URL. Set DIRECT_URL, DATABASE_URL, or pass --url.");
-    console.error("Example: npm run db:import:portable -- --input <path> --url \"postgresql://user:pass@host/db\"");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   // Verify input dir exists.
   try {
     fs.accessSync(opts.inputDir);
   } catch {
-    console.error(`\nERROR: Export directory not found: ${opts.inputDir}`);
-    process.exit(1);
+    console.error("\nERROR: The selected export directory is unavailable.");
+    process.exitCode = 1;
+    return;
   }
 
   // Verify manifest exists.
   const manifestPath = path.join(opts.inputDir, "manifest.json");
-  let manifest: { exportedAt?: string; version?: string; counts?: Record<string, number> };
+  let manifest: PortableManifest;
   try {
-    manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    const manifestStat = fs.statSync(manifestPath);
+    if (!manifestStat.isFile() || manifestStat.size === 0 || manifestStat.size > PORTABLE_MANIFEST_MAX_BYTES) throw new Error("invalid manifest");
+    const parsedManifest = parsePortableManifestBytes(fs.readFileSync(manifestPath));
+    if (!parsedManifest.ok) throw new Error("invalid manifest");
+    manifest = parsedManifest.value;
   } catch {
-    console.error(`\nERROR: manifest.json not found in ${opts.inputDir}`);
-    process.exit(1);
+    console.error("\nERROR: The selected export manifest is unavailable or invalid.");
+    process.exitCode = 1;
+    return;
   }
 
   console.log(`\n=== Englishphile Portable Import ===\n`);
-  console.log(`Source:      ${opts.inputDir}`);
-  console.log(`Target URL:  ${opts.targetUrl.replace(/\/\/[^@]+@/, "//***@")}`);
+  console.log("Source:      selected portable bundle");
+  console.log("Target:      configured database target");
   console.log(`Mode:       ${opts.dryRun ? "DRY RUN (no changes)" : "LIVE IMPORT"}`);
-  console.log(`Exported:   ${manifest.exportedAt ?? "unknown"}`);
-  console.log(`Version:    ${manifest.version ?? "unknown"}`);
+  console.log("Manifest:   accepted supported portable metadata");
 
-  if (opts.dryRun) {
-    console.log("\nDRY RUN: Showing import plan without writing to the database.\n");
+  const runtime = await createAuthorizedPortableImportRuntime(
+    { dryRun: opts.dryRun, yes: opts.yes, isTTY: Boolean(process.stdin.isTTY) },
+    {
+      confirmInteractive: () => confirm("\nImporting will modify the configured database. Continue?"),
+      createClient: () => new PrismaClient({ datasources: { db: { url: opts.targetUrl } } }),
+    },
+  );
+  if (runtime.mode === "rejected") {
+    console.error("A live non-interactive import requires explicit --yes approval.");
+    process.exitCode = 1;
+    return;
   }
-
-  // Safety confirmation for production-like targets.
-  if (looksLikeProduction(opts.targetUrl) && !opts.dryRun) {
-    console.warn("⚠  WARNING: Target URL looks like a hosted production database.");
-    const proceed = await confirm("\nImporting will modify the target database. Continue?");
-    if (!proceed) {
-      console.log("Aborted.");
-      process.exit(0);
-    }
+  if (runtime.mode === "aborted") {
+    console.log("Aborted.");
+    return;
   }
+  if (runtime.mode === "dry-run") {
+    console.log("\nDRY RUN: Declared counts from the accepted manifest; bundle rows and files were not validated and no database client was created.");
+    for (const line of portableManifestCountLines(manifest)) console.log(line);
+    console.log("\nDRY RUN complete. No data was written.");
+    return;
+  }
+  if (looksLikeProduction(opts.targetUrl)) console.warn("WARNING: The configured target appears to be hosted.");
 
   // Create a standalone PrismaClient pointing to the target database.
   // This bypasses the singleton wrapper so we can connect to a different URL.
-  const prisma = new PrismaClient({
-    datasources: { db: { url: opts.targetUrl } },
-    log: ["error"],
-  });
+  prismaForCleanup = runtime.client;
+  const prisma = runtime.client;
 
   // Verify connection.
   try {
     await prisma.$queryRaw`SELECT 1`;
-  } catch (err) {
-    console.error(`\nERROR: Could not connect to target database: ${err}`);
-    process.exit(1);
+  } catch (error) {
+    console.error(`\nERROR: Could not connect to the configured database (${classifySafeError(error)}).`);
+    process.exitCode = 1;
+    return;
   }
 
   console.log("\nConnected to target database ✓");
-
-  if (opts.dryRun) {
-    await prisma.$disconnect();
-    // Print a summary of what would be imported.
-    const counts = manifest.counts ?? {};
-    console.log("\nImport plan (counts from manifest):");
-    for (const [key, count] of Object.entries(counts)) {
-      console.log(`  ${key}: ${count} rows`);
-    }
-    console.log("\nDRY RUN complete. No data was written.");
-    return;
-  }
 
   // ---- Import logic (order matters for FK dependencies) ----
 
@@ -840,6 +820,7 @@ async function main() {
     { name: "learning-recommendations.json", fn: upsertLearningRecommendation },
   ];
 
+  let rejectedRows = 0;
   for (const step of importSteps) {
     let rows: Record<string, unknown>[] = [];
     try {
@@ -864,6 +845,7 @@ async function main() {
           skipped++;
           console.warn(`  Skipped ${step.name} row ${rowIndex + 1}: foreign key constraint failed`);
         } else {
+          rejectedRows += 1;
           console.error(`  Error on ${step.name} row ${rowIndex + 1}: import rejected`);
         }
       }
@@ -872,9 +854,8 @@ async function main() {
     console.log(`  ✓ Imported: ${imported}  Skipped: ${skipped}`);
   }
 
-  await prisma.$disconnect();
-
-  console.log("\n=== Import complete ===");
+  console.log(rejectedRows > 0 ? "\n=== Import completed with rejected rows ===" : "\n=== Import complete ===");
+  if (rejectedRows > 0) process.exitCode = 1;
   if (legacyTeacherRolesDowngraded > 0) {
     console.warn(`WARNING: ${legacyTeacherRolesDowngraded} legacy role value(s) were downgraded to STUDENT.`);
   }
@@ -886,7 +867,13 @@ async function main() {
   console.log("  3. Review published content and run QA.\n");
 }
 
-main().catch(() => {
-  console.error("ERROR: Portable import failed.");
-  process.exitCode = 1;
-});
+let prismaForCleanup: PrismaClient | null = null;
+
+main()
+  .catch(() => {
+    console.error("ERROR: Portable import failed.");
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prismaForCleanup?.$disconnect();
+  });
