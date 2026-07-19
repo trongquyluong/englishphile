@@ -97,11 +97,11 @@ function transaction(principal: { id: string; email: string; role: "STUDENT" | "
     },
     sourceCollection: {
       findMany: vi.fn().mockResolvedValue([{ id: "source-a", name: "Source" }]),
-      createMany: vi.fn().mockResolvedValue({ count: 0 }),
+      createManyAndReturn: vi.fn().mockResolvedValue([]),
     },
     topic: {
       findMany: vi.fn().mockResolvedValue([{ id: "topic-a", name: "Grammar", slug: "grammar" }]),
-      createMany: vi.fn().mockResolvedValue({ count: 0 }),
+      createManyAndReturn: vi.fn().mockResolvedValue([]),
     },
   };
   database.transaction.mockImplementation(async (callback) => callback(tx));
@@ -125,6 +125,82 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
     expect(tx.sourceCollection.findMany).toHaveBeenCalledTimes(1);
     expect(tx.topic.findMany).toHaveBeenCalledTimes(1);
     expect(tx.importBatch.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: "IMPORTED" }) }));
+  });
+
+  it("locks taxonomy keys and maps newly returned source and topic rows without re-fetching", async () => {
+    const tx = transaction();
+    tx.sourceCollection.findMany.mockResolvedValue([]);
+    tx.sourceCollection.createManyAndReturn.mockResolvedValue([{ id: "source-new", name: "Source" }]);
+    tx.topic.findMany.mockResolvedValue([]);
+    tx.topic.createManyAndReturn.mockResolvedValue([{ id: "topic-new", name: "Grammar", slug: "grammar" }]);
+
+    const result = await executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    });
+
+    expect(result.status).toBe("IMPORTED");
+    expect(tx.sourceCollection.findMany).toHaveBeenCalledTimes(1);
+    expect(tx.sourceCollection.createManyAndReturn).toHaveBeenCalledWith(expect.objectContaining({
+      select: { id: true, name: true },
+    }));
+    expect(tx.topic.findMany).toHaveBeenCalledTimes(1);
+    expect(tx.topic.createManyAndReturn).toHaveBeenCalledWith(expect.objectContaining({
+      select: { id: true, name: true, slug: true },
+    }));
+    expect(imported.problem).toHaveBeenCalledWith(
+      expect.anything(),
+      "source-new",
+      ["topic-new"],
+      expect.anything(),
+      tx,
+    );
+    expect(tx.$queryRaw.mock.invocationCallOrder[1]).toBeLessThan(tx.sourceCollection.findMany.mock.invocationCallOrder[0]);
+  });
+
+  it("reuses existing taxonomy while creating only missing topic rows", async () => {
+    const tx = transaction();
+    tx.topic.findMany.mockResolvedValue([{ id: "topic-existing", name: "Grammar", slug: "grammar" }]);
+    const mixed = normalizedProblem("one", ["Grammar", "Vocabulary"]);
+    tx.topic.createManyAndReturn.mockResolvedValue([{ id: "topic-new", name: "Vocabulary", slug: "vocabulary" }]);
+
+    await executeImportPlanAtomically(plan([mixed]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    });
+
+    expect(tx.sourceCollection.createManyAndReturn).not.toHaveBeenCalled();
+    expect(tx.topic.createManyAndReturn).toHaveBeenCalledTimes(1);
+    expect(imported.problem).toHaveBeenCalledWith(
+      expect.anything(),
+      "source-a",
+      ["topic-existing", "topic-new"],
+      expect.anything(),
+      tx,
+    );
+  });
+
+  it("logs only a safe static stage and error class when missing-source creation fails", async () => {
+    const tx = transaction();
+    tx.sourceCollection.findMany.mockResolvedValue([]);
+    const hostile = Object.assign(new Error("RAW_DATABASE_SENTINEL"), { code: "P2002" });
+    tx.sourceCollection.createManyAndReturn.mockRejectedValue(hostile);
+    const sink = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    })).rejects.toBe(hostile);
+
+    expect(sink).toHaveBeenCalledWith("Import commit failed.", {
+      action: "import-commit",
+      errorClass: "database",
+      stage: "source-create",
+    });
+    expect(JSON.stringify(sink.mock.calls)).not.toContain("RAW_DATABASE_SENTINEL");
   });
 
   it("simulates rollback at the mocked repository boundary when a later problem fails", async () => {
