@@ -14,9 +14,13 @@ import {
   contentPackFileIdentityKey,
   type ContentPackFileIdentity,
 } from "@/lib/content-packs/file-identity";
-import { createProblemWithQuestions, generateSlug } from "@/lib/import/duplicates";
+import {
+  createProblemWithQuestions,
+  generateSlug,
+  type ImportProblemWriteStage,
+} from "@/lib/import/duplicates";
 import type { ImportExecutionResult, ImportIssue, ImportPlan, NormalizedProblem } from "@/lib/import/types";
-import { safeErrorSignal } from "@/lib/operations/safe-error";
+import { safeErrorSignal, safePrismaKnownRequestCode } from "@/lib/operations/safe-error";
 import { prisma } from "@/lib/prisma";
 
 export const MAX_IMPORT_PROBLEMS_PER_COMMIT = 25;
@@ -44,7 +48,7 @@ type ImportCommitStage =
   | "source-create"
   | "topic-lookup"
   | "topic-create"
-  | "problem-create"
+  | ImportProblemWriteStage
   | "import-batch-finalize"
   | "content-pack-reconcile";
 
@@ -326,12 +330,12 @@ export async function executeImportPlanAtomically(
           (topic) => taxonomy.topicByKey.get(topic) ?? taxonomy.topicByKey.get(generateSlug(topic)),
         ))];
         if (topicIds.some((topicId) => !topicId)) throw new Error("Import taxonomy invariant failed.");
-        stage = "problem-create";
         await createProblemWithQuestions(problem, sourceId, topicIds as string[], {
           contentStatus: input.contentStatus,
           reviewedById: input.userId,
           importedBatchId: batch.id,
           contentPackId: input.contentPackId,
+          reportStage: (nextStage) => { stage = nextStage; },
         }, tx);
         problemsImported += 1;
         questionsImported += problem.questions.length;
@@ -357,7 +361,11 @@ export async function executeImportPlanAtomically(
     });
   } catch (error) {
     if (!isContentAdminTransactionAuthorizationError(error)) {
-      console.error("Import commit failed.", { ...safeErrorSignal("import-commit", error), stage });
+      console.error("Import commit failed.", {
+        ...safeErrorSignal("import-commit", error),
+        stage,
+        prismaCode: safePrismaKnownRequestCode(error),
+      });
     }
     throw error;
   }

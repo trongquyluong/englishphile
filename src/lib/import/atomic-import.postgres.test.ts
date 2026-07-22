@@ -540,7 +540,8 @@ describe.skipIf(!runPostgresIntegration).sequential(
       expect(sink).toHaveBeenCalledWith("Import commit failed.", {
         action: "import-commit",
         errorClass: "validation",
-        stage: "problem-create",
+        stage: "problem-nested-create",
+        prismaCode: "unknown",
       });
       await expect(prisma.sourceCollection.count()).resolves.toBe(0);
       await expect(prisma.topic.count()).resolves.toBe(0);

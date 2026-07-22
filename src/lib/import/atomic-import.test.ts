@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ImportPlan, NormalizedProblem } from "@/lib/import/types";
 
@@ -199,8 +200,112 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
       action: "import-commit",
       errorClass: "database",
       stage: "source-create",
+      prismaCode: "unknown",
     });
     expect(JSON.stringify(sink.mock.calls)).not.toContain("RAW_DATABASE_SENTINEL");
+  });
+
+  it("logs problem-nested-create and simulates transaction rollback", async () => {
+    const tx = transaction();
+    const pending = ["batch"];
+    const committed: string[] = [];
+    const failure = new Error("INNER_OPERATION_SENTINEL");
+    imported.problem.mockImplementation(async (_problem, _sourceId, _topicIds, options) => {
+      options.reportStage("problem-nested-create");
+      pending.push("problem-nested-create");
+      throw failure;
+    });
+    database.transaction.mockImplementation(async (callback) => {
+      try {
+        const result = await callback(tx);
+        committed.push(...pending);
+        return result;
+      } catch (error) {
+        pending.length = 0;
+        throw error;
+      }
+    });
+    const sink = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    })).rejects.toBe(failure);
+
+    expect(committed).toEqual([]);
+    expect(pending).toEqual([]);
+    expect(tx.importBatch.update).not.toHaveBeenCalled();
+    expect(sink).toHaveBeenCalledWith("Import commit failed.", {
+      action: "import-commit",
+      errorClass: "unknown",
+      stage: "problem-nested-create",
+      prismaCode: "unknown",
+    });
+    expect(JSON.stringify(sink.mock.calls)).not.toContain("INNER_OPERATION_SENTINEL");
+  });
+
+  it("emits only an allowlisted code from a typed Prisma known-request error", async () => {
+    transaction();
+    const sentinels = [
+      "ID_SENTINEL",
+      "SLUG_SENTINEL",
+      "PROMPT_SENTINEL",
+      "ANSWER_SENTINEL",
+      "CONSTRAINT_SENTINEL",
+      "CONNECTION_SENTINEL",
+    ];
+    const failure = new Prisma.PrismaClientKnownRequestError(sentinels.join(" "), {
+      code: "P2003",
+      clientVersion: "synthetic",
+      meta: { target: { nested: [{ values: sentinels }] } },
+    });
+    imported.problem.mockImplementation(async (_problem, _sourceId, _topicIds, options) => {
+      options.reportStage("problem-nested-create");
+      throw failure;
+    });
+    const sink = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    })).rejects.toBe(failure);
+
+    expect(sink).toHaveBeenCalledWith("Import commit failed.", {
+      action: "import-commit",
+      errorClass: "database",
+      stage: "problem-nested-create",
+      prismaCode: "P2003",
+    });
+    const output = JSON.stringify(sink.mock.calls);
+    for (const sentinel of sentinels) expect(output).not.toContain(sentinel);
+  });
+
+  it("does not expose a non-allowlisted typed Prisma code", async () => {
+    transaction();
+    const failure = new Prisma.PrismaClientKnownRequestError("NON_ALLOWLISTED_SENTINEL", {
+      code: "P2000",
+      clientVersion: "synthetic",
+      meta: { target: "TARGET_SENTINEL" },
+    });
+    imported.problem.mockImplementation(async (_problem, _sourceId, _topicIds, options) => {
+      options.reportStage("problem-nested-create");
+      throw failure;
+    });
+    const sink = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON", userId: "admin-a", contentStatus: "NEEDS_REVIEW",
+    })).rejects.toBe(failure);
+
+    expect(sink).toHaveBeenCalledWith("Import commit failed.", {
+      action: "import-commit",
+      errorClass: "database",
+      stage: "problem-nested-create",
+      prismaCode: "unknown",
+    });
+    expect(JSON.stringify(sink.mock.calls)).not.toContain("SENTINEL");
   });
 
   it("simulates rollback at the mocked repository boundary when a later problem fails", async () => {
@@ -262,11 +367,13 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
 
   it("denies a missing current principal before taxonomy lookup or content writes", async () => {
     const tx = transaction(null);
+    const sink = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await expect(executeImportPlanAtomically(plan([normalizedProblem("one")]), {
       importType: "JSON", userId: "deleted-admin", contentStatus: "NEEDS_REVIEW",
     })).rejects.toBeInstanceOf(ContentAdminTransactionAuthorizationError);
     expect(tx.sourceCollection.findMany).not.toHaveBeenCalled();
     expect(imported.problem).not.toHaveBeenCalled();
+    expect(sink).not.toHaveBeenCalled();
   });
 
   it("uses the durable file identity to avoid importing an already committed pack file again", async () => {

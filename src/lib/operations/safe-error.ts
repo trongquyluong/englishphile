@@ -1,4 +1,44 @@
+import { Prisma } from "@prisma/client";
+
 export type SafeErrorClass = "validation" | "database" | "filesystem" | "unknown";
+
+const SAFE_PRISMA_KNOWN_REQUEST_CODES = new Set([
+  "P2002",
+  "P2003",
+  "P2004",
+  "P2011",
+  "P2012",
+  "P2014",
+  "P2021",
+  "P2022",
+  "P2025",
+  "P2034",
+] as const);
+
+export type SafePrismaKnownRequestCode =
+  | "P2002"
+  | "P2003"
+  | "P2004"
+  | "P2011"
+  | "P2012"
+  | "P2014"
+  | "P2021"
+  | "P2022"
+  | "P2025"
+  | "P2034";
+
+export function safePrismaKnownRequestCode(error: unknown): SafePrismaKnownRequestCode | "unknown" {
+  try {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return "unknown";
+    const descriptor = Object.getOwnPropertyDescriptor(error, "code");
+    const code = descriptor && "value" in descriptor ? descriptor.value : undefined;
+    return typeof code === "string" && SAFE_PRISMA_KNOWN_REQUEST_CODES.has(code as SafePrismaKnownRequestCode)
+      ? code as SafePrismaKnownRequestCode
+      : "unknown";
+  } catch {
+    return "unknown";
+  }
+}
 
 export function classifySafeError(error: unknown): SafeErrorClass {
   try {

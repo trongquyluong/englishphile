@@ -12,6 +12,10 @@ import { prisma } from "@/lib/prisma";
 
 type Db = PrismaClient | Prisma.TransactionClient | typeof prisma;
 
+export type ImportProblemWriteStage = "problem-nested-create";
+
+export type ImportProblemWriteStageReporter = (stage: ImportProblemWriteStage) => void;
+
 export function generateSlug(value: string) {
   const slug = value
     .toLowerCase()
@@ -263,12 +267,19 @@ export async function createProblemWithQuestions(
   problem: NormalizedProblem,
   sourceCollectionId: string,
   topicIds: string[],
-  options: { contentStatus?: ContentStatus; reviewedById?: string; importedBatchId?: string; contentPackId?: string } = {},
+  options: {
+    contentStatus?: ContentStatus;
+    reviewedById?: string;
+    importedBatchId?: string;
+    contentPackId?: string;
+    reportStage?: ImportProblemWriteStageReporter;
+  } = {},
   db: Db = prisma,
 ) {
   const contentStatus = options.contentStatus ?? "NEEDS_REVIEW";
   const reviewDate = contentStatus === "PUBLISHED" ? new Date() : null;
 
+  options.reportStage?.("problem-nested-create");
   return db.problem.create({
     data: {
       title: problem.title,
