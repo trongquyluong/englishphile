@@ -4,6 +4,7 @@ import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/req
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
 import { parseExcelContest } from "@/lib/import/excel-contest-parser";
 import { hasValidXlsxSignature, MAX_FILE_SIZE_BYTES } from "@/lib/import/resource-limits";
+import { safeErrorSignal } from "@/lib/operations/safe-error";
 
 export async function POST(req: NextRequest) {
   const authorization = await requireContentAdminApi();
@@ -73,8 +74,8 @@ export async function POST(req: NextRequest) {
   try {
     const result = await parseExcelContest(fileBuffer);
     return NextResponse.json(result);
-  } catch (err) {
-    console.error("[contest-import/parse]", err instanceof Error ? err.message : "unknown");
+  } catch (error) {
+    console.error("Request operation failed.", safeErrorSignal("contest-spreadsheet-parse", error));
     return NextResponse.json({ error: "Lỗi khi đọc file Excel." }, { status: 500 });
   }
 }

@@ -183,3 +183,7 @@ No Prisma schema change was necessary, and no Phase 1D-A migration exists. No Pr
 ## Documentation-pass safety
 
 This Production reconciliation used only the supplied owner-attested runtime facts and local repository documentation. It did not access a database, environment value, endpoint, browser, logs, GitHub, Vercel, Neon, or another provider, and it did not run Prisma, typecheck, lint, tests, build, audit, migration, seed, import, export, deployment, commit, push, or PR/provider mutation operations.
+
+## Historical linkage to Phase 1D-B1
+
+Phase 1D-B1 builds on this phase’s learner allowlists without changing the Phase 1D-A conclusion or rewriting diagnostic rows. The later no-migration pass reuses the positive diagnostic metadata/breakdown sanitizers at the portable-export boundary so historical answer-bearing keys are not reproduced in new bundles. It does not prove that such rows exist, clean any database row, or close H-11. See `docs/SECURITY_PHASE_1D_B1_REPORT.md` for the repository-only implementation boundary.

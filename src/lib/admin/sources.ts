@@ -1,5 +1,6 @@
 import type { SourceType } from "@prisma/client";
 import { createContentAuditLog } from "@/lib/admin/audit";
+import { sourceAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import type { AdminResult } from "@/lib/admin/questions";
 import { sourceTypeValues } from "@/lib/import/types";
 import { prisma } from "@/lib/prisma";
@@ -36,7 +37,7 @@ export async function updateSourceCollection(payload: SourceCollectionEditPayloa
         copyrightNote: payload.copyrightNote?.trim() || null,
       },
     });
-    await createContentAuditLog({ userId, entityType: "SourceCollection", entityId: payload.id, action: "UPDATED", beforeJson: before, afterJson: updated }, tx);
+    await createContentAuditLog({ userId, entityType: "SourceCollection", entityId: payload.id, action: "UPDATED", ...sourceAuditSnapshots(before, updated) }, tx);
     return { ok: true, message: "Đã cập nhật nguồn tài liệu." };
   });
 }

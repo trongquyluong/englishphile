@@ -72,6 +72,7 @@ describe("Phase 1D-A static wiring checks (not runtime/browser evidence)", () =>
       const content = source(file);
       expect(content).not.toContain("summarizeCorrectAnswer");
       expect(content).not.toMatch(/item\.correctAnswer|question\.correctAnswer|answer\.correctAnswer/);
+      if (file === "src/app/contests/[id]/result/page.tsx") expect(content).toContain("toLearnerContestResult(attempt.answersJson)");
     }
   });
 });

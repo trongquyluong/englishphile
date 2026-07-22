@@ -93,6 +93,21 @@ type ContentPackImportResult = ContentPackValidationResult & {
   }>;
 };
 
+function getContentPackCommitMessage(input: {
+  responseOk: boolean;
+  contentPackStatus?: string;
+  error?: string;
+}) {
+  if (!input.responseOk) {
+    return input.error ?? "Không thể commit file hợp lệ. Xem lịch sử import để kiểm tra trạng thái.";
+  }
+  if (input.contentPackStatus === "IMPORTED") return "Import file hoàn tất.";
+  if (input.contentPackStatus === "PARTIALLY_IMPORTED") {
+    return "Đã import một phần. File lỗi hoặc problem trùng đã được ghi nhận trong lịch sử import.";
+  }
+  return "Không thể commit file hợp lệ. Xem lịch sử import để kiểm tra trạng thái.";
+}
+
 const sampleJson = `{
   "sourceCollection": {
     "name": "Admin Demo JSON",
@@ -320,8 +335,20 @@ export function ImportCenter({ history, templates }: ImportCenterProps) {
       }),
     });
     const payload = (await response.json()) as ContentPackValidationResult & ContentPackImportResult & { error?: string };
-    if (!response.ok && payload.error) {
-      setMessage(payload.error);
+    if (!response.ok) {
+      if ("contentPack" in payload) {
+        setFilePlan(payload);
+        setFileImportResult(payload);
+      }
+      setMessage(
+        mode === "commit"
+          ? getContentPackCommitMessage({
+              responseOk: false,
+              contentPackStatus: payload.contentPack?.status,
+              error: payload.error,
+            })
+          : payload.error ?? "Không thể kiểm tra dữ liệu import.",
+      );
     } else {
       setFilePlan(payload);
       if ("contentPack" in payload) {
@@ -332,7 +359,10 @@ export function ImportCenter({ history, templates }: ImportCenterProps) {
           ? payload.summary.validFiles > 0
             ? "Đã kiểm tra file. Có thể import tất cả file hợp lệ."
             : "Không có file hợp lệ để import."
-          : "Import nhiều file hoàn tất. File lỗi hoặc problem trùng đã được bỏ qua.",
+          : getContentPackCommitMessage({
+              responseOk: true,
+              contentPackStatus: payload.contentPack.status,
+            }),
       );
     }
     setIsWorking(false);

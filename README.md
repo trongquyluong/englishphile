@@ -908,3 +908,7 @@ npm run prisma:deploy          # Chạy migration trên production
 npm run admin:promote          # Promote user thành admin
 ```
 
+Portable export là định dạng JSON plaintext có dữ liệu nhạy cảm và phải được bảo vệ như một bản sao dữ liệu vận hành. Export mới không chứa `passwordHash` hoặc `Contest.accessCode`, đồng thời JSON chẩn đoán lịch sử được đưa qua allowlist để không sao chép đáp án/feedback cũ. Công cụ không mã hóa file và không thay đổi các hàng lịch sử trong database. Manifest portable bị giới hạn 32 KiB, chỉ giữ version `1.0` (hoặc manifest legacy chưa có version), thời điểm ISO và các count đã biết là số nguyên an toàn từ 0 đến 1.000.000; count lạ bị từ chối, còn note/warning top-level cũ bị bỏ qua và không log. Live import cần xác nhận TTY; khi chạy không tương tác, operator phải chủ động thêm `--yes`. Dry-run chỉ xác thực manifest và in các count do manifest khai báo; nó không kiểm tra các file hoặc row trong bundle và không tạo Prisma client. Không lưu bundle vào source control, log, hoặc thư mục chia sẻ công khai.
+
+Phase 1D-B1 chỉ giảm dữ liệu nhạy cảm trong write/export/audit mới. H-11 vẫn **Partially remediated**: Writing retention, lịch sử contest/submission/audit, contest access code plaintext trong database, account deletion/retention, và mã hóa portable export vẫn chưa được giải quyết.
+

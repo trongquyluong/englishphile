@@ -145,7 +145,7 @@ function difficultyValue(value: unknown): Difficulty | null {
     : null;
 }
 
-function sanitizeSkillBreakdown(value: unknown): LearnerDiagnosticSkillBreakdownDTO[] {
+export function sanitizeDiagnosticSkillBreakdown(value: unknown): LearnerDiagnosticSkillBreakdownDTO[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((entry) => {
     const item = asRecord(entry);
@@ -164,7 +164,7 @@ function sanitizeSkillBreakdown(value: unknown): LearnerDiagnosticSkillBreakdown
   });
 }
 
-function sanitizeTopicBreakdown(value: unknown): LearnerDiagnosticTopicBreakdownDTO[] {
+export function sanitizeDiagnosticTopicBreakdown(value: unknown): LearnerDiagnosticTopicBreakdownDTO[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((entry) => {
     const item = asRecord(entry);
@@ -217,8 +217,8 @@ function sanitizeScoring(value: unknown): LearnerDiagnosticScoringDTO | null {
     confidence,
     confidenceLabel: stringValue(scoring.confidenceLabel),
     confidenceReason: stringValue(scoring.confidenceReason),
-    strengths: sanitizeSkillBreakdown(scoring.strengths),
-    weakAreas: sanitizeSkillBreakdown(scoring.weakAreas),
+    strengths: sanitizeDiagnosticSkillBreakdown(scoring.strengths),
+    weakAreas: sanitizeDiagnosticSkillBreakdown(scoring.weakAreas),
     levelExplanation: stringValue(scoring.levelExplanation),
   };
 }
@@ -298,8 +298,8 @@ export function toLearnerDiagnosticResultDTO(
     createdAt: summary.createdAt,
     updatedAt: summary.updatedAt,
     status: attempt.status,
-    skillBreakdown: sanitizeSkillBreakdown(attempt.skillBreakdownJson),
-    topicBreakdown: sanitizeTopicBreakdown(attempt.topicBreakdownJson),
+    skillBreakdown: sanitizeDiagnosticSkillBreakdown(attempt.skillBreakdownJson),
+    topicBreakdown: sanitizeDiagnosticTopicBreakdown(attempt.topicBreakdownJson),
     scoring: metadata.scoring,
   };
 }

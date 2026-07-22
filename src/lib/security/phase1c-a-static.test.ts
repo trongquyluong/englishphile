@@ -135,14 +135,28 @@ describe("Phase 1C-A static portable import path wiring", () => {
     expect(importer).not.toContain("readJson(step.name, step.name)");
     expect(importer).toContain("row ${rowIndex + 1}: import rejected");
     expect(importer).not.toContain("console.error(error)");
+    expect(importer).toContain("createAuthorizedPortableImportRuntime");
+    expect(importer).toContain("parsePortableManifestBytes");
+    expect(importer).toContain("PORTABLE_MANIFEST_MAX_BYTES");
+    expect(importer.indexOf("fs.statSync(manifestPath)")).toBeLessThan(importer.lastIndexOf("parsePortableManifestBytes"));
+    expect(importer).toContain("tx.contestAccessGrant.deleteMany");
+    expect(importer).not.toContain("accessCode: contest.accessCode");
+    expect(importer).not.toContain("Exported:   ${manifest.exportedAt");
   });
 });
 
 describe("Phase 1C-A static independent-practice persistence wiring", () => {
   it.each([
-    ["src/app/api/submissions/route.ts", "prisma.submission.create"],
-    ["src/app/api/submissions/route.ts", "prisma.userProblemStatus.upsert"],
-    ["src/app/api/practice/random/route.ts", "prisma.submission.create"],
+    "src/app/api/submissions/route.ts",
+    "src/app/api/practice/random/route.ts",
+  ])("retains %s persistence inside the production Prisma transaction", (file) => {
+    expect(source(file)).toContain("prisma.$transaction");
+  });
+
+  it.each([
+    ["src/app/api/submissions/route.ts", "tx.submission.create"],
+    ["src/app/api/submissions/route.ts", "tx.userProblemStatus.upsert"],
+    ["src/app/api/practice/random/route.ts", "tx.submission.create"],
     ["src/lib/contests.ts", "tx.contestAttempt.create"],
     ["src/lib/diagnostic.ts", "tx.diagnosticAttempt.create"],
     ["src/lib/security/writing-quota.ts", "tx.writingSubmission.create"],

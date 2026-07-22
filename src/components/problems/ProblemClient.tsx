@@ -23,6 +23,18 @@ type ProblemClientProps = {
   previewMode?: boolean;
 };
 
+/** Production Client Component guard: preview must return before fetch/persistence. */
+export function preventsProblemSubmission(previewMode: boolean) {
+  return previewMode;
+}
+
+export async function requestProblemSubmission(
+  previewMode: boolean,
+  persist: () => Promise<Response>,
+): Promise<Response | null> {
+  return previewMode ? null : persist();
+}
+
 const tabs = ["Đề bài", "Gợi ý", "Lời giải", "Thảo luận", "Lịch sử nộp bài"] as const;
 type Tab = (typeof tabs)[number];
 
@@ -50,7 +62,7 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
   };
 
   const handleSubmit = async () => {
-    if (previewMode) {
+    if (preventsProblemSubmission(previewMode)) {
       setError("Chế độ xem trước dành cho quản trị — không lưu kết quả.");
       return;
     }
@@ -58,14 +70,15 @@ export function ProblemClient({ problem, history, isAuthenticated, previewMode =
     setIsSubmitting(true);
     setError(null);
 
-    const response = await fetch("/api/submissions", {
+    const response = await requestProblemSubmission(previewMode, () => fetch("/api/submissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         problemId: problem.id,
         answers,
       }),
-    });
+    }));
+    if (!response) return;
 
     if (!response.ok) {
       setError(response.status === 401 ? "Bạn cần đăng nhập để lưu submission." : "Không thể nộp bài lúc này.");
