@@ -32,6 +32,8 @@ export const MAX_IMPORT_QUESTIONS_PER_COMMIT = 250;
 export const MAX_IMPORT_TOPIC_ASSOCIATIONS_PER_COMMIT = 100;
 export const MAX_IMPORT_UNIQUE_TOPICS_PER_COMMIT = 50;
 export const MAX_IMPORT_UNIQUE_SOURCES_PER_COMMIT = 25;
+// Bounded allowance for this multi-round-trip import, not an expected duration.
+export const IMPORT_TRANSACTION_TIMEOUT_MS = 15_000;
 
 type ImportCommitInput = {
   importType: ImportType;
@@ -362,7 +364,7 @@ export async function executeImportPlanAtomically(
         if (!reconciled) throw new AdminResourceUnavailableError();
       }
       return { ...plan, summary, batchId: updatedBatch.id, status: "IMPORTED" };
-    });
+    }, { timeout: IMPORT_TRANSACTION_TIMEOUT_MS });
   } catch (error) {
     if (!isContentAdminTransactionAuthorizationError(error)) {
       console.error("Import commit failed.", {

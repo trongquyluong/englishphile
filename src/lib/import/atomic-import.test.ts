@@ -2,10 +2,18 @@ import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ImportPlan, NormalizedProblem } from "@/lib/import/types";
 
-const database = vi.hoisted(() => ({ transaction: vi.fn() }));
+const database = vi.hoisted(() => ({
+  transaction: vi.fn(),
+  globalTransactionOptions: { maxWait: 2_000, timeout: 5_000 },
+}));
 const imported = vi.hoisted(() => ({ problem: vi.fn() }));
 
-vi.mock("@/lib/prisma", () => ({ prisma: { $transaction: database.transaction } }));
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    $transaction: database.transaction,
+    transactionOptions: database.globalTransactionOptions,
+  },
+}));
 vi.mock("@/lib/import/duplicates", () => ({
   createProblemWithQuestions: imported.problem,
   generateSlug: (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
@@ -13,6 +21,7 @@ vi.mock("@/lib/import/duplicates", () => ({
 
 import {
   executeImportPlanAtomically,
+  IMPORT_TRANSACTION_TIMEOUT_MS,
   inspectImportCommitBounds,
   MAX_IMPORT_PROBLEMS_PER_COMMIT,
   MAX_IMPORT_TOPIC_ASSOCIATIONS_PER_COMMIT,
@@ -112,6 +121,23 @@ function transaction(principal: { id: string; email: string; role: "STUDENT" | "
 
 describe("atomic JSON/CSV commit helper (production function with mocked Prisma transaction)", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("passes only the bounded per-call timeout without mutating global transaction defaults", async () => {
+    const globalOptionsBefore = structuredClone(database.globalTransactionOptions);
+    transaction();
+
+    await executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    });
+
+    expect(IMPORT_TRANSACTION_TIMEOUT_MS).toBe(15_000);
+    expect(database.transaction).toHaveBeenCalledTimes(1);
+    expect(database.transaction.mock.calls[0][1]).toEqual({ timeout: 15_000 });
+    expect(Object.keys(database.transaction.mock.calls[0][1])).toEqual(["timeout"]);
+    expect(database.globalTransactionOptions).toEqual(globalOptionsBefore);
+  });
 
   it("commits batch status and every imported problem together on all-success", async () => {
     const tx = transaction();
@@ -285,6 +311,37 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
     for (const sentinel of sentinels) expect(output).not.toContain(sentinel);
   });
 
+  it("rethrows a synthetic P2028 without sleeping or retrying", async () => {
+    transaction();
+    const failure = new Prisma.PrismaClientKnownRequestError("TRANSACTION_ERROR_SENTINEL", {
+      code: "P2028",
+      clientVersion: "synthetic",
+      meta: { detail: "META_SENTINEL" },
+    });
+    imported.problem.mockImplementation(async (_problem, _sourceId, _topicIds, options) => {
+      options.reportStage("problem-nested-create");
+      throw failure;
+    });
+    const sink = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+    })).rejects.toBe(failure);
+
+    expect(database.transaction).toHaveBeenCalledTimes(1);
+    expect(imported.problem).toHaveBeenCalledTimes(1);
+    expect(sink).toHaveBeenCalledWith("Import commit failed.", {
+      action: "import-commit",
+      errorClass: "database",
+      stage: "problem-nested-create",
+      prismaErrorKind: "known-request",
+      prismaCode: "P2028",
+    });
+    expect(JSON.stringify(sink.mock.calls)).not.toContain("SENTINEL");
+  });
+
   it("does not expose a non-allowlisted typed Prisma code", async () => {
     transaction();
     const failure = new Prisma.PrismaClientKnownRequestError("NON_ALLOWLISTED_SENTINEL", {
@@ -405,5 +462,29 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
     expect(result).toEqual(expect.objectContaining({ status: "IMPORTED", batchId: "batch-existing" }));
     expect(imported.problem).not.toHaveBeenCalled();
     expect(tx.importBatch.create).not.toHaveBeenCalled();
+  });
+
+  it("keeps principal, optional pack, and taxonomy lock order with the local timeout", async () => {
+    const tx = transaction();
+    const identity = createContentPackFileIdentity("01-one.json", "JSON", "ONE", 0);
+    tx.contentPack.findUnique.mockResolvedValue({
+      id: "pack-a",
+      manifestJson: buildContentPackExecutionManifest(null, [{ ...identity, state: "PENDING" }]),
+    });
+
+    await executeImportPlanAtomically(plan([normalizedProblem("one")]), {
+      importType: "JSON",
+      userId: "admin-a",
+      contentStatus: "NEEDS_REVIEW",
+      contentPackId: "pack-a",
+      fileIdentity: identity,
+    });
+
+    expect(database.transaction.mock.calls[0][1]).toEqual({ timeout: IMPORT_TRANSACTION_TIMEOUT_MS });
+    expect(tx.$queryRaw).toHaveBeenCalledTimes(3);
+    const [principalLockOrder, packLockOrder, taxonomyLockOrder] = tx.$queryRaw.mock.invocationCallOrder;
+    expect(principalLockOrder).toBeLessThan(packLockOrder);
+    expect(packLockOrder).toBeLessThan(taxonomyLockOrder);
+    expect(taxonomyLockOrder).toBeLessThan(imported.problem.mock.invocationCallOrder[0]);
   });
 });
