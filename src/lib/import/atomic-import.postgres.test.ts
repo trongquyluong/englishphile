@@ -541,6 +541,7 @@ describe.skipIf(!runPostgresIntegration).sequential(
         action: "import-commit",
         errorClass: "validation",
         stage: "problem-nested-create",
+        prismaErrorKind: "not-prisma",
         prismaCode: "unknown",
       });
       await expect(prisma.sourceCollection.count()).resolves.toBe(0);

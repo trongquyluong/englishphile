@@ -200,6 +200,7 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
       action: "import-commit",
       errorClass: "database",
       stage: "source-create",
+      prismaErrorKind: "not-prisma",
       prismaCode: "unknown",
     });
     expect(JSON.stringify(sink.mock.calls)).not.toContain("RAW_DATABASE_SENTINEL");
@@ -240,6 +241,7 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
       action: "import-commit",
       errorClass: "unknown",
       stage: "problem-nested-create",
+      prismaErrorKind: "not-prisma",
       prismaCode: "unknown",
     });
     expect(JSON.stringify(sink.mock.calls)).not.toContain("INNER_OPERATION_SENTINEL");
@@ -276,6 +278,7 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
       action: "import-commit",
       errorClass: "database",
       stage: "problem-nested-create",
+      prismaErrorKind: "known-request",
       prismaCode: "P2003",
     });
     const output = JSON.stringify(sink.mock.calls);
@@ -303,6 +306,7 @@ describe("atomic JSON/CSV commit helper (production function with mocked Prisma 
       action: "import-commit",
       errorClass: "database",
       stage: "problem-nested-create",
+      prismaErrorKind: "known-request",
       prismaCode: "unknown",
     });
     expect(JSON.stringify(sink.mock.calls)).not.toContain("SENTINEL");

@@ -20,7 +20,11 @@ import {
   type ImportProblemWriteStage,
 } from "@/lib/import/duplicates";
 import type { ImportExecutionResult, ImportIssue, ImportPlan, NormalizedProblem } from "@/lib/import/types";
-import { safeErrorSignal, safePrismaKnownRequestCode } from "@/lib/operations/safe-error";
+import {
+  classifySafePrismaErrorKind,
+  safeErrorSignal,
+  safePrismaKnownRequestCode,
+} from "@/lib/operations/safe-error";
 import { prisma } from "@/lib/prisma";
 
 export const MAX_IMPORT_PROBLEMS_PER_COMMIT = 25;
@@ -364,6 +368,7 @@ export async function executeImportPlanAtomically(
       console.error("Import commit failed.", {
         ...safeErrorSignal("import-commit", error),
         stage,
+        prismaErrorKind: classifySafePrismaErrorKind(error),
         prismaCode: safePrismaKnownRequestCode(error),
       });
     }
