@@ -1,7 +1,7 @@
 # Security Phase 1D-B1 Report — No-migration at-rest minimization
 
-Date: 2026-07-26
-Scope: repository implementation, separately identified owner-attested Preview evidence, and local dependency-audit triage
+Date: 2026-07-27
+Scope: repository implementation, separately identified owner-attested Preview and Production evidence, and local dependency-audit triage
 Disposition: H-11 **Partially remediated**
 
 ## Executive result
@@ -144,7 +144,46 @@ Direct unauthenticated API probes were intercepted by Vercel Deployment Protecti
 
 ### Historical-versus-latest boundary
 
-At the earlier isolated Preview checkpoint on commit `e8e3a6752c74055f973af3d47a2135bc52ed98b9`, `OWNER_EMAIL` admin access, ordinary-`STUDENT` admin denial, answer-complete admin draft preview, preview POST suppression, contest-result learner safety, diagnostic regression, and Writing regression passed; checked logs exposed no runtime error or sensitive value. Later commits changed import safety, observability, safe error classification, and the bounded import timeout. Those contest, diagnostic, Writing, and admin-preview behaviors were not rerun on `4a869defacd6b932299bc8e0bc8b83897177cf6a`; the earlier result remains historical evidence, not a latest-commit retest. No Phase 1D-B1 Production deployment or verification is claimed, and no historical sensitive row was rewritten.
+At the earlier isolated Preview checkpoint on commit `e8e3a6752c74055f973af3d47a2135bc52ed98b9`, `OWNER_EMAIL` admin access, ordinary-`STUDENT` admin denial, answer-complete admin draft preview, preview POST suppression, contest-result learner safety, diagnostic regression, and Writing regression passed; checked logs exposed no runtime error or sensitive value. Later commits changed import safety, observability, safe error classification, and the bounded import timeout. Those contest, diagnostic, Writing, and admin-preview behaviors were not rerun on `4a869defacd6b932299bc8e0bc8b83897177cf6a`; the earlier result remains historical evidence, not a latest-Preview-commit retest. At that dated Preview checkpoint, Phase 1D-B1 had not yet merged or received the later selected Production verification recorded below. No historical sensitive row was rewritten.
+
+## Owner-attested Production operational reconciliation
+
+The following is owner-attested Production evidence supplied for the 2026-07-27 documentation reconciliation. It is separate from repository tests, local PGlite evidence, and the historical Preview evidence above.
+
+PR #12 merged at `2026-07-26T16:01:29Z`; its merge commit is `954783040c02e3d71f68babb8c00e917409408e1`. The canonical deployment target was Production, its deployment was created after the merge, and it reached `READY`. Provider commit metadata was not reported, so this does not establish a direct provider-reported SHA match.
+
+Health returned HTTP 200 with `ok=true` and `database=connected`. A missing-Origin submission returned 403, and a separate same-origin unauthenticated submission returned 401. `OWNER_EMAIL`-equivalent admin access passed, as did ordinary-`STUDENT` admin denial; no configured owner email value or account identifier is recorded.
+
+One bounded synthetic manual import passed with zero dry-run errors and created one source, one topic, one problem, and one question. The resulting single-problem learner response contained only:
+
+- `submissionId`
+- `status`
+- `score`
+- `total`
+- `answers` entries containing `questionId`, `isCorrect`, and fixed generic feedback
+
+It contained no canonical answer, explanation, options, metadata, checker feedback, or synthetic explanation sentinel. All ten owner-attested read-only persisted-shape checks were true:
+
+- `problemFound`
+- `problemQuestionCountValid`
+- `submissionFound`
+- `parentShapeValid`
+- `childAnswerCountValid`
+- `childRelationshipValid`
+- `incorrectFlagValid`
+- `childPayloadSafe`
+- `feedbackExactGeneric`
+- `feedbackContainsNoCanonicalMaterial`
+
+Admin preview retained answer access and issued no submission POST. The synthetic problem was archived; anonymous and ordinary-`STUDENT` access to the archived learner route was unavailable. Owner/admin visibility was privileged administrative visibility and is not learner exposure.
+
+Contest listing, diagnostic landing, Writing landing, owner-admin access, and ordinary-`STUDENT` denial regressions passed. Production error-log inspection found no relevant runtime error and no sensitive value. Git ended on `main` with tracked state clean before this documentation branch was created.
+
+### Production evidence boundaries
+
+Production random-practice persistence was not rerun; its operational persistence evidence remains Preview-only. Upload-first import was not rerun in Production; its operational evidence likewise remains Preview-only. This checkpoint does not establish managed PostgreSQL concurrency, rollback, failover, pooler, duration, or timeout behavior, and it does not establish historical-data cleanup. No deployment ID, infrastructure hostname, credential, connection information, configured owner email value, user ID, submission ID, or synthetic answer value is recorded.
+
+H-11 remains **Partially remediated**, not closed. Public-beta release remains blocked pending the documented Next, PostCSS, Sharp, brace-expansion, and other unresolved dependency remediation. Portable-export encryption/lifecycle, Writing/provider-output retention, account deletion and general retention, historical sensitive-row cleanup, plaintext contest-code hashing, provider deletion/log-retention verification, managed PostgreSQL behavior, and existing concurrency, rollback, and data-shaping Test debt remain open. No schema change or migration occurred.
 
 The valid-plan callback is a bounded but multi-round-trip remote sequence. The table counts application-level awaited database operations; Prisma can translate an operation, especially a nested create, into multiple internal SQL statements or protocol exchanges.
 
@@ -167,7 +206,7 @@ This retains the existing User -> optional ContentPack -> deterministic taxonomy
 
 Failed atomic imports continue to log only `action`, safe `errorClass`, static `stage`, fixed `prismaErrorKind`, and `prismaCode`. `prismaCode` may be only `P2002`, `P2003`, `P2004`, `P2011`, `P2012`, `P2014`, `P2021`, `P2022`, `P2024`, `P2025`, `P2028`, or `P2034`; all other codes and ambiguous errors produce `unknown`. Recognition accepts either the imported typed Prisma error classes or a guarded bundled-copy identity made only from exact fixed names and required own data-property descriptors; reflection fails closed. `prismaErrorKind` is restricted to `known-request`, `unknown-request`, `initialization`, `validation`, `rust-panic`, `not-prisma`, or `unknown`. `P2024` (connection-pool timeout), `P2028` (transaction API error), and bundled-copy recognition remain diagnostic hypotheses until a later safe signal identifies one. A code may narrow the failure class, but it cannot identify which nested relation caused a `P2002` or `P2003`. No message parsing or object enumeration is used, and message, metadata values, targets, constraints, model/field values, cause, client version values, query, stack, URLs, IDs, slugs, prompts, answers, and serialized errors are never included. Authorization failures remain outside this database-failure logger.
 
-This minimal bounded correction changes only the per-call interactive-transaction timeout. It does not change query, write, lock, schema, migration, dependency, input-bound, authorization, reconciliation, response, error-redaction, or rollback behavior. No retry is added. The isolated PGlite suite can verify PostgreSQL semantics and rollback within its stated boundary, but it does not prove managed remote latency, pooler behavior, failover behavior, or the inferred expiry subtype. The owner-attested manual and upload-first Preview probes now pass on the timeout commit; PR #12 remains open and Draft.
+This minimal bounded correction changes only the per-call interactive-transaction timeout. It does not change query, write, lock, schema, migration, dependency, input-bound, authorization, reconciliation, response, error-redaction, or rollback behavior. No retry is added. The isolated PGlite suite can verify PostgreSQL semantics and rollback within its stated boundary, but it does not prove managed remote latency, pooler behavior, failover behavior, or the inferred expiry subtype. The owner-attested manual and upload-first Preview probes passed on the timeout commit; PR #12 later merged, and the selected owner-attested Production verification is recorded above.
 
 The correction pass also fixes the confirmed superficial upload-first success signal: `/api/admin/import/files/commit` now returns success only when at least one validated file actually reached `IMPORTED`; an all-failed pack returns 422, and the import UI distinguishes full success, partial success, and failure instead of deriving completion from dry-run-valid file counts.
 
