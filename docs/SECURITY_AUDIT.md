@@ -1558,7 +1558,29 @@ The latest single/random checkpoint used the current owner-equivalent account on
 
 The operations used the Neon branch named `preview`; synthetic source/problem markers were absent from its parent branch named `production`, and no mutation was intentionally performed against that parent. This is narrow branch-isolation evidence, not general Production/provider evidence. The final ten-minute postflight returned `Fetched 0 logs`, with no new import, submission, or random-practice error observed. Direct unauthenticated probes were intercepted by Vercel Deployment Protection; their 401 responses are inconclusive and are not application origin/auth evidence.
 
-The prior `e8e3a6752c74055f973af3d47a2135bc52ed98b9` Preview checkpoint remains historical evidence for `OWNER_EMAIL` access, ordinary-`STUDENT` denial, admin draft-preview answer access and POST suppression, contest-result safety, diagnostic, Writing, and checked-log safety. Those paths were not rerun on `4a869def...`; no latest-commit retest or Phase 1D-B1 Production verification is claimed. No historical sensitive row was rewritten.
+The prior `e8e3a6752c74055f973af3d47a2135bc52ed98b9` Preview checkpoint remains historical evidence for `OWNER_EMAIL` access, ordinary-`STUDENT` denial, admin draft-preview answer access and POST suppression, contest-result safety, diagnostic, Writing, and checked-log safety. Those paths were not rerun on `4a869def...`; no latest-Preview-commit retest is claimed. At that dated Preview checkpoint, Phase 1D-B1 had not yet merged or received the later selected Production verification recorded below. No historical sensitive row was rewritten.
+
+## Phase 1D-B1 Production operational reconciliation (owner-attested 2026-07-27)
+
+This is supplied owner-attested operational evidence, separate from repository tests, local PGlite evidence, and the historical Preview checkpoints above.
+
+- PR #12 merged at `2026-07-26T16:01:29Z`; its merge commit is `954783040c02e3d71f68babb8c00e917409408e1`.
+- The canonical deployment target was Production, the deployment was created after the merge, and it reached `READY`. Provider commit metadata was not reported, so this is not a claim of a direct provider-reported SHA match.
+- Health returned HTTP 200 with `ok=true` and `database=connected`.
+- A missing-Origin submission returned 403; a separate same-origin unauthenticated submission returned 401.
+- `OWNER_EMAIL`-equivalent admin access passed, and ordinary-`STUDENT` admin denial passed. No configured owner email value or account identifier is recorded.
+- One bounded synthetic manual import passed with zero dry-run errors and created one source, one topic, one problem, and one question.
+- The single-problem learner response contained only `submissionId`, `status`, `score`, `total`, and `answers` entries containing `questionId`, `isCorrect`, and fixed generic feedback. It contained no canonical answer, explanation, options, metadata, checker feedback, or synthetic explanation sentinel.
+- All ten owner-attested read-only persisted-shape checks were true: `problemFound`, `problemQuestionCountValid`, `submissionFound`, `parentShapeValid`, `childAnswerCountValid`, `childRelationshipValid`, `incorrectFlagValid`, `childPayloadSafe`, `feedbackExactGeneric`, and `feedbackContainsNoCanonicalMaterial`.
+- Admin preview retained answer access and issued no submission POST.
+- The synthetic problem was archived. Anonymous and ordinary-`STUDENT` access to its archived learner route was unavailable. Owner/admin visibility was privileged administrative visibility, not learner exposure.
+- Contest listing, diagnostic landing, Writing landing, owner-admin access, and ordinary-`STUDENT` denial regressions passed.
+- Production error-log inspection found no relevant runtime error and no sensitive value.
+- Git ended on `main` with tracked state clean before this documentation branch was created.
+
+Production random-practice persistence and upload-first import were not rerun; their operational evidence remains Preview-only. This checkpoint does not establish managed PostgreSQL concurrency, rollback, failover, pooler, duration, or timeout behavior, and it does not establish historical-data cleanup. No deployment ID, infrastructure hostname, credential, connection information, configured owner email value, user ID, submission ID, or synthetic answer value is recorded.
+
+H-11 remains **Partially remediated**, not closed. Public-beta release remains blocked pending the documented Next, PostCSS, Sharp, brace-expansion, and other unresolved dependency remediation. Portable-export encryption/lifecycle, Writing/provider-output retention, account deletion and general retention, historical sensitive-row cleanup, plaintext contest-code hashing, provider deletion/log-retention verification, and existing concurrency, rollback, and data-shaping Test debt remain open. No schema change or migration occurred.
 
 ### Current dependency-advisory snapshot
 
