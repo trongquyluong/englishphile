@@ -1,46 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { QuestionType } from "@prisma/client";
 import { QuestionRootWord } from "@/components/questions/QuestionRootWord";
 import { contestAttemptStatusLabels } from "@/lib/labels";
 import { requireUser } from "@/lib/auth/session";
 import { findContestByIdOrSlug } from "@/lib/contests";
 import { learnerFeedbackForCorrectness } from "@/lib/dto/submission";
+import { toLearnerContestResult } from "@/lib/dto/contest-attempt";
 import { prisma } from "@/lib/prisma";
 
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-type StoredContestResult = {
-  sectionBreakdown?: Array<{ section: string; score: number; total: number; needsReview: number }>;
-  problems?: Array<{
-    problemId: string;
-    title: string;
-    section: string;
-    results: Array<{
-      questionId: string;
-      type?: QuestionType;
-      prompt?: string;
-      rootWord?: string | null;
-      studentAnswer?: unknown;
-      isCorrect: boolean | null;
-    }>;
-  }>;
-  sectionResults?: Array<{
-    sectionId: string;
-    sectionTitle: string;
-    skillType?: string;
-    results: Array<{
-      questionId: string;
-      type?: QuestionType;
-      prompt?: string;
-      rootWord?: string | null;
-      studentAnswer?: unknown;
-      isCorrect: boolean | null;
-    }>;
-  }>;
 };
 
 function answerText(value: unknown) {
@@ -58,7 +28,7 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
   if (!contest || !attemptId) redirect("/contests");
   const attempt = await prisma.contestAttempt.findFirst({ where: { id: attemptId, contestId: contest.id, userId: user.id } });
   if (!attempt) redirect(`/contests/${contest.slug}`);
-  const result = (attempt.answersJson && typeof attempt.answersJson === "object" ? attempt.answersJson : {}) as StoredContestResult;
+  const result = toLearnerContestResult(attempt.answersJson);
 
   return (
     <div className="grid gap-6">
@@ -88,21 +58,21 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
       <section className="surface rounded-2xl p-5">
         <h2 className="text-lg font-semibold">Breakdown theo section</h2>
         <div className="mt-4 grid gap-2">
-          {result.sectionBreakdown?.map((section) => (
+          {result?.sectionBreakdown.map((section) => (
             <div key={section.section} className="grid gap-2 rounded-xl bg-white p-3 text-sm shadow-[var(--shadow-border)] sm:grid-cols-[1fr_auto_auto] sm:items-center">
               <span className="font-semibold">{section.section}</span>
               <span className="tabular-nums text-ink-soft">{section.score}/{section.total}</span>
               <span className="text-ink-soft">{section.needsReview ? `${section.needsReview} cần chấm tay` : "Đã chấm tự động"}</span>
             </div>
           ))}
-          {!result.sectionBreakdown?.length ? <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có breakdown.</p> : null}
+          {!result?.sectionBreakdown.length ? <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có breakdown.</p> : null}
         </div>
       </section>
 
       <section className="surface rounded-2xl p-5">
         <h2 className="text-lg font-semibold">Review câu trả lời</h2>
         <div className="mt-4 grid gap-2">
-          {result.problems?.map((problem) => {
+          {result?.problems.map((problem) => {
             const correct = problem.results.filter((item) => item.isCorrect === true).length;
             const wrong = problem.results.filter((item) => item.isCorrect === false).length;
             const needsReview = problem.results.filter((item) => item.isCorrect === null).length;
@@ -133,10 +103,10 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
               </div>
             );
           })}
-          {!result.problems?.length ? <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có dữ liệu problem.</p> : null}
+          {!result?.problems.length ? <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có dữ liệu problem.</p> : null}
 
           {/* Section-based questions (standalone) */}
-          {result.sectionResults?.map((section) => {
+          {result?.sectionResults.map((section) => {
             const correct = section.results.filter((item) => item.isCorrect === true).length;
             const wrong = section.results.filter((item) => item.isCorrect === false).length;
             const needsReview = section.results.filter((item) => item.isCorrect === null).length;
@@ -167,7 +137,7 @@ export default async function ContestResultPage({ params, searchParams }: PagePr
               </div>
             );
           })}
-          {result.sectionResults?.length && !result.problems?.length ? (
+          {result?.sectionResults.length && !result.problems.length ? (
             <p className="rounded-xl bg-panel-muted p-4 text-sm text-ink-soft">Chưa có dữ liệu.</p>
           ) : null}
         </div>

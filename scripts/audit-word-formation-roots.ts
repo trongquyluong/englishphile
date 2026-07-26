@@ -2,8 +2,9 @@ import "dotenv/config";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { PrismaClient } from "@prisma/client";
+import { classifySafeError } from "@/lib/operations/safe-error";
 
-const prisma = new PrismaClient({ log: ["error"] });
+const prisma = new PrismaClient();
 
 function stringify(value: unknown) {
   return JSON.stringify(value, null, 2);
@@ -28,18 +29,7 @@ async function main() {
     orderBy: [{ problemId: "asc" }, { orderIndex: "asc" }],
   });
 
-  console.log(`Found ${targetQuestions.length} question(s) matching prompt fragment "director's".`);
-  for (const question of targetQuestions) {
-    console.log("\n=== Target prompt match ===");
-    console.log(`Question: ${question.id}`);
-    console.log(`Type: ${question.type}`);
-    console.log(`Skill: ${question.skillType}`);
-    console.log(`Root word: ${question.rootWord ?? "(null)"}`);
-    console.log(`Problem: ${question.problem.title} (${question.problem.slug}, ${question.problem.id})`);
-    console.log(`Status: question=${question.contentStatus}, problem=${question.problem.contentStatus}`);
-    console.log(`Diagnostic eligible: ${question.problem.isDiagnosticEligible}`);
-    console.log(`Prompt: ${question.prompt}`);
-  }
+  console.log(`Found ${targetQuestions.length} matching question record(s).`);
 
   const questions = await prisma.question.findMany({
     where: { type: "WORD_FORMATION" },
@@ -62,41 +52,23 @@ async function main() {
   const report = missingRootWords.map((question) => ({
     questionId: question.id,
     problemId: question.problemId,
-    problemTitle: question.problem.title,
-    problemSlug: question.problem.slug,
     questionContentStatus: question.contentStatus,
     problemContentStatus: question.problem.contentStatus,
     isDiagnosticEligible: question.problem.isDiagnosticEligible,
-    prompt: question.prompt,
-    answer: question.answer,
-    explanation: question.explanation,
   }));
 
   console.log(`Found ${missingRootWords.length} Word Formation question(s) with missing rootWord.`);
-
-  for (const item of report) {
-    console.log("\n---");
-    console.log(`Question: ${item.questionId}`);
-    console.log(`Problem: ${item.problemTitle} (${item.problemSlug}, ${item.problemId})`);
-    console.log(`Status: question=${item.questionContentStatus}, problem=${item.problemContentStatus}`);
-    console.log(`Diagnostic eligible: ${item.isDiagnosticEligible}`);
-    console.log(`Prompt: ${item.prompt}`);
-    console.log(`Answer: ${stringify(item.answer)}`);
-    if (item.explanation) {
-      console.log(`Explanation: ${item.explanation}`);
-    }
-  }
 
   const exportDir = path.resolve(process.cwd(), "exports");
   await fs.mkdir(exportDir, { recursive: true });
   const reportPath = path.join(exportDir, "word-formation-root-audit.json");
   await fs.writeFile(reportPath, stringify(report), "utf8");
-  console.log(`\nWrote report to ${reportPath}`);
+  console.log("\nWrote the minimized audit report to the configured export directory.");
 }
 
 main()
   .catch((error) => {
-    console.error(error);
+    console.error(`Word-formation audit failed (${classifySafeError(error)}).`);
     process.exitCode = 1;
   })
   .finally(async () => {

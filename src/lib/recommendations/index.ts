@@ -1,4 +1,4 @@
-import type { Difficulty, SkillType } from "@prisma/client";
+import type { Difficulty, Prisma, SkillType } from "@prisma/client";
 import { getStudentTopicStats, getStudentWrongQuestionStats } from "@/lib/analytics/student";
 import { skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
@@ -181,8 +181,12 @@ export async function getPersonalizedRecommendations(userId: string, take = 8): 
   return recommendations.sort((left, right) => right.priority - left.priority).slice(0, take);
 }
 
-export async function markRecommendationsCompletedForProblem(userId: string, problemId: string) {
-  await prisma.learningRecommendation.updateMany({
+export async function markRecommendationsCompletedForProblem(
+  userId: string,
+  problemId: string,
+  db: Pick<Prisma.TransactionClient, "learningRecommendation"> = prisma,
+) {
+  await db.learningRecommendation.updateMany({
     where: { userId, problemId, status: "ACTIVE" },
     data: { status: "COMPLETED" },
   });

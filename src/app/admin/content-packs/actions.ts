@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createContentAuditLog } from "@/lib/admin/audit";
+import { contentPackAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import { bulkUpdateProblemStatus } from "@/lib/admin/problems";
 import { requireAdmin } from "@/lib/auth/session";
 import { getContentQaReport } from "@/lib/content-packs/qa";
@@ -29,7 +30,7 @@ export async function archiveContentPackAction(formData: FormData) {
     const before = await tx.contentPack.findUnique({ where: { id: locked.id } });
     if (!before) return false;
     const updated = await tx.contentPack.update({ where: { id: contentPackId }, data: { status: "ARCHIVED" } });
-    await createContentAuditLog({ userId: user.id, entityType: "ContentPack", entityId: contentPackId, action: "ARCHIVED", beforeJson: before, afterJson: updated }, tx);
+    await createContentAuditLog({ userId: user.id, entityType: "ContentPack", entityId: contentPackId, action: "ARCHIVED", ...contentPackAuditSnapshots(before, updated) }, tx);
     return true;
   });
   if (!archived) redirectWith("/admin/content-packs", { ok: false, message: "Tài nguyên không tồn tại hoặc không còn khả dụng." });

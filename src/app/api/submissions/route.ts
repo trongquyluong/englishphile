@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import { checkQuestionAnswer, getProblemStatusFromSubmission, getSubmissionStatus } from "@/lib/answer-checking";
-import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/session";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { prisma } from "@/lib/prisma";
 import { markRecommendationsCompletedForProblem } from "@/lib/recommendations";
-import { toSubmissionResultDTO } from "@/lib/dto/submission";
+import { learnerFeedbackForCorrectness, toSubmissionResultDTO } from "@/lib/dto/submission";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
+import {
+  PracticeSubmissionInputError,
+  MINIMIZED_SUBMISSION_ANSWERS,
+  parseSingleProblemSubmissionBody,
+  readBoundedPracticeRequestBody,
+  requireAnswerKeysBelongToQuestions,
+  requireSupportedQuestionAnswerShapes,
+} from "@/lib/security/submission-input";
 
 function toJson(value: unknown) {
   return value === undefined ? null : JSON.parse(JSON.stringify(value));
@@ -32,26 +40,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Bạn nộp bài quá nhanh. Vui lòng thử lại sau." }, { status: 429 });
   }
 
-  const body = (await request.json()) as {
-    problemId?: string;
-    answers?: Record<string, unknown>;
-  };
-
-  if (!body.problemId) {
-    return NextResponse.json({ error: "Missing problemId" }, { status: 400 });
+  let body: ReturnType<typeof parseSingleProblemSubmissionBody>;
+  try {
+    body = parseSingleProblemSubmissionBody(await readBoundedPracticeRequestBody(request));
+  } catch (error) {
+    if (error instanceof PracticeSubmissionInputError) {
+      return NextResponse.json({ error: "Dữ liệu bài làm không hợp lệ." }, { status: 400 });
+    }
+    throw error;
   }
 
-  const canManageContent = isContentAdminUser(user);
   const questions = await prisma.question.findMany({
     where: {
       problemId: body.problemId,
-      ...(canManageContent ? {} : { contentStatus: "PUBLISHED", problem: { contentStatus: "PUBLISHED" } }),
+      contentStatus: "PUBLISHED",
+      problem: { contentStatus: "PUBLISHED" },
     },
     orderBy: { orderIndex: "asc" },
   });
 
   if (questions.length === 0) {
     return NextResponse.json({ error: "Problem not found" }, { status: 404 });
+  }
+
+  try {
+    requireAnswerKeysBelongToQuestions(body.answers, questions.map((question) => question.id));
+    requireSupportedQuestionAnswerShapes(body.answers, questions);
+  } catch (error) {
+    if (error instanceof PracticeSubmissionInputError) {
+      return NextResponse.json({ error: "Dữ liệu bài làm không hợp lệ." }, { status: 400 });
+    }
+    throw error;
   }
 
   const results = questions.map((question) => {
@@ -69,62 +88,50 @@ export async function POST(request: Request) {
   const status = getSubmissionStatus(results);
   const bestScore = total > 0 ? score / total : null;
 
-  const submission = await prisma.submission.create({
-    data: {
-      userId: user.id,
-      problemId: body.problemId,
-      mode: "SINGLE_PROBLEM",
-      status,
-      score,
-      total,
-      answers: toJson(body.answers ?? {}),
-      submissionAnswers: {
-        create: results.map((result) => ({
-          questionId: result.question.id,
-          studentAnswer: toJson(result.studentAnswer),
-          isCorrect: result.isCorrect,
-          feedback: result.feedback,
-        })),
-      },
-    },
-  });
-
-  const existingStatus = await prisma.userProblemStatus.findUnique({
-    where: {
-      userId_problemId: {
+  const submission = await prisma.$transaction(async (tx) => {
+    const created = await tx.submission.create({
+      data: {
         userId: user.id,
         problemId: body.problemId,
+        mode: "SINGLE_PROBLEM",
+        status,
+        score,
+        total,
+        answers: toJson(MINIMIZED_SUBMISSION_ANSWERS),
+        submissionAnswers: {
+          create: results.map((result) => ({
+            questionId: result.question.id,
+            studentAnswer: toJson(result.studentAnswer),
+            isCorrect: result.isCorrect,
+            feedback: learnerFeedbackForCorrectness(result.isCorrect),
+          })),
+        },
       },
-    },
-  });
+    });
 
-  await prisma.userProblemStatus.upsert({
-    where: {
-      userId_problemId: {
+    const existingStatus = await tx.userProblemStatus.findUnique({
+      where: { userId_problemId: { userId: user.id, problemId: body.problemId } },
+    });
+    await tx.userProblemStatus.upsert({
+      where: { userId_problemId: { userId: user.id, problemId: body.problemId } },
+      create: {
         userId: user.id,
         problemId: body.problemId,
+        status: getProblemStatusFromSubmission(status),
+        bestScore,
+        attempts: 1,
+        lastAttemptAt: new Date(),
       },
-    },
-    create: {
-      userId: user.id,
-      problemId: body.problemId,
-      status: getProblemStatusFromSubmission(status),
-      bestScore,
-      attempts: 1,
-      lastAttemptAt: new Date(),
-    },
-    update: {
-      status: getProblemStatusFromSubmission(status),
-      bestScore:
-        bestScore === null
-          ? existingStatus?.bestScore
-          : Math.max(existingStatus?.bestScore ?? 0, bestScore),
-      attempts: { increment: 1 },
-      lastAttemptAt: new Date(),
-    },
+      update: {
+        status: getProblemStatusFromSubmission(status),
+        bestScore: bestScore === null ? existingStatus?.bestScore : Math.max(existingStatus?.bestScore ?? 0, bestScore),
+        attempts: { increment: 1 },
+        lastAttemptAt: new Date(),
+      },
+    });
+    await markRecommendationsCompletedForProblem(user.id, body.problemId, tx);
+    return created;
   });
-
-  await markRecommendationsCompletedForProblem(user.id, body.problemId);
 
   // Build learner-safe response — correct answers are NOT sent to the client
   const response = toSubmissionResultDTO({

@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { classifySafeError } from "@/lib/operations/safe-error";
 
-const prisma = new PrismaClient({ log: ["error"] });
+const prisma = new PrismaClient();
 
 type RootWordFix = {
   id: string;
@@ -22,7 +23,7 @@ async function main() {
   }
 
   const seenIds = new Set<string>();
-  for (const fix of fixes) {
+  for (const [ordinal, fix] of fixes.entries()) {
     if (seenIds.has(fix.id)) {
       throw new Error(`Duplicate question id in fixes: ${fix.id}`);
     }
@@ -45,19 +46,19 @@ async function main() {
       throw new Error(`Question ${fix.id} is ${question.type}, not WORD_FORMATION.`);
     }
 
-    const updated = await prisma.question.update({
+    await prisma.question.update({
       where: { id: fix.id },
       data: { rootWord },
       select: { id: true, rootWord: true },
     });
 
-    console.log(`Updated ${updated.id}: ${updated.rootWord}`);
+    console.log(`Updated configured Word Formation item ${ordinal + 1}.`);
   }
 }
 
 main()
   .catch((error) => {
-    console.error(error);
+    console.error(`Word-formation repair failed (${classifySafeError(error)}).`);
     process.exitCode = 1;
   })
   .finally(async () => {

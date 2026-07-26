@@ -1,6 +1,7 @@
 import { Prisma, type ContentStatus, type Difficulty, type QuestionType, type SkillType } from "@prisma/client";
 import { questionTypeValues, skillTypeValues, difficultyValues } from "@/lib/import/types";
 import { createContentAuditLog } from "@/lib/admin/audit";
+import { questionAuditSnapshots } from "@/lib/admin/audit-snapshots";
 
 export type AdminResult = {
   ok: boolean;
@@ -124,13 +125,13 @@ export async function updateQuestion(
   const updated = await tx.question.findUnique({ where: { id: payload.id } });
   if (!updated) throw new Error("Updated question disappeared inside the locked transaction.");
 
+  const audit = questionAuditSnapshots(before, updated);
   await createContentAuditLog({
     userId,
     entityType: "Question",
     entityId: payload.id,
     action: "UPDATED",
-    beforeJson: before,
-    afterJson: updated,
+    ...audit,
   }, tx);
 
   return { ok: true, message: "Đã cập nhật câu hỏi." };

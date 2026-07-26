@@ -129,6 +129,20 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     }));
   });
 
+  it("persists only safe mapper output through the actual problem/question audit writers", async () => {
+    const tx = transactionWith();
+    await updateProblemWithQuestions(problemPayload, [questionPayload()], "admin-a");
+    expect(tx.contentAuditLog.create).toHaveBeenCalledTimes(2);
+    const serialized = JSON.stringify(tx.contentAuditLog.create.mock.calls);
+    for (const sentinel of ["must-not-be-audited", "Prompt", "Answer", "Statement"]) {
+      expect(serialized).not.toContain(sentinel);
+    }
+    for (const call of tx.contentAuditLog.create.mock.calls) {
+      expect(call[0].data.afterJson.changedFields).toEqual([...new Set(call[0].data.afterJson.changedFields)]);
+      expect(call[0].data.afterJson.changedFields.length).toBeLessThanOrEqual(32);
+    }
+  });
+
   it("rejects a Problem B question through Problem A before any content mutation", async () => {
     const tx = transactionWith();
     const result = await updateProblemWithQuestions(problemPayload, [questionPayload("question-b")], "admin-a");

@@ -23,19 +23,30 @@ function required(name: string) {
   return value;
 }
 
-export function getAuthSecret() {
-  return readEnv("SESSION_SECRET") ?? readEnv("AUTH_SECRET") ?? "local-development-secret-change-before-deploy";
+export const LOCAL_AUTH_SECRET_FALLBACK = "local-development-secret-change-before-deploy";
+
+type AuthSecretEnvironment = {
+  NODE_ENV?: string;
+  SESSION_SECRET?: string;
+  AUTH_SECRET?: string;
+};
+
+export function resolveAuthSecret(environment: AuthSecretEnvironment) {
+  const configured = environment.SESSION_SECRET?.trim() || environment.AUTH_SECRET?.trim() || null;
+  if (environment.NODE_ENV === "production" && (!configured || configured === LOCAL_AUTH_SECRET_FALLBACK)) {
+    throw new Error("Authentication signing configuration is unavailable.");
+  }
+  return configured ?? LOCAL_AUTH_SECRET_FALLBACK;
+}
+
+export function getAuthSecret(environment: AuthSecretEnvironment = process.env) {
+  return resolveAuthSecret(environment);
 }
 
 export function getServerConfig(): ServerConfig {
   const nodeEnv = process.env.NODE_ENV ?? "development";
   const isProduction = nodeEnv === "production";
   const authSecret = getAuthSecret();
-
-  // Require a real secret in production.
-  if (isProduction && authSecret === "local-development-secret-change-before-deploy") {
-    throw new Error("SESSION_SECRET or AUTH_SECRET must be configured in production.");
-  }
 
   // Require DATABASE_URL everywhere.
   const databaseUrl = required("DATABASE_URL");

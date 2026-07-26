@@ -10,6 +10,7 @@ import {
 } from "@/lib/auth/content-admin-policy";
 import { getAuthSecret } from "@/lib/config";
 import { prisma } from "@/lib/prisma";
+import { decodeCanonicalBase64Url, signaturesMatch } from "@/lib/security/signature";
 
 const SESSION_COOKIE = "englishphile_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
@@ -47,18 +48,21 @@ function encodeSession(payload: SessionPayload) {
 }
 
 function decodeSession(value: string | undefined): SessionPayload | null {
-  if (!value) {
+  if (!value || value.length > 4096) {
     return null;
   }
 
-  const [body, signature] = value.split(".");
+  const parts = value.split(".");
+  if (parts.length !== 2) return null;
+  const [body, signature] = parts;
+  const bodyBytes = body ? decodeCanonicalBase64Url(body, 2048) : null;
 
-  if (!body || !signature || sign(body) !== signature) {
+  if (!body || !bodyBytes || !signature || !signaturesMatch(sign(body), signature)) {
     return null;
   }
 
   try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SessionPayload;
+    const payload = JSON.parse(bodyBytes.toString("utf8")) as SessionPayload;
     if (!payload.userId || payload.expiresAt < Date.now()) {
       return null;
     }

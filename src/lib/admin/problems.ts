@@ -1,5 +1,6 @@
 import { Prisma, type ContentStatus, type Difficulty, type QuestionType, type SkillType } from "@prisma/client";
 import { createContentAuditLog } from "@/lib/admin/audit";
+import { problemAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import { questionPublishErrors, updateQuestion, validateQuestionEditPayload, type AdminResult, type QuestionEditPayload } from "@/lib/admin/questions";
 import { generateSlug } from "@/lib/import/duplicates";
 import { contentStatusOrder, difficultyOrder, skillOrder } from "@/lib/labels";
@@ -152,13 +153,13 @@ async function updateProblem(
     include: { problemTopics: true },
   });
 
+  const audit = problemAuditSnapshots(before, updated);
   await createContentAuditLog({
     userId,
     entityType: "Problem",
     entityId: payload.id,
     action: "UPDATED",
-    beforeJson: before,
-    afterJson: updated,
+    ...audit,
   }, db);
 
   return { ok: true, message: "Đã lưu thay đổi." };

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyAccessCode } from "@/lib/security/access-code";
 import { evaluateAccessGrant } from "@/lib/security/access-grant-decision";
 import type { CleanupOperationResult } from "@/lib/security/cleanup-core";
+import { decodeCanonicalBase64Url, signaturesMatch } from "@/lib/security/signature";
 
 export { constantTimeEquals, verifyAccessCode } from "@/lib/security/access-code";
 
@@ -30,16 +31,16 @@ function verifyGrantToken(token: string): string | null {
   if (parts.length !== 2) return null;
 
   try {
-    const grantId = Buffer.from(parts[0], "base64url").toString("utf8");
+    const grantBytes = decodeCanonicalBase64Url(parts[0], MAX_GRANT_TOKEN_LENGTH);
+    if (!grantBytes) return null;
+    const grantId = grantBytes.toString("utf8");
     if (!grantId) return null;
 
     const expectedSignature = crypto
       .createHmac("sha256", getAuthSecret())
       .update(grantId)
       .digest("base64url");
-    const supplied = Buffer.from(parts[1], "utf8");
-    const expected = Buffer.from(expectedSignature, "utf8");
-    if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) {
+    if (!signaturesMatch(expectedSignature, parts[1])) {
       return null;
     }
     return grantId;

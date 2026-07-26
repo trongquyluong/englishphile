@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { classifySafeError } from "@/lib/operations/safe-error";
 
 const prisma = new PrismaClient();
 
@@ -38,7 +39,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    console.error(`Database statistics failed (${classifySafeError(error)}).`);
     process.exitCode = 1;
   })
   .finally(async () => {

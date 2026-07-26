@@ -59,7 +59,8 @@ export async function POST(request: Request) {
       publishImmediately: body.publishImmediately === true,
       fileName: files.length === 1 ? files[0].fileName : undefined,
     });
-    return NextResponse.json(result, { status: result.summary.validFiles > 0 ? 200 : 422 });
+    const importedAnyFile = result.results.some((file) => file.status === "IMPORTED");
+    return NextResponse.json(result, { status: importedAnyFile ? 200 : 422 });
   } catch (error) {
     if (isContentAdminTransactionAuthorizationError(error)) {
       return NextResponse.json({ error: "Không có quyền truy cập." }, { status: 403 });

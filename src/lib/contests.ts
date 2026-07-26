@@ -1,5 +1,6 @@
 import type { Contest, ContestAttemptStatus, ContestStatus, ContestType, ContestVisibility, Prisma } from "@prisma/client";
 import { checkQuestionAnswer } from "@/lib/answer-checking";
+import { toStoredContestAttemptResult } from "@/lib/dto/contest-attempt";
 import { generateSlug } from "@/lib/import/duplicates";
 import { prisma } from "@/lib/prisma";
 import {
@@ -469,7 +470,7 @@ export async function submitContestAttempt(
         score: scored.score,
         total: scored.total,
         timeSpentSeconds: Math.max(0, Math.round((now.getTime() - attempt.startedAt.getTime()) / 1000)),
-        answersJson: toJson(scored),
+        answersJson: toJson(toStoredContestAttemptResult(scored)),
       },
     });
     return updated.count;

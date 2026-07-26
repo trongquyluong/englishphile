@@ -7,6 +7,7 @@ import {
   MAX_CELL_TEXT_LENGTH,
   MAX_TOTAL_CELLS,
   REQUIRED_SHEET_NAMES,
+  hasValidXlsxSignature,
 } from "@/lib/import/resource-limits";
 
 // ---------------------------------------------------------------------------
@@ -542,6 +543,10 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
   // --- Resource limits guard ---
   if (fileBuffer.byteLength === 0) {
     return { data: null, errors: [{ sheet: "", row: 0, field: "file", message: "File trống." }], warnings: [] };
+  }
+
+  if (!hasValidXlsxSignature(fileBuffer)) {
+    return { data: null, errors: [{ sheet: "", row: 0, field: "file", message: "File không đúng định dạng XLSX." }], warnings: [] };
   }
 
   // Import exceljs dynamically to keep this server-only

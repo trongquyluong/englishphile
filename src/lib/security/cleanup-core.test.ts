@@ -13,6 +13,8 @@ const runSecurityCleanupMock = vi.hoisted(() => vi.fn());
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/security/cleanup", () => ({ runSecurityCleanup: runSecurityCleanupMock }));
 
+import * as cleanupRoute from "@/app/api/cron/security-cleanup/route";
+
 describe("production cron bearer authentication", () => {
   const secret = "cron-secret-case-sensitive";
 
@@ -73,8 +75,7 @@ describe("production cron bearer authentication", () => {
 describe("production cron route method behavior", () => {
   it("rejects HEAD without invoking cleanup", async () => {
     runSecurityCleanupMock.mockClear();
-    const { HEAD } = await import("@/app/api/cron/security-cleanup/route");
-    const response = await HEAD();
+    const response = await cleanupRoute.HEAD();
 
     expect(response.status).toBe(405);
     expect(response.headers.get("allow")).toBe("GET");
@@ -87,8 +88,7 @@ describe("production cron route method behavior", () => {
     "rejects %s without invoking cleanup",
     async (method) => {
       runSecurityCleanupMock.mockClear();
-      const route = await import("@/app/api/cron/security-cleanup/route");
-      const response = await route[method]();
+      const response = await cleanupRoute[method]();
 
       expect(response.status).toBe(405);
       expect(response.headers.get("allow")).toBe("GET");
