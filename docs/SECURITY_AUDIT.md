@@ -1534,3 +1534,57 @@ The production admin problem-preview page calls `requireAdmin`, maps answer-comp
 Active question, problem, topic, source, content-pack, and lifecycle audits remain transaction-coupled but store only identifiers, lifecycle/classification/reviewer fields, relation IDs, timestamps, and a bounded changed-field-name list. Prompt/body text, options, answers, explanations, metadata, and full records are excluded from new broad snapshots. Application Prisma error-event observability now emits only a fixed action/error-class signal, while touched raw-error paths were removed or classified generically; no Prisma message, query, target, or raw error is emitted by that handler. `getAuthSecret()` now rejects missing, empty, or committed fallback secrets in Production; session and contest-grant signature checks require canonical base64url and use a shared unequal-length-safe timing comparison.
 
 No Prisma schema, migration, retention policy, account-deletion policy, encryption format, key management, or historical row changed. Remaining H-11 work includes plaintext portable files, Writing/provider-output retention, general deletion/retention policy, historical rows, plaintext contest codes pending an additive migration, account deletion/anonymization, provider deletion, and separately approved data shaping. Repository runtime/helper tests use pure production helpers or mocked collaborators; static checks remain static and no PostgreSQL integration evidence exists. Preview/Production evidence must be recorded separately if later authorized.
+
+## Phase 1D-B1 Preview operational reconciliation and dependency triage (2026-07-26)
+
+H-11 remains **Partially remediated**, not closed. This section separates owner-attested operational facts from repository and automated-test evidence.
+
+### Owner-attested isolated Preview evidence
+
+PR #12 commit `4a869defacd6b932299bc8e0bc8b83897177cf6a` reached `READY` on the Preview target; Vercel and Vercel Preview Comments checks passed, and the PR remained open and Draft. Earlier manual imports had failed at `problem-nested-create` with `errorClass=database`, `prismaErrorKind=known-request`, and `prismaCode=P2028`. P2028 is a Transaction API error. Raw Prisma message/meta, imported values, connection details, and credentials were not logged. The completed pre-create sequence plus the successful bounded correction support a transaction-timeout diagnosis for the observed path, but do not prove the exact internal P2028 subtype.
+
+The correction applies a 15-second timeout only to the atomic import transaction. It changes no global Prisma timeout, retry behavior, query, write shape, lock order, schema, or migration.
+
+Both latest-commit missing-taxonomy paths passed:
+
+- Manual JSON: `IMPORTED`, source `Phase 1D-B1 Timeout Probe 20260723c`, problem `phase1d-b1-timeout-import-probe-20260723c`, 1 problem, 1 question.
+- Upload-first JSON: `IMPORTED`, source `Phase 1D-B1 Upload Timeout Probe 20260726d`, problem `phase1d-b1-upload-timeout-probe-20260726d`, 1 problem, 1 question.
+
+Single-problem practice returned learner-safe success/wrong-answer shapes and exposed no canonical answer, explanation, raw metadata, options, or checker feedback. All reported isolated-Preview persistence checks were true: `submissionFound`, `parentShapeValid`, `childAnswerCountValid`, `childRelationshipValid`, and `feedbackShapeValid`.
+
+Random practice remained learner-safe and partitioned children by actual problem. All reported checks were true: `randomSubmissionCountValid`, `parentShapesValid`, `childAnswerCountValid`, `oneChildPerSubmission`, `perProblemRelationshipValid`, and `feedbackShapesValid`.
+
+The latest single/random checkpoint used the current owner-equivalent account on its own learner surface. It did not test access to another user's data, and ordinary-`STUDENT` practice behavior was not rerun on commit `4a869defacd6b932299bc8e0bc8b83897177cf6a`. Historical ordinary-`STUDENT` admin denial at `e8e3a6752c74055f973af3d47a2135bc52ed98b9` remains admin-boundary evidence only. No configured owner email value is recorded.
+
+The operations used the Neon branch named `preview`; synthetic source/problem markers were absent from its parent branch named `production`, and no mutation was intentionally performed against that parent. This is narrow branch-isolation evidence, not general Production/provider evidence. The final ten-minute postflight returned `Fetched 0 logs`, with no new import, submission, or random-practice error observed. Direct unauthenticated probes were intercepted by Vercel Deployment Protection; their 401 responses are inconclusive and are not application origin/auth evidence.
+
+The prior `e8e3a6752c74055f973af3d47a2135bc52ed98b9` Preview checkpoint remains historical evidence for `OWNER_EMAIL` access, ordinary-`STUDENT` denial, admin draft-preview answer access and POST suppression, contest-result safety, diagnostic, Writing, and checked-log safety. Those paths were not rerun on `4a869def...`; no latest-commit retest or Phase 1D-B1 Production verification is claimed. No historical sensitive row was rewritten.
+
+### Current dependency-advisory snapshot
+
+Both read-only audits exited 1. The registry result changed without a repository manifest or lockfile edit:
+
+| Scope | Current result |
+| --- | --- |
+| `npm.cmd audit` | 20 top-level vulnerable-package entries; npm metadata summarized them as 1 Moderate, 19 High |
+| `npm.cmd audit --omit=dev` | 13 top-level vulnerable-package entries; npm metadata summarized them as 1 Moderate, 12 High |
+
+These are vulnerable dependency-package entries, not 20 or 13 independent GHSAs. The five advisory-bearing packages and their paths are:
+
+Read-only `npm view next@16.2.12 version dependencies optionalDependencies --json` metadata confirms `postcss: 8.4.31` and optional `sharp: ^0.34.5`. Next-native GHSAs are patched from Next 16.2.11, making Next 16.2.12 a valid patch-level Next-native path, but it does not establish remediation for the independent PostCSS or Sharp advisories.
+
+| Package | Severity | Direct/transitive and path | Production | Reported remediation | Disposition |
+| --- | --- | --- | --- | --- | --- |
+| `next@16.2.10` | High aggregate: 4 High, 5 Moderate GHSAs | Direct production framework; active App Router Server Actions and `next/image` | Yes | Next-native advisories patched from 16.2.11; npm proposes patch-level `next@16.2.12`, outside exact pin | **Release-blocking** for public-beta release |
+| `postcss@8.4.31` under Next; `8.5.16` in build chains | High aggregate: 2 High, 1 Moderate | Transitive; Production `next > postcss`; full scope also Tailwind/Vite | Yes | `GHSA-qx2v-qp2m-jg93` is patched in 8.5.10, `GHSA-6g55-p6wh-862q` in 8.5.12, and `GHSA-r28c-9q8g-f849` in 8.5.18. The aggregate safe floor is therefore `>=8.5.18`; `postcss@8.5.16` remains affected by `GHSA-r28c-9q8g-f849`. Next 16.2.12 still declares 8.4.31, so no compatible remediation was verified. | **Independently release-blocking** |
+| `sharp@0.34.5` | High | Transitive `next > sharp`; `next/image` is used | Yes | Requires `>=0.35.0`; Next 16.2.12 declares `^0.34.5`, excluding 0.35.x, so no compatible remediation was verified | **Independently release-blocking** |
+| `brace-expansion@1.1.15`, `2.1.2`, `5.0.7` | High, two GHSAs | Transitive Production ExcelJS/archiver/glob/minimatch chain; also ESLint in full scope | Yes | 5.0.7 remains affected by the later OOM advisory and requires 5.0.8; npm proposes breaking forced ExcelJS 3.4.0 and major ESLint 10.8.0 | **Unresolved pending more evidence** |
+| `uuid@8.3.2` | Moderate | Transitive `exceljs > uuid`; no direct repository import or affected buffer-API call found | Yes | Patched UUID is `>=11.1.1`; npm proposes breaking forced ExcelJS 3.4.0 | **Separately tracked, non-blocking for PR #12**, but unresolved |
+
+Full-scope vulnerable objects are `@eslint/config-array`, `@eslint/eslintrc`, `archiver`, `archiver-utils`, `brace-expansion`, `eslint`, `eslint-config-next`, `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, `eslint-plugin-react`, `exceljs`, `glob`, `minimatch`, `next`, `postcss`, `readdir-glob`, `rimraf`, `sharp`, `uuid`, and `zip-stream`. Production-scope objects are `archiver`, `archiver-utils`, `brace-expansion`, `exceljs`, `glob`, `minimatch`, `next`, `postcss`, `readdir-glob`, `rimraf`, `sharp`, `uuid`, and `zip-stream`.
+
+Source inspection establishes dependency paths, not non-exploitability. No audit fix, install, upgrade, manifest change, or lockfile change occurred. A separate dependency-remediation phase must test the Next-native patch path, independently test an upstream version, reviewed override, or other compatible resolution for PostCSS and Sharp, and determine a safe ExcelJS-chain strategy. No override is asserted safe in advance.
+
+### Remaining H-11 and Test debt
+
+Open work remains: portable-export encryption and lifecycle, Writing/provider-output retention, account deletion and general retention, historical sensitive-row cleanup, plaintext contest-code hashing, provider deletion/log-retention verification, managed PostgreSQL/pooler/timeout testing, and existing concurrency, rollback, and data-shaping debt. PGlite remains embedded-engine evidence, not managed PostgreSQL, pooler, failover, timeout, or Production evidence.
