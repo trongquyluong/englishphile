@@ -4,7 +4,7 @@ Date: 2026-07-27
 
 ## Executive result
 
-Security Phase 1D-C1 is implemented locally and remains unstaged and uncommitted on branch `security-phase-1d-c1-framework-dependencies`, based on `85af6d43dcfb15bc05689daf74d2e77002dcece7`.
+Security Phase 1D-C1 is committed at `87b239b3709262d9adf9e00ed439c20f4fc14985` on branch `security-phase-1d-c1-framework-dependencies`. Owner-attested PR metadata dated 2026-07-27 records PR #14 as OPEN, Draft, targeting `main`, and pointing to that commit. This documentation reconciliation did not query or mutate GitHub/provider state.
 
 The release-blocking framework paths in this phase are removed:
 
@@ -14,15 +14,23 @@ The release-blocking framework paths in this phase are removed:
 
 Next-only remediation was insufficient. Next 16.2.12 still declares exact `postcss@8.4.31` and optional `sharp@^0.34.5`, neither of which reaches the independent patched floors. This phase therefore makes PostCSS and Sharp explicit production dependencies and applies only a Next-scoped override that references those exact direct specifications.
 
-Public-beta release remains blocked pending Phase 1D-C2 review and remediation of the remaining brace-expansion, ExcelJS, and UUID chains. H-11 remains **Partially remediated**. Preview and Production deployment/verification remain pending and are not claimed.
+Public-beta release remains blocked pending Phase 1D-C2 review and remediation of the remaining brace-expansion, minimatch/glob consumer, ExcelJS/archiver, and UUID chains. H-11 remains **Partially remediated**. Narrow owner-attested isolated Preview evidence is recorded below; Production deployment/verification for this phase remains pending and is not claimed.
 
-## Starting repository state
+## Historical implementation starting state
 
 - Branch: `security-phase-1d-c1-framework-dependencies`
 - HEAD/base: `85af6d43dcfb15bc05689daf74d2e77002dcece7`
 - Tracked worktree: clean
 - Index: clean
 - Protected pre-existing untracked artifacts: `=` and prior `*.patch` review files; none was opened, modified, deleted, staged, or included
+
+## Documentation reconciliation checkpoint
+
+- Branch: `security-phase-1d-c1-framework-dependencies`
+- Full HEAD: `87b239b3709262d9adf9e00ed439c20f4fc14985`
+- Tracked worktree and index before this documentation pass: clean
+- Owner-attested PR #14 state: OPEN, Draft, targeting `main`, source commit `87b239b3709262d9adf9e00ed439c20f4fc14985`
+- Provider lookup or mutation during this pass: none
 
 ## Before inventory
 
@@ -182,7 +190,31 @@ All three existing `next/image` components typechecked and compiled in the succe
 | Isolated PGlite integration tests | Zero run in this phase; eight opt-in integration cases were skipped by the default suite |
 | Dependency runtime probes | One final composite probe passed for Next, PostCSS, Sharp, and Next image optimization |
 | Real managed PostgreSQL tests | Zero |
-| Preview/Production/provider tests | Zero; still pending |
+| Owner-attested isolated Preview observations | `READY`, health/database, home render, HTTP 304 with browser-reported cached WebP representation, visible image/logo render, access boundaries, navigation/regression smoke, and checked-log safety passed for the supplied scope |
+| Production/provider tests performed by this pass | Zero; Production remains pending |
+
+## Owner-attested isolated Preview operational reconciliation (2026-07-27)
+
+This operational evidence was supplied by the owner and is recorded separately from repository inspection, local tests, simulations, static checks, PGlite status, and dependency runtime probes:
+
+- PR #14 Preview source commit: `87b239b3709262d9adf9e00ed439c20f4fc14985`.
+- Owner-attested PR state: OPEN and Draft, targeting `main`, with the expected source commit.
+- Deployment target: Preview.
+- Deployment state: `READY`.
+- Health/database: passed.
+- Home render: passed.
+- The Next image request returned HTTP 304, and the browser reported the cached representation type as WebP. HTTP 304 means the browser successfully revalidated and reused an existing cached representation; visible images and the logo rendered correctly. This was not a fresh HTTP 200 image response. It does not claim that the 304 response body contained image data or that the response included a `Content-Type: image/webp` header; the supplied evidence reported only `304/webp`.
+- `OWNER_EMAIL`-equivalent admin access: passed.
+- Ordinary `STUDENT` admin denial: passed.
+- Public pages and App Router navigation: passed.
+- Practice submission regression: passed.
+- Diagnostic regression: passed.
+- Contest regression: passed.
+- Writing regression: passed.
+- Checked Preview runtime errors: none.
+- Checked sensitive data in logs: none.
+
+The image observation is narrow: it does not establish every image format, platform binary, or cache state, and it is not a claim of direct Sharp or libvips execution in Preview. The health/database observation is operational smoke only; it does not establish managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping behavior. No Production deployment or verification is claimed. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded.
 
 ## Final audit and remaining Phase 1D-C2 work
 
@@ -195,13 +227,13 @@ The remaining audit output is intentionally unchanged by this phase:
 
 Npm proposes breaking forced changes (`eslint@10.8.0` in full scope and `exceljs@3.4.0` for the production chain). Phase 1D-C1 does not accept or implement those proposals. Brace-expansion, UUID, and the ExcelJS chain remain explicitly assigned to Phase 1D-C2.
 
-## Safety and disposition
+## Implementation-pass safety and current disposition
 
 - No `npm audit fix`, `--force`, or `--legacy-peer-deps` command was used.
 - No application behavior, Prisma schema, migration, script, or runtime configuration file changed.
 - No migration, seed, import, export, backup, cleanup, or data rewrite ran.
 - No real database, endpoint, browser, provider, deployment, or environment value was used by the authoritative verification; the initial Prisma dotenv auto-load exception is disclosed above.
-- No file was staged, committed, pushed, deployed, merged, or used to change PR state.
-- Preview and Production compatibility remain pending.
+- The implementation was subsequently committed at `87b239b3709262d9adf9e00ed439c20f4fc14985`. This documentation pass staged, committed, pushed, deployed, or merged nothing and did not change PR state or readiness.
+- Owner-attested isolated Preview verification passed only for the recorded scope; Production verification remains pending.
 - Public beta remains blocked on the actual remaining Phase 1D-C2 dependency findings.
 - H-11 remains **Partially remediated**.
