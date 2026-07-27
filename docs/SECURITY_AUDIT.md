@@ -1613,7 +1613,7 @@ Open work remains: portable-export encryption and lifecycle, Writing/provider-ou
 
 ## Phase 1D-C1 framework dependency remediation addendum (2026-07-27)
 
-The dependency table and audit counts in the preceding Phase 1D-B1 section remain the historical 2026-07-26 pre-remediation snapshot. Phase 1D-C1 is committed at `87b239b3709262d9adf9e00ed439c20f4fc14985` on branch `security-phase-1d-c1-framework-dependencies`. Owner-attested PR metadata dated 2026-07-27 records PR #14 as OPEN, Draft, targeting `main`, and pointing to that commit. This documentation pass did not query or mutate GitHub/provider state.
+The dependency table and audit counts in the preceding Phase 1D-B1 section remain the historical 2026-07-26 pre-remediation snapshot. Phase 1D-C1 was implemented at `87b239b3709262d9adf9e00ed439c20f4fc14985`, received the PR #14 documentation follow-up at `d5d8cfd4b402a31f742bdbaec5b7671c1f47801e`, and merged through PR #14 at `e4483e6e6af0b8b1fad3c70d6ebc017436731cd2` on 2026-07-27 at `01:41:29Z`. Local Git confirms the merge commit; this documentation pass did not query or mutate GitHub/provider state.
 
 The exact dependency resolution is:
 
@@ -1650,20 +1650,37 @@ Final read-only audits correctly exit 1:
 
 No Next, PostCSS, or Sharp object remains in either audit. Remaining results are limited to brace-expansion/minimatch/glob consumers and `exceljs > uuid`. Their advisory IDs are `GHSA-3jxr-9vmj-r5cp`, `GHSA-mh99-v99m-4gvg`, and `GHSA-w5hq-g745-h8pq`. Npm proposes breaking forced ESLint/ExcelJS changes; no audit fix, force option, or C2 dependency change was used. Brace-expansion, the ExcelJS chain, and UUID remain explicitly tracked for Phase 1D-C2.
 
-Evidence classification remains bounded: production runtime/helper tests, simulations/mocked tests, and static checks passed in their stated classes; zero PGlite integration cases ran in this phase; one composite dependency runtime probe passed; and zero real managed PostgreSQL or Production tests ran. The separate owner-attested isolated Preview observations below are operational evidence, not repository tests or managed PostgreSQL evidence. Public-beta release remains blocked pending actual Phase 1D-C2 disposition. H-11 remains **Partially remediated**.
+Evidence classification remains bounded: production runtime/helper tests, simulations/mocked tests, and static checks passed in their stated classes; zero PGlite integration cases ran in this phase; one composite dependency runtime probe passed; and zero real managed PostgreSQL tests ran. The historical owner-attested isolated Preview observations and later selected owner-attested Production observations below are operational evidence, not repository tests or managed PostgreSQL evidence. Public-beta release remains blocked pending actual Phase 1D-C2 disposition. H-11 remains **Partially remediated**.
 
 The complete Phase 1D-C1 dependency graph, lockfile integrity, compatibility review, command outcomes, evidence classification, and safety boundary are recorded in `docs/SECURITY_PHASE_1D_C1_REPORT.md`.
 
-### Owner-attested isolated Preview operational reconciliation (2026-07-27)
+### Historical owner-attested isolated Preview operational reconciliation (2026-07-27)
 
 This supplied operational evidence is separate from repository/local evidence:
 
 - PR #14 source commit `87b239b3709262d9adf9e00ed439c20f4fc14985` reached `READY` on the Preview target.
-- Owner-attested PR state remained OPEN and Draft, targeting `main`, with the expected source commit.
+- At that historical Preview checkpoint, owner-attested PR state remained OPEN and Draft, targeting `main`, with the expected source commit.
 - Health/database and home rendering passed.
 - The Next image request returned HTTP 304, and the browser reported the cached representation type as WebP. HTTP 304 means the browser successfully revalidated and reused an existing cached representation; visible images and the logo rendered correctly. This was not a fresh HTTP 200 image response. It does not claim that the 304 response body contained image data or that the response included a `Content-Type: image/webp` header; the supplied evidence reported only `304/webp`.
 - `OWNER_EMAIL`-equivalent admin access and ordinary-`STUDENT` admin denial passed.
 - Public pages/App Router navigation and practice submission, diagnostic, contest, and Writing regressions passed.
 - The checked Preview runtime window contained no runtime error and no sensitive log data.
 
-This does not claim that every image format, platform binary, or cache state was tested, and it does not claim direct Sharp or libvips execution in Preview. It establishes no managed PostgreSQL, pooler, failover, concurrency, rollback, migration, data-shaping, or Production evidence. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded. PR #14 remains described as OPEN and Draft; release clearance is not claimed. Public beta remains blocked pending actual Phase 1D-C2 disposition, and H-11 remains **Partially remediated**.
+This does not claim that every image format, platform binary, or cache state was tested, and it does not claim direct Sharp or libvips execution in Preview. It establishes no managed PostgreSQL, pooler, failover, concurrency, rollback, migration, data-shaping, or Production evidence. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded. The OPEN/Draft state applies only to that historical Preview checkpoint; PR #14 later merged as recorded above. Release clearance is not claimed.
+
+### Owner-attested selected Production operational reconciliation (2026-07-27)
+
+This supplied Production operational evidence is separate from repository/local evidence and the historical isolated Preview checkpoint:
+
+- Expected merge commit `e4483e6e6af0b8b1fad3c70d6ebc017436731cd2` reached `READY` on the Production target.
+- The deployment was created after the PR #14 merge, and provider-reported commit metadata matched the expected merge commit.
+- Health/database passed. A missing-Origin submission returned HTTP 403, and a same-origin anonymous submission returned HTTP 401.
+- Home rendering passed. A Next image request returned a fresh HTTP GET 200 OK response; visible images and the logo rendered correctly.
+- `OWNER_EMAIL`-equivalent admin access and ordinary-`STUDENT` admin denial passed.
+- Public pages/App Router navigation and practice submission, diagnostic, contest, and Writing regressions passed.
+- The checked Production runtime window contained no runtime error and no sensitive log data.
+- The operational Git checkpoint was branch `main`, with tracked worktree and index clean.
+
+No browser-reported or response `Content-Type` was supplied for the Production image check; no WebP, AVIF, PNG, or other exact format is claimed. The observation does not establish direct Sharp or libvips execution or test every image input, output format, platform binary, cache state, or optimizer branch. The successful build, local synthetic optimizer probe, historical Preview cache revalidation, and Production GET 200 observation remain separate evidence.
+
+These selected Production observations do not test every route and establish no managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping evidence. No import, migration, seed, export, backup, cleanup, historical rewrite, or data rewrite was performed for C1 Production verification. No deployment ID, provider hostname, protected URL, account email, user ID, submission ID, cookie, credential, environment value, request payload, learner answer, problem ID, or internal provider data is recorded. No audit was rerun during this documentation pass. The latest known audits remain 17 entries (1 Moderate/16 High) in full scope and 10 entries (1 Moderate/9 High) in production scope, both exiting 1; Next, PostCSS, and Sharp remain absent. Public beta remains blocked pending actual Phase 1D-C2 disposition, and H-11 remains **Partially remediated**.
