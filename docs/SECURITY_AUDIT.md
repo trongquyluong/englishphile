@@ -1580,13 +1580,13 @@ This is supplied owner-attested operational evidence, separate from repository t
 
 Production random-practice persistence and upload-first import were not rerun; their operational evidence remains Preview-only. This checkpoint does not establish managed PostgreSQL concurrency, rollback, failover, pooler, duration, or timeout behavior, and it does not establish historical-data cleanup. No deployment ID, infrastructure hostname, credential, connection information, configured owner email value, user ID, submission ID, or synthetic answer value is recorded.
 
-H-11 remains **Partially remediated**, not closed. Public-beta release remains blocked pending the documented Next, PostCSS, Sharp, brace-expansion, and other unresolved dependency remediation. Portable-export encryption/lifecycle, Writing/provider-output retention, account deletion and general retention, historical sensitive-row cleanup, plaintext contest-code hashing, provider deletion/log-retention verification, and existing concurrency, rollback, and data-shaping Test debt remain open. No schema change or migration occurred.
+At this historical Phase 1D-B1 checkpoint, H-11 remained **Partially remediated**, not closed. Public-beta release was blocked by the then-current Next, PostCSS, Sharp, brace-expansion, and other unresolved dependency findings. Portable-export encryption/lifecycle, Writing/provider-output retention, account deletion and general retention, historical sensitive-row cleanup, plaintext contest-code hashing, provider deletion/log-retention verification, and existing concurrency, rollback, and data-shaping Test debt remained open. No schema change or migration occurred.
 
-### Current dependency-advisory snapshot
+### Historical pre-C1 dependency-advisory snapshot (2026-07-26)
 
-Both read-only audits exited 1. The registry result changed without a repository manifest or lockfile edit:
+Both read-only audits exited 1. At that checkpoint, the registry result had changed without a repository manifest or lockfile edit:
 
-| Scope | Current result |
+| Scope | Historical result |
 | --- | --- |
 | `npm.cmd audit` | 20 top-level vulnerable-package entries; npm metadata summarized them as 1 Moderate, 19 High |
 | `npm.cmd audit --omit=dev` | 13 top-level vulnerable-package entries; npm metadata summarized them as 1 Moderate, 12 High |
@@ -1610,3 +1610,60 @@ Source inspection establishes dependency paths, not non-exploitability. No audit
 ### Remaining H-11 and Test debt
 
 Open work remains: portable-export encryption and lifecycle, Writing/provider-output retention, account deletion and general retention, historical sensitive-row cleanup, plaintext contest-code hashing, provider deletion/log-retention verification, managed PostgreSQL/pooler/timeout testing, and existing concurrency, rollback, and data-shaping debt. PGlite remains embedded-engine evidence, not managed PostgreSQL, pooler, failover, timeout, or Production evidence.
+
+## Phase 1D-C1 framework dependency remediation addendum (2026-07-27)
+
+The dependency table and audit counts in the preceding Phase 1D-B1 section remain the historical 2026-07-26 pre-remediation snapshot. Phase 1D-C1 is committed at `87b239b3709262d9adf9e00ed439c20f4fc14985` on branch `security-phase-1d-c1-framework-dependencies`. Owner-attested PR metadata dated 2026-07-27 records PR #14 as OPEN, Draft, targeting `main`, and pointing to that commit. This documentation pass did not query or mutate GitHub/provider state.
+
+The exact dependency resolution is:
+
+- direct `next@16.2.10` → exact `next@16.2.12`;
+- nested `next > postcss@8.4.31` plus shared build-chain `postcss@8.5.16` → one exact `postcss@8.5.18`;
+- optional transitive `next > sharp@0.34.5` → one exact direct/runtime `sharp@0.35.0` with libvips 8.18.3; and
+- a Next-scoped override references the exact direct PostCSS and Sharp specifications via `$postcss` and `$sharp`.
+
+This is not a claim that Next alone fixes PostCSS or Sharp. Next 16.2.12 continues to declare exact PostCSS 8.4.31 and optional Sharp `^0.34.5`. The reviewed resolution makes PostCSS and Sharp explicit production controls. Tailwind PostCSS accepts `^8.5.15` and Vite accepts `^8.5.16`, so both naturally deduplicate to PostCSS 8.5.18 without an override. Next uses compatible public PostCSS 8 APIs. Although Sharp 0.35.0 is a breaking pre-1.0 release, Next's image optimizer uses retained APIs and does not use the removed 0.35 interfaces.
+
+Current primary metadata retains the same patched floors:
+
+| Package/advisories | Severity | Patched floor | Phase 1D-C1 result |
+| --- | --- | --- | --- |
+| Next: `GHSA-6gpp-xcg3-4w24`, `GHSA-m99w-x7hq-7vfj`, `GHSA-89xv-2m56-2m9x`, `GHSA-p9j2-gv94-2wf4` | High | 16.2.11 for 16.2.x | Removed by 16.2.12 |
+| Next: `GHSA-68g3-v927-f742`, `GHSA-4633-3j49-mh5q`, `GHSA-4c39-4ccg-62r3`, `GHSA-q8wf-6r8g-63ch`, `GHSA-955p-x3mx-jcvp` | Moderate | 16.2.11 for 16.2.x | Removed by 16.2.12 |
+| PostCSS: `GHSA-qx2v-qp2m-jg93` | Moderate | 8.5.10 | Removed by 8.5.18 |
+| PostCSS: `GHSA-6g55-p6wh-862q` | High | 8.5.12 | Removed by 8.5.18 |
+| PostCSS: `GHSA-r28c-9q8g-f849` | High | 8.5.18 | Removed by 8.5.18 |
+| Sharp: `GHSA-f88m-g3jw-g9cj` | High | 0.35.0 | Removed by 0.35.0 |
+
+Normal installation and `npm ls next postcss sharp --all` exit 0 without peer, invalid-tree, deduplication, optional-binary, or platform warnings. Registry integrity is preserved. No unrelated package version changed.
+
+Dependency runtime evidence uses only synthetic input: Next 16.2.12 loads; PostCSS 8.5.18 performs a plugin transformation and removes a synthetic traversal `sourceMappingURL` rather than loading a synthetic map outside the `from` directory; Sharp 0.35.0 reads 2×2 in-memory metadata and resizes/encodes a 1×1 PNG; and Next's production image optimizer successfully processes that PNG. The temporary directory was removed. Typecheck and the Next 16.2.12/Turbopack production build pass, including all three tracked `next/image` components.
+
+Verification passed for Prisma validate/generate, typecheck, lint, 15 focused files/141 tests, the complete 41-file suite with 459 passed and 8 opt-in PGlite integration cases skipped, and the 63-page Next build. Standard dotenv files were held by pathname without opening them for the authoritative runs, explicit synthetic configuration was supplied, and no real database connection was attempted. Two build-time database operations failed at configuration validation and emitted only the fixed generic error classification.
+
+Final read-only audits correctly exit 1:
+
+| Scope | Post-Phase-1D-C1 result |
+| --- | --- |
+| `npm.cmd audit` | 17 vulnerable-package entries; 1 Moderate, 16 High |
+| `npm.cmd audit --omit=dev` | 10 vulnerable-package entries; 1 Moderate, 9 High |
+
+No Next, PostCSS, or Sharp object remains in either audit. Remaining results are limited to brace-expansion/minimatch/glob consumers and `exceljs > uuid`. Their advisory IDs are `GHSA-3jxr-9vmj-r5cp`, `GHSA-mh99-v99m-4gvg`, and `GHSA-w5hq-g745-h8pq`. Npm proposes breaking forced ESLint/ExcelJS changes; no audit fix, force option, or C2 dependency change was used. Brace-expansion, the ExcelJS chain, and UUID remain explicitly tracked for Phase 1D-C2.
+
+Evidence classification remains bounded: production runtime/helper tests, simulations/mocked tests, and static checks passed in their stated classes; zero PGlite integration cases ran in this phase; one composite dependency runtime probe passed; and zero real managed PostgreSQL or Production tests ran. The separate owner-attested isolated Preview observations below are operational evidence, not repository tests or managed PostgreSQL evidence. Public-beta release remains blocked pending actual Phase 1D-C2 disposition. H-11 remains **Partially remediated**.
+
+The complete Phase 1D-C1 dependency graph, lockfile integrity, compatibility review, command outcomes, evidence classification, and safety boundary are recorded in `docs/SECURITY_PHASE_1D_C1_REPORT.md`.
+
+### Owner-attested isolated Preview operational reconciliation (2026-07-27)
+
+This supplied operational evidence is separate from repository/local evidence:
+
+- PR #14 source commit `87b239b3709262d9adf9e00ed439c20f4fc14985` reached `READY` on the Preview target.
+- Owner-attested PR state remained OPEN and Draft, targeting `main`, with the expected source commit.
+- Health/database and home rendering passed.
+- The Next image request returned HTTP 304, and the browser reported the cached representation type as WebP. HTTP 304 means the browser successfully revalidated and reused an existing cached representation; visible images and the logo rendered correctly. This was not a fresh HTTP 200 image response. It does not claim that the 304 response body contained image data or that the response included a `Content-Type: image/webp` header; the supplied evidence reported only `304/webp`.
+- `OWNER_EMAIL`-equivalent admin access and ordinary-`STUDENT` admin denial passed.
+- Public pages/App Router navigation and practice submission, diagnostic, contest, and Writing regressions passed.
+- The checked Preview runtime window contained no runtime error and no sensitive log data.
+
+This does not claim that every image format, platform binary, or cache state was tested, and it does not claim direct Sharp or libvips execution in Preview. It establishes no managed PostgreSQL, pooler, failover, concurrency, rollback, migration, data-shaping, or Production evidence. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded. PR #14 remains described as OPEN and Draft; release clearance is not claimed. Public beta remains blocked pending actual Phase 1D-C2 disposition, and H-11 remains **Partially remediated**.
