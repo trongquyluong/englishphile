@@ -1679,7 +1679,23 @@ Prisma validate/generate, typecheck, lint, 6 focused files/52 tests, the complet
 
 Phase 1D-C2 clears the dependency-advisory condition for public beta but does not grant blanket release clearance for unrelated gates. H-11 remains **Partially remediated**. The complete evidence and lockfile explanation are in `docs/SECURITY_PHASE_1D_C2_REPORT.md`.
 
-### Historical owner-attested isolated Preview operational reconciliation (2026-07-27)
+### Phase 1D-C2 Preview operational reconciliation (owner-attested 2026-07-27)
+
+The C2 dependency implementation is commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`; the formula-validation UI correction that followed is commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main` during the supplied Preview verification. It has not merged, and C2 Production functional verification has not occurred.
+
+The initial dependency Preview passed Vercel and Vercel Preview Comments. A generated valid XLSX reached the actual application contest parser running on Preview and rendered title `Phase 1D-C2 Preview XLSX Probe`, one section, and one question. ExcelJS externalization worked, no optional S3-module resolution failure appeared, no contest draft was created, and the checked runtime log window returned no logs.
+
+Before the correction, a formula-bearing XLSX posted to `/api/admin/contests-import/parse` received HTTP 200 with `application/json`, but the page reached the generic App Router error UI without a corresponding checked server-log error. Local reproduction established that the parser correctly returned `{ data: null, errors: [...], warnings: [] }`; the old client incorrectly created preview state for that result, and preview JSX dereferenced `state.data.info` while `data` was `null`.
+
+Commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5` adds a dedicated validation state, structural response decoding, bounded fixed Vietnamese formula feedback, no draft action during validation, generic fail-closed handling for malformed or unexpected responses, continued formula/shared-formula rejection, bounded formula-error output, and valid retry/recovery behavior. Repository tests use the application-source transition helper and view, but not a fully mounted browser.
+
+At the correction Preview checkpoint, both remote checks succeeded with zero failing or pending checks. A formula-bearing XLSX rendered “File Excel chưa hợp lệ — không thể tạo contest draft.” plus fixed Vietnamese guidance to convert formulas to static values. Raw formula content and the generic App Router error page were absent; draft creation was unavailable while validation failed; the upload UI remained available; and a later valid XLSX recovered to the normal preview with the draft button restored. No contest draft was created, and the checked Preview runtime-error and sensitive-data log checks were clear.
+
+Authentication/session material exposed during investigation was treated as compromised. The affected old Preview deployment was deleted, Preview signing material was rotated, Production used separate rotated signing material, and Production was redeployed after rotation with a passing health check. No protected value or operational identifier is recorded. These containment actions are not application-code evidence and do not constitute C2 Production functional verification.
+
+This operational evidence is owner-attested and separate from repository/local verification. No browser automation, ordinary-`STUDENT` C2 retest, contest persistence, every-path ExcelJS/ZIP/Sharp/platform/cache/provider check, or managed PostgreSQL evidence is claimed. PR #16 remains Draft, Production verification remains pending, the development-only `brace-expansion@1.1.15` package entry representing two GHSAs remains open, and H-11 remains **Partially remediated**. Clearing the production dependency-advisory gate does not grant blanket public-beta or release clearance.
+
+### Historical Phase 1D-C1 owner-attested isolated Preview operational reconciliation (2026-07-27)
 
 This supplied operational evidence is separate from repository/local evidence:
 
@@ -1693,7 +1709,7 @@ This supplied operational evidence is separate from repository/local evidence:
 
 This does not claim that every image format, platform binary, or cache state was tested, and it does not claim direct Sharp or libvips execution in Preview. It establishes no managed PostgreSQL, pooler, failover, concurrency, rollback, migration, data-shaping, or Production evidence. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded. The OPEN/Draft state applies only to that historical Preview checkpoint; PR #14 later merged as recorded above. Release clearance is not claimed.
 
-### Owner-attested selected Production operational reconciliation (2026-07-27)
+### Phase 1D-C1 owner-attested selected Production operational reconciliation (2026-07-27)
 
 This supplied Production operational evidence is separate from repository/local evidence and the historical isolated Preview checkpoint:
 

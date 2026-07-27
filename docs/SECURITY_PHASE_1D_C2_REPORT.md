@@ -12,6 +12,8 @@ Real ExcelJS round-trip testing exposed an existing adapter defect: ExcelJS retu
 
 Phase 1D-C2 clears the dependency-advisory condition for public beta. It does not grant a blanket release approval for unrelated findings or operational gates. H-11 remains **Partially remediated**; this phase does not close or expand H-11.
 
+The repository chronology is explicit: the Phase 1D-C2 dependency implementation is commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`, followed by the formula-validation UI correction in commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. During the supplied Preview verification, PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main`. Production functional verification and merge have not occurred.
+
 ## Starting checkpoint and safety boundary
 
 - Branch: `security-phase-1d-c2-transitive-dependencies`
@@ -234,7 +236,7 @@ ESLint/config/plugins (development only)
 
 Focused verification covers 6 files and 52 tests after the real formula-cell case was added:
 
-- **Runtime production-boundary:** admin route rejects unauthorized callers before file access/parser invocation; rejects an oversized file before parsing; rejects an invalid signature; and returns/logs no raw dependency error.
+- **Application runtime boundary:** admin route rejects unauthorized callers before file access/parser invocation; rejects an oversized file before parsing; rejects an invalid signature; and returns/logs no raw dependency error.
 - **Helper/runtime:** a real ExcelJS-generated contest workbook round-trips through `parseExcelContest`; a malformed ZIP-signature workbook is rejected; a real ExcelJS formula object is rejected rather than trusting its cached result.
 - **Helper/runtime:** ExcelJS conditional-formatting serialization/deserialization creates a UUID-backed x14 identifier through `uuid@11.1.1`.
 - **Helper/runtime:** ExcelJS’s streaming workbook writer generates a ZIP through retained Archiver/ZipStream parents and the result loads successfully.
@@ -289,9 +291,9 @@ This is a precise non-production disposition, not a claim that the vulnerable co
 
 ## Formula-validation UI correction continuation
 
-This narrowly scoped continuation began on `security-phase-1d-c2-transitive-dependencies` at full HEAD `7e582904c392a743dc8a0e62c5d18f4d494efd19`. The tracked worktree and repository index were clean. The unrelated untracked `=`, `--json`, and existing review patches were inventoried by filename only and were not read, modified, deleted, staged, or included. PR #16 provider state was not queried or changed; this work preserves its supplied OPEN/Draft state by non-interaction.
+This narrowly scoped continuation began on `security-phase-1d-c2-transitive-dependencies` at full HEAD `7e582904c392a743dc8a0e62c5d18f4d494efd19`. The tracked worktree and repository index were clean. The unrelated untracked `=`, `--json`, and existing review patches were inventoried by filename only and were not read, modified, deleted, staged, or included. The correction is recorded in commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`.
 
-The supplied historical Preview evidence established that a valid synthetic XLSX rendered its preview and a formula-bearing parse returned HTTP 200/application-json without checked server errors, but the page reached the App Router error UI. Local runtime reproduction against the actual production import page established the exact cause:
+The supplied historical Preview evidence established that a valid synthetic XLSX rendered its preview and a formula-bearing parse returned HTTP 200/application-json without checked server errors, but the page reached the App Router error UI. Local runtime reproduction against the actual application import-page source established the exact cause:
 
 1. `parseExcelContest()` correctly returned `{ data: null, errors: [...], warnings: [] }` for a formula cell.
 2. `POST /api/admin/contests-import/parse` correctly serialized that expected validation result with HTTP 200.
@@ -304,9 +306,9 @@ Formula and shared-formula rejection remains fail-closed. Parser formula errors 
 
 Runtime evidence uses only generated synthetic workbooks:
 
-- **Production parser/helper runtime:** valid XLSX succeeds; ordinary and shared-formula cells fail; a many-formula workbook returns at most 21 formula records; source ArrayBuffer bytes remain unchanged; formula text is absent.
-- **Production Route Handler runtime:** the actual exported `POST` with the real parser returns a valid preview contract for an authorized workbook and a bounded `{ data: null, errors, warnings: [] }` contract for formula validation. Authorization, origin, and rate-limit collaborators are mocked; the contest-persistence action remains uncalled. Recursive response checks exclude stack/cause/raw-error/provider/path/connection fields and synthetic formula/unrelated-content sentinels.
-- **Production UI/component runtime:** the real production file-selection transition posts a FormData file to the mocked parse endpoint; the actual production view renders bounded Vietnamese validation without throwing or containing the App Router error text; draft creation is absent and the persistence action is uncalled. A subsequent valid response recovers to the normal preview. Unexpected fetch failure remains generic and fail-closed.
+- **Application parser/helper runtime:** valid XLSX succeeds; ordinary and shared-formula cells fail; a many-formula workbook returns at most 21 formula records; source ArrayBuffer bytes remain unchanged; formula text is absent.
+- **Repository Route Handler runtime:** the actual exported `POST` with the real parser returns a valid preview contract for an authorized workbook and a bounded `{ data: null, errors, warnings: [] }` contract for formula validation. This is repository runtime evidence, not deployed Production evidence. Authorization, origin, and rate-limit collaborators are mocked; the contest-persistence action remains uncalled. Recursive response checks exclude stack/cause/raw-error/provider/path/connection fields and synthetic formula/unrelated-content sentinels.
+- **Application-source UI/component runtime:** the real application-source file-selection transition posts a FormData file to the mocked parse endpoint; the actual application-source view renders bounded Vietnamese validation without throwing or containing the App Router error text; draft creation is absent and the persistence action is uncalled. A subsequent valid response recovers to the normal preview. Unexpected fetch failure remains generic and fail-closed.
 - **Existing static checks:** existing parser resource-limit/formula source assertions still pass but remain classified as static checks, not runtime proof.
 - **Database integration:** zero PGlite or real PostgreSQL cases ran; no database behavior changed.
 
@@ -341,6 +343,45 @@ Continuation changed-file inventory:
 
 No schema, migration, seed, dependency, lockfile, test timeout, provider state, real infrastructure, or persisted contest changed.
 
+## Preview operational reconciliation
+
+The following observations are owner-attested operational evidence and are separate from the repository tests and local command evidence above.
+
+### Initial dependency Preview
+
+- Vercel and Vercel Preview Comments passed.
+- A generated valid XLSX reached the actual application contest parser running on Preview and rendered the normal preview with title `Phase 1D-C2 Preview XLSX Probe`, one section, and one question.
+- ExcelJS externalization worked on Preview, and the checked runtime window showed neither an optional S3-module resolution failure nor any runtime log entry.
+- No contest draft was created.
+
+### Historical formula failure before the correction
+
+- A formula-bearing XLSX was posted to `/api/admin/contests-import/parse`.
+- The API returned HTTP 200 with `application/json`, but the page reached the generic App Router error UI.
+- The checked server-log window contained no corresponding runtime error.
+- This was the pre-correction behavior that led to the local root-cause investigation. It is not the current disposition.
+
+### Local correction evidence
+
+The actual application parser exercised locally correctly returned `{ data: null, errors: [...], warnings: [] }`. The old client converted any non-empty `errors` result into preview state, after which preview JSX dereferenced `state.data.info` while `data` was `null`. Commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5` added a dedicated validation state, structural response decoding, bounded fixed Vietnamese formula guidance, fail-closed handling for malformed or unexpected responses, no draft action during validation, continued formula/shared-formula rejection, bounded formula-error output, and valid retry/recovery behavior. Its application-source transition-helper and view test is runtime component evidence, but not a fully mounted browser test.
+
+### Correction Preview
+
+- PR #16 head was `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`; the supplied state was OPEN, Draft, MERGEABLE, and targeting `main`.
+- Vercel and Vercel Preview Comments succeeded, with zero failing and zero pending checks.
+- A formula-bearing XLSX rendered the in-page alert “File Excel chưa hợp lệ — không thể tạo contest draft.” and fixed Vietnamese guidance to convert formulas to static values.
+- Raw formula content and the generic App Router error page were absent. The draft-creation action was absent while validation failed, while the upload control remained available.
+- Uploading a valid XLSX afterward recovered to the normal preview, and the “Tạo contest draft” button returned.
+- No contest draft was created. The checked Preview runtime-error window and sensitive-data log check were both clear.
+
+### Operational credential-response boundary
+
+Authentication/session material exposed during investigation was treated as compromised. The affected old Preview deployment was deleted, the Preview signing credential was rotated, Production used a separate rotated signing credential, and Production was redeployed after rotation with a passing health check. No protected value or operational identifier is recorded here. These containment actions are not application-code test evidence and do not establish C2 Production functional verification.
+
+### Still-pending Production boundary
+
+PR #16 remains OPEN and Draft. It has not merged, and Phase 1D-C2 has not received Production functional verification. The rotation-related Production health check is not a C2 spreadsheet, dependency-path, authorization, persistence, or release verification.
+
 ## Public-beta and H-11 disposition
 
 All production dependency advisories are remediated, so Phase 1D-C2 no longer blocks public beta on the dependency-advisory condition. This report does not clear unrelated product, operational, privacy, or security gates.
@@ -365,9 +406,12 @@ No Prisma schema, migration, Next/PostCSS/Sharp version, ESLint Config Next vers
 
 ## Evidence limitations
 
-- No real provider, endpoint, browser, database, deployment, or runtime log was accessed.
-- No managed PostgreSQL, PGlite, pooler, failover, concurrency, rollback, or Production evidence was created.
+- The repository implementation and local correction did not access a real provider, endpoint, browser, database, deployment, or runtime log. The Preview observations above are separately supplied owner-attested operational evidence; no browser automation is claimed.
+- Ordinary-`STUDENT` authorization was not retested for C2. No persistence behavior is claimed because no contest draft was created.
+- No managed PostgreSQL, PGlite, pooler, failover, concurrency, rollback, or C2 Production functional evidence was created.
 - Archive generation/extraction beyond XLSX is synthetic compatibility evidence because Englishphile has no active standalone archive route.
 - The UUID test exercises ExcelJS’s real conditional-formatting path, but Englishphile’s contest parser does not create security-sensitive UUIDs.
 - Post-load worksheet/row/cell caps do not bound decompression before ExcelJS load; the administrator-only route’s 2 MiB compressed-file cap is the pre-load bound.
 - npm 11’s six pre-existing optional WASM “extraneous” artifacts remain disclosed above.
+- The supplied Preview checks do not establish every ExcelJS, ZIP, Sharp, platform, cache, managed PostgreSQL, or provider path.
+- Clearing C2’s production dependency-advisory gate is not blanket public-beta or release clearance. H-11 remains **Partially remediated**.
