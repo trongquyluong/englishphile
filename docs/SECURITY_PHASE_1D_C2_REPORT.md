@@ -287,6 +287,60 @@ This is a precise non-production disposition, not a claim that the vulnerable co
 - minimum future remediation: upstream ESLint/config/plugin consumers must leave Minimatch 3, or brace-expansion must publish a compatible line that addresses both advisories. A global brace-expansion 5 override is not acceptable because it was proven API-incompatible;
 - public-beta effect: this development-only finding does not block the dependency gate.
 
+## Formula-validation UI correction continuation
+
+This narrowly scoped continuation began on `security-phase-1d-c2-transitive-dependencies` at full HEAD `7e582904c392a743dc8a0e62c5d18f4d494efd19`. The tracked worktree and repository index were clean. The unrelated untracked `=`, `--json`, and existing review patches were inventoried by filename only and were not read, modified, deleted, staged, or included. PR #16 provider state was not queried or changed; this work preserves its supplied OPEN/Draft state by non-interaction.
+
+The supplied historical Preview evidence established that a valid synthetic XLSX rendered its preview and a formula-bearing parse returned HTTP 200/application-json without checked server errors, but the page reached the App Router error UI. Local runtime reproduction against the actual production import page established the exact cause:
+
+1. `parseExcelContest()` correctly returned `{ data: null, errors: [...], warnings: [] }` for a formula cell.
+2. `POST /api/admin/contests-import/parse` correctly serialized that expected validation result with HTTP 200.
+3. `handleFileChange()` in `src/app/admin/contests-builder/import/page.tsx` treated every non-empty `errors` result as `{ status: "preview", data: json.data, ... }`.
+4. The production preview JSX immediately evaluated `state.data.info.title`; because `data` was `null`, React threw `Cannot read properties of null (reading 'info')`, reaching the App Router error boundary.
+
+The correction introduces a dedicated `validation` state. The response decoder requires structurally valid arrays, permits preview only when `errors` is empty and `data` has the render-required shape, normalizes formula feedback to a fixed Vietnamese message, caps rendered issues at 20, and maps malformed/unexpected responses to a generic fail-closed error. Validation UI contains no draft-creation action and keeps the upload control available for correction/retry. A subsequent valid response transitions normally to preview. The draft action also catches unexpected failures and returns generic UI feedback.
+
+Formula and shared-formula rejection remains fail-closed. Parser formula errors now include `code: "FORMULA_NOT_ALLOWED"` and a fixed message that does not interpolate the formula. Parser output is bounded to the first 20 formula locations plus one generic overflow record. The parser also rejects a ZIP container with no end-of-central-directory record before invoking ExcelJS. That stricter precheck resolved a repeatable normal-suite timeout on the existing 10-byte `PK`-header-only fixture without increasing a timeout or weakening a test.
+
+Runtime evidence uses only generated synthetic workbooks:
+
+- **Production parser/helper runtime:** valid XLSX succeeds; ordinary and shared-formula cells fail; a many-formula workbook returns at most 21 formula records; source ArrayBuffer bytes remain unchanged; formula text is absent.
+- **Production Route Handler runtime:** the actual exported `POST` with the real parser returns a valid preview contract for an authorized workbook and a bounded `{ data: null, errors, warnings: [] }` contract for formula validation. Authorization, origin, and rate-limit collaborators are mocked; the contest-persistence action remains uncalled. Recursive response checks exclude stack/cause/raw-error/provider/path/connection fields and synthetic formula/unrelated-content sentinels.
+- **Production UI/component runtime:** the real production file-selection transition posts a FormData file to the mocked parse endpoint; the actual production view renders bounded Vietnamese validation without throwing or containing the App Router error text; draft creation is absent and the persistence action is uncalled. A subsequent valid response recovers to the normal preview. Unexpected fetch failure remains generic and fail-closed.
+- **Existing static checks:** existing parser resource-limit/formula source assertions still pass but remain classified as static checks, not runtime proof.
+- **Database integration:** zero PGlite or real PostgreSQL cases ran; no database behavior changed.
+
+Verification for the continuation:
+
+| Command | Result |
+| --- | --- |
+| `npx.cmd prisma validate` | Exit 0 |
+| `npx.cmd prisma generate` | Exit 0 |
+| `npm.cmd run typecheck` | Exit 0 |
+| `npm.cmd run lint` | Exit 0 |
+| Focused parser/route/UI set | Exit 0; 6 files, 36 passed |
+| First two pre-precheck `npm.cmd test` runs | Exit 1; the same existing 10-byte pseudo-XLSX test timed out at 5 seconds while 478 passed and 8 skipped |
+| First post-precheck `npm.cmd test` | Exit 0; 46 files, 479 passed, 8 skipped |
+| Second post-precheck `npm.cmd test` | Exit 0; 46 files, 479 passed, 8 skipped |
+| Synthetic unreachable-database build | Exit 0; 63 routes/pages |
+| `npm.cmd audit` | Exit 1; one High development-only brace-expansion package entry, two GHSAs |
+| `npm.cmd audit --omit=dev` | Exit 0; zero vulnerabilities |
+| `git diff --check` and `git diff --cached --check` | Exit 0 |
+
+Continuation changed-file inventory:
+
+- `src/app/admin/contests-builder/import/page.tsx`
+- `src/app/admin/contests-builder/import/page.test.tsx`
+- `src/app/api/admin/contests-import/parse/route.formula-runtime.test.ts`
+- `src/lib/import/excel-contest-parser.ts`
+- `src/lib/import/excel-contest-formula-runtime.test.ts`
+- `src/lib/import/test-fixtures/synthetic-contest-workbook.ts`
+- `docs/SECURITY_PHASE_1D_C2_REPORT.md`
+- `handoff.md`
+- `englishphile-phase1d-c2-formula-ui-correction-review.patch` (review artifact only; excluded from itself)
+
+No schema, migration, seed, dependency, lockfile, test timeout, provider state, real infrastructure, or persisted contest changed.
+
 ## Public-beta and H-11 disposition
 
 All production dependency advisories are remediated, so Phase 1D-C2 no longer blocks public beta on the dependency-advisory condition. This report does not clear unrelated product, operational, privacy, or security gates.
@@ -317,4 +371,3 @@ No Prisma schema, migration, Next/PostCSS/Sharp version, ESLint Config Next vers
 - The UUID test exercises ExcelJS’s real conditional-formatting path, but Englishphile’s contest parser does not create security-sensitive UUIDs.
 - Post-load worksheet/row/cell caps do not bound decompression before ExcelJS load; the administrator-only route’s 2 MiB compressed-file cap is the pre-load bound.
 - npm 11’s six pre-existing optional WASM “extraneous” artifacts remain disclosed above.
-

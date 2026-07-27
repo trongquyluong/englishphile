@@ -69,6 +69,7 @@ export interface ParseError {
   row: number;
   field: string;
   message: string;
+  code?: "FORMULA_NOT_ALLOWED";
 }
 
 export interface ParseWarning {
@@ -149,14 +150,6 @@ function parseFloatSafe(value: unknown): number | null {
 // Formula cell detection
 // ---------------------------------------------------------------------------
 
-interface ExcelCell {
-  v?: unknown;  // cached value
-  w?: string;   // formatted text
-  f?: string;   // formula (present only for formula cells)
-  formula?: string;
-  sharedFormula?: string;
-}
-
 function hasFormula(cell: unknown): boolean {
   if (typeof cell === "object" && cell !== null) {
     const obj = cell as Record<string, unknown>;
@@ -165,6 +158,26 @@ function hasFormula(cell: unknown): boolean {
       || (typeof obj.formula === "string" && obj.formula.length > 0)
       || (typeof obj.sharedFormula === "string" && obj.sharedFormula.length > 0)
     );
+  }
+  return false;
+}
+
+function hasZipEndOfCentralDirectory(fileBuffer: ArrayBuffer): boolean {
+  const bytes = new Uint8Array(fileBuffer);
+  const minimumRecordLength = 22;
+  if (bytes.length < minimumRecordLength) return false;
+
+  const maximumCommentLength = 0xffff;
+  const searchStart = Math.max(0, bytes.length - minimumRecordLength - maximumCommentLength);
+  for (let index = bytes.length - minimumRecordLength; index >= searchStart; index--) {
+    if (
+      bytes[index] === 0x50
+      && bytes[index + 1] === 0x4b
+      && bytes[index + 2] === 0x05
+      && bytes[index + 3] === 0x06
+    ) {
+      return true;
+    }
   }
   return false;
 }
@@ -522,13 +535,12 @@ function sheetToStringArray(
 
     // Check if this is a formula cell
     if (hasFormula(cell)) {
-      const formulaCell = cell as ExcelCell;
-      const formula = formulaCell.f ?? formulaCell.formula ?? formulaCell.sharedFormula ?? "";
       formulaErrors.push({
         sheet: sheetName,
         row: rowIndex,
         field: `${colLetter}${rowIndex}`,
-        message: `Sheet "${sheetName}" ô ${colLetter}${rowIndex} chứa công thức Excel (=${formula.slice(0, 50)}${formula.length > 50 ? "..." : ""}). Không chấp nhận công thức.`,
+        code: "FORMULA_NOT_ALLOWED",
+        message: `Ô ${colLetter}${rowIndex} trong sheet "${sheetName}" chứa công thức Excel. Không chấp nhận công thức. Hãy chuyển thành giá trị tĩnh rồi upload lại.`,
       });
       cells.push("");
       continue;
@@ -553,6 +565,9 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
   }
 
   if (!hasValidXlsxSignature(fileBuffer)) {
+    return { data: null, errors: [{ sheet: "", row: 0, field: "file", message: "File không đúng định dạng XLSX." }], warnings: [] };
+  }
+  if (!hasZipEndOfCentralDirectory(fileBuffer)) {
     return { data: null, errors: [{ sheet: "", row: 0, field: "file", message: "File không đúng định dạng XLSX." }], warnings: [] };
   }
 
@@ -595,18 +610,25 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
   const contestInfoRows: string[][] = [];
   const sectionsRows: string[][] = [];
   const questionsRows: string[][] = [];
-  const allFormulaErrors: Array<{ sheet: string; row: number; field: string; message: string }> = [];
+  const maxFormulaErrors = 20;
+  const allFormulaErrors: ParseError[] = [];
+  let formulaErrorCount = 0;
+  const collectFormulaErrors = (errors: ParseError[]) => {
+    formulaErrorCount += errors.length;
+    const remaining = maxFormulaErrors - allFormulaErrors.length;
+    if (remaining > 0) allFormulaErrors.push(...errors.slice(0, remaining));
+  };
 
   // Process Contest_Info sheet
   if (contestInfoSheet) {
     const header = sheetToStringArray(contestInfoSheet.getRow(1).values as Record<string, unknown>, 4, "Contest_Info", 1);
     contestInfoRows.push(header.cells);
-    allFormulaErrors.push(...header.formulaErrors);
+    collectFormulaErrors(header.formulaErrors);
     const infoRowCount = Math.min(contestInfoSheet.rowCount, MAX_ROWS_PER_SHEET);
     for (let i = 2; i <= infoRowCount; i++) {
       const result = sheetToStringArray(contestInfoSheet.getRow(i).values as Record<string, unknown>, 4, "Contest_Info", i);
       contestInfoRows.push(result.cells);
-      allFormulaErrors.push(...result.formulaErrors);
+      collectFormulaErrors(result.formulaErrors);
     }
   }
 
@@ -614,7 +636,7 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
   if (sectionsSheet) {
     const header = sheetToStringArray(sectionsSheet.getRow(1).values as Record<string, unknown>, 13, "Sections", 1);
     sectionsRows.push(header.cells);
-    allFormulaErrors.push(...header.formulaErrors);
+    collectFormulaErrors(header.formulaErrors);
     const sectionRowCount = Math.min(sectionsSheet.rowCount, MAX_ROWS_PER_SHEET);
     let totalSections = 0;
     for (let i = 2; i <= sectionRowCount; i++) {
@@ -629,7 +651,7 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
         };
       }
       sectionsRows.push(result.cells);
-      allFormulaErrors.push(...result.formulaErrors);
+      collectFormulaErrors(result.formulaErrors);
     }
   }
 
@@ -637,7 +659,7 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
   if (questionsSheet) {
     const header = sheetToStringArray(questionsSheet.getRow(1).values as Record<string, unknown>, 15, "Questions", 1);
     questionsRows.push(header.cells);
-    allFormulaErrors.push(...header.formulaErrors);
+    collectFormulaErrors(header.formulaErrors);
     const questionRowCount = Math.min(questionsSheet.rowCount, MAX_ROWS_PER_SHEET);
     let totalQuestions = 0;
     let totalCells = 0;
@@ -671,7 +693,7 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
         };
       }
       questionsRows.push(result.cells);
-      allFormulaErrors.push(...result.formulaErrors);
+      collectFormulaErrors(result.formulaErrors);
     }
   }
 
@@ -689,7 +711,16 @@ export async function parseExcelContest(fileBuffer: ArrayBuffer): Promise<ParseR
   if (allFormulaErrors.length > 0) {
     return {
       data: null,
-      errors: allFormulaErrors,
+      errors: [
+        ...allFormulaErrors,
+        ...(formulaErrorCount > maxFormulaErrors ? [{
+          sheet: "",
+          row: 0,
+          field: "formula",
+          code: "FORMULA_NOT_ALLOWED" as const,
+          message: "File còn chứa thêm công thức Excel. Hãy chuyển tất cả công thức thành giá trị tĩnh rồi upload lại.",
+        }] : []),
+      ],
       warnings: [],
     };
   }
