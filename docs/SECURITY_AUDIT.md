@@ -1654,6 +1654,31 @@ Evidence classification remains bounded: production runtime/helper tests, simula
 
 The complete Phase 1D-C1 dependency graph, lockfile integrity, compatibility review, command outcomes, evidence classification, and safety boundary are recorded in `docs/SECURITY_PHASE_1D_C1_REPORT.md`.
 
+## Phase 1D-C2 transitive dependency remediation addendum (2026-07-27)
+
+Phase 1D-C2 started on `security-phase-1d-c2-transitive-dependencies` at full HEAD `0cae690f1a66ea2089bc7de847bc27ee023bb461`, with a clean tracked worktree and index. It did not access Preview, Production, a browser, a provider, a deployed endpoint, or a real database.
+
+The original post-C1 full audit exited 1 with 17 propagated vulnerable-package entries (1 Moderate/16 High); production scope exited 1 with 10 entries (1 Moderate/9 High). These represented three unique advisories: the brace-expansion CPU and memory denial-of-service advisories `GHSA-3jxr-9vmj-r5cp` and `GHSA-mh99-v99m-4gvg`, plus the UUID external-buffer advisory `GHSA-w5hq-g745-h8pq`.
+
+The selected resolution retains `exceljs@4.4.0`, `archiver@5.3.2`, and `zip-stream@4.1.1`. Scoped overrides resolve ExcelJS to `unzipper@0.12.5` and `uuid@11.1.1`, resolve `readdir-glob@3.0.0`, resolve each Archiver Utils consumer to `glob@13.0.6`, and resolve brace-expansion 5.0.8 only below Minimatch 10.2.5. A global brace-expansion 5 override was rejected after Minimatch 3 failed against its changed CommonJS API. An Archiver 7 candidate was rejected after ExcelJS streaming output failed at runtime. No direct dependency, Next, PostCSS, Sharp, or ESLint Config Next version changed.
+
+The production contest spreadsheet route is admin/owner-only, same-origin checked, rate-limited to 10 parses per administrator per hour, `.xlsx`-only, capped at 2 MiB before parsing, signature-checked, and bounded after load by worksheet/row/question/cell limits. The route never accepts a learner-controlled Glob/Minimatch pattern. ExcelJS uses UUID v4 without an external buffer for conditional-formatting identifiers, not for authorization or credentials. There is no active standalone archive route.
+
+Real-workbook testing found and corrected the parser’s ExcelJS adapter: numeric `row.values` and `{ formula, result }`/shared-formula objects are now handled, and formula cells are rejected. ExcelJS is externalized from the Next server bundle because the independently reproduced Turbopack build followed Unzipper’s unused optional S3 `require`; native server loading avoids adding an unused AWS SDK.
+
+Final audit results are:
+
+| Scope | Result |
+| --- | --- |
+| `npm.cmd audit` | Exit 1; one High vulnerable-package entry (`brace-expansion@1.1.15`), two advisory records |
+| `npm.cmd audit --omit=dev` | Exit 0; zero vulnerabilities |
+
+The remaining instance is reachable only through ESLint/config/plugin development paths using Minimatch 3. It is absent from production installation, not imported by application code, and receives no network-request pattern. Its residual risk is local/CI denial of service if a developer/operator or compromised workflow supplies a crafted lint pattern. It remains open pending a compatible upstream ESLint consumer update; it does not block the production dependency gate.
+
+Prisma validate/generate, typecheck, lint, 6 focused files/52 tests, the complete 43-file suite with 470 passed and 8 skipped, and a synthetic unreachable-database production build pass. The focused evidence includes real workbook parsing, malformed and formula workbook rejection, route authorization and file bounds, UUID-backed ExcelJS conditional formatting, ExcelJS streaming ZIP generation, synthetic archive extraction, a bounded subprocess brace probe, and mocked import transaction behavior. Zero PGlite or real PostgreSQL integration tests ran.
+
+Phase 1D-C2 clears the dependency-advisory condition for public beta but does not grant blanket release clearance for unrelated gates. H-11 remains **Partially remediated**. The complete evidence and lockfile explanation are in `docs/SECURITY_PHASE_1D_C2_REPORT.md`.
+
 ### Historical owner-attested isolated Preview operational reconciliation (2026-07-27)
 
 This supplied operational evidence is separate from repository/local evidence:

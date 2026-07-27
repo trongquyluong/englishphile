@@ -153,12 +153,18 @@ interface ExcelCell {
   v?: unknown;  // cached value
   w?: string;   // formatted text
   f?: string;   // formula (present only for formula cells)
+  formula?: string;
+  sharedFormula?: string;
 }
 
 function hasFormula(cell: unknown): boolean {
   if (typeof cell === "object" && cell !== null) {
     const obj = cell as Record<string, unknown>;
-    return typeof obj.f === "string" && obj.f.length > 0;
+    return (
+      (typeof obj.f === "string" && obj.f.length > 0)
+      || (typeof obj.formula === "string" && obj.formula.length > 0)
+      || (typeof obj.sharedFormula === "string" && obj.sharedFormula.length > 0)
+    );
   }
   return false;
 }
@@ -507,7 +513,7 @@ function sheetToStringArray(
 
   for (let i = 0; i < colCount; i++) {
     const colLetter = String.fromCharCode(65 + i); // A, B, C, ...
-    const cell = row[colLetter];
+    const cell = row[colLetter] ?? row[i + 1];
 
     if (!cell) {
       cells.push("");
@@ -516,7 +522,8 @@ function sheetToStringArray(
 
     // Check if this is a formula cell
     if (hasFormula(cell)) {
-      const formula = (cell as ExcelCell).f ?? "";
+      const formulaCell = cell as ExcelCell;
+      const formula = formulaCell.f ?? formulaCell.formula ?? formulaCell.sharedFormula ?? "";
       formulaErrors.push({
         sheet: sheetName,
         row: rowIndex,
@@ -530,7 +537,7 @@ function sheetToStringArray(
     // Extract value from non-formula cells
     if (typeof cell === "object" && cell !== null) {
       const obj = cell as Record<string, unknown>;
-      cells.push(String(obj.w ?? obj.v ?? "").trim());
+      cells.push(String(obj.w ?? obj.v ?? obj.text ?? "").trim());
     } else {
       cells.push(String(cell).trim());
     }
