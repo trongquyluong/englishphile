@@ -4,7 +4,7 @@ Date: 2026-07-27
 
 ## Executive result
 
-Security Phase 1D-C1 is committed at `87b239b3709262d9adf9e00ed439c20f4fc14985` on branch `security-phase-1d-c1-framework-dependencies`. Owner-attested PR metadata dated 2026-07-27 records PR #14 as OPEN, Draft, targeting `main`, and pointing to that commit. This documentation reconciliation did not query or mutate GitHub/provider state.
+Security Phase 1D-C1 was implemented at `87b239b3709262d9adf9e00ed439c20f4fc14985`, received the PR #14 documentation follow-up at `d5d8cfd4b402a31f742bdbaec5b7671c1f47801e`, and merged through PR #14 at `e4483e6e6af0b8b1fad3c70d6ebc017436731cd2` on 2026-07-27 at `01:41:29Z`. Local Git confirms that the current HEAD is the PR #14 merge commit. This documentation reconciliation did not query or mutate GitHub/provider state.
 
 The release-blocking framework paths in this phase are removed:
 
@@ -14,7 +14,7 @@ The release-blocking framework paths in this phase are removed:
 
 Next-only remediation was insufficient. Next 16.2.12 still declares exact `postcss@8.4.31` and optional `sharp@^0.34.5`, neither of which reaches the independent patched floors. This phase therefore makes PostCSS and Sharp explicit production dependencies and applies only a Next-scoped override that references those exact direct specifications.
 
-Public-beta release remains blocked pending Phase 1D-C2 review and remediation of the remaining brace-expansion, minimatch/glob consumer, ExcelJS/archiver, and UUID chains. H-11 remains **Partially remediated**. Narrow owner-attested isolated Preview evidence is recorded below; Production deployment/verification for this phase remains pending and is not claimed.
+Public-beta release remains blocked pending Phase 1D-C2 review and remediation of the remaining brace-expansion, minimatch/glob consumer, ExcelJS/archiver, and UUID chains. H-11 remains **Partially remediated**. Historical owner-attested isolated Preview evidence and later selected owner-attested Production operational evidence are recorded separately below.
 
 ## Historical implementation starting state
 
@@ -24,13 +24,22 @@ Public-beta release remains blocked pending Phase 1D-C2 review and remediation o
 - Index: clean
 - Protected pre-existing untracked artifacts: `=` and prior `*.patch` review files; none was opened, modified, deleted, staged, or included
 
-## Documentation reconciliation checkpoint
+## Historical Preview documentation reconciliation checkpoint
 
 - Branch: `security-phase-1d-c1-framework-dependencies`
 - Full HEAD: `87b239b3709262d9adf9e00ed439c20f4fc14985`
 - Tracked worktree and index before this documentation pass: clean
-- Owner-attested PR #14 state: OPEN, Draft, targeting `main`, source commit `87b239b3709262d9adf9e00ed439c20f4fc14985`
+- At that historical Preview checkpoint, owner-attested PR #14 state: OPEN, Draft, targeting `main`, source commit `87b239b3709262d9adf9e00ed439c20f4fc14985`
 - Provider lookup or mutation during this pass: none
+
+## Production documentation reconciliation checkpoint
+
+- Branch: `docs/phase1d-c1-production-verification`
+- Full HEAD/base: `e4483e6e6af0b8b1fad3c70d6ebc017436731cd2`
+- Local Git subject: `Merge pull request #14 from trongquyluong/security-phase-1d-c1-framework-dependencies`
+- The implementation and documentation follow-up commits are ancestors of this merge commit
+- Tracked worktree and index before this documentation pass: clean
+- Provider, deployment, endpoint, browser, database, or environment access during this pass: none
 
 ## Before inventory
 
@@ -190,15 +199,15 @@ All three existing `next/image` components typechecked and compiled in the succe
 | Isolated PGlite integration tests | Zero run in this phase; eight opt-in integration cases were skipped by the default suite |
 | Dependency runtime probes | One final composite probe passed for Next, PostCSS, Sharp, and Next image optimization |
 | Real managed PostgreSQL tests | Zero |
-| Owner-attested isolated Preview observations | `READY`, health/database, home render, HTTP 304 with browser-reported cached WebP representation, visible image/logo render, access boundaries, navigation/regression smoke, and checked-log safety passed for the supplied scope |
-| Production/provider tests performed by this pass | Zero; Production remains pending |
+| Historical owner-attested isolated Preview observations | `READY`, health/database, home render, HTTP 304 with browser-reported cached WebP representation, visible image/logo render, access boundaries, navigation/regression smoke, and checked-log safety passed for the supplied scope |
+| Owner-attested selected Production observations | Post-merge `READY`, provider-reported merge-commit match, health/database, submission boundaries, home/image render, access boundaries, navigation/regression smoke, and checked-log safety passed for the supplied scope |
 
-## Owner-attested isolated Preview operational reconciliation (2026-07-27)
+## Historical owner-attested isolated Preview operational reconciliation (2026-07-27)
 
 This operational evidence was supplied by the owner and is recorded separately from repository inspection, local tests, simulations, static checks, PGlite status, and dependency runtime probes:
 
 - PR #14 Preview source commit: `87b239b3709262d9adf9e00ed439c20f4fc14985`.
-- Owner-attested PR state: OPEN and Draft, targeting `main`, with the expected source commit.
+- At that historical Preview checkpoint, owner-attested PR state: OPEN and Draft, targeting `main`, with the expected source commit.
 - Deployment target: Preview.
 - Deployment state: `READY`.
 - Health/database: passed.
@@ -214,7 +223,35 @@ This operational evidence was supplied by the owner and is recorded separately f
 - Checked Preview runtime errors: none.
 - Checked sensitive data in logs: none.
 
-The image observation is narrow: it does not establish every image format, platform binary, or cache state, and it is not a claim of direct Sharp or libvips execution in Preview. The health/database observation is operational smoke only; it does not establish managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping behavior. No Production deployment or verification is claimed. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded.
+The Preview image observation is narrow: it does not establish every image format, platform binary, or cache state, and it is not a claim of direct Sharp or libvips execution. The Preview health/database observation is operational smoke only; it does not establish managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping behavior. This historical Preview checkpoint is not Production evidence. No deployment ID, hostname, account email, cookie, credential, request payload, problem ID, submission ID, or protected URL is recorded.
+
+## Owner-attested selected Production operational reconciliation (2026-07-27)
+
+This supplied Production operational evidence is separate from repository/local verification and the historical isolated Preview checkpoint:
+
+- Expected merge commit: `e4483e6e6af0b8b1fad3c70d6ebc017436731cd2`.
+- Deployment target: Production.
+- Deployment state: `READY`.
+- The deployment was created after the PR #14 merge, and provider-reported commit metadata matched the expected merge commit.
+- Health/database: passed.
+- Missing-Origin submission boundary: HTTP 403.
+- Same-origin anonymous submission boundary: HTTP 401.
+- Home render: passed.
+- A Next image request returned a fresh HTTP GET 200 OK response; visible images and the logo rendered correctly.
+- `OWNER_EMAIL`-equivalent admin access: passed.
+- Ordinary `STUDENT` admin denial: passed.
+- Public pages and App Router navigation: passed.
+- Practice submission regression: passed.
+- Diagnostic regression: passed.
+- Contest regression: passed.
+- Writing regression: passed.
+- Checked Production runtime errors: none.
+- Checked sensitive data in logs: none.
+- Operational Git checkpoint: branch `main`, with tracked worktree and index clean.
+
+No browser-reported or response `Content-Type` was supplied for the Production image check, so no WebP, AVIF, PNG, or other exact response format is claimed. The GET 200 observation does not establish direct Sharp or libvips invocation or test every image input, output format, platform binary, cache state, or optimizer branch. The successful build, local synthetic optimizer probe, historical Preview cache-revalidation observation, and Production GET 200 observation are four separate pieces of evidence.
+
+The selected Production observations do not establish every route, managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping behavior. No import, migration, seed, export, backup, cleanup, historical rewrite, or data rewrite was performed for C1 Production verification. No deployment ID, provider hostname, protected URL, account email, user ID, submission ID, cookie, credential, environment value, request payload, learner answer, problem ID, or internal provider data is recorded.
 
 ## Final audit and remaining Phase 1D-C2 work
 
@@ -233,7 +270,8 @@ Npm proposes breaking forced changes (`eslint@10.8.0` in full scope and `exceljs
 - No application behavior, Prisma schema, migration, script, or runtime configuration file changed.
 - No migration, seed, import, export, backup, cleanup, or data rewrite ran.
 - No real database, endpoint, browser, provider, deployment, or environment value was used by the authoritative verification; the initial Prisma dotenv auto-load exception is disclosed above.
-- The implementation was subsequently committed at `87b239b3709262d9adf9e00ed439c20f4fc14985`. This documentation pass staged, committed, pushed, deployed, or merged nothing and did not change PR state or readiness.
-- Owner-attested isolated Preview verification passed only for the recorded scope; Production verification remains pending.
+- The implementation commit, documentation follow-up, and PR #14 merge chronology are recorded above. This documentation pass staged, committed, pushed, deployed, or merged nothing and did not change PR state.
+- Historical owner-attested isolated Preview evidence and later selected owner-attested Production evidence passed only for their separately recorded scopes.
+- No audit was rerun during this documentation pass.
 - Public beta remains blocked on the actual remaining Phase 1D-C2 dependency findings.
 - H-11 remains **Partially remediated**.
