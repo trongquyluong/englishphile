@@ -23,7 +23,14 @@ const writingSlotStore: WritingSlotStore = {
         "expires_at"
       )
       VALUES (${userId}, ${quotaKey}::date, ${slotNumber}, ${expiresAt})
-      ON CONFLICT ("userId", "quota_date", "slot_number") DO NOTHING
+      ON CONFLICT ("userId", "quota_date", "slot_number") DO UPDATE
+      SET
+        "status" = 'PENDING',
+        "provider_started_at" = NULL,
+        "completed_at" = NULL,
+        "failure_code" = NULL,
+        "expires_at" = EXCLUDED."expires_at"
+      WHERE "WritingQuotaReservation"."status" = 'FAILED'
       RETURNING "id"
     `;
     return rows[0] ?? null;
@@ -45,54 +52,33 @@ export async function markProviderStarted(reservationId: string, userId: string)
       data: { providerStartedAt: new Date() },
     });
     return result.count === 1;
-  } catch (error) {
-    console.error(
-      "[writing-quota] Provider-start persistence error:",
-      error instanceof Error ? error.name : "unknown",
-    );
+  } catch {
+    console.error("[writing-quota]", { event: "provider-start-persistence-failure" });
     return false;
   }
 }
 
-export type WritingFailureCode =
-  | "NOT_CONFIGURED"
-  | "PROVIDER_RATE_LIMITED"
-  | "CONTENT_BLOCKED"
-  | "INVALID_RESPONSE"
-  | "NETWORK_ERROR"
-  | "PROVIDER_ERROR"
-  | "PERSISTENCE_OR_UNEXPECTED_ERROR"
-  | "STATE_UPDATE_INCOMPLETE";
-
 /**
- * A provider-started attempt always consumes its slot. If this update fails,
- * providerStartedAt remains set on PENDING and cleanup keeps it non-reclaimable.
+ * Release only the exact provider-started reservation while it is still
+ * PENDING. A successful submission changes the row to COMPLETED atomically
+ * before this delete can match, so completed learner slots are never reopened.
  */
-export async function failWritingReservation(
+export async function releaseProviderStartedWritingReservation(
   reservationId: string,
   userId: string,
-  failureCode: WritingFailureCode,
 ): Promise<boolean> {
   try {
-    const result = await prisma.writingQuotaReservation.updateMany({
+    const result = await prisma.writingQuotaReservation.deleteMany({
       where: {
         id: reservationId,
         userId,
         status: "PENDING",
         providerStartedAt: { not: null },
       },
-      data: {
-        status: "FAILED",
-        completedAt: new Date(),
-        failureCode,
-      },
     });
     return result.count === 1;
-  } catch (error) {
-    console.error(
-      "[writing-quota] Failure-state persistence error:",
-      error instanceof Error ? error.name : "unknown",
-    );
+  } catch {
+    console.error("[writing-quota]", { event: "provider-started-release-failure" });
     return false;
   }
 }
@@ -111,11 +97,8 @@ export async function cancelWritingReservation(
       },
     });
     return result.count === 1;
-  } catch (error) {
-    console.error(
-      "[writing-quota] Cancellation infrastructure error:",
-      error instanceof Error ? error.name : "unknown",
-    );
+  } catch {
+    console.error("[writing-quota]", { event: "unstarted-cancellation-failure" });
     return false;
   }
 }
@@ -175,6 +158,7 @@ export async function getWritingQuotaStatus(
     FROM "WritingQuotaReservation"
     WHERE "userId" = ${userId}
       AND "quota_date" = ${quotaKey}::date
+      AND "status" IN ('PENDING', 'COMPLETED')
   `;
   const occupied = rows[0]?.occupied ?? 0;
 

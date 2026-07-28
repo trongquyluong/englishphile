@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { toLearnerWritingGradeResult } from "@/lib/dto/writing-grade";
 import {
+  isWritingReviewTimestamp,
   targetWordCountValues,
   WRITING_GRADER_MAX_ESSAY_CHARS,
   type TargetWordCount,
@@ -30,6 +31,7 @@ export async function getLatestWritingReview(
       essayText: true,
       targetWordCount: true,
       resultJson: true,
+      createdAt: true,
     },
   });
 
@@ -43,10 +45,13 @@ export async function getLatestWritingReview(
 
   const result = toLearnerWritingGradeResult(submission.resultJson);
   if (!result) return null;
+  const reviewTimestamp = submission.createdAt.getTime();
+  if (!isWritingReviewTimestamp(reviewTimestamp)) return null;
 
   return {
     essayText: submission.essayText,
     targetWordCount: submission.targetWordCount as TargetWordCount,
     result,
+    reviewTimestamp,
   };
 }

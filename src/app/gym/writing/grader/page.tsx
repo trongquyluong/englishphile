@@ -6,6 +6,7 @@ import { isWritingGraderEnabled } from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getWritingPromptBySlug } from "@/lib/writing-prompts";
 import { getWritingQuotaStatus } from "@/lib/security/writing-quota";
+import { deriveWritingDraftKey } from "@/lib/security/writing-draft-key";
 import { getLatestWritingReview } from "@/lib/writing-review";
 
 export const metadata: Metadata = {
@@ -87,11 +88,15 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
           </section>
 
           <WritingGraderForm
+            key={promptData.slug}
             enabled={enabled}
             isAuthenticated={Boolean(user)}
             prompt={promptData}
             quota={usage}
             initialReview={initialReview}
+            draftKey={
+              user ? deriveWritingDraftKey(user.id, promptData.slug) : null
+            }
           />
         </>
       )}

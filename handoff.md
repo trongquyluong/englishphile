@@ -15,43 +15,77 @@ Prepare Englishphile for public beta while preserving the current product direct
 ## Current Progress
 
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
-AI directly with the reviewed `@cf/qwen/qwen3-30b-a3b-fp8` model. The server
-requires a Cloudflare account ID and narrowly scoped API token, does not use AI
-Gateway, requests JSON Schema output, and still validates every provider result
-with the application Zod schema before persistence. The provider remains
-disabled when credentials, the reviewed model, or the bounded global quota are
-invalid.
+AI directly. A narrow Production hotfix changes the only reviewed model from
+`@cf/qwen/qwen3-30b-a3b-fp8` to
+`@cf/meta/llama-3.1-8b-instruct-fast`; every other configured model fails
+closed. The server requires a Cloudflare account ID and narrowly scoped API
+token, does not use AI Gateway, requests JSON Schema output with an exact
+2,000-token cap, and independently validates and bounds every provider result
+with Zod before persistence.
 
-Writing quota is now two provider-started attempts per learner per UTC day.
-Immediately before the provider boundary, the route also atomically reserves a
-site-wide UTC-day allowance. The site cap defaults to 15 and accepts only
-integer values from 1 through 100. Missing quota infrastructure fails closed;
-an unstarted learner reservation is released and the provider is not called.
-The existing short-term learner/global burst limits remain in place. Learner
-pages use provider-neutral product language. Provider and data-processing
-details are consolidated in Privacy and Terms.
+The hotfix follows an owner-observed Production `INVALID_RESPONSE`. The
+provider call started, the previous provider-started learner-slot policy reduced
+the allowance from 2 to 1, and no `WritingSubmission` was persisted. Raw
+provider output was intentionally not retained, so the exact malformed field,
+envelope subtype, or truncation subtype cannot be claimed.
 
-Local verification for this change passes Prisma generation, typecheck, lint,
-17 focused quota/review/page/API/disclosure tests, the complete 52-file suite
-with 506 passed and 8 opt-in PGlite cases skipped, and the production build with
-an explicit unreachable synthetic database target. Production dependency audit
-exits 0; the full audit retains only the documented development-only
-brace-expansion/ESLint finding.
+Writing learner quota now means two successfully persisted grades per UTC day.
+A failed provider-started request releases only its exact still-`PENDING`
+learner reservation when no successful submission transaction committed. The
+site-wide UTC-day allowance remains provider-attempt based and is never
+refunded. The site cap defaults to 15 and accepts only integers from 1 through
+100; Production is owner-configured separately at 100 and Preview at 15.
+Existing six-per-learner/ten-minute and global short-window limits remain.
+Recoverable failures save only a bounded essay/target/timestamp/version draft
+in `sessionStorage`, keyed by a server-derived opaque user-and-prompt HMAC, and
+expire it within 24 hours. A successful persisted grade clears that draft.
+Learner pages remain provider-neutral.
+
+Legacy/current `FAILED` quota rows are excluded from successful-grade usage and
+are atomically reusable through the same unique slot key; `PENDING` and
+`COMPLETED` rows remain occupied and cannot be recycled. No Production data
+cleanup or rewrite was performed. Managed-PostgreSQL execution of the
+conditional conflict update remains Preview/Production verification debt.
+Restored or newly preserved failed drafts clear older visible feedback and
+stored-review mode. “Bỏ bản nháp” removes only the browser draft and restores
+the latest unchanged server review without another provider call. Browser
+storage is best-effort: access/load/save/clear failures cannot override a
+successfully returned grade, alter quota, or initiate a provider retry.
+
+Local hotfix verification passes Prisma validation/generation, typecheck, lint,
+10 focused files with 101 passed, the complete 57-file suite with 557 passed
+and 8 opt-in PGlite cases skipped, the production build with an explicit
+unreachable synthetic database target, `npm audit --omit=dev` with zero
+vulnerabilities, and `git diff --check`. No integration database test ran.
+Prisma and Next reported
+automatic local env-file loading/discovery even though relevant process values
+were explicitly overridden with synthetic loopback/blank values; no value was
+printed and no real endpoint was contacted. Retain this tooling caveat.
 
 Owner-attested Preview evidence is recorded separately from repository tests.
-The initial provider integration graded successfully. The review correction
-updated quota without refresh, restored the current learner's latest essay and
-feedback after refresh, linked “Xem lại” to feedback, preserved edited-latest
-behavior, and passed cross-user isolation. At copy-correction head
-`6844d2b23722e1d176809243b0afe9fa12d2cacb`, provider wording was absent from
-the Writing workflow, quota wording was learner-facing, review/refresh still
-passed, and Privacy plus Terms carried the disclosure. PR #18 remained OPEN,
-Draft, and mergeable; both Vercel checks passed. Checked runtime windows
-contained no relevant error or sensitive data.
+At hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`, Preview reached
+`READY`, health/database passed, and the reviewed model was
+`@cf/meta/llama-3.1-8b-instruct-fast`. PR #18 remained OPEN and Draft. Starting
+from displayed learner quota `1/2`, an offline failure preserved the essay,
+did not reduce the displayed quota, restored the draft after same-session
+navigation, and showed no older feedback while the newer failed draft was
+active. One real AI grade succeeded; quota changed immediately, refresh
+preserved the successful essay and feedback, and “Xem lại” restored the latest
+server-backed review. “Bỏ bản nháp” restored that review without a provider
+request. The checked runtime window had no errors or sensitive log data.
 
-No schema, migration, dependency, or lockfile changed. Production deployment
-and verification remain pending. Writing essay/result retention is unchanged,
-so H-11 remains **Partially remediated**. See
+This owner-attested checkpoint covers one real Preview grade, not comprehensive
+provider/model behavior. It does not claim a second real AI attempt,
+provider-retention verification, Production success, or managed-PostgreSQL
+execution of conditional `FAILED`-row recycling. Earlier provider,
+review-state, and copy-correction Preview evidence remains historical and is
+recorded in the D1 report.
+
+Only stale Prisma schema comments changed in the implementation hotfix; there
+is no structural schema, migration, dependency, or lockfile change. Production
+deployment and post-merge verification remain pending and Production must not
+be described as passing. Writing essay/result retention is unchanged, so H-11
+remains **Partially remediated**. See
 `docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
 
 Security Phase 1D-C2 dependency implementation is recorded at commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`. The formula-validation UI correction began from that HEAD and is recorded at commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. During the supplied Preview verification, PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main`; that remains historical Preview state. PR #16 later merged as commit `0852c05f9acde31f8bfed0887b2749616edf65f6`, and selected owner-attested Production verification passed within the limits below.

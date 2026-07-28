@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, ListChecks, LoaderCircle, LogIn, Quote, Sparkles } from "lucide-react";
 import {
   countWords,
-  DEFAULT_TARGET_WORD_COUNT,
+  isWritingReviewTimestamp,
   targetWordCountOptions,
   WRITING_GRADER_MAX_WORDS,
   WRITING_GRADER_MIN_WORDS,
@@ -14,6 +14,19 @@ import {
   type WritingReviewData,
 } from "@/lib/writing-grader-shared";
 import type { WritingPrompt } from "@/lib/writing-prompts";
+import {
+  clearWritingDraft,
+  getSafeSessionStorage,
+  loadWritingDraft,
+  saveWritingDraft,
+} from "@/lib/writing-draft";
+import {
+  applySuccessfulWritingGrade,
+  createWritingFormContentState,
+  discardWritingDraft,
+  preserveFailedWritingDraft,
+  reconcileWritingDraft,
+} from "@/lib/writing-grader-form-state";
 
 type PromptData = WritingPrompt;
 
@@ -26,6 +39,7 @@ type Props = {
     total: number;
   } | null;
   initialReview: WritingReviewData | null;
+  draftKey: string | null;
 };
 
 const criterionRows = [
@@ -232,23 +246,78 @@ export function WritingGraderForm({
   prompt,
   quota,
   initialReview,
+  draftKey,
 }: Props) {
-  const [targetWordCount, setTargetWordCount] = useState<TargetWordCount>(() => {
-    return initialReview?.targetWordCount ?? DEFAULT_TARGET_WORD_COUNT;
-  });
-  const [essayText, setEssayText] = useState(initialReview?.essayText ?? "");
+  const [contentState, setContentState] = useState(() =>
+    createWritingFormContentState(initialReview),
+  );
+  const {
+    targetWordCount,
+    essayText,
+    result,
+    reviewingStoredResult,
+    draftActive,
+    draftRestored,
+  } = contentState;
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<WritingGradeResult | null>(initialReview?.result ?? null);
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(
     quota?.remaining ?? null,
   );
-  const [reviewingStoredResult, setReviewingStoredResult] = useState(Boolean(initialReview));
   const [error, setError] = useState<string | null>(null);
   const [dailyLimitError, setDailyLimitError] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    if (!draftKey) return;
+    const storage = getSafeSessionStorage(window);
+    const draft = loadWritingDraft(storage, draftKey);
+    if (!draft) return;
+    const initialReconciliation = reconcileWritingDraft(
+      createWritingFormContentState(initialReview),
+      draft,
+    );
+    if (initialReconciliation.staleDraft) {
+      clearWritingDraft(storage, draftKey);
+      return;
+    }
+
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      setContentState((current) => reconcileWritingDraft(current, draft).state);
+    });
+    return () => {
+      active = false;
+    };
+  }, [draftKey, initialReview]);
+
   const wordCount = useMemo(() => countWords(essayText), [essayText]);
   const formDisabled = !enabled || !isAuthenticated || loading;
+
+  function preserveCurrentDraft(): void {
+    const draftSaved = saveWritingDraft(getSafeSessionStorage(window), draftKey, {
+      essayText,
+      targetWordCount,
+    });
+    setContentState((current) =>
+      preserveFailedWritingDraft(current, draftSaved),
+    );
+  }
+
+  function handleDiscardDraft(): void {
+    const deletionConfirmed = clearWritingDraft(
+      getSafeSessionStorage(window),
+      draftKey,
+    );
+    const discard = discardWritingDraft(contentState, deletionConfirmed);
+    if (!discard.discarded) {
+      setError(discard.error);
+      return;
+    }
+    setContentState(discard.state);
+    setError(null);
+    setDailyLimitError(null);
+  }
 
   const wordCountTone =
     wordCount > WRITING_GRADER_MAX_WORDS
@@ -289,26 +358,49 @@ export function WritingGraderForm({
       });
       const data = (await response.json().catch(() => null)) as {
         result?: WritingGradeResult;
+        reviewTimestamp?: unknown;
         remaining?: unknown;
         error?: string;
       } | null;
+
+      setRemainingAttempts((current) =>
+        resolveRemainingAttempts(
+          data?.remaining,
+          current,
+          quota?.total ?? null,
+        ),
+      );
+
       if (!response.ok || !data?.result) {
-        if (response.status === 429) {
+        preserveCurrentDraft();
+        const remainingAfterFailure = resolveRemainingAttempts(
+          data?.remaining,
+          remainingAttempts,
+          quota?.total ?? null,
+        );
+        if (response.status === 429 && remainingAfterFailure === 0) {
           setDailyLimitError(data?.error ?? "Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.");
         } else {
           setError(data?.error ?? "Có lỗi xảy ra khi chấm bài. Vui lòng thử lại.");
         }
         return;
       }
-      setResult(data.result);
-      setReviewingStoredResult(false);
-      setRemainingAttempts((current) =>
-        resolveRemainingAttempts(data.remaining, current, quota?.total ?? null),
+      const reviewTimestamp = isWritingReviewTimestamp(data.reviewTimestamp)
+        ? data.reviewTimestamp
+        : Date.now();
+      setContentState((current) =>
+        applySuccessfulWritingGrade(
+          current,
+          data.result as WritingGradeResult,
+          reviewTimestamp,
+        ),
       );
+      clearWritingDraft(getSafeSessionStorage(window), draftKey);
       requestAnimationFrame(() => {
         resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     } catch {
+      preserveCurrentDraft();
       setError("Không gửi được bài viết. Hãy kiểm tra kết nối mạng và thử lại.");
     } finally {
       setLoading(false);
@@ -346,6 +438,26 @@ export function WritingGraderForm({
         </div>
       ) : null}
 
+      {draftActive ? (
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-accent-soft/60 p-4 text-sm leading-6 text-accent-strong"
+          role="status"
+        >
+          <p>
+            {draftRestored
+              ? "Đã khôi phục bản nháp chưa được chấm."
+              : "Bản nháp chưa được chấm đã được giữ trong phiên này."}
+          </p>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleDiscardDraft}
+          >
+            Bỏ bản nháp
+          </button>
+        </div>
+      ) : null}
+
       <form onSubmit={handleSubmit} className="surface rounded-3xl p-6 md:p-8">
         <fieldset disabled={formDisabled} className="grid gap-5">
           {/* Read-only prompt display */}
@@ -367,7 +479,12 @@ export function WritingGraderForm({
               <select
                 id="target-word-count"
                 value={targetWordCount}
-                onChange={(event) => setTargetWordCount(event.target.value as TargetWordCount)}
+                onChange={(event) =>
+                  setContentState((current) => ({
+                    ...current,
+                    targetWordCount: event.target.value as TargetWordCount,
+                  }))
+                }
                 className="field min-h-11"
               >
                 {targetWordCountOptions.map((option) => (
@@ -384,7 +501,12 @@ export function WritingGraderForm({
             <textarea
               id="essay-text"
               value={essayText}
-              onChange={(event) => setEssayText(event.target.value)}
+              onChange={(event) =>
+                setContentState((current) => ({
+                  ...current,
+                  essayText: event.target.value,
+                }))
+              }
               rows={14}
               className="field min-h-72 resize-y p-3"
               placeholder="Viết bài luận tiếng Anh của bạn ở đây..."

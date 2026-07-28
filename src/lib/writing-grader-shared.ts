@@ -6,6 +6,7 @@ export const WRITING_GRADER_MIN_WORDS = 80;
 export const WRITING_GRADER_MAX_WORDS = 700;
 export const WRITING_GRADER_MAX_PROMPT_CHARS = 1500;
 export const WRITING_GRADER_MAX_ESSAY_CHARS = 30000;
+export const WRITING_REVIEW_TIMESTAMP_MAX = 8_640_000_000_000_000;
 
 export const essayTypeOptions = [
   { value: "opinion", label: "Opinion essay" },
@@ -41,6 +42,15 @@ export const DEFAULT_TARGET_WORD_COUNT: TargetWordCount = "250-300";
 export function countWords(text: string): number {
   const matches = text.trim().match(/\S+/g);
   return matches ? matches.length : 0;
+}
+
+export function isWritingReviewTimestamp(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value >= 0 &&
+    value <= WRITING_REVIEW_TIMESTAMP_MAX
+  );
 }
 
 export type WritingGradeRequest = {
@@ -87,4 +97,5 @@ export type WritingReviewData = {
   essayText: string;
   targetWordCount: TargetWordCount;
   result: WritingGradeResult;
+  reviewTimestamp: number;
 };

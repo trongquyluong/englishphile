@@ -53,11 +53,69 @@ describe("static distributed caller coverage", () => {
 });
 
 describe("static Writing lifecycle and cleanup", () => {
-  it("stores FAILED plus failureCode after provider start", () => {
+  it("atomically recycles only a conflicting FAILED learner slot", () => {
     const implementation = source("src/lib/security/writing-quota.ts");
-    expect(implementation).toContain('status: "FAILED"');
-    expect(implementation).toContain("failureCode,");
-    expect(implementation).toContain("providerStartedAt: { not: null }");
+    const storeStart = implementation.indexOf(
+      "const writingSlotStore: WritingSlotStore",
+    );
+    const storeEnd = implementation.indexOf(
+      "export const reserveWritingQuota",
+    );
+    const store = implementation.slice(storeStart, storeEnd);
+
+    expect(storeStart).toBeGreaterThanOrEqual(0);
+    expect(store).toContain(
+      'ON CONFLICT ("userId", "quota_date", "slot_number") DO UPDATE',
+    );
+    expect(store).toContain(
+      `WHERE "WritingQuotaReservation"."status" = 'FAILED'`,
+    );
+    expect(store).toContain(`"status" = 'PENDING'`);
+    expect(store).toContain(`"provider_started_at" = NULL`);
+    expect(store).toContain(`"completed_at" = NULL`);
+    expect(store).toContain(`"failure_code" = NULL`);
+    expect(store).toContain(`"expires_at" = EXCLUDED."expires_at"`);
+    expect(store).not.toContain("DO NOTHING");
+    expect(store).not.toMatch(
+      /WHERE "WritingQuotaReservation"\."status" = '(?:PENDING|COMPLETED)'/,
+    );
+  });
+
+  it("counts only PENDING and COMPLETED rows as occupied learner slots", () => {
+    const implementation = source("src/lib/security/writing-quota.ts");
+    const statusStart = implementation.indexOf(
+      "export async function getWritingQuotaStatus",
+    );
+    const statusEnd = implementation.indexOf(
+      "const WRITING_QUOTA_CLEANUP_BATCH",
+    );
+    const statusQuery = implementation.slice(statusStart, statusEnd);
+
+    expect(statusStart).toBeGreaterThanOrEqual(0);
+    expect(statusQuery).toContain(
+      `AND "status" IN ('PENDING', 'COMPLETED')`,
+    );
+    expect(statusQuery).not.toContain("FAILED");
+  });
+
+  it("releases only an exact PENDING provider-started learner reservation", () => {
+    const implementation = source("src/lib/security/writing-quota.ts");
+    const releaseStart = implementation.indexOf(
+      "export async function releaseProviderStartedWritingReservation",
+    );
+    const releaseEnd = implementation.indexOf(
+      "export async function cancelWritingReservation",
+    );
+    const release = implementation.slice(releaseStart, releaseEnd);
+
+    expect(releaseStart).toBeGreaterThanOrEqual(0);
+    expect(release).toContain("writingQuotaReservation.deleteMany");
+    expect(release).toContain("id: reservationId");
+    expect(release).toContain("userId");
+    expect(release).toContain('status: "PENDING"');
+    expect(release).toContain("providerStartedAt: { not: null }");
+    expect(release).not.toContain('status: "COMPLETED"');
+    expect(release).not.toContain('status: "FAILED"');
   });
 
   it("uses mapped database columns and reasserts reclaim predicates", () => {

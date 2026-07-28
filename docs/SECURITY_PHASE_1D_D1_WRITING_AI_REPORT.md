@@ -4,11 +4,19 @@ Date: 2026-07-28
 
 ## Verdict
 
-Phase 1D-D1 is implemented, locally verified, and selected Preview behavior is
-owner-attested. Writing AI now has a zero-cost-oriented Cloudflare Workers AI
-provider boundary, two provider-started attempts per learner per UTC day, and a
-bounded site-wide UTC-day allowance. Provider configuration and quota
-infrastructure fail closed.
+Phase 1D-D1 has a narrowly scoped Production `INVALID_RESPONSE` recovery
+hotfix. Local verification and owner-attested Preview reconciliation are
+recorded separately below; Production deployment and post-merge verification
+remain pending. Before this hotfix, the owner observed a real Production
+submission reach the provider and return an unusable structured result. The
+learner allowance changed from 2 to 1 under the previous provider-started
+policy, but no `WritingSubmission` was created, so completion and review could
+not be restored.
+
+Raw provider output was intentionally not logged or retained. The safe
+root-cause classification is `WritingGraderError: INVALID_RESPONSE`; the exact
+malformed field, provider envelope subtype, JSON truncation subtype, or other
+schema defect remains unprovable and is not claimed.
 
 This does not close H-11. Essay text, prompts, normalized model feedback, and
 Writing submission rows retain their existing lifecycle. A separately approved
@@ -17,7 +25,9 @@ retention/deletion phase is still required.
 ## Provider boundary
 
 - Provider: Cloudflare Workers AI, called directly from the server.
-- Reviewed model: `@cf/qwen/qwen3-30b-a3b-fp8`.
+- Reviewed model: `@cf/meta/llama-3.1-8b-instruct-fast`.
+- The previous `@cf/qwen/qwen3-30b-a3b-fp8` model and arbitrary configured
+  model names are rejected.
 - AI Gateway is not used.
 - The API token is server-only and must have only the Workers AI permission
   required for the configured account.
@@ -26,18 +36,28 @@ retention/deletion phase is still required.
 - Output is requested with JSON Schema and independently validated with Zod.
   Malformed or incomplete output is rejected and never persisted as a
   successful grade.
-- The output budget is capped at 1,400 tokens and the provider request has a
+- The output budget is capped at exactly 2,000 tokens and the provider request has a
   50-second timeout inside the existing 60-second route duration.
-- Logs contain only fixed operation, status, and error-class context. Essay
-  text, prompts, provider output, credentials, and raw provider errors are not
-  logged.
+- The JSON Schema and normalizer retain exactly four criterion objects; cap
+  criterion comments at 140 characters and the overall comment at 240; cap
+  strengths and priority issues at four each; cap detailed feedback at three
+  entries with quote/issue/explanation/revision bounds of 100/80/140/140
+  characters; cap the suggested thesis/paragraph at 160/360; require three to
+  four next-practice tasks; and cap warnings at three. Modestly oversized
+  allowlisted strings/lists are safely truncated; malformed, unknown-key, or
+  excessively oversized shapes fail closed. The total remains recomputed from
+  normalized criterion scores.
+- Logs contain only fixed diagnostic events, provider HTTP status class, and an
+  allowlisted finish reason (`stop`, `length`, `content_filter`, or `unknown`).
+  Essay text, prompts, feedback, raw bodies, credentials, identities,
+  reservation IDs, and raw Prisma/provider errors are not logged.
 
 Required server configuration:
 
 ```text
 CLOUDFLARE_ACCOUNT_ID
 CLOUDFLARE_API_TOKEN
-CLOUDFLARE_WRITING_MODEL=@cf/qwen/qwen3-30b-a3b-fp8
+CLOUDFLARE_WRITING_MODEL=@cf/meta/llama-3.1-8b-instruct-fast
 WRITING_AI_GLOBAL_DAILY_LIMIT=15
 ```
 
@@ -60,16 +80,36 @@ The request boundary retains this order:
 9. Cloudflare request.
 10. Atomic completed-submission persistence.
 
-Only a reservation that reaches the provider-start marker consumes one of the
-learner's two daily attempts. A validation error or site-wide limit denial
-releases the unstarted learner reservation. Once the provider starts, provider
-failure consumes the learner slot to prevent unlimited free retries.
+The learner's “2 lượt chấm bài/ngày” now means two successfully persisted
+grades. Validation errors and site-wide denials release unstarted learner
+reservations. After the provider starts, an invalid result, provider
+rate-limit/content block, network/provider failure, or unexpected pre-commit
+failure releases only the exact `reservationId + userId` row while it remains
+`PENDING` with `providerStartedAt` set. The atomic success transaction changes
+that row to `COMPLETED` and creates `WritingSubmission`; the release predicate
+therefore never deletes or reopens a completed slot. If release or authoritative
+quota reading fails, the response remains conservative and does not claim that
+an allowance was restored.
+
+Legacy and current `FAILED` rows do not count as occupied learner slots.
+Reservation acquisition uses one PostgreSQL `INSERT ... ON CONFLICT ... DO
+UPDATE ... WHERE status = 'FAILED'` statement to recycle only the conflicting
+same-user/date/slot failed row. Recycling resets it to `PENDING`, clears
+provider-start/completion/failure fields, and applies the new expiry; `PENDING`
+and `COMPLETED` rows cannot be recycled. No Production row was deleted,
+modified, or manually rewritten for this hotfix. The already observed
+`FAILED/INVALID_RESPONSE` row becomes reusable through deployed application
+semantics, not an operational data cleanup.
 
 The global allowance is stored through the existing atomic database rate-limit
 primitive under action `writing-grade-daily-global` and the current UTC date.
 Missing or failed limiter infrastructure prevents the provider call. A denied
 global allowance may conservatively remain consumed if a later pre-provider
 transition fails; it never permits spending beyond the configured ceiling.
+Once a provider call is attempted, this global UTC-day allowance is not
+decremented or refunded even when the learner reservation is released. The
+existing six Writing requests per learner per ten minutes and global
+short-window limiter are unchanged.
 
 ## Learner communication
 
@@ -80,9 +120,39 @@ boundary, and advises learners to provide only content needed for practice.
 The Terms page records automated Writing processing and links to the Privacy
 page for the provider and data details.
 
-The UI reports two daily Writing grades and derives usage from quota
-reservations, not merely from completed Writing submissions. Failed
-provider-started attempts therefore remain visible in the daily allowance.
+The UI reports two daily successfully persisted Writing grades. Successful and
+recoverable failed grade responses carry a bounded authoritative `remaining`
+value whenever the current quota can be read safely, and the Client Component
+updates the quota card from it. A failed grade is never labeled submitted or
+graded.
+
+For a recoverable failure, the client saves only `{ version, essayText,
+targetWordCount, timestamp }` in `sessionStorage`. The storage key contains a
+server-derived HMAC over the authenticated user and static prompt, so the raw
+user ID and prompt are not stored or passed as key material. Draft restoration
+reapplies the existing essay character/word bounds and target-word-count
+allowlist, rejects malformed/oversized/future values, expires after at most 24
+hours, and is limited to the same browser session. A different authenticated
+user receives a different opaque key. Each successful review carries a bounded
+integer millisecond timestamp derived from its persisted
+`WritingSubmission.createdAt`; it exposes no identity or provider data.
+Successful persistence and response attempt to clear the draft. Feedback,
+provider payloads, credentials, user IDs, email addresses, and prompt text are
+never placed in browser storage.
+
+A browser draft is restored only when no successful server review exists or its
+timestamp is strictly newer than the latest persisted review timestamp. Older
+or equal-time drafts cannot hide the server review and are removed on a
+best-effort basis. Restoring or preserving a newer failed draft clears older
+visible feedback and exits stored-review mode, so the draft is shown only as
+ungraded. “Bỏ bản nháp” restores the unchanged latest server-backed review only
+after browser deletion is confirmed; on deletion failure the draft remains
+visible with a generic retry message and no provider request. Forms remount by
+prompt slug, preventing state from one Writing prompt carrying into another.
+`sessionStorage` is strictly best-effort: property access and all
+load/save/clear operations are guarded. Storage failure cannot replace a
+successful API result with an error, hide returned feedback, alter quota, or
+trigger another provider request.
 
 ## Writing review UX correction
 
@@ -114,16 +184,19 @@ remediated**.
 
 ## Local verification
 
+- Prisma validation: passed.
 - Prisma generation: passed.
 - Typecheck: passed.
 - Lint: passed.
-- Focused quota/review/page/API/disclosure tests: 4 files, 17 passed.
-- Complete test suite: 52 files, 506 passed, 8 opt-in PGlite tests skipped.
+- Focused draft-freshness/review/page/API/quota/security tests: 10 files, 101
+  passed.
+- Complete test suite: 57 files, 557 passed, 8 opt-in PGlite tests skipped.
 - Production build: passed with an explicit unreachable synthetic database
   configuration; expected database collection failures were sanitized.
 - `npm audit --omit=dev`: exit 0, zero vulnerabilities.
-- Full `npm audit`: exit 1, retaining only the documented development-only
-  brace-expansion/ESLint finding.
+- Full `npm audit` was not requested or rerun; the prior documented
+  development-only brace-expansion/ESLint finding is unchanged.
+- `git diff --check`: passed.
 
 Focused coverage includes:
 
@@ -132,11 +205,24 @@ Focused coverage includes:
 - JSON Schema request and both supported response envelopes;
 - score normalization and invalid-output rejection;
 - provider 429 mapping;
-- no essay/token logging on network failure;
+- bounded allowlisted diagnostics for HTTP class, envelope, empty result, JSON
+  decoding, schema validation, finish reason, and persistence failures;
+- no synthetic essay/token/provider/database sentinel in captured logs or
+  learner errors;
 - learner two-attempt quota behavior;
+- exact release of only a still-`PENDING`, provider-started learner reservation;
+- release after invalid/provider/network/rate-limit/persistence failures while
+  leaving the global provider-attempt allowance consumed;
+- conservative release-failure behavior and authoritative bounded failure
+  `remaining` values where safely readable;
+- at-most-two concurrent successful daily persistence calls;
 - site-wide exhaustion and infrastructure failure before provider invocation;
 - reservation release when a provider call has not started;
-- immediate quota-state transition from a successful API response;
+- immediate quota-state transition from successful and recoverable failed API
+  responses;
+- strict draft-versus-review freshness, same-session failed-essay restoration,
+  24-hour expiry, malformed and oversized rejection, opaque cross-user
+  isolation, and deletion-confirmed discard behavior;
 - current-user and prompt-scoped latest-review selection;
 - bounded positive mapping of stored Writing feedback;
 - restored essay, grade feedback, and quota rendering after a refresh;
@@ -145,11 +231,46 @@ Focused coverage includes:
 No PGlite or managed PostgreSQL test ran for this phase. Local verification did
 not access a real Cloudflare account, database, endpoint, Preview, Production,
 migration, import, export, backup, cleanup, deployment, or data rewrite.
+Relevant environment variables were explicitly overridden with synthetic
+loopback or blank values. Prisma and Next nevertheless reported their automatic
+local env-file discovery/loading behavior; no env value was printed, and the
+build used the explicit synthetic process values. The final review must retain
+this tooling caveat rather than claiming that the CLI skipped local env files.
+Mocked behavioral concurrency tests and a precise static SQL assertion cover
+legacy `FAILED` reuse. Executing the conditional `ON CONFLICT` statement against
+managed PostgreSQL remains Preview/Production verification debt; no external
+database was accessed for this review.
 
 ## Owner-attested Preview reconciliation
 
 The owner separately verified the deployed Preview behavior. This is
 operational evidence, not repository test evidence or browser automation.
+
+- At hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`, the Preview
+  target reached `READY`; health and database checks passed. PR #18 remained
+  OPEN and Draft.
+- Preview used the reviewed
+  `@cf/meta/llama-3.1-8b-instruct-fast` model. The learner began with `1/2`
+  displayed attempts.
+- An offline network failure preserved the essay without reducing the displayed
+  learner quota. Navigating away and back in the same browser session restored
+  the failed draft, and older feedback was absent while that newer ungraded
+  draft was active.
+- One real AI grade then succeeded. The quota updated immediately without a
+  refresh; refreshing preserved the successfully graded essay and feedback;
+  and “Xem lại” restored the latest successful server-backed review.
+- “Bỏ bản nháp” restored the latest successful review and triggered no provider
+  request.
+- The checked Preview runtime window contained no errors and no sensitive data
+  in the checked logs.
+
+This is evidence for one successful real Preview grade and the specifically
+observed failure/draft/review flows. It is not comprehensive provider or model
+coverage. It does not claim a second real AI attempt, provider-retention
+verification, or managed-PostgreSQL execution of the conditional `FAILED`-row
+recycling SQL.
+
+Earlier Preview checkpoints remain historical evidence:
 
 - The initial provider integration at `d8ff4a8` graded a bounded Writing
   submission successfully with the configured Cloudflare account, token,
@@ -168,9 +289,12 @@ operational evidence, not repository test evidence or browser automation.
 - Checked Preview runtime windows contained no relevant error or sensitive
   data.
 
-The latest copy-only checkpoint did not repeat the provider call or claim a new
-quota-consumption, database, cross-user, or provider-retention test. Production
-deployment and verification remain pending.
+The copy-only checkpoint did not repeat the provider call or claim a new
+quota-consumption, database, cross-user, or provider-retention test. It remains
+historical evidence for the previous reviewed model only. The current
+owner-attested Preview reconciliation above supersedes only the statement that
+Llama-model Preview retesting was pending. Production deployment and post-merge
+verification remain pending; Production is not described as passing.
 
 ## Deployment runbook
 
@@ -184,12 +308,17 @@ deployment and verification remain pending.
 4. Submit one synthetic non-sensitive essay. Require a structured result,
    bounded Vietnamese feedback, no canonical/provider fields in unrelated
    learner responses, and no raw provider response in the UI.
-5. Verify that the same learner receives at most two provider-started grades in
-   one UTC day and that another learner has an independent allowance.
+5. Verify that the same learner receives at most two successfully persisted
+   grades in one UTC day and that another learner has an independent allowance.
+   In an isolated synthetic failure check, require the learner slot to remain
+   available while the global provider-attempt allowance remains consumed.
 6. Without refreshing, require the quota card to change from 2/2 to 1/2 after
-   the first successful grade. Refresh the page, return through “Xem lại”, and
-   require the same learner’s latest essay and feedback to remain visible and
-   editable.
+   the first successful grade. For a recoverable failure, navigate away and
+   back in the same session, require “Đã khôi phục bản nháp chưa được chấm.”,
+   and require no completed/submitted label. After retry success, require the
+   draft to be cleared. Refresh the page, return through “Xem lại”, and require
+   the same learner’s latest successful essay and feedback to remain visible
+   and editable.
 7. Temporarily lower the site-wide limit in an isolated Preview window and
    verify deterministic denial before provider invocation after the ceiling.
    Restore the intended cap and redeploy.

@@ -40,6 +40,7 @@ const resultJson = {
   warnings: [],
   providerSecret: "PROVIDER-SENTINEL",
 };
+const reviewTimestamp = Date.parse("2026-07-28T12:00:00.000Z");
 
 describe("learner Writing review boundary", () => {
   beforeEach(() => {
@@ -48,6 +49,7 @@ describe("learner Writing review boundary", () => {
       essayText: "Machines can save time for families. ".repeat(12),
       targetWordCount: "250-300",
       resultJson,
+      createdAt: new Date(reviewTimestamp),
     });
   });
 
@@ -67,10 +69,12 @@ describe("learner Writing review boundary", () => {
         essayText: true,
         targetWordCount: true,
         resultJson: true,
+        createdAt: true,
       },
     });
     expect(review).toMatchObject({
       targetWordCount: "250-300",
+      reviewTimestamp,
       result: {
         totalScore: 20,
         overallComment: "Cần phát triển thêm dẫn chứng.",
@@ -84,6 +88,7 @@ describe("learner Writing review boundary", () => {
       essayText: "Valid essay",
       targetWordCount: "250-300",
       resultJson: { ...resultJson, maxScore: 100 },
+      createdAt: new Date(reviewTimestamp),
     });
     await expect(getLatestWritingReview("current-user", "machines-at-home")).resolves.toBeNull();
 
@@ -91,8 +96,22 @@ describe("learner Writing review boundary", () => {
       essayText: "Valid essay",
       targetWordCount: "unbounded",
       resultJson,
+      createdAt: new Date(reviewTimestamp),
     });
     await expect(getLatestWritingReview("current-user", "machines-at-home")).resolves.toBeNull();
+  });
+
+  it("fails closed for an invalid persisted review timestamp", async () => {
+    mocks.findFirst.mockResolvedValueOnce({
+      essayText: "Valid essay",
+      targetWordCount: "250-300",
+      resultJson,
+      createdAt: new Date(Number.NaN),
+    });
+
+    await expect(
+      getLatestWritingReview("current-user", "machines-at-home"),
+    ).resolves.toBeNull();
   });
 
   it("positive-maps nested result fields and rejects oversized retained content", () => {
