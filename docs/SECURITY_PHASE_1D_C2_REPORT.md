@@ -1,6 +1,7 @@
 # Security Phase 1D-C2 Report — Transitive dependency remediation
 
 Date: 2026-07-27
+Production operational reconciliation: 2026-07-28
 
 ## Executive result
 
@@ -12,7 +13,7 @@ Real ExcelJS round-trip testing exposed an existing adapter defect: ExcelJS retu
 
 Phase 1D-C2 clears the dependency-advisory condition for public beta. It does not grant a blanket release approval for unrelated findings or operational gates. H-11 remains **Partially remediated**; this phase does not close or expand H-11.
 
-The repository chronology is explicit: the Phase 1D-C2 dependency implementation is commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`, followed by the formula-validation UI correction in commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. During the supplied Preview verification, PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main`. Production functional verification and merge have not occurred.
+The repository chronology is explicit: the Phase 1D-C2 dependency implementation is commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`, followed by the formula-validation UI correction in commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. During the supplied Preview verification, PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main`. That is historical Preview state. PR #16 later merged as commit `0852c05f9acde31f8bfed0887b2749616edf65f6`, after which selected owner-attested Production verification passed within the limits recorded below.
 
 ## Starting checkpoint and safety boundary
 
@@ -378,9 +379,45 @@ The actual application parser exercised locally correctly returned `{ data: null
 
 Authentication/session material exposed during investigation was treated as compromised. The affected old Preview deployment was deleted, the Preview signing credential was rotated, Production used a separate rotated signing credential, and Production was redeployed after rotation with a passing health check. No protected value or operational identifier is recorded here. These containment actions are not application-code test evidence and do not establish C2 Production functional verification.
 
-### Still-pending Production boundary
+## Production operational reconciliation
 
-PR #16 remains OPEN and Draft. It has not merged, and Phase 1D-C2 has not received Production functional verification. The rotation-related Production health check is not a C2 spreadsheet, dependency-path, authorization, persistence, or release verification.
+The following observations are owner-attested operational Production evidence. They are separate from repository tests, local command evidence, and the historical Preview evidence above.
+
+### Deployment and health
+
+- PR #16 merged as commit `0852c05f9acde31f8bfed0887b2749616edf65f6`.
+- The deployment target was Production, the deployment reached `READY`, and it was created after the merge.
+- Provider commit metadata was not reported. No provider-reported commit metadata match is claimed.
+- Health returned HTTP 200 with `ok=true` and `database=connected`.
+
+### Submission boundary
+
+- A same-origin anonymous submission in a fresh unauthenticated browser context returned HTTP 401.
+- Current missing-Origin status was not reverified. PowerShell, Node `fetch`, `HttpClient`, and `WebClient` did not receive an HTTP response.
+- No HTTP status `0` is recorded, and no current HTTP 403 result is claimed.
+- Historical Phase 1D-C1 Production evidence returned HTTP 403 for missing Origin. That result is historical C1 evidence only, not a current C2 recheck.
+
+### Contest spreadsheet import
+
+- `OWNER_EMAIL`-equivalent owner/admin access passed.
+- A valid XLSX rendered the normal Preview with one section and one question. No contest draft was created.
+- A formula-containing XLSX produced bounded in-page validation and showed the formula cell location. Raw formula content was absent, the generic error page was absent, and the draft action was suppressed while the workbook was invalid.
+- Retrying with a valid XLSX succeeded and restored the draft button.
+- Ordinary-`STUDENT` admin denial passed.
+
+### Regression and operational checks
+
+- Home and public navigation passed.
+- Visible images and the logo passed. No exact image format or comprehensive Sharp/libvips coverage is claimed.
+- Practice submission passed. Diagnostic, contest, and Writing regressions passed.
+- Checked Production runtime logs returned `No logs found`. No sensitive data was observed in the checked logs.
+- The operational Git checkpoint was branch `main`, with the tracked worktree and index clean.
+
+### Documentation-only reconciliation boundary
+
+The Production facts above were supplied as owner-attested evidence. This documentation-only reconciliation did not access a database, endpoint, browser, provider, deployment, runtime log, environment value, or PR state. It did not stage, commit, push, deploy, merge, or alter PR/provider state.
+
+The Phase 1D-C2 implementation checkpoint remains the dependency-verification source: production `npm audit` exited 0 with zero vulnerable dependency-package entries, while the full audit retained the documented development-only `brace-expansion@1.1.15`/ESLint finding. Audits, tests, build, lint, typecheck, Prisma commands, and npm install were not rerun during this documentation-only reconciliation.
 
 ## Public-beta and H-11 disposition
 
@@ -406,12 +443,13 @@ No Prisma schema, migration, Next/PostCSS/Sharp version, ESLint Config Next vers
 
 ## Evidence limitations
 
-- The repository implementation and local correction did not access a real provider, endpoint, browser, database, deployment, or runtime log. The Preview observations above are separately supplied owner-attested operational evidence; no browser automation is claimed.
-- Ordinary-`STUDENT` authorization was not retested for C2. No persistence behavior is claimed because no contest draft was created.
-- No managed PostgreSQL, PGlite, pooler, failover, concurrency, rollback, or C2 Production functional evidence was created.
+- The repository implementation and local correction did not access a real provider, endpoint, browser, database, deployment, or runtime log. The Preview and Production observations above are separately supplied owner-attested operational evidence; no browser automation is claimed.
+- Production owner/admin access and ordinary-`STUDENT` admin denial passed. No contest persistence behavior is claimed because no contest draft was created.
+- No managed PostgreSQL, PGlite, pooler, failover, concurrency, rollback, or comprehensive C2 Production evidence was created.
 - Archive generation/extraction beyond XLSX is synthetic compatibility evidence because Englishphile has no active standalone archive route.
 - The UUID test exercises ExcelJS’s real conditional-formatting path, but Englishphile’s contest parser does not create security-sensitive UUIDs.
 - Post-load worksheet/row/cell caps do not bound decompression before ExcelJS load; the administrator-only route’s 2 MiB compressed-file cap is the pre-load bound.
 - npm 11’s six pre-existing optional WASM “extraneous” artifacts remain disclosed above.
-- The supplied Preview checks do not establish every ExcelJS, ZIP, Sharp, platform, cache, managed PostgreSQL, or provider path.
+- The supplied Preview and Production checks do not establish every ExcelJS, ZIP, Sharp, libvips, image-format, platform, cache, managed PostgreSQL, or provider path.
+- Current missing-Origin status is unknown because the attempted clients received no HTTP response. Historical Phase 1D-C1 Production evidence returned HTTP 403, but that historical result is not a current C2 verification.
 - Clearing C2’s production dependency-advisory gate is not blanket public-beta or release clearance. H-11 remains **Partially remediated**.
