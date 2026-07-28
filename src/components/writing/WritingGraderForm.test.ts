@@ -12,6 +12,11 @@ describe("Writing grader immediate quota transition", () => {
     expect(resolveRemainingAttempts(0, 1, 2)).toBe(0);
   });
 
+  it("uses an authoritative recoverable-failure remaining count immediately", () => {
+    expect(resolveRemainingAttempts(2, 1, 2)).toBe(2);
+    expect(resolveRemainingAttempts(1, 0, 2)).toBe(1);
+  });
+
   it("keeps the current display for malformed or out-of-range responses", () => {
     expect(resolveRemainingAttempts("1", 2, 2)).toBe(2);
     expect(resolveRemainingAttempts(3, 2, 2)).toBe(2);
@@ -33,9 +38,11 @@ describe("Writing grader immediate quota transition", () => {
           difficulty: "Chuyên",
         },
         quota: { remaining: 1, total: 2 },
+        draftKey: "a".repeat(43),
         initialReview: {
           essayText,
           targetWordCount: "250-300",
+          reviewTimestamp: Date.parse("2026-07-28T12:00:00.000Z"),
           result: {
             totalScore: 20,
             maxScore: 30,

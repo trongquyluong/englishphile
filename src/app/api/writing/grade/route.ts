@@ -12,14 +12,16 @@ import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit
 import {
   reserveWritingQuota,
   markProviderStarted,
-  failWritingReservation,
+  releaseProviderStartedWritingReservation,
   cancelWritingReservation,
+  getWritingQuotaStatus,
   persistCompletedWritingSubmission,
 } from "@/lib/security/writing-quota";
 import { getUtcQuotaKey } from "@/lib/security/writing-quota-core";
 import { Prisma } from "@prisma/client";
 import {
   countWords,
+  isWritingReviewTimestamp,
   targetWordCountValues,
   WRITING_GRADER_MAX_ESSAY_CHARS,
   WRITING_GRADER_MAX_WORDS,
@@ -36,8 +38,51 @@ const requestSchema = z.object({
   essayText: z.string().trim().min(1).max(WRITING_GRADER_MAX_ESSAY_CHARS),
 });
 
-function errorResponse(message: string, status: number) {
-  return NextResponse.json({ error: message }, { status });
+function errorResponse(message: string, status: number, remaining?: number) {
+  return NextResponse.json(
+    {
+      error: message,
+      ...(remaining === undefined ? {} : { remaining }),
+    },
+    { status },
+  );
+}
+
+async function readAuthoritativeRemaining(userId: string): Promise<number | undefined> {
+  try {
+    const quota = await getWritingQuotaStatus(userId);
+    return Math.min(quota.total, Math.max(0, quota.remaining));
+  } catch {
+    console.error("[writing-grade]", { event: "quota-status-read-failure" });
+    return undefined;
+  }
+}
+
+async function learnerErrorResponse(
+  userId: string,
+  message: string,
+  status: number,
+  knownRemaining?: number,
+) {
+  const remaining =
+    knownRemaining ?? (await readAuthoritativeRemaining(userId));
+  return errorResponse(message, status, remaining);
+}
+
+async function releaseFailedGradeReservation(
+  reservationId: string,
+  userId: string,
+): Promise<number | undefined> {
+  const released = await releaseProviderStartedWritingReservation(
+    reservationId,
+    userId,
+  );
+  if (!released) {
+    console.error("[writing-grade]", {
+      event: "learner-reservation-release-not-confirmed",
+    });
+  }
+  return readAuthoritativeRemaining(userId);
 }
 
 function validationMessage(error: z.ZodError): string {
@@ -88,55 +133,81 @@ export async function POST(request: Request) {
   }
 
   if (!isWritingGraderEnabled()) {
-    return errorResponse("Tính năng chấm bài Writing chưa sẵn sàng.", 503);
+    return learnerErrorResponse(
+      user.id,
+      "Tính năng chấm bài Writing chưa sẵn sàng.",
+      503,
+    );
   }
 
   // Check per-user rate limit (short-term burst protection)
   const userLimit = await checkConfiguredRateLimit(RATE_LIMITS.WRITING_GRADE(user.id));
   if (userLimit.status !== "allowed") {
     if (userLimit.status === "infrastructure-error") {
-      return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+      return learnerErrorResponse(
+        user.id,
+        "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.",
+        503,
+      );
     }
     const minutes = Math.max(1, Math.ceil(userLimit.retryAfterSeconds / 60));
-    return errorResponse(`Bạn đã gửi khá nhiều bài trong thời gian ngắn. Thử lại sau khoảng ${minutes} phút nhé.`, 429);
+    return learnerErrorResponse(
+      user.id,
+      `Bạn đã gửi khá nhiều bài trong thời gian ngắn. Thử lại sau khoảng ${minutes} phút nhé.`,
+      429,
+    );
   }
 
   // Check global rate limit
   const globalLimit = await checkConfiguredRateLimit(RATE_LIMITS.WRITING_GRADE_GLOBAL);
   if (globalLimit.status !== "allowed") {
     if (globalLimit.status === "infrastructure-error") {
-      return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+      return learnerErrorResponse(
+        user.id,
+        "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.",
+        503,
+      );
     }
-    return errorResponse("Hệ thống chấm bài đang bận. Vui lòng thử lại sau ít phút.", 429);
+    return learnerErrorResponse(
+      user.id,
+      "Hệ thống chấm bài đang bận. Vui lòng thử lại sau ít phút.",
+      429,
+    );
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return errorResponse("Dữ liệu gửi lên không hợp lệ.", 400);
+    return learnerErrorResponse(user.id, "Dữ liệu gửi lên không hợp lệ.", 400);
   }
 
   const parsed = requestSchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse(validationMessage(parsed.error), 400);
+    return learnerErrorResponse(user.id, validationMessage(parsed.error), 400);
   }
 
   // Look up prompt from static bank — do not trust client-supplied promptText or essayType
   const prompt = getWritingPromptBySlug(parsed.data.promptSlug);
   if (!prompt) {
-    return errorResponse("Đề bài không hợp lệ. Vui lòng chọn đề từ Gym Writing.", 400);
+    return learnerErrorResponse(
+      user.id,
+      "Đề bài không hợp lệ. Vui lòng chọn đề từ Gym Writing.",
+      400,
+    );
   }
 
   const wordCount = countWords(parsed.data.essayText);
   if (wordCount < WRITING_GRADER_MIN_WORDS) {
-    return errorResponse(
+    return learnerErrorResponse(
+      user.id,
       `Bài viết hiện có ${wordCount} từ — quá ngắn để chấm chính xác. Hãy viết ít nhất ${WRITING_GRADER_MIN_WORDS} từ.`,
       400,
     );
   }
   if (wordCount > WRITING_GRADER_MAX_WORDS) {
-    return errorResponse(
+    return learnerErrorResponse(
+      user.id,
       `Bài viết hiện có ${wordCount} từ — vượt giới hạn ${WRITING_GRADER_MAX_WORDS} từ cho mỗi lần chấm. Hãy rút gọn bớt.`,
       400,
     );
@@ -146,10 +217,19 @@ export async function POST(request: Request) {
   const reservation = await reserveWritingQuota(user.id);
   if (!reservation.allowed) {
     if (reservation.reason === "infrastructure-error") {
-      return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+      return learnerErrorResponse(
+        user.id,
+        "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.",
+        503,
+      );
     }
     // quota-exceeded
-    return errorResponse("Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.", 429);
+    return learnerErrorResponse(
+      user.id,
+      "Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.",
+      429,
+      reservation.remaining,
+    );
   }
 
   // Reserve a separate global daily allowance immediately before the provider
@@ -158,7 +238,11 @@ export async function POST(request: Request) {
   const globalDailyLimit = getWritingGlobalDailyLimit();
   if (!globalDailyLimit) {
     await cancelWritingReservation(reservation.reservationId, user.id);
-    return errorResponse("Tính năng chấm bài Writing tạm thời chưa sẵn sàng.", 503);
+    return learnerErrorResponse(
+      user.id,
+      "Tính năng chấm bài Writing tạm thời chưa sẵn sàng.",
+      503,
+    );
   }
 
   const globalDailyAllowance = await checkConfiguredRateLimit(
@@ -170,9 +254,14 @@ export async function POST(request: Request) {
   if (globalDailyAllowance.status !== "allowed") {
     await cancelWritingReservation(reservation.reservationId, user.id);
     if (globalDailyAllowance.status === "infrastructure-error") {
-      return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+      return learnerErrorResponse(
+        user.id,
+        "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.",
+        503,
+      );
     }
-    return errorResponse(
+    return learnerErrorResponse(
+      user.id,
       "Hệ thống đã dùng hết lượt chấm bài hôm nay. Hãy quay lại vào ngày mai.",
       429,
     );
@@ -183,22 +272,47 @@ export async function POST(request: Request) {
   const providerStarted = await markProviderStarted(reservation.reservationId, user.id);
   if (!providerStarted) {
     await cancelWritingReservation(reservation.reservationId, user.id);
-    return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+    return learnerErrorResponse(
+      user.id,
+      "Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.",
+      503,
+    );
   }
 
+  const essayType = mapEssayTypeToGraderValue(prompt.essayType);
+  let result: Awaited<ReturnType<typeof gradeEssay>>;
   try {
-    const essayType = mapEssayTypeToGraderValue(prompt.essayType);
-
     // Call AI grader OUTSIDE the database transaction
-    const result = await gradeEssay({
+    result = await gradeEssay({
       prompt: prompt.statement,
       essayType: essayType as "opinion" | "discussion" | "advantage-disadvantage" | "outweigh" | "cause-effect-solution" | "double-question" | "other",
       targetWordCount: parsed.data.targetWordCount,
       essayText: parsed.data.essayText,
     });
+  } catch (error) {
+    const remaining = await releaseFailedGradeReservation(
+      reservation.reservationId,
+      user.id,
+    );
+    if (error instanceof WritingGraderError) {
+      const mapped = graderErrorResponses[error.code];
+      return errorResponse(mapped.message, mapped.status, remaining);
+    }
 
-    // Persist the submission and COMPLETED transition atomically after the AI provider returns.
-    await persistCompletedWritingSubmission(reservation.reservationId, user.id, {
+    console.error("[writing-grade]", {
+      event: "unexpected-pre-persistence-failure",
+    });
+    return errorResponse(
+      "Có lỗi xảy ra khi chấm bài. Bản nháp của bạn vẫn được giữ để thử lại.",
+      500,
+      remaining,
+    );
+  }
+
+  try {
+    // Persist the submission and COMPLETED transition atomically after the
+    // provider returns a validated, normalized result.
+    const submission = await persistCompletedWritingSubmission(reservation.reservationId, user.id, {
       promptSlug: prompt.slug,
       promptText: prompt.statement,
       essayType: prompt.essayType,
@@ -206,25 +320,30 @@ export async function POST(request: Request) {
       essayText: parsed.data.essayText,
       resultJson: result as unknown as Prisma.InputJsonValue,
     });
-
-    return NextResponse.json({ result, remaining: reservation.remaining });
-  } catch (error) {
-    // Handle provider errors
-    if (error instanceof WritingGraderError) {
-      // Every provider-started attempt consumes its reserved daily slot.
-      await failWritingReservation(reservation.reservationId, user.id, error.code);
-      const mapped = graderErrorResponses[error.code];
-      return errorResponse(mapped.message, mapped.status);
+    const reviewTimestamp = submission.createdAt.getTime();
+    const timestampValid = isWritingReviewTimestamp(reviewTimestamp);
+    if (!timestampValid) {
+      console.error("[writing-grade]", {
+        event: "persistence-timestamp-invalid",
+      });
     }
 
-    console.error("[writing-grade] unexpected error", error instanceof Error ? error.name : "unknown");
-
-    // Unexpected errors after the provider call also consume the slot
-    await failWritingReservation(
+    const remaining = await readAuthoritativeRemaining(user.id);
+    return NextResponse.json({
+      result,
+      ...(timestampValid ? { reviewTimestamp } : {}),
+      ...(remaining === undefined ? {} : { remaining }),
+    });
+  } catch {
+    console.error("[writing-grade]", { event: "persistence-failure" });
+    const remaining = await releaseFailedGradeReservation(
       reservation.reservationId,
       user.id,
-      "PERSISTENCE_OR_UNEXPECTED_ERROR",
     );
-    return errorResponse("Có lỗi xảy ra khi chấm bài. Vui lòng thử lại.", 500);
+    return errorResponse(
+      "Chưa thể lưu kết quả chấm. Bản nháp của bạn vẫn được giữ để thử lại.",
+      500,
+      remaining,
+    );
   }
 }

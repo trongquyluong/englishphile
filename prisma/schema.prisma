@@ -782,32 +782,32 @@ model ContestAccessGrant {
 // Security: Writing submission quota reservations to prevent race conditions
 // Used to atomically reserve a slot before calling the AI grader
 //
-// Design: 5 slots per user per day, enforced by database unique constraint.
-// Each slot is identified by slotNumber (1-5), allowing up to 5 concurrent
-// or sequential reservations per quota day.
+// Application policy: 2 learner grade slots per UTC day. The existing database
+// CHECK permits legacy slot numbers 1-5; current code allocates only slots 1-2
+// and the unique key preserves the concurrency boundary.
 //
 // Lifecycle:
 // 1. All validation before reservation — no slot consumed
 // 2. Reserve slot atomically via unique constraint (status = PENDING)
 // 3. Before calling provider, persist providerStartedAt to mark "in use"
-// 4. Call Gemini outside any database transaction
-// 5. Mark COMPLETED, or FAILED with an auditable failureCode
-// 6. All occupied slots (PENDING + COMPLETED + FAILED) count for the quota day
+// 4. Call the reviewed provider outside any database transaction
+// 5. Mark COMPLETED only with the successful WritingSubmission transaction
+// 6. PENDING + COMPLETED occupy learner slots; FAILED is reusable atomically
 // 7. Cleanup reclaims PENDING rows where providerStartedAt IS NULL and expired
 model WritingQuotaReservation {
   id               String    @id @default(dbgenerated("gen_random_uuid()::text"))
   userId           String
   quotaDate        DateTime  @map("quota_date") @db.Date // UTC date, no time
-  slotNumber       Int       @map("slot_number") // 1-5, enforced by CHECK constraint
+  slotNumber       Int       @map("slot_number") // Current allocator: 1-2; legacy CHECK: 1-5
   status           WritingQuotaReservationStatus @default(PENDING)
-  providerStartedAt DateTime? @map("provider_started_at") // Set before calling Gemini
+  providerStartedAt DateTime? @map("provider_started_at") // Set before calling the reviewed provider
   completedAt       DateTime? @map("completed_at") // Set on COMPLETED or FAILED
   failureCode      String?   @map("failure_code")
   expiresAt        DateTime  @map("expires_at")
   createdAt        DateTime  @default(now())
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Each slot can only be used once per user per day
+  // Each occupied slot is unique; a FAILED row may be atomically recycled.
   @@unique([userId, quotaDate, slotNumber], map: "WritingQuotaReservation_userId_quotaDate_slotNumber_key")
   @@index([expiresAt], map: "WritingQuotaReservation_expiresAt_idx")
   @@index([status], map: "WritingQuotaReservation_status_idx")

@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   getWritingPromptBySlug: vi.fn(),
   getWritingQuotaStatus: vi.fn(),
   getLatestWritingReview: vi.fn(),
+  deriveWritingDraftKey: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/session", () => ({
@@ -23,6 +24,9 @@ vi.mock("@/lib/security/writing-quota", () => ({
 }));
 vi.mock("@/lib/writing-review", () => ({
   getLatestWritingReview: mocks.getLatestWritingReview,
+}));
+vi.mock("@/lib/security/writing-draft-key", () => ({
+  deriveWritingDraftKey: mocks.deriveWritingDraftKey,
 }));
 
 import WritingGraderPage from "@/app/gym/writing/grader/page";
@@ -57,6 +61,7 @@ const prompt = {
 const initialReview = {
   essayText: "Machines can save time for families.",
   targetWordCount: "250-300",
+  reviewTimestamp: Date.parse("2026-07-28T12:00:00.000Z"),
   result: {
     totalScore: 20,
     maxScore: 30,
@@ -83,6 +88,7 @@ describe("Writing grader review page boundary", () => {
     mocks.getWritingPromptBySlug.mockReturnValue(prompt);
     mocks.getWritingQuotaStatus.mockResolvedValue({ used: 1, remaining: 1, total: 2 });
     mocks.getLatestWritingReview.mockResolvedValue(initialReview);
+    mocks.deriveWritingDraftKey.mockReturnValue("opaque-draft-key");
   });
 
   it("loads the current learner's latest prompt review and hydrates the client form", async () => {
@@ -94,13 +100,19 @@ describe("Writing grader review page boundary", () => {
       "current-user",
       "machines-at-home",
     );
+    expect(mocks.deriveWritingDraftKey).toHaveBeenCalledWith(
+      "current-user",
+      "machines-at-home",
+    );
     const form = findElement(page, WritingGraderForm);
+    expect(form?.key).toBe("machines-at-home");
     expect(form?.props).toMatchObject({
       enabled: true,
       isAuthenticated: true,
       prompt,
       quota: { used: 1, remaining: 1, total: 2 },
       initialReview,
+      draftKey: "opaque-draft-key",
     });
   });
 
@@ -113,11 +125,43 @@ describe("Writing grader review page boundary", () => {
 
     expect(mocks.getLatestWritingReview).not.toHaveBeenCalled();
     expect(mocks.getWritingQuotaStatus).not.toHaveBeenCalled();
+    expect(mocks.deriveWritingDraftKey).not.toHaveBeenCalled();
     const form = findElement(page, WritingGraderForm);
     expect(form?.props).toMatchObject({
       isAuthenticated: false,
       quota: null,
       initialReview: null,
+      draftKey: null,
+    });
+  });
+
+  it("uses a prompt-scoped form key when navigating directly between slugs", async () => {
+    mocks.getWritingPromptBySlug.mockImplementation((slug: string) => ({
+      ...prompt,
+      slug,
+    }));
+    mocks.deriveWritingDraftKey.mockImplementation(
+      (_userId: string, slug: string) => `opaque-${slug}`,
+    );
+
+    const firstPage = await WritingGraderPage({
+      searchParams: Promise.resolve({ prompt: "machines-at-home" }),
+    });
+    const secondPage = await WritingGraderPage({
+      searchParams: Promise.resolve({ prompt: "school-uniforms" }),
+    });
+    const firstForm = findElement(firstPage, WritingGraderForm);
+    const secondForm = findElement(secondPage, WritingGraderForm);
+
+    expect(firstForm?.key).toBe("machines-at-home");
+    expect(secondForm?.key).toBe("school-uniforms");
+    expect(firstForm?.props).toMatchObject({
+      draftKey: "opaque-machines-at-home",
+      prompt: { slug: "machines-at-home" },
+    });
+    expect(secondForm?.props).toMatchObject({
+      draftKey: "opaque-school-uniforms",
+      prompt: { slug: "school-uniforms" },
     });
   });
 });

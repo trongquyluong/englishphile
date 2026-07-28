@@ -2,7 +2,7 @@ export const WRITING_DAILY_LIMIT = 2;
 export const WRITING_SLOT_NUMBERS = [1, 2] as const;
 
 export type WritingReservationResult =
-  | { allowed: true; reservationId: string; remaining: number }
+  | { allowed: true; reservationId: string }
   | { allowed: false; reason: "quota-exceeded"; remaining: number }
   | { allowed: false; reason: "infrastructure-error"; retryAfterSeconds: number };
 
@@ -44,19 +44,12 @@ export function createWritingQuotaReserver(
         return {
           allowed: true,
           reservationId: reservation.id,
-          // Slots are attempted in order. A higher slot is reached only after
-          // lower unique keys were occupied; this conservative snapshot avoids
-          // a fallible read after the reservation has already committed.
-          remaining: Math.max(0, WRITING_DAILY_LIMIT - slotNumber),
         };
       }
 
       return { allowed: false, reason: "quota-exceeded", remaining: 0 };
-    } catch (error) {
-      logger.error(
-        "[writing-quota] Reservation infrastructure error:",
-        error instanceof Error ? error.name : "unknown",
-      );
+    } catch {
+      logger.error("[writing-quota]", { event: "reservation-infrastructure-failure" });
       return { allowed: false, reason: "infrastructure-error", retryAfterSeconds: 30 };
     }
   };
