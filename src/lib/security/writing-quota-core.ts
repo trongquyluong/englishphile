@@ -1,5 +1,5 @@
-export const WRITING_DAILY_LIMIT = 5;
-export const WRITING_SLOT_NUMBERS = [1, 2, 3, 4, 5] as const;
+export const WRITING_DAILY_LIMIT = 2;
+export const WRITING_SLOT_NUMBERS = [1, 2] as const;
 
 export type WritingReservationResult =
   | { allowed: true; reservationId: string; remaining: number }

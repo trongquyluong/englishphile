@@ -58,6 +58,10 @@ CRON_SECRET=""
 OWNER_EMAIL="owner@example.com"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_CONTACT_EMAIL=""
+CLOUDFLARE_ACCOUNT_ID=""
+CLOUDFLARE_API_TOKEN=""
+CLOUDFLARE_WRITING_MODEL="@cf/qwen/qwen3-30b-a3b-fp8"
+WRITING_AI_GLOBAL_DAILY_LIMIT="15"
 NODE_ENV="development"
 ```
 
@@ -68,6 +72,26 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 Never commit `.env`. Local development must use a separate PostgreSQL database, such as an independent Neon project, and must never use production `DATABASE_URL` or `DIRECT_URL`. Production must configure `DATABASE_URL`, `SESSION_SECRET`, `CRON_SECRET`, and `OWNER_EMAIL`. `AUTH_SECRET` is retained only as a legacy compatibility fallback when `SESSION_SECRET` is absent; new deployments should leave it empty.
+
+Writing AI uses Cloudflare Workers AI directly (without AI Gateway). It is
+disabled unless both Cloudflare credentials are present. The current policy is
+2 provider-started attempts per learner per UTC day. The site-wide UTC-day
+ceiling defaults to a conservative 15 and accepts an explicitly configured
+value of at most 100. Keep the API token server-only and give it only the
+Workers AI permission needed for the account.
+
+Phase 1D-D1 local verification passes 17 focused
+quota/review/page/API/disclosure tests, the complete 52-file suite with 506
+passed and 8 opt-in PGlite cases skipped, typecheck, lint, and the Production
+build. Owner-attested Preview evidence records successful grading, immediate
+quota updates, restored essay/feedback after refresh, functional “Xem lại,”
+edited-latest behavior, and cross-user isolation. At
+`6844d2b23722e1d176809243b0afe9fa12d2cacb`, learner-facing Writing pages use
+provider-neutral wording while Privacy and Terms retain the processing
+disclosure; both Vercel checks passed and checked runtime windows contained no
+relevant error or sensitive data. Production verification remains pending.
+Writing retention is unchanged, so H-11 remains **Partially remediated**. See
+`docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
 
 ## Test Accounts And Signup
 

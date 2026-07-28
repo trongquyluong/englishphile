@@ -118,6 +118,16 @@ export const RATE_LIMITS = {
     subject: "global",
     policy: { limit: 60, windowSeconds: 10 * 60 },
   } satisfies ConfiguredRateLimit,
+  WRITING_GRADE_DAILY_GLOBAL: (
+    quotaKey: string,
+    limit: number,
+  ): ConfiguredRateLimit => ({
+    action: "writing-grade-daily-global",
+    // The UTC date is the logical window. A 48-hour physical expiry keeps the
+    // bucket alive through that date even if the first request arrives late.
+    subject: quotaKey,
+    policy: { limit, windowSeconds: 48 * 60 * 60 },
+  }),
   EXCEL_PARSE: (adminId: string): ConfiguredRateLimit => ({
     action: "excel-parse",
     subject: adminId,

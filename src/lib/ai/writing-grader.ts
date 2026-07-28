@@ -10,9 +10,12 @@ import {
   type WritingGradeResult,
 } from "@/lib/writing-grader-shared";
 
-const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash";
-const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+export const DEFAULT_CLOUDFLARE_WRITING_MODEL = "@cf/qwen/qwen3-30b-a3b-fp8";
+export const DEFAULT_WRITING_GLOBAL_DAILY_LIMIT = 15;
+const MAX_WRITING_GLOBAL_DAILY_LIMIT = 100;
+const CLOUDFLARE_API_BASE = "https://api.cloudflare.com/client/v4/accounts";
 const REQUEST_TIMEOUT_MS = 50_000;
+const MAX_OUTPUT_TOKENS = 1_400;
 
 const CRITERIA_MAX = {
   content: 9,
@@ -39,18 +42,47 @@ export class WritingGraderError extends Error {
   }
 }
 
-export function getGeminiApiKey(): string | null {
-  const value = process.env.GEMINI_API_KEY;
+function readEnvironmentValue(name: string): string | null {
+  const value = process.env[name];
   return value && value.trim() ? value.trim() : null;
 }
 
-export function getGeminiModel(): string {
-  const value = process.env.GEMINI_MODEL;
-  return value && value.trim() ? value.trim() : DEFAULT_GEMINI_MODEL;
+export function getCloudflareAccountId(): string | null {
+  return readEnvironmentValue("CLOUDFLARE_ACCOUNT_ID");
+}
+
+export function getCloudflareApiToken(): string | null {
+  return readEnvironmentValue("CLOUDFLARE_API_TOKEN");
+}
+
+export function getCloudflareWritingModel(): string | null {
+  const configured = readEnvironmentValue("CLOUDFLARE_WRITING_MODEL");
+  const model = configured ?? DEFAULT_CLOUDFLARE_WRITING_MODEL;
+  return model === DEFAULT_CLOUDFLARE_WRITING_MODEL ? model : null;
+}
+
+export function getWritingGlobalDailyLimit(): number | null {
+  const configured = readEnvironmentValue("WRITING_AI_GLOBAL_DAILY_LIMIT");
+  if (!configured) return DEFAULT_WRITING_GLOBAL_DAILY_LIMIT;
+
+  const parsed = Number(configured);
+  if (
+    !Number.isInteger(parsed) ||
+    parsed < 1 ||
+    parsed > MAX_WRITING_GLOBAL_DAILY_LIMIT
+  ) {
+    return null;
+  }
+  return parsed;
 }
 
 export function isWritingGraderEnabled(): boolean {
-  return Boolean(getGeminiApiKey());
+  return Boolean(
+    getCloudflareAccountId() &&
+      getCloudflareApiToken() &&
+      getCloudflareWritingModel() &&
+      getWritingGlobalDailyLimit(),
+  );
 }
 
 export type WritingGradeInput = {
@@ -141,21 +173,24 @@ ${input.essayText}
 ESSAY>>>`;
 }
 
-// OpenAPI-style schema for Gemini structured output (generationConfig.responseSchema).
+// JSON Schema sent through Cloudflare Workers AI JSON Mode.
 const criterionSchema = {
-  type: "OBJECT",
+  type: "object",
+  additionalProperties: false,
   properties: {
-    score: { type: "NUMBER" },
-    comment: { type: "STRING" },
+    score: { type: "number" },
+    comment: { type: "string" },
   },
   required: ["score", "comment"],
 } as const;
 
 const responseSchema = {
-  type: "OBJECT",
+  type: "object",
+  additionalProperties: false,
   properties: {
     criteria: {
-      type: "OBJECT",
+      type: "object",
+      additionalProperties: false,
       properties: {
         content: criterionSchema,
         organization: criterionSchema,
@@ -164,31 +199,33 @@ const responseSchema = {
       },
       required: ["content", "organization", "language", "mechanics"],
     },
-    overallComment: { type: "STRING" },
-    strengths: { type: "ARRAY", items: { type: "STRING" } },
-    priorityIssues: { type: "ARRAY", items: { type: "STRING" } },
+    overallComment: { type: "string" },
+    strengths: { type: "array", items: { type: "string" } },
+    priorityIssues: { type: "array", items: { type: "string" } },
     detailedFeedback: {
-      type: "ARRAY",
+      type: "array",
       items: {
-        type: "OBJECT",
+        type: "object",
+        additionalProperties: false,
         properties: {
-          quote: { type: "STRING" },
-          issue: { type: "STRING" },
-          explanation: { type: "STRING" },
-          suggestedRevision: { type: "STRING" },
+          quote: { type: "string" },
+          issue: { type: "string" },
+          explanation: { type: "string" },
+          suggestedRevision: { type: "string" },
         },
         required: ["quote", "issue", "explanation", "suggestedRevision"],
       },
     },
     suggestedRewrite: {
-      type: "OBJECT",
+      type: "object",
+      additionalProperties: false,
       properties: {
-        thesis: { type: "STRING" },
-        paragraph: { type: "STRING" },
+        thesis: { type: "string" },
+        paragraph: { type: "string" },
       },
     },
-    nextPracticeTasks: { type: "ARRAY", items: { type: "STRING" } },
-    warnings: { type: "ARRAY", items: { type: "STRING" } },
+    nextPracticeTasks: { type: "array", items: { type: "string" } },
+    warnings: { type: "array", items: { type: "string" } },
   },
   required: ["criteria", "overallComment", "strengths", "priorityIssues", "detailedFeedback", "nextPracticeTasks", "warnings"],
 } as const;
@@ -317,24 +354,61 @@ function extractJsonText(text: string): string {
   return trimmed;
 }
 
-type GeminiResponse = {
-  promptFeedback?: { blockReason?: string };
-  candidates?: Array<{
-    finishReason?: string;
-    content?: { parts?: Array<{ text?: string }> };
-  }>;
+type CloudflareResponse = {
+  success?: boolean;
+  result?: unknown;
+  errors?: unknown[];
 };
 
-const BLOCKED_FINISH_REASONS = new Set(["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII", "RECITATION"]);
+function extractCloudflareResult(result: unknown): unknown {
+  if (typeof result === "string") return result;
+  if (!result || typeof result !== "object") return null;
+
+  const record = result as Record<string, unknown>;
+  if (record.response !== undefined) return record.response;
+
+  const choices = Array.isArray(record.choices) ? record.choices : [];
+  const firstChoice = choices[0];
+  if (!firstChoice || typeof firstChoice !== "object") return null;
+
+  const choice = firstChoice as Record<string, unknown>;
+  if (typeof choice.text === "string") return choice.text;
+
+  const message = choice.message;
+  if (!message || typeof message !== "object") return null;
+  const content = (message as Record<string, unknown>).content;
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return null;
+
+  return content
+    .map((part) => {
+      if (!part || typeof part !== "object") return "";
+      const text = (part as Record<string, unknown>).text;
+      return typeof text === "string" ? text : "";
+    })
+    .join("");
+}
+
+function parseStructuredResult(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const text = extractJsonText(value);
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
 
 export async function gradeEssay(input: WritingGradeInput): Promise<WritingGradeResult> {
-  const apiKey = getGeminiApiKey();
-  if (!apiKey) {
-    throw new WritingGraderError("NOT_CONFIGURED", "GEMINI_API_KEY is not configured");
+  const accountId = getCloudflareAccountId();
+  const apiToken = getCloudflareApiToken();
+  const model = getCloudflareWritingModel();
+  if (!accountId || !apiToken || !model || !getWritingGlobalDailyLimit()) {
+    throw new WritingGraderError("NOT_CONFIGURED", "Writing AI configuration is unavailable");
   }
 
-  const model = getGeminiModel();
-  const url = `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent`;
+  const url = `${CLOUDFLARE_API_BASE}/${encodeURIComponent(accountId)}/ai/run/${model}`;
 
   let response: Response;
   try {
@@ -342,16 +416,19 @@ export async function gradeEssay(input: WritingGradeInput): Promise<WritingGrade
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
+        Authorization: `Bearer ${apiToken}`,
       },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ role: "user", parts: [{ text: buildUserPrompt(input) }] }],
-        generationConfig: {
-          temperature: 0.3,
-          responseMimeType: "application/json",
-          responseSchema,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: buildUserPrompt(input) },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: responseSchema,
         },
+        temperature: 0.2,
+        max_tokens: MAX_OUTPUT_TOKENS,
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -371,35 +448,19 @@ export async function gradeEssay(input: WritingGradeInput): Promise<WritingGrade
     throw new WritingGraderError("PROVIDER_ERROR", `AI provider returned status ${response.status}`);
   }
 
-  let data: GeminiResponse;
+  let data: CloudflareResponse;
   try {
-    data = (await response.json()) as GeminiResponse;
+    data = (await response.json()) as CloudflareResponse;
   } catch {
     throw new WritingGraderError("INVALID_RESPONSE", "AI provider returned unreadable data");
   }
 
-  if (data.promptFeedback?.blockReason) {
-    throw new WritingGraderError("CONTENT_BLOCKED", "The submission was blocked by the AI provider");
-  }
-
-  const candidate = data.candidates?.[0];
-  if (candidate?.finishReason && BLOCKED_FINISH_REASONS.has(candidate.finishReason)) {
-    throw new WritingGraderError("CONTENT_BLOCKED", "The response was blocked by the AI provider");
-  }
-
-  const text = (candidate?.content?.parts ?? [])
-    .map((part) => part.text ?? "")
-    .join("")
-    .trim();
-
-  if (!text) {
+  if (data.success === false || !data.result) {
     throw new WritingGraderError("INVALID_RESPONSE", "AI provider returned an empty response");
   }
 
-  let parsedJson: unknown;
-  try {
-    parsedJson = JSON.parse(extractJsonText(text));
-  } catch {
+  const parsedJson = parseStructuredResult(extractCloudflareResult(data.result));
+  if (!parsedJson) {
     throw new WritingGraderError("INVALID_RESPONSE", "AI provider returned invalid JSON");
   }
 

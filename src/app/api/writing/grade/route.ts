@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { gradeEssay, isWritingGraderEnabled, WritingGraderError } from "@/lib/ai/writing-grader";
+import {
+  getWritingGlobalDailyLimit,
+  gradeEssay,
+  isWritingGraderEnabled,
+  WritingGraderError,
+} from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
@@ -11,6 +16,7 @@ import {
   cancelWritingReservation,
   persistCompletedWritingSubmission,
 } from "@/lib/security/writing-quota";
+import { getUtcQuotaKey } from "@/lib/security/writing-quota-core";
 import { Prisma } from "@prisma/client";
 import {
   countWords,
@@ -46,25 +52,25 @@ function validationMessage(error: z.ZodError): string {
 }
 
 const graderErrorResponses: Record<WritingGraderError["code"], { message: string; status: number }> = {
-  NOT_CONFIGURED: { message: "Tính năng chấm bài AI chưa được bật trên server.", status: 503 },
+  NOT_CONFIGURED: { message: "Tính năng chấm bài Writing chưa sẵn sàng.", status: 503 },
   PROVIDER_RATE_LIMITED: {
-    message: "Hệ thống AI đang quá tải. Vui lòng đợi vài phút rồi thử lại.",
+    message: "Hệ thống chấm bài đang quá tải. Vui lòng đợi vài phút rồi thử lại.",
     status: 429,
   },
   CONTENT_BLOCKED: {
-    message: "AI từ chối xử lý bài viết này. Hãy kiểm tra lại nội dung bài và thử lại.",
+    message: "Hệ thống không thể xử lý bài viết này. Hãy kiểm tra lại nội dung và thử lại.",
     status: 422,
   },
   INVALID_RESPONSE: {
-    message: "AI trả về kết quả không đọc được. Vui lòng thử lại.",
+    message: "Không tạo được kết quả chấm hợp lệ. Vui lòng thử lại.",
     status: 502,
   },
   NETWORK_ERROR: {
-    message: "Không kết nối được tới dịch vụ AI. Vui lòng thử lại sau.",
+    message: "Không kết nối được tới hệ thống chấm bài. Vui lòng thử lại sau.",
     status: 504,
   },
   PROVIDER_ERROR: {
-    message: "Dịch vụ AI đang gặp sự cố. Vui lòng thử lại sau.",
+    message: "Hệ thống chấm bài đang gặp sự cố. Vui lòng thử lại sau.",
     status: 502,
   },
 };
@@ -82,7 +88,7 @@ export async function POST(request: Request) {
   }
 
   if (!isWritingGraderEnabled()) {
-    return errorResponse("Tính năng chấm bài AI chưa được bật trên server.", 503);
+    return errorResponse("Tính năng chấm bài Writing chưa sẵn sàng.", 503);
   }
 
   // Check per-user rate limit (short-term burst protection)
@@ -143,7 +149,33 @@ export async function POST(request: Request) {
       return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
     }
     // quota-exceeded
-    return errorResponse("Bạn đã dùng hết 5 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.", 429);
+    return errorResponse("Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.", 429);
+  }
+
+  // Reserve a separate global daily allowance immediately before the provider
+  // call. Invalid or unavailable configuration fails closed and releases the
+  // still-unstarted per-user reservation.
+  const globalDailyLimit = getWritingGlobalDailyLimit();
+  if (!globalDailyLimit) {
+    await cancelWritingReservation(reservation.reservationId, user.id);
+    return errorResponse("Tính năng chấm bài Writing tạm thời chưa sẵn sàng.", 503);
+  }
+
+  const globalDailyAllowance = await checkConfiguredRateLimit(
+    RATE_LIMITS.WRITING_GRADE_DAILY_GLOBAL(
+      getUtcQuotaKey(new Date()),
+      globalDailyLimit,
+    ),
+  );
+  if (globalDailyAllowance.status !== "allowed") {
+    await cancelWritingReservation(reservation.reservationId, user.id);
+    if (globalDailyAllowance.status === "infrastructure-error") {
+      return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+    }
+    return errorResponse(
+      "Hệ thống đã dùng hết lượt chấm bài hôm nay. Hãy quay lại vào ngày mai.",
+      429,
+    );
   }
 
   // Mark provider as starting — this prevents cleanup from reclaiming the slot
@@ -165,7 +197,7 @@ export async function POST(request: Request) {
       essayText: parsed.data.essayText,
     });
 
-    // Persist the submission and COMPLETED transition atomically after Gemini returns.
+    // Persist the submission and COMPLETED transition atomically after the AI provider returns.
     await persistCompletedWritingSubmission(reservation.reservationId, user.id, {
       promptSlug: prompt.slug,
       promptText: prompt.statement,
