@@ -6,6 +6,7 @@ import { isWritingGraderEnabled } from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getWritingPromptBySlug } from "@/lib/writing-prompts";
 import { getWritingQuotaStatus } from "@/lib/security/writing-quota";
+import { getLatestWritingReview } from "@/lib/writing-review";
 
 export const metadata: Metadata = {
   title: "Làm đề Writing",
@@ -31,8 +32,13 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
   // Look up prompt from static bank
   const promptData = promptSlug ? getWritingPromptBySlug(promptSlug) : null;
 
-  // Get daily usage
-  const usage = user ? await getWritingQuotaStatus(user.id) : null;
+  const [usage, initialReview] =
+    user && promptData
+      ? await Promise.all([
+          getWritingQuotaStatus(user.id),
+          getLatestWritingReview(user.id, promptData.slug),
+        ])
+      : [null, null];
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6">
@@ -66,14 +72,6 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
         </section>
       ) : (
         <>
-          {user && usage && (
-            <section className="surface rounded-2xl p-4">
-              <p className="text-sm font-medium">
-                Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.total} lượt chấm AI hôm nay
-              </p>
-            </section>
-          )}
-
           <section className="surface rounded-3xl p-6">
             <h2 className="text-lg font-semibold">Thang điểm 30 theo tiêu chí chuyên Anh</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -92,6 +90,8 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
             enabled={enabled}
             isAuthenticated={Boolean(user)}
             prompt={promptData}
+            quota={usage}
+            initialReview={initialReview}
           />
         </>
       )}

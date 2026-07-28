@@ -82,13 +82,41 @@ The UI reports two daily AI grades and derives usage from quota reservations,
 not merely from completed Writing submissions. Failed provider-started attempts
 therefore remain visible in the daily allowance.
 
+## Writing review UX correction
+
+Owner testing of the initial Preview found two presentation defects: the quota
+card stayed at its pre-submit value until a full refresh, and a refresh removed
+the visible essay/feedback even though the successful submission was already
+stored. The Gym card consequently offered “Xem lại” without restoring the
+review.
+
+The correction keeps the quota card inside the Writing Client Component and
+updates it from the bounded `remaining` value returned by the successful grade
+API. It does not reserve another slot or make a second provider call.
+
+On initial page load or refresh, the server now selects only the newest
+`WritingSubmission` matching both the current session `userId` and the selected
+static `promptSlug`. Only `essayText`, `targetWordCount`, and `resultJson` are
+selected. Stored feedback crosses the learner Server Component boundary only
+after a bounded positive mapper validates the complete expected grade shape and
+discards unknown keys. Malformed, oversized, or unsupported historical values
+fail closed to no restored review. The learner’s saved essay and latest safe
+feedback are then restored, so “Xem lại” is functional and the learner can edit
+the essay before using another daily attempt. Completed Gym cards link directly
+to the restored feedback section.
+
+This adds no schema, migration, provider call, or duplicated persistence. It
+does not change Writing retention: the existing essay/result row remains stored
+under the previously documented lifecycle, so H-11 remains **Partially
+remediated**.
+
 ## Local verification
 
 - Prisma generation: passed.
 - Typecheck: passed.
 - Lint: passed.
-- Focused Writing/provider/quota tests: 53 passed.
-- Complete test suite: 48 files, 490 passed, 8 opt-in PGlite tests skipped.
+- Focused quota/review/page/API correction tests: 4 files, 12 passed.
+- Complete test suite: 51 files, 498 passed, 8 opt-in PGlite tests skipped.
 - Production build: passed with an explicit unreachable synthetic database
   configuration; expected database collection failures were sanitized.
 - `npm audit --omit=dev`: exit 0, zero vulnerabilities.
@@ -106,6 +134,10 @@ Focused coverage includes:
 - learner two-attempt quota behavior;
 - site-wide exhaustion and infrastructure failure before provider invocation;
 - reservation release when a provider call has not started.
+- immediate quota-state transition from a successful API response;
+- current-user and prompt-scoped latest-review selection;
+- bounded positive mapping of stored Writing feedback;
+- restored essay, grade feedback, and quota rendering after a refresh.
 
 No PGlite or managed PostgreSQL test ran for this phase. No real Cloudflare
 request, database, endpoint, Preview, Production, migration, import, export,
@@ -125,12 +157,16 @@ backup, cleanup, deployment, or data rewrite was performed.
    learner responses, and no raw provider response in the UI.
 5. Verify that the same learner receives at most two provider-started grades in
    one UTC day and that another learner has an independent allowance.
-6. Temporarily lower the site-wide limit in an isolated Preview window and
+6. Without refreshing, require the quota card to change from 2/2 to 1/2 after
+   the first successful grade. Refresh the page, return through “Xem lại”, and
+   require the same learner’s latest essay and feedback to remain visible and
+   editable.
+7. Temporarily lower the site-wide limit in an isolated Preview window and
    verify deterministic denial before provider invocation after the ceiling.
    Restore the intended cap and redeploy.
-7. Inspect the bounded runtime-log window. Require no essay, prompt, API token,
+8. Inspect the bounded runtime-log window. Require no essay, prompt, API token,
    provider response, personal sentinel, or raw error.
-8. Configure separate Production credentials, redeploy the known merged commit,
+9. Configure separate Production credentials, redeploy the known merged commit,
    and repeat one bounded synthetic smoke. Record provider deployment
    provenance, health, origin/auth boundaries, quota behavior, and log outcome.
 

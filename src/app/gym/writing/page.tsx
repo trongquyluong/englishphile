@@ -84,10 +84,11 @@ export default async function GymWritingPage() {
           const submission = submissionMap.get(prompt.slug);
           const isCompleted = !!submission;
           const hasResult = submission?.hasResult;
+          const graderHref = `/gym/writing/grader?prompt=${encodeURIComponent(prompt.slug)}`;
           return (
             <Link
               key={prompt.slug}
-              href={`/gym/writing/grader?prompt=${encodeURIComponent(prompt.slug)}`}
+              href={hasResult ? `${graderHref}#writing-grade-result` : graderHref}
               className={`rounded-2xl p-5 transition-all duration-150 ${isCompleted ? "surface surface-hover border border-accent/20 bg-accent/5" : "surface surface-hover"}`}
             >
               <div className="flex items-start justify-between gap-3">

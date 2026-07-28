@@ -11,6 +11,7 @@ import {
   WRITING_GRADER_MIN_WORDS,
   type TargetWordCount,
   type WritingGradeResult,
+  type WritingReviewData,
 } from "@/lib/writing-grader-shared";
 import type { WritingPrompt } from "@/lib/writing-prompts";
 
@@ -20,6 +21,11 @@ type Props = {
   enabled: boolean;
   isAuthenticated: boolean;
   prompt: PromptData;
+  quota: {
+    remaining: number;
+    total: number;
+  } | null;
+  initialReview: WritingReviewData | null;
 };
 
 const criterionRows = [
@@ -31,6 +37,23 @@ const criterionRows = [
 
 function formatScore(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+export function resolveRemainingAttempts(
+  value: unknown,
+  current: number | null,
+  total: number | null,
+): number | null {
+  if (
+    typeof value !== "number" ||
+    !Number.isInteger(value) ||
+    total === null ||
+    value < 0 ||
+    value > total
+  ) {
+    return current;
+  }
+  return value;
 }
 
 function CriterionCard({ label, score, maxScore, comment }: { label: string; score: number; maxScore: number; comment: string }) {
@@ -203,14 +226,23 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
   );
 }
 
-export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
+export function WritingGraderForm({
+  enabled,
+  isAuthenticated,
+  prompt,
+  quota,
+  initialReview,
+}: Props) {
   const [targetWordCount, setTargetWordCount] = useState<TargetWordCount>(() => {
-    // Default to the prompt's target word count
-    return DEFAULT_TARGET_WORD_COUNT;
+    return initialReview?.targetWordCount ?? DEFAULT_TARGET_WORD_COUNT;
   });
-  const [essayText, setEssayText] = useState("");
+  const [essayText, setEssayText] = useState(initialReview?.essayText ?? "");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<WritingGradeResult | null>(null);
+  const [result, setResult] = useState<WritingGradeResult | null>(initialReview?.result ?? null);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(
+    quota?.remaining ?? null,
+  );
+  const [reviewingStoredResult, setReviewingStoredResult] = useState(Boolean(initialReview));
   const [error, setError] = useState<string | null>(null);
   const [dailyLimitError, setDailyLimitError] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
@@ -245,7 +277,6 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
     setLoading(true);
     setError(null);
     setDailyLimitError(null);
-    setResult(null);
     try {
       const response = await fetch("/api/writing/grade", {
         method: "POST",
@@ -256,7 +287,11 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
           targetWordCount,
         }),
       });
-      const data = (await response.json().catch(() => null)) as { result?: WritingGradeResult; error?: string } | null;
+      const data = (await response.json().catch(() => null)) as {
+        result?: WritingGradeResult;
+        remaining?: unknown;
+        error?: string;
+      } | null;
       if (!response.ok || !data?.result) {
         if (response.status === 429) {
           setDailyLimitError(data?.error ?? "Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.");
@@ -266,6 +301,10 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
         return;
       }
       setResult(data.result);
+      setReviewingStoredResult(false);
+      setRemainingAttempts((current) =>
+        resolveRemainingAttempts(data.remaining, current, quota?.total ?? null),
+      );
       requestAnimationFrame(() => {
         resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -278,6 +317,18 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
 
   return (
     <div className="grid gap-5">
+      {isAuthenticated && quota && remainingAttempts !== null ? (
+        <section className="surface rounded-2xl p-4" aria-live="polite">
+          <p className="text-sm font-medium">
+            Còn{" "}
+            <span className="tabular-nums font-semibold text-accent-strong">
+              {remainingAttempts}
+            </span>
+            /{quota.total} lượt chấm AI hôm nay
+          </p>
+        </section>
+      ) : null}
+
       {enabled && !isAuthenticated ? (
         <div className="surface flex flex-col gap-3 rounded-2xl p-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-ink-soft">Bạn cần đăng nhập để nộp bài và nhận nhận xét.</p>
@@ -369,7 +420,12 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
         </fieldset>
       </form>
 
-      <div ref={resultRef} aria-live="polite">
+      <div id="writing-grade-result" ref={resultRef} aria-live="polite">
+        {reviewingStoredResult && result ? (
+          <p className="mb-4 rounded-2xl bg-accent-soft/60 p-4 text-sm leading-6 text-accent-strong">
+            Đây là bài viết và kết quả chấm gần nhất của đề này. Bạn có thể sửa bài ở trên rồi nộp lại để nhận nhận xét mới.
+          </p>
+        ) : null}
         {result ? <GradeResultView result={result} /> : null}
       </div>
     </div>

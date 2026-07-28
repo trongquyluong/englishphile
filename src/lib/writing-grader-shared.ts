@@ -82,3 +82,9 @@ export type WritingGradeResult = {
   nextPracticeTasks: string[];
   warnings: string[];
 };
+
+export type WritingReviewData = {
+  essayText: string;
+  targetWordCount: TargetWordCount;
+  result: WritingGradeResult;
+};
