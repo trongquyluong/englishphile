@@ -1681,7 +1681,7 @@ Phase 1D-C2 clears the dependency-advisory condition for public beta but does no
 
 ### Phase 1D-C2 Preview operational reconciliation (owner-attested 2026-07-27)
 
-The C2 dependency implementation is commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`; the formula-validation UI correction that followed is commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main` during the supplied Preview verification. It has not merged, and C2 Production functional verification has not occurred.
+The C2 dependency implementation is commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`; the formula-validation UI correction that followed is commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main` during the supplied Preview verification. That is historical Preview state; PR #16 later merged and received the selected Production verification recorded below.
 
 The initial dependency Preview passed Vercel and Vercel Preview Comments. A generated valid XLSX reached the actual application contest parser running on Preview and rendered title `Phase 1D-C2 Preview XLSX Probe`, one section, and one question. ExcelJS externalization worked, no optional S3-module resolution failure appeared, no contest draft was created, and the checked runtime log window returned no logs.
 
@@ -1693,7 +1693,29 @@ At the correction Preview checkpoint, both remote checks succeeded with zero fai
 
 Authentication/session material exposed during investigation was treated as compromised. The affected old Preview deployment was deleted, Preview signing material was rotated, Production used separate rotated signing material, and Production was redeployed after rotation with a passing health check. No protected value or operational identifier is recorded. These containment actions are not application-code evidence and do not constitute C2 Production functional verification.
 
-This operational evidence is owner-attested and separate from repository/local verification. No browser automation, ordinary-`STUDENT` C2 retest, contest persistence, every-path ExcelJS/ZIP/Sharp/platform/cache/provider check, or managed PostgreSQL evidence is claimed. PR #16 remains Draft, Production verification remains pending, the development-only `brace-expansion@1.1.15` package entry representing two GHSAs remains open, and H-11 remains **Partially remediated**. Clearing the production dependency-advisory gate does not grant blanket public-beta or release clearance.
+This operational evidence is owner-attested and separate from repository/local verification. No browser automation, ordinary-`STUDENT` C2 retest at that Preview checkpoint, contest persistence, every-path ExcelJS/ZIP/Sharp/platform/cache/provider check, or managed PostgreSQL evidence is claimed. The development-only `brace-expansion@1.1.15` package entry representing two GHSAs remains open, and H-11 remains **Partially remediated**. Clearing the production dependency-advisory gate does not grant blanket public-beta or release clearance.
+
+### Phase 1D-C2 selected Production operational reconciliation (owner-attested 2026-07-28)
+
+This supplied Production operational evidence is separate from repository/local evidence and the historical Preview evidence:
+
+- PR #16 merged as commit `0852c05f9acde31f8bfed0887b2749616edf65f6`.
+- The deployment target was Production, it reached `READY`, and it was created after the merge.
+- Provider commit metadata was not reported, so no provider-reported commit metadata match is claimed.
+- Health returned HTTP 200 with `ok=true` and `database=connected`.
+- A same-origin anonymous submission returned HTTP 401 in a fresh unauthenticated browser context.
+- Current missing-Origin status was not reverified because PowerShell, Node `fetch`, `HttpClient`, and `WebClient` did not receive an HTTP response. No status `0` is recorded and no current HTTP 403 is claimed. The missing-Origin HTTP 403 recorded for Phase 1D-C1 Production is historical C1 evidence only.
+- `OWNER_EMAIL`-equivalent owner/admin access passed. A valid XLSX rendered a normal Preview with one section and one question; no contest draft was created.
+- A formula-containing XLSX produced bounded in-page validation and showed the formula cell location. Raw formula content and the generic error page were absent, and the draft action was suppressed while invalid.
+- Retrying a valid XLSX succeeded and restored the draft button. Ordinary-`STUDENT` admin denial passed.
+- Home/public navigation, visible images and the logo, practice submission, diagnostic, contest, and Writing regressions passed.
+- No exact image format or comprehensive Sharp/libvips coverage is claimed.
+- Checked Production runtime logs returned `No logs found`; no sensitive data was observed in the checked logs.
+- The operational Git checkpoint was branch `main`, with the tracked worktree and index clean.
+
+The implementation checkpoint remains the source of dependency evidence: production `npm audit` exited 0 with zero vulnerable dependency-package entries, and the full audit retained the documented development-only `brace-expansion@1.1.15`/ESLint finding. Audits, tests, build, lint, typecheck, Prisma commands, and npm install were not rerun during this documentation-only reconciliation.
+
+The reconciliation used supplied owner-attested facts only. It did not access a database, endpoint, browser, provider, deployment, runtime log, environment value, or PR state, and it did not stage, commit, push, deploy, merge, or alter PR/provider state. These selected Production checks do not establish every route, exact image format, comprehensive Sharp/libvips behavior, managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping evidence. The public-beta production dependency-advisory gate is cleared, but this is not blanket release clearance. H-11 remains **Partially remediated**.
 
 ### Historical Phase 1D-C1 owner-attested isolated Preview operational reconciliation (2026-07-27)
 
@@ -1724,4 +1746,4 @@ This supplied Production operational evidence is separate from repository/local 
 
 No browser-reported or response `Content-Type` was supplied for the Production image check; no WebP, AVIF, PNG, or other exact format is claimed. The observation does not establish direct Sharp or libvips execution or test every image input, output format, platform binary, cache state, or optimizer branch. The successful build, local synthetic optimizer probe, historical Preview cache revalidation, and Production GET 200 observation remain separate evidence.
 
-These selected Production observations do not test every route and establish no managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping evidence. No import, migration, seed, export, backup, cleanup, historical rewrite, or data rewrite was performed for C1 Production verification. No deployment ID, provider hostname, protected URL, account email, user ID, submission ID, cookie, credential, environment value, request payload, learner answer, problem ID, or internal provider data is recorded. No audit was rerun during this documentation pass. The latest known audits remain 17 entries (1 Moderate/16 High) in full scope and 10 entries (1 Moderate/9 High) in production scope, both exiting 1; Next, PostCSS, and Sharp remain absent. Public beta remains blocked pending actual Phase 1D-C2 disposition, and H-11 remains **Partially remediated**.
+These selected Production observations do not test every route and establish no managed PostgreSQL integration, pooler, failover, concurrency, rollback, migration, or data-shaping evidence. No import, migration, seed, export, backup, cleanup, historical rewrite, or data rewrite was performed for C1 Production verification. No deployment ID, provider hostname, protected URL, account email, user ID, submission ID, cookie, credential, environment value, request payload, learner answer, problem ID, or internal provider data is recorded. No audit was rerun during this documentation pass. At that historical C1 checkpoint, the latest known audits remained 17 entries (1 Moderate/16 High) in full scope and 10 entries (1 Moderate/9 High) in production scope, both exiting 1; Next, PostCSS, and Sharp were absent, and public beta remained blocked pending actual Phase 1D-C2 disposition. The later C2 disposition is recorded above. H-11 remains **Partially remediated**.
