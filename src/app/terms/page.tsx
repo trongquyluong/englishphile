@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Điều khoản sử dụng Englishphile: tài khoản, nội dung, điểm số và giới hạn trách nhiệm.",
 };
 
-const lastUpdated = "09/07/2026";
+const lastUpdated = "28/07/2026";
 
 export default function TermsPage() {
   return (
@@ -43,7 +43,7 @@ export default function TermsPage() {
           </li>
           <li>Điểm số và mức trình độ là ước lượng để định hướng luyện tập, không phải chứng chỉ hay kết quả thi chính thức.</li>
           <li>
-            Nhận xét và điểm từ tính năng chấm bài Writing bằng AI chỉ nhằm hỗ trợ việc học và có thể thiếu chính xác. Đó là điểm ước
+            Nhận xét và điểm từ tính năng nhận xét Writing tự động chỉ nhằm hỗ trợ việc học và có thể thiếu chính xác. Đó là điểm ước
             lượng, không phải kết quả thi chính thức.
           </li>
           <li>
@@ -55,6 +55,16 @@ export default function TermsPage() {
             để nội dung được sửa sớm.
           </li>
         </ul>
+
+        <h2 className="mt-6 text-lg font-semibold text-foreground">Xử lý nội dung Writing</h2>
+        <p className="mt-2">
+          Khi sử dụng tính năng nhận xét Writing, bạn đồng ý để đề bài và bài viết được xử lý bởi dịch vụ bên thứ ba nhằm tạo phản hồi
+          học tập. Thông tin về mục đích xử lý, nhà cung cấp và dữ liệu liên quan được nêu trong{" "}
+          <Link href="/privacy" className="font-semibold text-accent-strong hover:underline">
+            Chính sách riêng tư
+          </Link>
+          .
+        </p>
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Những việc không được làm</h2>
         <ul className="mt-2 grid list-disc gap-1.5 pl-5 marker:text-accent">

@@ -74,7 +74,7 @@ export default async function GymWritingPage() {
       {user && (
         <section className="surface rounded-2xl p-4">
           <p className="text-sm font-medium">
-            Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.total} lượt chấm AI hôm nay
+            Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.total} lượt chấm bài hôm nay
           </p>
         </section>
       )}

@@ -57,10 +57,14 @@ describe("Writing grader immediate quota transition", () => {
     );
 
     expect(html).toContain("Còn");
-    expect(html).toContain("1</span>/2 lượt chấm AI hôm nay");
+    expect(html).toContain("1</span>/2 lượt chấm bài hôm nay");
     expect(html).toContain(essayText);
     expect(html).toContain("PERSISTED-FEEDBACK-SENTINEL");
     expect(html).toContain("kết quả chấm gần nhất");
     expect(html).toContain('id="writing-grade-result"');
+    expect(html).not.toContain("Cloudflare");
+    expect(html).not.toContain("Workers AI");
+    expect(html).not.toContain("thông tin nhạy cảm");
+    expect(html).not.toContain("Điểm do AI");
   });
 });

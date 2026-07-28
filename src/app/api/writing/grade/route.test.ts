@@ -62,6 +62,10 @@ vi.mock("@/lib/security/writing-quota", () => ({
 }));
 
 import { POST } from "@/app/api/writing/grade/route";
+import {
+  WritingGraderError,
+  type WritingGraderErrorCode,
+} from "@/lib/ai/writing-grader";
 
 const gradeResult = {
   totalScore: 20,
@@ -151,7 +155,7 @@ describe("Writing grade route daily quota boundaries", () => {
 
     expect(response.status).toBe(429);
     expect(await response.json()).toEqual({
-      error: "Hệ thống đã dùng hết lượt chấm AI miễn phí hôm nay. Hãy quay lại vào ngày mai.",
+      error: "Hệ thống đã dùng hết lượt chấm bài hôm nay. Hãy quay lại vào ngày mai.",
     });
     expect(mocks.cancelWritingReservation).toHaveBeenCalledWith(
       "reservation-1",
@@ -195,5 +199,26 @@ describe("Writing grade route daily quota boundaries", () => {
     });
     expect(mocks.checkConfiguredRateLimit).toHaveBeenCalledTimes(2);
     expect(mocks.gradeEssay).not.toHaveBeenCalled();
+  });
+
+  it.each<[WritingGraderErrorCode, number]>([
+    ["NOT_CONFIGURED", 503],
+    ["PROVIDER_RATE_LIMITED", 429],
+    ["CONTENT_BLOCKED", 422],
+    ["INVALID_RESPONSE", 502],
+    ["NETWORK_ERROR", 504],
+    ["PROVIDER_ERROR", 502],
+  ])("returns product-safe copy for grader error %s", async (code, expectedStatus) => {
+    mocks.gradeEssay.mockRejectedValue(
+      new WritingGraderError(code, "INTERNAL-PROVIDER-SENTINEL"),
+    );
+
+    const response = await POST(request());
+    const body = await response.json();
+
+    expect(response.status).toBe(expectedStatus);
+    expect(body.error).toEqual(expect.any(String));
+    expect(body.error).not.toMatch(/\bAI\b|Cloudflare|provider|server/i);
+    expect(JSON.stringify(body)).not.toContain("INTERNAL-PROVIDER-SENTINEL");
   });
 });

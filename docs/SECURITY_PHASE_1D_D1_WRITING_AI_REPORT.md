@@ -73,14 +73,16 @@ transition fails; it never permits spending beyond the configured ceiling.
 
 ## Learner communication
 
-The Writing form states that the prompt and essay are sent to Cloudflare
-Workers AI and tells learners not to enter names, email addresses, phone
-numbers, home addresses, or other sensitive information. The Privacy page
-describes the same boundary and states that AI Gateway is not used.
+The learner workflow uses concise product language and does not expose
+provider, infrastructure, or configuration details inline. The Privacy page
+identifies Cloudflare Workers AI, explains the purpose and data-processing
+boundary, and advises learners to provide only content needed for practice.
+The Terms page records automated Writing processing and links to the Privacy
+page for the provider and data details.
 
-The UI reports two daily AI grades and derives usage from quota reservations,
-not merely from completed Writing submissions. Failed provider-started attempts
-therefore remain visible in the daily allowance.
+The UI reports two daily Writing grades and derives usage from quota
+reservations, not merely from completed Writing submissions. Failed
+provider-started attempts therefore remain visible in the daily allowance.
 
 ## Writing review UX correction
 
@@ -115,8 +117,8 @@ remediated**.
 - Prisma generation: passed.
 - Typecheck: passed.
 - Lint: passed.
-- Focused quota/review/page/API correction tests: 4 files, 12 passed.
-- Complete test suite: 51 files, 498 passed, 8 opt-in PGlite tests skipped.
+- Focused quota/review/page/API/disclosure tests: 4 files, 17 passed.
+- Complete test suite: 52 files, 506 passed, 8 opt-in PGlite tests skipped.
 - Production build: passed with an explicit unreachable synthetic database
   configuration; expected database collection failures were sanitized.
 - `npm audit --omit=dev`: exit 0, zero vulnerabilities.
@@ -133,11 +135,12 @@ Focused coverage includes:
 - no essay/token logging on network failure;
 - learner two-attempt quota behavior;
 - site-wide exhaustion and infrastructure failure before provider invocation;
-- reservation release when a provider call has not started.
+- reservation release when a provider call has not started;
 - immediate quota-state transition from a successful API response;
 - current-user and prompt-scoped latest-review selection;
 - bounded positive mapping of stored Writing feedback;
-- restored essay, grade feedback, and quota rendering after a refresh.
+- restored essay, grade feedback, and quota rendering after a refresh;
+- provider-neutral learner copy and consolidated Privacy/Terms disclosure.
 
 No PGlite or managed PostgreSQL test ran for this phase. No real Cloudflare
 request, database, endpoint, Preview, Production, migration, import, export,

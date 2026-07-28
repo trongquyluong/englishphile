@@ -85,7 +85,7 @@ function GradeResultView({ result }: { result: WritingGradeResult }) {
           <span className="text-2xl font-medium text-ink-soft">/{result.maxScore}</span>
         </p>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-soft text-pretty">
-          Điểm do AI ước lượng theo tiêu chí chuyên Anh, chỉ để định hướng luyện tập — không phải kết quả thi chính thức.
+          Điểm được ước lượng theo tiêu chí chuyên Anh và chỉ dùng để định hướng luyện tập — không phải kết quả thi chính thức.
         </p>
       </section>
 
@@ -324,7 +324,7 @@ export function WritingGraderForm({
             <span className="tabular-nums font-semibold text-accent-strong">
               {remainingAttempts}
             </span>
-            /{quota.total} lượt chấm AI hôm nay
+            /{quota.total} lượt chấm bài hôm nay
           </p>
         </section>
       ) : null}
@@ -392,10 +392,6 @@ export function WritingGraderForm({
             <span className={`tabular-nums text-xs font-medium ${wordCountTone}`}>
               {wordCount} từ · tối thiểu {WRITING_GRADER_MIN_WORDS}, tối đa {WRITING_GRADER_MAX_WORDS} từ
             </span>
-            <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs font-medium leading-5 text-warning">
-              Bài viết sẽ được gửi tới Cloudflare Workers AI để tạo nhận xét. Đừng nhập họ tên, email,
-              số điện thoại, địa chỉ hoặc thông tin nhạy cảm.
-            </p>
           </div>
 
           {error ? (

@@ -55,12 +55,12 @@ export default function PrivacyPage() {
           bảo mật riêng của họ.
         </p>
 
-        <h2 className="mt-6 text-lg font-semibold text-foreground">Nhận xét Writing bằng AI</h2>
+        <h2 className="mt-6 text-lg font-semibold text-foreground">Xử lý bài Writing</h2>
         <p className="mt-2">
-          Khi bạn gửi bài viết để nhận nhận xét Writing, đề bài và bài viết sẽ được chuyển trực tiếp tới Cloudflare Workers AI để tạo
-          nhận xét, theo chính sách dữ liệu riêng của Cloudflare. Englishphile không dùng AI Gateway cho luồng này. Việc gửi bài được coi
-          là đồng ý sử dụng dữ liệu cho mục đích chấm luyện tập. Vì vậy, đừng đưa họ tên, email, số điện thoại, địa chỉ hoặc nội dung nhạy
-          cảm vào bài viết.
+          Khi bạn sử dụng tính năng nhận xét Writing, nội dung đề bài và bài viết được xử lý bởi Cloudflare Workers AI nhằm tạo phản hồi
+          học tập. Englishphile chỉ gửi dữ liệu cần thiết để cung cấp tính năng; việc xử lý tại Cloudflare tuân theo chính sách bảo vệ dữ
+          liệu riêng của nhà cung cấp. Người dùng nên chỉ cung cấp nội dung phục vụ việc luyện tập và không đưa dữ liệu cá nhân không cần
+          thiết vào bài viết.
         </p>
 
         <h2 className="mt-6 text-lg font-semibold text-foreground">Cookie và phiên đăng nhập</h2>
