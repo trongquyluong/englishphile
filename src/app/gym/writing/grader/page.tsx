@@ -5,7 +5,7 @@ import { WritingGraderForm } from "@/components/writing/WritingGraderForm";
 import { isWritingGraderEnabled } from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getWritingPromptBySlug } from "@/lib/writing-prompts";
-import { getWritingSubmissionUsage } from "@/lib/writing-submissions";
+import { getWritingQuotaStatus } from "@/lib/security/writing-quota";
 
 export const metadata: Metadata = {
   title: "Làm đề Writing",
@@ -32,7 +32,7 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
   const promptData = promptSlug ? getWritingPromptBySlug(promptSlug) : null;
 
   // Get daily usage
-  const usage = user ? await getWritingSubmissionUsage(user.id) : null;
+  const usage = user ? await getWritingQuotaStatus(user.id) : null;
 
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-6">
@@ -69,7 +69,7 @@ export default async function WritingGraderPage({ searchParams }: PageProps) {
           {user && usage && (
             <section className="surface rounded-2xl p-4">
               <p className="text-sm font-medium">
-                Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.limit} lượt nộp hôm nay
+                Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.total} lượt chấm AI hôm nay
               </p>
             </section>
           )}

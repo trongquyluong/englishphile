@@ -259,7 +259,7 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
       const data = (await response.json().catch(() => null)) as { result?: WritingGradeResult; error?: string } | null;
       if (!response.ok || !data?.result) {
         if (response.status === 429) {
-          setDailyLimitError(data?.error ?? "Bạn đã dùng hết 5 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.");
+          setDailyLimitError(data?.error ?? "Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.");
         } else {
           setError(data?.error ?? "Có lỗi xảy ra khi chấm bài. Vui lòng thử lại.");
         }
@@ -341,6 +341,10 @@ export function WritingGraderForm({ enabled, isAuthenticated, prompt }: Props) {
             <span className={`tabular-nums text-xs font-medium ${wordCountTone}`}>
               {wordCount} từ · tối thiểu {WRITING_GRADER_MIN_WORDS}, tối đa {WRITING_GRADER_MAX_WORDS} từ
             </span>
+            <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs font-medium leading-5 text-warning">
+              Bài viết sẽ được gửi tới Cloudflare Workers AI để tạo nhận xét. Đừng nhập họ tên, email,
+              số điện thoại, địa chỉ hoặc thông tin nhạy cảm.
+            </p>
           </div>
 
           {error ? (

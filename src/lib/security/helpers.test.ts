@@ -289,13 +289,13 @@ describe("production Writing quota factory with a mocked atomic store", () => {
     expect(getUtcQuotaKey(new Date("2026-07-13T00:30:00.000+01:00"))).toBe("2026-07-12");
   });
 
-  it("allows five concurrent mocked reservations and denies the sixth", async () => {
+  it("allows two concurrent mocked reservations and denies later requests", async () => {
     const reserve = createWritingQuotaReserver(new AtomicWritingSlotStore(), {
       now: () => new Date("2026-07-12T12:00:00Z"),
     });
     const results = await Promise.all(Array.from({ length: 6 }, () => reserve("user-1")));
-    expect(results.filter((result) => result.allowed)).toHaveLength(5);
-    expect(results.filter((result) => !result.allowed && result.reason === "quota-exceeded")).toHaveLength(1);
+    expect(results.filter((result) => result.allowed)).toHaveLength(2);
+    expect(results.filter((result) => !result.allowed && result.reason === "quota-exceeded")).toHaveLength(4);
   });
 
   it("distinguishes infrastructure failure from quota exhaustion", async () => {

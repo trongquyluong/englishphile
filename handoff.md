@@ -14,6 +14,34 @@ Prepare Englishphile for public beta while preserving the current product direct
 
 ## Current Progress
 
+Security Phase 1D-D1 prepares the Writing grader to use Cloudflare Workers AI
+directly with the reviewed `@cf/qwen/qwen3-30b-a3b-fp8` model. The server
+requires a Cloudflare account ID and narrowly scoped API token, does not use AI
+Gateway, requests JSON Schema output, and still validates every provider result
+with the application Zod schema before persistence. The provider remains
+disabled when credentials, the reviewed model, or the bounded global quota are
+invalid.
+
+Writing quota is now two provider-started attempts per learner per UTC day.
+Immediately before the provider boundary, the route also atomically reserves a
+site-wide UTC-day allowance. The site cap defaults to 15 and accepts only
+integer values from 1 through 100. Missing quota infrastructure fails closed;
+an unstarted learner reservation is released and the provider is not called.
+The existing short-term learner/global burst limits remain in place. Learners
+see a clear warning that the essay is sent to Cloudflare Workers AI and must
+not contain names, contact details, addresses, or other sensitive information.
+
+Local verification for this change passes Prisma generation, typecheck, lint,
+53 focused tests, the complete 48-file suite with 490 passed and 8 opt-in
+PGlite cases skipped, and the production build with an explicit unreachable
+synthetic database target. Production dependency audit exits 0; the full audit
+retains only the documented development-only brace-expansion/ESLint finding.
+No schema, migration, dependency, lockfile, real database, Cloudflare provider,
+Preview, or Production operation was used. Deployment configuration and
+bounded Preview/Production verification remain pending. Writing essay/result
+retention is unchanged, so H-11 remains **Partially remediated**. See
+`docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
+
 Security Phase 1D-C2 dependency implementation is recorded at commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`. The formula-validation UI correction began from that HEAD and is recorded at commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. During the supplied Preview verification, PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main`; that remains historical Preview state. PR #16 later merged as commit `0852c05f9acde31f8bfed0887b2749616edf65f6`, and selected owner-attested Production verification passed within the limits below.
 
 Owner-attested initial dependency Preview evidence records that Vercel and Vercel Preview Comments passed. A generated valid XLSX reached the actual application contest parser running on Preview and rendered title `Phase 1D-C2 Preview XLSX Probe`, one section, and one question. ExcelJS externalization worked, no optional S3-module resolution failure appeared, no contest draft was created, and the checked runtime log window returned no logs.

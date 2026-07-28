@@ -3,7 +3,8 @@ import { ArrowRight, FilePenLine, PenTool } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { WRITING_PROMPTS } from "@/lib/writing-prompts";
-import { getWritingSubmissionUsage } from "@/lib/writing-submissions";
+import { getWritingQuotaStatus } from "@/lib/security/writing-quota";
+import { WRITING_DAILY_LIMIT } from "@/lib/security/writing-quota-core";
 
 export default async function GymWritingPage() {
   const user = await getCurrentUser();
@@ -25,7 +26,13 @@ export default async function GymWritingPage() {
           return map;
         })
       : Promise.resolve(new Map<string, { createdAt: Date; hasResult: boolean }>()),
-    user ? getWritingSubmissionUsage(user.id) : Promise.resolve({ used: 0, limit: 5, remaining: 5 }),
+    user
+      ? getWritingQuotaStatus(user.id)
+      : Promise.resolve({
+          used: 0,
+          total: WRITING_DAILY_LIMIT,
+          remaining: WRITING_DAILY_LIMIT,
+        }),
   ]);
 
   return (
@@ -67,7 +74,7 @@ export default async function GymWritingPage() {
       {user && (
         <section className="surface rounded-2xl p-4">
           <p className="text-sm font-medium">
-            Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.limit} lượt nộp hôm nay
+            Còn <span className="tabular-nums font-semibold text-accent-strong">{usage.remaining}</span>/{usage.total} lượt chấm AI hôm nay
           </p>
         </section>
       )}

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { gradeEssay, isWritingGraderEnabled, WritingGraderError } from "@/lib/ai/writing-grader";
+import {
+  getWritingGlobalDailyLimit,
+  gradeEssay,
+  isWritingGraderEnabled,
+  WritingGraderError,
+} from "@/lib/ai/writing-grader";
 import { getCurrentUser } from "@/lib/auth/session";
 import { validateRequestOrigin, getOriginErrorMessage } from "@/lib/security/request-origin";
 import { checkConfiguredRateLimit, RATE_LIMITS } from "@/lib/security/rate-limit";
@@ -11,6 +16,7 @@ import {
   cancelWritingReservation,
   persistCompletedWritingSubmission,
 } from "@/lib/security/writing-quota";
+import { getUtcQuotaKey } from "@/lib/security/writing-quota-core";
 import { Prisma } from "@prisma/client";
 import {
   countWords,
@@ -143,7 +149,33 @@ export async function POST(request: Request) {
       return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
     }
     // quota-exceeded
-    return errorResponse("Bạn đã dùng hết 5 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.", 429);
+    return errorResponse("Bạn đã dùng hết 2 lượt chấm Writing hôm nay. Hãy quay lại vào ngày mai.", 429);
+  }
+
+  // Reserve a separate global daily allowance immediately before the provider
+  // call. Invalid or unavailable configuration fails closed and releases the
+  // still-unstarted per-user reservation.
+  const globalDailyLimit = getWritingGlobalDailyLimit();
+  if (!globalDailyLimit) {
+    await cancelWritingReservation(reservation.reservationId, user.id);
+    return errorResponse("Tính năng chấm bài AI tạm thời chưa sẵn sàng.", 503);
+  }
+
+  const globalDailyAllowance = await checkConfiguredRateLimit(
+    RATE_LIMITS.WRITING_GRADE_DAILY_GLOBAL(
+      getUtcQuotaKey(new Date()),
+      globalDailyLimit,
+    ),
+  );
+  if (globalDailyAllowance.status !== "allowed") {
+    await cancelWritingReservation(reservation.reservationId, user.id);
+    if (globalDailyAllowance.status === "infrastructure-error") {
+      return errorResponse("Dịch vụ tạm thời gián đoạn. Vui lòng thử lại sau.", 503);
+    }
+    return errorResponse(
+      "Hệ thống đã dùng hết lượt chấm AI miễn phí hôm nay. Hãy quay lại vào ngày mai.",
+      429,
+    );
   }
 
   // Mark provider as starting — this prevents cleanup from reclaiming the slot
@@ -165,7 +197,7 @@ export async function POST(request: Request) {
       essayText: parsed.data.essayText,
     });
 
-    // Persist the submission and COMPLETED transition atomically after Gemini returns.
+    // Persist the submission and COMPLETED transition atomically after the AI provider returns.
     await persistCompletedWritingSubmission(reservation.reservationId, user.id, {
       promptSlug: prompt.slug,
       promptText: prompt.statement,
