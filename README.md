@@ -80,6 +80,19 @@ ceiling defaults to a conservative 15 and accepts an explicitly configured
 value of at most 100. Keep the API token server-only and give it only the
 Workers AI permission needed for the account.
 
+Phase 1D-D1 local verification passes 17 focused
+quota/review/page/API/disclosure tests, the complete 52-file suite with 506
+passed and 8 opt-in PGlite cases skipped, typecheck, lint, and the Production
+build. Owner-attested Preview evidence records successful grading, immediate
+quota updates, restored essay/feedback after refresh, functional “Xem lại,”
+edited-latest behavior, and cross-user isolation. At
+`6844d2b23722e1d176809243b0afe9fa12d2cacb`, learner-facing Writing pages use
+provider-neutral wording while Privacy and Terms retain the processing
+disclosure; both Vercel checks passed and checked runtime windows contained no
+relevant error or sensitive data. Production verification remains pending.
+Writing retention is unchanged, so H-11 remains **Partially remediated**. See
+`docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
+
 ## Test Accounts And Signup
 
 After seeding:

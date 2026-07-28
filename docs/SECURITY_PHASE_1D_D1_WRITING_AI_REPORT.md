@@ -4,11 +4,11 @@ Date: 2026-07-28
 
 ## Verdict
 
-Phase 1D-D1 is implemented and locally verified. Writing AI now has a
-zero-cost-oriented Cloudflare Workers AI provider boundary, two
-provider-started attempts per learner per UTC day, and a bounded site-wide
-UTC-day allowance. Provider configuration and quota infrastructure fail
-closed.
+Phase 1D-D1 is implemented, locally verified, and selected Preview behavior is
+owner-attested. Writing AI now has a zero-cost-oriented Cloudflare Workers AI
+provider boundary, two provider-started attempts per learner per UTC day, and a
+bounded site-wide UTC-day allowance. Provider configuration and quota
+infrastructure fail closed.
 
 This does not close H-11. Essay text, prompts, normalized model feedback, and
 Writing submission rows retain their existing lifecycle. A separately approved
@@ -142,9 +142,35 @@ Focused coverage includes:
 - restored essay, grade feedback, and quota rendering after a refresh;
 - provider-neutral learner copy and consolidated Privacy/Terms disclosure.
 
-No PGlite or managed PostgreSQL test ran for this phase. No real Cloudflare
-request, database, endpoint, Preview, Production, migration, import, export,
-backup, cleanup, deployment, or data rewrite was performed.
+No PGlite or managed PostgreSQL test ran for this phase. Local verification did
+not access a real Cloudflare account, database, endpoint, Preview, Production,
+migration, import, export, backup, cleanup, deployment, or data rewrite.
+
+## Owner-attested Preview reconciliation
+
+The owner separately verified the deployed Preview behavior. This is
+operational evidence, not repository test evidence or browser automation.
+
+- The initial provider integration at `d8ff4a8` graded a bounded Writing
+  submission successfully with the configured Cloudflare account, token,
+  reviewed model, and site-wide daily limit of 15.
+- The review-state correction at `3b58991` updated the quota without refresh,
+  restored the latest essay and feedback after refresh, linked “Xem lại” to the
+  feedback section, treated an edited essay as the newest submission, and
+  preserved cross-user isolation.
+- The learner-copy correction at
+  `6844d2b23722e1d176809243b0afe9fa12d2cacb` displayed provider-neutral quota
+  wording, removed provider wording from the Writing workflow, preserved the
+  review/refresh behavior, and exposed the data-processing disclosure through
+  Privacy and Terms instead.
+- PR #18 remained OPEN, Draft, and mergeable at this checkpoint. Vercel and
+  Vercel Preview Comments both passed for the copy-correction head.
+- Checked Preview runtime windows contained no relevant error or sensitive
+  data.
+
+The latest copy-only checkpoint did not repeat the provider call or claim a new
+quota-consumption, database, cross-user, or provider-retention test. Production
+deployment and verification remain pending.
 
 ## Deployment runbook
 
