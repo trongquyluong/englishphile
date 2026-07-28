@@ -5,12 +5,13 @@ Date: 2026-07-28
 ## Verdict
 
 Phase 1D-D1 has a narrowly scoped Production `INVALID_RESPONSE` recovery
-hotfix. Local verification is recorded below; Preview and Production retesting
-of the hotfix remain pending. The owner observed a real Production submission
-reach the provider and return an unusable structured result. The learner
-allowance changed from 2 to 1 under the previous provider-started policy, but no
-`WritingSubmission` was created, so completion and review could not be
-restored.
+hotfix. Local verification and owner-attested Preview reconciliation are
+recorded separately below; Production deployment and post-merge verification
+remain pending. Before this hotfix, the owner observed a real Production
+submission reach the provider and return an unusable structured result. The
+learner allowance changed from 2 to 1 under the previous provider-started
+policy, but no `WritingSubmission` was created, so completion and review could
+not be restored.
 
 Raw provider output was intentionally not logged or retained. The safe
 root-cause classification is `WritingGraderError: INVALID_RESPONSE`; the exact
@@ -245,6 +246,32 @@ database was accessed for this review.
 The owner separately verified the deployed Preview behavior. This is
 operational evidence, not repository test evidence or browser automation.
 
+- At hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`, the Preview
+  target reached `READY`; health and database checks passed. PR #18 remained
+  OPEN and Draft.
+- Preview used the reviewed
+  `@cf/meta/llama-3.1-8b-instruct-fast` model. The learner began with `1/2`
+  displayed attempts.
+- An offline network failure preserved the essay without reducing the displayed
+  learner quota. Navigating away and back in the same browser session restored
+  the failed draft, and older feedback was absent while that newer ungraded
+  draft was active.
+- One real AI grade then succeeded. The quota updated immediately without a
+  refresh; refreshing preserved the successfully graded essay and feedback;
+  and “Xem lại” restored the latest successful server-backed review.
+- “Bỏ bản nháp” restored the latest successful review and triggered no provider
+  request.
+- The checked Preview runtime window contained no errors and no sensitive data
+  in the checked logs.
+
+This is evidence for one successful real Preview grade and the specifically
+observed failure/draft/review flows. It is not comprehensive provider or model
+coverage. It does not claim a second real AI attempt, provider-retention
+verification, or managed-PostgreSQL execution of the conditional `FAILED`-row
+recycling SQL.
+
+Earlier Preview checkpoints remain historical evidence:
+
 - The initial provider integration at `d8ff4a8` graded a bounded Writing
   submission successfully with the configured Cloudflare account, token,
   reviewed model, and site-wide daily limit of 15.
@@ -262,11 +289,12 @@ operational evidence, not repository test evidence or browser automation.
 - Checked Preview runtime windows contained no relevant error or sensitive
   data.
 
-The latest copy-only checkpoint did not repeat the provider call or claim a new
-quota-consumption, database, cross-user, or provider-retention test. It is
-historical evidence for the previous reviewed model only. Preview and
-Production retesting of the Llama-model invalid-response hotfix remain pending;
-Production is not described as passing until the owner supplies new evidence.
+The copy-only checkpoint did not repeat the provider call or claim a new
+quota-consumption, database, cross-user, or provider-retention test. It remains
+historical evidence for the previous reviewed model only. The current
+owner-attested Preview reconciliation above supersedes only the statement that
+Llama-model Preview retesting was pending. Production deployment and post-merge
+verification remain pending; Production is not described as passing.
 
 ## Deployment runbook
 

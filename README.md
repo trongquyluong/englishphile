@@ -82,14 +82,16 @@ of at most 100. Recoverable failed grades retain only a bounded, opaque-keyed
 draft in same-session browser storage for at most 24 hours. Keep the API token
 server-only and give it only the Workers AI permission needed for the account.
 
-The Phase 1D-D1 invalid-response recovery hotfix passes 11 focused files with
-97 tests, the complete 56-file suite with 534 passed and 8 opt-in PGlite cases
+The Phase 1D-D1 invalid-response recovery hotfix passes 10 focused files with
+101 tests, the complete 57-file suite with 557 passed and 8 opt-in PGlite cases
 skipped, Prisma validation/generation, typecheck, lint, the synthetic
-Production build, and the production dependency audit. Historical Preview
-evidence applies to the previous reviewed model only. Preview and Production
-retesting of the Llama-model hotfix remain pending; Production is not yet
-described as passing. Writing retention is unchanged, so H-11 remains
-**Partially remediated**. See
+Production build, and the production dependency audit. Owner-attested Preview
+evidence at hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`
+records one successful real grade with the reviewed Llama model plus the
+bounded failure/draft/review checks described in the D1 report. This is not
+comprehensive provider/model coverage. Production deployment and post-merge
+verification remain pending and Production is not described as passing.
+Writing retention is unchanged, so H-11 remains **Partially remediated**. See
 `docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
 
 ## Test Accounts And Signup

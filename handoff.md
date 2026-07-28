@@ -53,30 +53,38 @@ storage is best-effort: access/load/save/clear failures cannot override a
 successfully returned grade, alter quota, or initiate a provider retry.
 
 Local hotfix verification passes Prisma validation/generation, typecheck, lint,
-12 focused files with 113 passed (including a narrower 6-file/72-test
-correction group), the complete 57-file suite with 550 passed and 8 opt-in PGlite
-cases skipped, the production build with an explicit unreachable synthetic
-database target, `npm audit --omit=dev` with zero vulnerabilities, and
-`git diff --check`. No integration database test ran. Prisma and Next reported
+10 focused files with 101 passed, the complete 57-file suite with 557 passed
+and 8 opt-in PGlite cases skipped, the production build with an explicit
+unreachable synthetic database target, `npm audit --omit=dev` with zero
+vulnerabilities, and `git diff --check`. No integration database test ran.
+Prisma and Next reported
 automatic local env-file loading/discovery even though relevant process values
 were explicitly overridden with synthetic loopback/blank values; no value was
 printed and no real endpoint was contacted. Retain this tooling caveat.
 
 Owner-attested Preview evidence is recorded separately from repository tests.
-The initial provider integration graded successfully. The review correction
-updated quota without refresh, restored the current learner's latest essay and
-feedback after refresh, linked “Xem lại” to feedback, preserved edited-latest
-behavior, and passed cross-user isolation. At copy-correction head
-`6844d2b23722e1d176809243b0afe9fa12d2cacb`, provider wording was absent from
-the Writing workflow, quota wording was learner-facing, review/refresh still
-passed, and Privacy plus Terms carried the disclosure. PR #18 remained OPEN,
-Draft, and mergeable; both Vercel checks passed. Checked runtime windows
-contained no relevant error or sensitive data.
+At hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`, Preview reached
+`READY`, health/database passed, and the reviewed model was
+`@cf/meta/llama-3.1-8b-instruct-fast`. PR #18 remained OPEN and Draft. Starting
+from displayed learner quota `1/2`, an offline failure preserved the essay,
+did not reduce the displayed quota, restored the draft after same-session
+navigation, and showed no older feedback while the newer failed draft was
+active. One real AI grade succeeded; quota changed immediately, refresh
+preserved the successful essay and feedback, and “Xem lại” restored the latest
+server-backed review. “Bỏ bản nháp” restored that review without a provider
+request. The checked runtime window had no errors or sensitive log data.
 
-Only stale Prisma schema comments changed; there is no structural schema,
-migration, dependency, or lockfile change. Preview and Production retesting of
-this hotfix remain pending; Production must not be described as passing from
-repository evidence. Writing essay/result retention is unchanged, so H-11
+This owner-attested checkpoint covers one real Preview grade, not comprehensive
+provider/model behavior. It does not claim a second real AI attempt,
+provider-retention verification, Production success, or managed-PostgreSQL
+execution of conditional `FAILED`-row recycling. Earlier provider,
+review-state, and copy-correction Preview evidence remains historical and is
+recorded in the D1 report.
+
+Only stale Prisma schema comments changed in the implementation hotfix; there
+is no structural schema, migration, dependency, or lockfile change. Production
+deployment and post-merge verification remain pending and Production must not
+be described as passing. Writing essay/result retention is unchanged, so H-11
 remains **Partially remediated**. See
 `docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
 
