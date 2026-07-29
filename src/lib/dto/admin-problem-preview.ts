@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { LearnerProblemDTO, LearnerQuestionDTO } from "@/lib/dto/learner-question";
-import { normalizeLearnerOptions } from "@/lib/dto/learner-question";
+import { normalizeLearnerQuestionOptions } from "@/lib/dto/learner-question";
 
 export type AdminPreviewQuestionDTO = LearnerQuestionDTO & {
   answer: unknown;
@@ -63,7 +63,7 @@ export function toAdminProblemPreviewDTO(problem: AdminProblemPreviewSource): Ad
       difficulty: question.difficulty,
       prompt: question.prompt,
       passage: question.passage,
-      options: normalizeLearnerOptions(question.options),
+      options: normalizeLearnerQuestionOptions(question.type, question.options),
       rootWord: question.rootWord,
       keyword: question.keyword,
       targetSentence: question.targetSentence,

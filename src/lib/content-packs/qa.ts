@@ -1,5 +1,6 @@
 import type { Prisma, Problem, Question } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 
 export type QaSeverity = "ERROR" | "WARNING" | "INFO";
 
@@ -123,6 +124,23 @@ function checkQuestion(problem: ProblemForQa, question: Question, issues: QaIssu
       entityId: question.id,
       path: `${path}.options`,
       message: "MCQ-like question cần options hợp lệ.",
+    });
+  }
+
+  if (question.type === "ERROR_IDENTIFICATION") {
+    const contract = validateErrorIdentificationContract(
+      question.options,
+      question.answer,
+    );
+    contract.issues.forEach((contractIssue) => {
+      pushIssue(issues, problem, {
+        severity: "ERROR",
+        code: `ERROR_IDENTIFICATION_${contractIssue.code}`,
+        entityType: "Question",
+        entityId: question.id,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+      });
     });
   }
 

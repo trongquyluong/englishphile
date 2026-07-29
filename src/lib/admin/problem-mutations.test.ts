@@ -28,6 +28,13 @@ const problemPayload: ProblemEditPayload = {
   contentStatus: "DRAFT",
 };
 
+const validErrorOptions = [
+  { id: "A", text: "The students" },
+  { id: "B", text: "was" },
+  { id: "C", text: "ready" },
+  { id: "D", text: "today" },
+];
+
 function questionPayload(id = "question-a"): QuestionEditPayload {
   return {
     id,
@@ -39,6 +46,23 @@ function questionPayload(id = "question-a"): QuestionEditPayload {
     answer: { correctOptionId: "A", secret: "must-not-be-audited" },
     orderIndex: 0,
     contentStatus: "DRAFT",
+  };
+}
+
+function errorQuestionPayload(
+  options: unknown = validErrorOptions,
+  answer: unknown = { correctPart: "B", correction: "were" },
+): QuestionEditPayload {
+  return {
+    id: "question-a",
+    type: "ERROR_IDENTIFICATION",
+    skillType: "ERROR_IDENTIFICATION",
+    difficulty: "C1",
+    prompt: "The students was ready today.",
+    options,
+    answer,
+    orderIndex: 0,
+    contentStatus: "PUBLISHED",
   };
 }
 
@@ -199,6 +223,69 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     expect(committed).toEqual([]);
   });
 
+  it("edit-to-publish revalidates an omitted invalid Error Identification row after the lock", async () => {
+    const stored = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: null,
+        answer: { correctPart: "A", correction: "fixed" },
+      }],
+    };
+    const tx = transactionWith({
+      targets: [stored as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await updateProblemWithQuestions(
+      {
+        ...problemPayload,
+        questionType: "ERROR_IDENTIFICATION",
+        skillType: "ERROR_IDENTIFICATION",
+        contentStatus: "PUBLISHED",
+      },
+      [],
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("bốn phần");
+    expect(tx.problem.findUnique).toHaveBeenCalled();
+    expect(tx.problem.update).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("edit-to-publish accepts a valid Error Identification candidate through the locked write path", async () => {
+    const stored = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: null,
+        answer: { correctPart: "A", correction: "fixed" },
+      }],
+    };
+    const tx = transactionWith({
+      targets: [stored as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await updateProblemWithQuestions(
+      {
+        ...problemPayload,
+        questionType: "ERROR_IDENTIFICATION",
+        skillType: "ERROR_IDENTIFICATION",
+        contentStatus: "PUBLISHED",
+      },
+      [errorQuestionPayload()],
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(true);
+    expect(tx.problem.findUnique).toHaveBeenCalled();
+    expect(tx.problem.update).toHaveBeenCalled();
+    expect(tx.question.updateMany).toHaveBeenCalled();
+  });
+
   it("uses set-based status, child, and audit mutations for a bounded bulk", async () => {
     const targets = [storedProblem("problem-a"), storedProblem("problem-b")];
     const tx = transactionWith({ resourceRows: targets.map(({ id }) => ({ id })), targets });
@@ -233,6 +320,148 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     expect(result.ok).toBe(false);
     expect(tx.problem.updateMany).not.toHaveBeenCalled();
     expect(tx.contentAuditLog.createMany).not.toHaveBeenCalled();
+  });
+
+  it("individual publish rejects legacy Error Identification without A-D options", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: null,
+        answer: { correctPart: "A", correction: "replacement" },
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await setProblemContentStatus(
+      "problem-a",
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("bốn phần");
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("individual publish accepts a valid canonical Error Identification row", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: validErrorOptions,
+        answer: { correctPart: "B", correction: "were" },
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await setProblemContentStatus(
+      "problem-a",
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(true);
+    expect(tx.problem.updateMany).toHaveBeenCalled();
+    expect(tx.question.updateMany).toHaveBeenCalled();
+  });
+
+  it("bulk publish-safe rejects persisted Error Identification QA errors", async () => {
+    const target = {
+      ...storedProblem("problem-a", "pack-a"),
+      title: "Error Identification fixture",
+      slug: "error-identification-fixture",
+      statement: "Chọn phần sai.",
+      instructions: "Chọn A-D và sửa lại.",
+      estimatedMinutes: 5,
+      questionType: "ERROR_IDENTIFICATION" as const,
+      sourceCollection: { id: "source-a", name: "Synthetic source" },
+      problemTopics: [{
+        topic: { id: "topic-a", name: "Grammar", slug: "grammar" },
+      }],
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: null,
+        answer: { correctPart: "A", correction: "replacement" },
+      }],
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+      { contentPackId: "pack-a", qaRequirement: "safe" },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("QA");
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("ordinary bulk publish rejects an invalid Error Identification row after transaction reload", async () => {
+    const target = {
+      ...storedProblem("problem-a"),
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: null,
+        answer: { correctPart: "A", correction: "fixed" },
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("bốn phần");
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("ordinary bulk publish accepts a valid canonical Error Identification row", async () => {
+    const target = {
+      ...storedProblem("problem-a"),
+      questions: [{
+        ...storedQuestion(),
+        type: "ERROR_IDENTIFICATION" as const,
+        skillType: "ERROR_IDENTIFICATION" as const,
+        options: validErrorOptions,
+        answer: { correctPart: "B", correction: "were" },
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(true);
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(tx.problem.updateMany).toHaveBeenCalled();
+    expect(tx.question.updateMany).toHaveBeenCalled();
   });
 
   it("keeps status audit JSON bounded and excludes question prompts, answers, and arrays", async () => {

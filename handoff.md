@@ -53,6 +53,52 @@ lowercase normalization; renderers still display the original stringified
 values. Neither warning changes import, database, learner, admin, scoring, or
 publication behavior or replaces human linguistic review.
 
+Phase 2 PR 3 implements the Error Identification contract on branch
+`phase2/03-error-identification-contract` from canonical base
+`1b9dccd0cc9ebf7ee8b948dce171b464bcb59c05`. The existing Prisma JSON fields
+already support it, so there is no schema or migration change. A valid question
+has exactly four renderable parts with unique canonical A–D IDs, non-empty
+display text, a member `answer.correctPart`, and a non-empty bounded
+slash-delimited `answer.correction`. The existing string `errorPart` import
+alias is normalized to `correctPart`; no new answer field is introduced.
+
+The same pure option/answer contract now feeds JSON/CSV normalization,
+repository audit, persisted QA, minimal publication validation, immediate
+import-publish validation, learner/admin DTO projection, and scoring.
+`NEEDS_REVIEW` import keeps render/options gaps as exact-location warnings so
+draft content can be repaired, while missing/unbounded answer data remains a
+fatal import error. Persisted QA, bulk `publish-safe`, individual publish,
+edit-to-publish, and immediate JSON/CSV import-publish all fail closed for any
+contract gap.
+
+The learner DTO emits only canonical `{id,text}` parts and returns an empty
+option list for malformed persisted Error Identification data. It never emits
+`correctPart`, correction variants, explanations, raw options, or metadata.
+Admin preview remains separately answer-complete and keeps `rawOptions` for
+repair, while the production renderer receives the same safe projection and
+preview mode still suppresses submissions. The renderer uses one labelled
+native radio group plus a separate correction input; legacy missing options
+show a fixed Vietnamese unavailable notice without crashing. Scoring requires
+both the canonical part and one normalized slash-delimited correction variant.
+Writing and Sentence Transformation scoring are unchanged.
+
+The 55 legacy repository questions in
+`content-packs/pilot-pack-001/07-error-identification-pack-001.json` and
+`content-packs/content-pack-002/07-error-identification-pack-002.json` remain
+unchanged with `options=null`. They are still exactly 55 non-fatal
+`rendererIncompatibleOptions` findings and 56 import-normalizer warnings (the
+legacy `correctPart=OK` item adds one canonical-ID warning); the
+repository audit exits zero. They are not publication-ready and every
+publication path blocks them. A separate reviewed content-repair PR must author
+real A–D spans; no options may be synthesized silently.
+
+Phase 2 PR 3 evidence is repository/local only: pure and mocked-path tests,
+typecheck, lint, full suite, human/JSON repository audit, deterministic JSON
+comparison, synthetic-unreachable build, and `git diff --check` are the
+required gates. No database, endpoint, environment value, provider, migration,
+seed, import, publication, deployment, or legacy content repair is evidence for
+this PR.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

@@ -2,6 +2,7 @@ import { Prisma, type ContentStatus, type Difficulty, type QuestionType, type Sk
 import { questionTypeValues, skillTypeValues, difficultyValues } from "@/lib/import/types";
 import { createContentAuditLog } from "@/lib/admin/audit";
 import { questionAuditSnapshots } from "@/lib/admin/audit-snapshots";
+import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 
 export type AdminResult = {
   ok: boolean;
@@ -58,6 +59,15 @@ export function questionPublishErrors(question: {
 
   if (!question.prompt.trim()) {
     errors.push("Prompt không được để trống.");
+  }
+
+  if (question.type === "ERROR_IDENTIFICATION") {
+    const contract = validateErrorIdentificationContract(
+      question.options,
+      question.answer,
+    );
+    errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
+    return errors;
   }
 
   if (!hasJsonValue(question.answer) && !canUseRubric) {
