@@ -134,6 +134,31 @@ npm run build
 
 Do not run `npm run prisma:seed` on a populated local or production database unless you intentionally want to reset demo/imported data.
 
+## Phase 2 Repository Content Audit
+
+Run the database-free content-pack inventory and quality baseline:
+
+```bash
+npm run audit:content-packs
+```
+
+For machine-readable output:
+
+```bash
+npm run --silent audit:content-packs -- --format=json
+```
+
+The command reads each repository `manifest.json` and only the split JSON files
+listed in `manifest.files`. It ignores `00-all-in-one` mirrors when split files
+are declared, never connects to Prisma or a database, and exits non-zero only
+for malformed input or manifest/inventory inconsistency. Quality heuristics such
+as short explanations remain review signals rather than automatic failures.
+
+See [`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
+for the canonical repository evidence boundary, learner/admin journey audit,
+parsed inventory, controlled-beta backlog, difficulty rubric, curriculum
+proposal, and first representative 21-problem/84-question batch.
+
 ## Database Schema Overview
 
 Main models:

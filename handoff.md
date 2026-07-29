@@ -14,6 +14,19 @@ Prepare Englishphile for public beta while preserving the current product direct
 
 ## Current Progress
 
+Phase 2 PR 1 establishes a repository-only, database-free product/content audit
+baseline at canonical base `52f0ec030196ec202c26872325a29d0ddb5d3db6`.
+Run `npm run audit:content-packs` for readable tables or
+`npm run --silent audit:content-packs -- --format=json` for machine-readable
+output. The command reads only manifest-listed split JSON files and does not
+count `00-all-in-one` mirrors. The baseline parses 2 packs, 17 split files, 101
+problems, and 495 questions; see
+[`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
+for evidence classification, route journeys, quality findings, difficulty
+rubric, backlog, curriculum proposal, and the first 21-problem/84-question
+representative batch. This phase does not change learner/admin behavior or
+weaken the Phase 1D-A learner-safe DTO.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

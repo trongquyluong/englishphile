@@ -1,6 +1,6 @@
 # Englishphile content packs
 
-Use this folder for clean JSON/CSV packs that are ready for validation and teacher review.
+Use this folder for clean JSON/CSV packs that are ready for validation and admin review.
 
 Expected structure:
 
@@ -28,3 +28,16 @@ Import locally:
 ```bash
 npm run import:pack -- content-packs/pilot-pack-001
 ```
+
+Audit the repository packs without Prisma or a database:
+
+```bash
+npm run audit:content-packs
+npm run --silent audit:content-packs -- --format=json
+```
+
+The audit reads only split JSON files listed in each `manifest.json`; it does not
+count `00-all-in-one` mirrors. See
+[`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](../docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
+for the repository evidence boundary, current inventory, product gaps, and
+proposed editorial sequence.
