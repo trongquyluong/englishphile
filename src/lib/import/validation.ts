@@ -16,6 +16,10 @@ import {
   normalizeErrorIdentificationOptions,
   validateErrorIdentificationContract,
 } from "@/lib/questions/error-identification-contract";
+import {
+  normalizeTriosAnswer,
+  validateTriosContract,
+} from "@/lib/questions/trios-contract";
 
 const nullableString = z
   .union([z.string(), z.null(), z.undefined()])
@@ -136,6 +140,10 @@ function normalizeOptions(options: unknown) {
 }
 
 function normalizeAnswer(questionType: QuestionType, answer: unknown) {
+  if (questionType === "TRIOS_GAPPED_SENTENCES") {
+    return normalizeTriosAnswer(answer);
+  }
+
   if (!isRecord(answer)) {
     return answer;
   }
@@ -207,8 +215,16 @@ function validateQuestionRules(question: NormalizedQuestion, path: string): Impo
     issues.push({ level: "error", path: `${path}.answer`, message: "Dạng điền từ cần accepted/acceptedAnswers." });
   }
 
-  if (question.type === "TRIOS_GAPPED_SENTENCES" && getAcceptedAnswers(answer).length !== 1) {
-    issues.push({ level: "error", path: `${path}.answer`, message: "Trios cần đúng một accepted shared word." });
+  if (question.type === "TRIOS_GAPPED_SENTENCES") {
+    const contract = validateTriosContract(question.metadata, question.answer);
+    issues.push(
+      ...contract.issues.map((contractIssue) => ({
+        level: contractIssue.importLevel,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+        code: `TRIOS_${contractIssue.code}`,
+      })),
+    );
   }
 
   if (question.type === "ERROR_IDENTIFICATION") {

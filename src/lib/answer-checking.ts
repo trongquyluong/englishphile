@@ -5,6 +5,7 @@ import {
   isErrorIdentificationPartId,
   parseErrorIdentificationCorrectionVariants,
 } from "@/lib/questions/error-identification-contract";
+import { validateTriosAnswer } from "@/lib/questions/trios-contract";
 
 type JsonObject = Record<string, unknown>;
 
@@ -128,7 +129,6 @@ export function checkQuestionAnswer(
   if (
     question.type === "OPEN_CLOZE" ||
     question.type === "WORD_FORMATION" ||
-    question.type === "TRIOS_GAPPED_SENTENCES" ||
     question.type === "SHORT_ANSWER" ||
     question.type === "LISTENING_SHORT_ANSWER"
   ) {
@@ -138,6 +138,25 @@ export function checkQuestionAnswer(
       isCorrect,
       feedback: isCorrect ? `Chính xác. ${explanation}` : `Chưa đúng. Đáp án chấp nhận: ${correctAnswer}. ${explanation}`,
       correctAnswer,
+    };
+  }
+
+  if (question.type === "TRIOS_GAPPED_SENTENCES") {
+    const contract = validateTriosAnswer(answer);
+    const learnerAnswer =
+      typeof studentAnswer === "string" ? studentAnswer.trim() : "";
+    const isCorrect =
+      contract.valid &&
+      Boolean(contract.sharedAnswer) &&
+      Boolean(learnerAnswer) &&
+      checkExactMatch(learnerAnswer, contract.sharedAnswer);
+    const triosCorrectAnswer = contract.sharedAnswer ?? "—";
+    return {
+      isCorrect,
+      feedback: isCorrect
+        ? `Chính xác. ${explanation}`
+        : `Chưa đúng. Đáp án chấp nhận: ${triosCorrectAnswer}. ${explanation}`,
+      correctAnswer: triosCorrectAnswer,
     };
   }
 

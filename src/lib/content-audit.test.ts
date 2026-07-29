@@ -751,13 +751,15 @@ describe("content-pack repository audit", () => {
               type: "TRIOS_GAPPED_SENTENCES",
               skillType: "TRIOS",
               prompt: triosPrompt,
-              metadata: { sentences: ["One.", "Two.", "Three."] },
+              answer: { acceptedAnswers: ["one"] },
+              metadata: { sentences: ["One _____.", "Two _____.", "Three _____."] },
             }),
             question({
               type: "TRIOS_GAPPED_SENTENCES",
               skillType: "TRIOS",
               prompt: triosPrompt,
-              metadata: { sentences: ["Four.", "Five.", "Six."] },
+              answer: { acceptedAnswers: ["four"] },
+              metadata: { sentences: ["Four _____.", "Five _____.", "Six _____."] },
             }),
           ],
           { skillType: "TRIOS", slug: "trios-problem" },
@@ -766,6 +768,64 @@ describe("content-pack repository audit", () => {
     ]);
 
     expect(report.findings.duplicatePromptGroups).toEqual([]);
+  });
+
+  it("audits the canonical Trios sentence contract without parsing passage mirrors", () => {
+    const canonical = [
+      "First _____ sentence.",
+      "Second _____ sentence.",
+      "Third _____ sentence.",
+    ];
+    const triosQuestions = [
+      question({
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        answer: { acceptedAnswers: ["shared"] },
+        metadata: { sentences: canonical },
+      }),
+      question({
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        answer: { acceptedAnswers: ["shared"] },
+        passage: "1. First _____.\n2. Second _____.\n3. Third _____.",
+        metadata: null,
+      }),
+      question({
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        answer: { acceptedAnswers: ["shared"] },
+        metadata: { sentences: [canonical[0], 2, canonical[2]] },
+      }),
+      question({
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        answer: { acceptedAnswers: ["shared"] },
+        metadata: { sentences: [canonical[0], "No gap.", canonical[2]] },
+      }),
+      question({
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        answer: { acceptedAnswers: ["shared"] },
+        metadata: { sentences: [canonical[0], "Two _____ gaps _____.", canonical[2]] },
+      }),
+    ];
+    const input = pack([
+      problem(triosQuestions, {
+        skillType: "TRIOS",
+        questionType: "TRIOS_GAPPED_SENTENCES",
+        slug: "trios-contract-audit",
+      }),
+    ]);
+    const first = auditContentPacks([input]);
+    const second = auditContentPacks([input]);
+
+    expect(first.findings.triosWithoutThreeSentences).toHaveLength(4);
+    expect(first.findings.triosWithoutThreeSentences.map(
+      (location) => location.questionIndex,
+    )).toEqual([1, 2, 3, 4]);
+    expect(JSON.stringify(first)).toBe(JSON.stringify(second));
+    expect(JSON.stringify(first.findings.triosWithoutThreeSentences))
+      .not.toContain("shared");
   });
 
   it("reports malformed payloads and manifest count mismatches", () => {
@@ -839,6 +899,8 @@ describe("content-pack repository audit", () => {
     expect(report.findings.rendererIncompatibleOptions).toHaveLength(55);
     expect(report.findings.duplicateNormalizedOptionTexts).toHaveLength(0);
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
+    expect(report.byQuestionType.TRIOS_GAPPED_SENTENCES).toBe(15);
+    expect(report.findings.triosWithoutThreeSentences).toEqual([]);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);
     expect(report.normalizerWarnings).toHaveLength(56);
@@ -1308,7 +1370,13 @@ describe("content-pack repository audit", () => {
         ),
       ],
     }));
-    expect(secondaryNormalized.issues).toEqual([]);
+    expect(secondaryNormalized.issues).toEqual([
+      expect.objectContaining({
+        level: "warning",
+        code: "TRIOS_METADATA_REQUIRED",
+        path: "problems.0.questions.3.metadata",
+      }),
+    ]);
     const secondaryFile = {
       fileName: "secondary.json",
       payload: secondaryNormalized.payload ?? undefined,

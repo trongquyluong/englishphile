@@ -31,11 +31,9 @@ Decisions:
 This document uses repository evidence only. It makes no claim about a database,
 Preview, Production, provider, environment, or deployed content.
 
-- PR #21 proposed renderer correctness as the next PR; this bounded PR instead
-  establishes the QA workflow first. Renderer debt remains a publication gate.
-- The audit finds Trios sentences in `metadata.sentences`/`passage`, but the
-  learner DTO does not carry `metadata.sentences` and `TriosQuestion` only shows
-  `prompt`.
+- Phase 2 PR 4 implements the bounded Trios learner-safe contract. The
+  structured source is only `metadata.sentences`; `passage` remains an optional
+  display/compatibility mirror and is never split into a tuple.
 - All 55 current `ERROR_IDENTIFICATION` questions lack renderable options.
   Phase 2 PR 3 now reports this as a non-fatal import/repository warning and
   enforces the complete contract in persisted QA and every publication path.
@@ -51,7 +49,8 @@ Preview, Production, provider, environment, or deployed content.
 - Persisted QA is enforced by bulk `publish-safe`. Single publish and immediate
   import-publish still use the repository's minimal publication layer in
   general, but Phase 2 PR 3 makes that layer complete and fail-closed for
-  `ERROR_IDENTIFICATION`.
+  `ERROR_IDENTIFICATION`, and Phase 2 PR 4 does the same for
+  `TRIOS_GAPPED_SENTENCES`.
 - `copyrightNote` is optional in Prisma/import schema. It is mandatory for this
   process, not an implemented schema error.
 - The schema supports `SkillType.COLLOCATIONS`; pilot Collocations should use it
@@ -168,7 +167,7 @@ Prefer canonical normalized answer names: `correctOptionId`, `correctPart`, and
 | `WORD_FORMATION` | prompt + `rootWord`; dedicated renderer | `acceptedAnswers`; auto exact normalized text | Review word class, polarity/plural, and visible root |
 | `SENTENCE_TRANSFORMATION` | prompt, optional `keyword`/`targetSentence`; dedicated renderer | exact accepted answer = true; otherwise `null` | Never count non-exact as wrong; review equivalence/variants; no active manual-grading UI |
 | `ERROR_IDENTIFICATION` | `prompt` + exactly four parts `options[{id,text}]`; IDs canonicalize to unique A–D | canonical member `correctPart` + non-empty `correction`; auto-score requires both; `/` separates at most eight bounded variants | Normal `NEEDS_REVIEW` import warns and retains renderer/option gaps and a syntactically present string `correctPart` that is invalid or outside the rendered set. Missing/non-string/blank `correctPart`, missing/blank correction, and correction-bound violations remain import errors. Persisted QA, bulk safe, individual publish, edit-to-publish, and immediate import-publish enforce the full contract |
-| `TRIOS_GAPPED_SENTENCES` | current component renders only prompt | exactly one shared `acceptedAnswers`; auto | Review three natural contexts; learner DTO omits stored sentences, so block publication |
+| `TRIOS_GAPPED_SENTENCES` | `prompt` + `metadata.sentences`; dedicated renderer shows exactly three numbered sentences and one labelled native text input | exactly one bounded shared word from `acceptedAnswers` or `accepted`; auto exact normalized text; metadata/display never authorizes scoring | Each trimmed sentence is non-empty and contains exactly one `_____` marker. Normal `NEEDS_REVIEW` import retains sentence-contract defects as warnings; answer defects are fatal. Persisted QA and every publication path enforce the full contract. Human linguistic/context review remains mandatory |
 
 `SHORT_ANSWER` exists but is not a pilot substitute for
 `LISTENING_SHORT_ANSWER`.
@@ -207,8 +206,8 @@ application; this is coverage rationale, not calibration evidence.
 
 - Editorial master scope: 21/84.
 - Organizationally importable non-Listening core: `phase2-pilot-core-001`,
-  19/76. It is not publication-ready while Trios, Pronunciation, and Writing
-  contracts remain unresolved and no reviewed pilot content has been authored.
+  19/76. It is not publication-ready while Pronunciation and Writing contracts
+  remain unresolved and no reviewed pilot content has been authored.
 - Separately blocked Listening extension: `phase2-listening-pilot-001`, 2/8,
   created only after the Listening media contract passes.
 - Core split files: `01-reading` through separate files for Writing,
@@ -252,7 +251,7 @@ application; this is coverage rationale, not calibration evidence.
 Publication is blocked by any automated error, persisted QA `ERROR`, unclear
 rights, ambiguity/language error, unresolved duplicate, missing review evidence,
 immediate-publish use, unrenderable legacy Error Identification content, or
-unresolved contracts for Trios, Pronunciation, or Writing. Listening remains
+unresolved contracts for Pronunciation or Writing. Listening remains
 separately blocked by its media contract.
 
 Diagnostic eligibility is additionally blocked until status is `STABLE`, sample
@@ -420,9 +419,71 @@ deterministic audit output. They are repository/local evidence only: no
 database, deployed environment, provider, import, publication, migration,
 seed, or content repair was executed.
 
-## J. Boundary and recommended next small PR
+## J. Phase 2 PR 4 — Trios / Gapped Sentences contract
 
-Phase 2 PR 3 contains no real pilot questions, Prisma/migration, broad UI
+### Canonical structured data and accepted word
+
+`metadata` must be an object and `metadata.sentences` must be an array of
+exactly three strings. Each string is trimmed for the safe projection, must
+remain non-empty, and must contain exactly one underscore run equal to
+`_____`. Source order is preserved. The contract never splits `passage`,
+synthesizes a sentence, repairs a marker, or returns a partial tuple.
+
+The answer uses the repository-supported `acceptedAnswers`/`accepted` aliases.
+Either a string or a one-string array is accepted; if both aliases exist, both
+must be valid and equal after trimming. The shared answer must be one
+Unicode-letter word, with optional internal ASCII/curly apostrophes or hyphens,
+and is bounded at 80 Unicode code points. Whitespace-separated, blank,
+multiple, conflicting, malformed, or over-bound values fail. `display` and
+`metadata.sharedWord` are never scoring authorities and cannot synthesize an
+answer.
+
+### Import, publication, DTO, renderer, scorer, and audit
+
+- Ordinary `NEEDS_REVIEW` JSON/CSV import retains missing or malformed sentence
+  data as exact-location warnings. Every accepted-answer defect is a fatal
+  import error. Both formats use the same pure contract and no new top-level
+  field.
+- Immediate JSON/CSV publication promotes sentence warnings to errors before
+  the atomic executor. Persisted QA, individual publish, edit-to-publish,
+  ordinary bulk publish, bulk `publish-safe`, and its transaction-locked QA
+  reload/recheck block every sentence or answer defect.
+- The positive learner DTO exposes only
+  `triosSentences: [string, string, string] | null`. A malformed source produces
+  `null`; raw metadata, `sharedWord`, accepted answers, display answer,
+  explanation, and raw options are not projected. Admin preview keeps raw
+  metadata/answer for repair but uses the same safe tuple for its renderer.
+- The renderer shows the prompt, exactly three numbered sentences, and one
+  labelled native text input with question-specific IDs. A missing safe tuple
+  shows a Vietnamese unavailable notice and no input. Disabled handlers also
+  fail closed when invoked directly; the submitted answer remains a string.
+- Runtime scoring independently requires one valid configured word and a
+  non-empty learner string, then uses the existing exact-text normalization.
+  Blank or malformed historical configurations cannot score correct. Open
+  Cloze, Word Formation, Listening Short Answer, Short Answer, Writing,
+  Sentence Transformation, and Error Identification keep their existing
+  branches.
+- `triosWithoutThreeSentences` uses the safe sentence contract and no longer
+  accepts a three-line `passage` fallback. It detects malformed entries and
+  invalid gap counts without exposing shared answers.
+
+Repository inspection at canonical base
+`a24ec7ffb606996b234f3d90c156ea366825f778` finds 15 current Trios questions
+across three problems in
+`content-packs/pilot-pack-001/08-trios-pack-001.json`. All 15 use
+`metadata.sentences`, have exactly three ordered strings with one `_____` each,
+and use one `answer.accepted` word. The pack is unchanged. This is structural
+evidence only: all 15 items still require human linguistic, ambiguity,
+naturalness, explanation, difficulty, and calibration review and are not made
+pilot-ready by this contract.
+
+Phase 2 PR 4 evidence is repository/local only. It does not claim database,
+import, publication, Preview, Production, browser-E2E, deployed endpoint,
+linguistic quality, or calibration verification.
+
+## K. Boundary and recommended next small PR
+
+Phase 2 PR 4 contains no real pilot questions, Prisma/migration, broad UI
 redesign, database-backed execution, executed import/publication, HSG, or
 diagnostic enablement.
 
@@ -432,7 +493,8 @@ this branch:
 1. **Error Identification content repair:** author and independently review
    real A–D spans for the 55 legacy questions; do not synthesize them from
    sentence text or metadata.
-2. **Trios:** learner-safe DTO projection and three-sentence rendering.
+2. **Trios linguistic review:** independently review the unchanged 15 current
+   items; contract conformance alone does not approve their language or level.
 3. **Pronunciation:** target-span schema/normalization, safe DTO, renderer, and
    migration plan.
 4. **Writing:** Vietnamese controls and authored-rubric presentation while

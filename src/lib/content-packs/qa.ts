@@ -1,6 +1,7 @@
 import type { Prisma, Problem, Question } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
+import { validateTriosContract } from "@/lib/questions/trios-contract";
 
 export type QaSeverity = "ERROR" | "WARNING" | "INFO";
 
@@ -189,26 +190,17 @@ function checkQuestion(problem: ProblemForQa, question: Question, issues: QaIssu
   }
 
   if (question.type === "TRIOS_GAPPED_SENTENCES") {
-    const metadata = asObject(question.metadata);
-    const sentences = metadata.sentences;
-    if (Array.isArray(sentences) && sentences.length !== 3) {
-      pushIssue(issues, problem, {
-        severity: "WARNING",
-        entityType: "Question",
-        entityId: question.id,
-        path: `${path}.metadata.sentences`,
-        message: "Trios nên có đúng ba câu.",
-      });
-    }
-    if (!hasAcceptedAnswer(question.answer)) {
+    const contract = validateTriosContract(question.metadata, question.answer);
+    contract.issues.forEach((contractIssue) => {
       pushIssue(issues, problem, {
         severity: "ERROR",
+        code: `TRIOS_${contractIssue.code}`,
         entityType: "Question",
         entityId: question.id,
-        path: `${path}.answer`,
-        message: "Trios thiếu shared word được chấp nhận.",
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
       });
-    }
+    });
   }
 
   const metadata = asObject(question.metadata);

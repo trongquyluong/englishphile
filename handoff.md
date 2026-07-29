@@ -99,6 +99,43 @@ required gates. No database, endpoint, environment value, provider, migration,
 seed, import, publication, deployment, or legacy content repair is evidence for
 this PR.
 
+Phase 2 PR 4 implements the bounded Trios / Gapped Sentences contract on branch
+`phase2/04-trios-contract` from canonical base
+`a24ec7ffb606996b234f3d90c156ea366825f778`. The existing Prisma JSON fields
+already support it. The only structured sentence source is
+`metadata.sentences`: exactly three ordered, non-empty strings, each with
+exactly one `_____` marker. `passage` is never split or repaired into the
+tuple. One shared answer is resolved from the existing
+`acceptedAnswers`/`accepted` aliases, must be a bounded single word, and never
+comes from `display` or `metadata.sharedWord`.
+
+The same database-free contract feeds JSON/CSV normalization, immediate
+publication validation, persisted QA, individual/edit/bulk publication,
+transaction-locked bulk `publish-safe` QA, learner/admin DTO projection,
+scoring, and the repository audit. Ordinary `NEEDS_REVIEW` import retains
+sentence defects as exact-location warnings; answer defects are fatal. Every
+defect blocks publication. The learner DTO exposes only an all-or-nothing
+`triosSentences` tuple and never full metadata or answer data. Admin preview
+retains raw metadata/answer for repair while using that same safe tuple for
+rendering.
+
+`TriosQuestion` now renders the prompt, exactly three numbered sentences, and
+one labelled native input with unique question-specific IDs. Missing safe data
+shows a Vietnamese unavailable notice and no answer control. Disabled handlers
+fail closed, and the answer shape remains a string. Scoring independently
+requires one valid configured word plus a non-empty learner string; malformed
+historical rows and blank values cannot score correct. Other text, Writing,
+Sentence Transformation, and Error Identification scoring branches are
+unchanged.
+
+The unchanged pilot Trios file contains 3 problems and 15 questions. All 15
+structurally use three ordered `metadata.sentences` strings with one `_____`
+each and one `answer.accepted` word. This is not linguistic, ambiguity,
+difficulty, or calibration approval: all 15 still require human review and are
+not automatically pilot-ready. Phase 2 PR 4 evidence is repository/local only;
+it includes no database, endpoint, import, publication, Preview, Production,
+deployment, migration, seed, provider, browser-E2E, or content-pack change.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

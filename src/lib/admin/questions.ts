@@ -3,6 +3,7 @@ import { questionTypeValues, skillTypeValues, difficultyValues } from "@/lib/imp
 import { createContentAuditLog } from "@/lib/admin/audit";
 import { questionAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
+import { validateTriosContract } from "@/lib/questions/trios-contract";
 
 export type AdminResult = {
   ok: boolean;
@@ -49,6 +50,7 @@ export function questionPublishErrors(question: {
   prompt: string;
   options?: unknown;
   answer?: unknown;
+  metadata?: unknown;
 }) {
   const errors: string[] = [];
   const needsOptions = ["MCQ", "GUIDED_CLOZE", "PRONUNCIATION_ODD_ONE_OUT", "READING_MCQ", "LISTENING_MCQ"].includes(question.type);
@@ -66,6 +68,12 @@ export function questionPublishErrors(question: {
       question.options,
       question.answer,
     );
+    errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
+    return errors;
+  }
+
+  if (question.type === "TRIOS_GAPPED_SENTENCES") {
+    const contract = validateTriosContract(question.metadata, question.answer);
     errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
     return errors;
   }

@@ -8,6 +8,10 @@ import {
   ERROR_IDENTIFICATION_PART_IDS,
   validateErrorIdentificationOptions,
 } from "@/lib/questions/error-identification-contract";
+import {
+  validateTriosSentences,
+  type TriosSentences,
+} from "@/lib/questions/trios-contract";
 
 export type LearnerOptionDTO = {
   id: string;
@@ -30,6 +34,7 @@ export type LearnerQuestionDTO = {
   problemTitle: string | null;
   audioUrl: string | null;
   sectionType: string | null;
+  triosSentences: TriosSentences | null;
 };
 
 export type LearnerProblemDTO = {
@@ -148,6 +153,10 @@ export function normalizeLearnerQuestionOptions(
 
 export function toLearnerQuestionDTO(question: LearnerQuestionSource): LearnerQuestionDTO {
   const metadata = asRecord(question.metadata);
+  const triosSentences =
+    question.type === "TRIOS_GAPPED_SENTENCES"
+      ? validateTriosSentences(question.metadata).sentences
+      : null;
 
   return {
     id: question.id,
@@ -165,6 +174,7 @@ export function toLearnerQuestionDTO(question: LearnerQuestionSource): LearnerQu
     problemTitle: question.problem?.title ?? null,
     audioUrl: nullableString(metadata.audioUrl),
     sectionType: nullableString(metadata.sectionType),
+    triosSentences,
   };
 }
 
