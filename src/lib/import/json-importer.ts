@@ -1,7 +1,7 @@
 import type { ImportExecutionResult, ImportPlan } from "@/lib/import/types";
 import type { ContentStatus } from "@prisma/client";
 import { buildImportPlan } from "@/lib/import/duplicates";
-import { normalizeJsonPayload, parseJsonText } from "@/lib/import/validation";
+import { normalizeJsonText } from "@/lib/import/normalize-file";
 import { executeImportPlanAtomically } from "@/lib/import/atomic-import";
 import { AdminResourceUnavailableError } from "@/lib/admin/mutation-locks";
 import {
@@ -11,12 +11,7 @@ import {
 } from "@/lib/content-packs/file-identity";
 
 export async function validateJsonImport(text: string): Promise<ImportPlan> {
-  const parsed = parseJsonText(text);
-  if (!parsed.data) {
-    return buildImportPlan({ importType: "JSON", problems: [] }, parsed.issues);
-  }
-
-  const normalized = normalizeJsonPayload(parsed.data);
+  const normalized = normalizeJsonText(text);
   if (!normalized.payload) {
     return buildImportPlan({ importType: "JSON", problems: [] }, normalized.issues);
   }

@@ -85,7 +85,7 @@ server-only and give it only the Workers AI permission needed for the account.
 The Phase 1D-D1 invalid-response recovery hotfix passes 10 focused files with
 101 tests, the complete 57-file suite with 557 passed and 8 opt-in PGlite cases
 skipped, Prisma validation/generation, typecheck, lint, the synthetic
-Production build, and the production dependency audit. Owner-attested Preview
+Production build, and `npm audit --omit=dev`. Owner-attested Preview
 evidence at hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`
 records one successful real grade with the reviewed Llama model plus the
 bounded failure/draft/review checks described in the D1 report. This is not
@@ -133,6 +133,35 @@ npm run build
 ```
 
 Do not run `npm run prisma:seed` on a populated local or production database unless you intentionally want to reset demo/imported data.
+
+## Phase 2 Repository Content Audit
+
+Run the database-free content-pack inventory and quality baseline:
+
+```bash
+npm run audit:content-packs
+```
+
+For machine-readable output:
+
+```bash
+npm run --silent audit:content-packs -- --format=json
+```
+
+The command uses the same pure file selector and JSON/CSV normalizers as the
+real importer. It audits every file the importer would select, preserves the
+split-file preference that ignores `00-all-in-one` mirrors when numbered split
+files are present, and supports packs without a manifest. When a manifest is
+present, its entries must match the complete importer-selected set in both
+directions. Import-normalizer errors and manifest/inventory inconsistencies
+produce a non-zero exit; normalizer warnings and quality heuristics such as
+short explanations remain review signals. The command never connects to Prisma
+or a database.
+
+See [`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
+for the canonical repository evidence boundary, learner/admin journey audit,
+parsed inventory, controlled-beta backlog, difficulty rubric, curriculum
+proposal, and first representative 21-problem/84-question batch.
 
 ## Database Schema Overview
 

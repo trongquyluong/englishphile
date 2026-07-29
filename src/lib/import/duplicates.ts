@@ -9,23 +9,15 @@ import type {
 } from "@/lib/import/types";
 import { attachDuplicateRiskMetadata, detectImportDuplicates, getQuestionFingerprint } from "@/lib/import/duplicate-detection";
 import { prisma } from "@/lib/prisma";
+import { generateSlug } from "@/lib/import/slug";
+
+export { generateSlug } from "@/lib/import/slug";
 
 type Db = PrismaClient | Prisma.TransactionClient | typeof prisma;
 
 export type ImportProblemWriteStage = "problem-nested-create";
 
 export type ImportProblemWriteStageReporter = (stage: ImportProblemWriteStage) => void;
-
-export function generateSlug(value: string) {
-  const slug = value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return slug || `problem-${Date.now()}`;
-}
 
 function topicSlug(value: string) {
   return generateSlug(value);
