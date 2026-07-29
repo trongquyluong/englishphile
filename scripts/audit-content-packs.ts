@@ -135,6 +135,14 @@ function findingRows(report: ContentAuditReport) {
       count: report.findings.invalidCorrectOptions.length,
     },
     {
+      signal: "Option không tương thích learner renderer",
+      count: report.findings.rendererIncompatibleOptions.length,
+    },
+    {
+      signal: "Câu có lựa chọn trùng sau chuẩn hóa, cần biên tập",
+      count: report.findings.duplicateNormalizedOptionTexts.length,
+    },
+    {
       signal: "Nhóm prompt trùng lặp chính xác có nội dung",
       count: report.findings.duplicatePromptGroups.length,
     },

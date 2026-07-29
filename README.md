@@ -163,6 +163,14 @@ for the canonical repository evidence boundary, learner/admin journey audit,
 parsed inventory, controlled-beta backlog, difficulty rubric, curriculum
 proposal, and first representative 21-problem/84-question batch.
 
+See
+[`docs/PHASE_2_CONTENT_QA_WORKFLOW.md`](docs/PHASE_2_CONTENT_QA_WORKFLOW.md)
+for the pre-authoring lifecycle, operational rubric, difficulty calibration,
+repository-backed contracts for all pilot types, the 21/84 acceptance
+specification, and implemented-versus-manual admin workflow. Copy
+[`content-packs/CONTENT_PACK_REVIEW_TEMPLATE.md`](content-packs/CONTENT_PACK_REVIEW_TEMPLATE.md)
+for one pack's review evidence.
+
 ## Database Schema Overview
 
 Main models:

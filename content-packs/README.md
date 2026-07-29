@@ -47,3 +47,9 @@ validation rules as import, without Prisma or a database. See
 [`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](../docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
 for the repository evidence boundary, current inventory, product gaps, and
 proposed editorial sequence.
+
+Before authoring a controlled batch, follow
+[`docs/PHASE_2_CONTENT_QA_WORKFLOW.md`](../docs/PHASE_2_CONTENT_QA_WORKFLOW.md).
+Copy [`CONTENT_PACK_REVIEW_TEMPLATE.md`](CONTENT_PACK_REVIEW_TEMPLATE.md) to
+`REVIEW_RECORD.md` inside the new pack and record human linguistic, rendering,
+calibration, and approval evidence separately from automated output.
