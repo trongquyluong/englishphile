@@ -11,6 +11,11 @@ import {
   sourceTypeValues,
 } from "@/lib/import/types";
 import { generateSlug } from "@/lib/import/slug";
+import {
+  normalizeErrorIdentificationAnswer,
+  normalizeErrorIdentificationOptions,
+  validateErrorIdentificationContract,
+} from "@/lib/questions/error-identification-contract";
 
 const nullableString = z
   .union([z.string(), z.null(), z.undefined()])
@@ -145,21 +150,16 @@ function normalizeAnswer(questionType: QuestionType, answer: unknown) {
     normalized.correctOptionId = normalized.correctOption;
   }
 
-  if (
-    questionType === "ERROR_IDENTIFICATION" &&
-    typeof normalized.correctPart !== "string" &&
-    typeof normalized.errorPart === "string"
-  ) {
-    normalized.correctPart = normalized.errorPart;
-  }
-
   if ("accepted" in normalized) {
     const acceptedAnswers = getAcceptedAnswers(normalized);
-    return {
+    const acceptedNormalized = {
       ...normalized,
       acceptedAnswers,
       display: typeof normalized.display === "string" ? normalized.display : acceptedAnswers[0],
     };
+    return questionType === "ERROR_IDENTIFICATION"
+      ? normalizeErrorIdentificationAnswer(acceptedNormalized)
+      : acceptedNormalized;
   }
 
   if (
@@ -170,7 +170,9 @@ function normalizeAnswer(questionType: QuestionType, answer: unknown) {
     return { ...normalized, acceptedAnswers: [normalized.correctForm] };
   }
 
-  return normalized;
+  return questionType === "ERROR_IDENTIFICATION"
+    ? normalizeErrorIdentificationAnswer(normalized)
+    : normalized;
 }
 
 function validateQuestionRules(question: NormalizedQuestion, path: string): ImportIssue[] {
@@ -210,12 +212,34 @@ function validateQuestionRules(question: NormalizedQuestion, path: string): Impo
   }
 
   if (question.type === "ERROR_IDENTIFICATION") {
-    if (typeof answer.correctPart !== "string") {
-      issues.push({ level: "error", path: `${path}.answer.correctPart`, message: "Error Identification cần correctPart." });
-    }
-    if (typeof answer.correction !== "string") {
-      issues.push({ level: "error", path: `${path}.answer.correction`, message: "Error Identification cần correction." });
-    }
+    const contract = validateErrorIdentificationContract(
+      question.options,
+      question.answer,
+    );
+    const hasOptionFailure = contract.issues.some((contractIssue) =>
+      [
+        "OPTIONS_REQUIRED",
+        "OPTION_COUNT_NOT_FOUR",
+        "INVALID_OPTION_ID",
+        "DUPLICATE_OPTION_ID",
+        "MISSING_CANONICAL_OPTION_ID",
+        "INVALID_OPTION_TEXT",
+      ].includes(contractIssue.code),
+    );
+    issues.push(
+      ...contract.issues
+        .filter(
+          (contractIssue) =>
+            contractIssue.code !== "CORRECT_PART_NOT_IN_OPTIONS" ||
+            !hasOptionFailure,
+        )
+        .map((contractIssue) => ({
+          level: contractIssue.importLevel,
+          path: `${path}.${contractIssue.path}`,
+          message: contractIssue.message,
+          code: `ERROR_IDENTIFICATION_${contractIssue.code}`,
+        })),
+    );
   }
 
   if (question.type === "SENTENCE_TRANSFORMATION" && getAcceptedAnswers(answer).length === 0) {
@@ -241,7 +265,10 @@ export function normalizeQuestion(input: unknown, path: string, orderIndex: numb
     difficulty: parsed.data.difficulty as Difficulty,
     prompt: parsed.data.prompt.trim(),
     passage: parsed.data.passage,
-    options: normalizeOptions(parsed.data.options),
+    options:
+      parsed.data.type === "ERROR_IDENTIFICATION"
+        ? normalizeErrorIdentificationOptions(parsed.data.options)
+        : normalizeOptions(parsed.data.options),
     answer: normalizeAnswer(parsed.data.type as QuestionType, parsed.data.answer),
     explanation: parsed.data.explanation,
     rootWord: parsed.data.rootWord,

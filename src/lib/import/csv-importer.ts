@@ -9,6 +9,7 @@ import {
   createContentPackFileIdentity,
   type ContentPackFileIdentity,
 } from "@/lib/content-packs/file-identity";
+import { enforceImportPublicationContract } from "@/lib/import/publication-validation";
 
 export { parseCsvImport } from "@/lib/import/normalize-file";
 
@@ -22,7 +23,7 @@ export async function importCsvRows(
   userId: string,
   options: { publishImmediately?: boolean; contentPackId?: string; fileIdentity?: ContentPackFileIdentity } = {},
 ): Promise<ImportExecutionResult> {
-  const plan = await validateCsvRows(text);
+  let plan = await validateCsvRows(text);
   const fileIdentity = options.fileIdentity
     ? createContentPackFileIdentity(options.fileIdentity.fileName, "CSV", text, options.fileIdentity.position)
     : undefined;
@@ -32,6 +33,8 @@ export async function importCsvRows(
 
   const contentStatus: ContentStatus =
     options.publishImmediately && plan.summary.possibleDuplicateQuestionsFlagged === 0 ? "PUBLISHED" : "NEEDS_REVIEW";
+  plan = enforceImportPublicationContract(plan, contentStatus);
+  if (!plan.ok) return { ...plan, status: "FAILED" };
   return executeImportPlanAtomically(plan, {
     importType: "CSV",
     userId,

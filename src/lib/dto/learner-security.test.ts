@@ -138,6 +138,112 @@ describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
     ])).toEqual([{ id: "1", text: "2" }]);
   });
 
+  it("projects only canonical Error Identification parts and never answer material", () => {
+    const source = {
+      id: "error-question",
+      type: "ERROR_IDENTIFICATION",
+      skillType: "ERROR_IDENTIFICATION",
+      difficulty: "C1",
+      prompt: "Find the error.",
+      passage: null,
+      options: [
+        { id: " a ", text: "The students", answer: ANSWER_SENTINEL },
+        { id: "b", text: "was" },
+        { id: "C", text: "ready" },
+        { id: "d", text: 4 },
+      ],
+      answer: {
+        correctPart: "B",
+        correction: ANSWER_SENTINEL,
+        acceptedAnswers: [ANSWER_SENTINEL],
+      },
+      explanation: EXPLANATION_SENTINEL,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: { correction: ANSWER_SENTINEL },
+      orderIndex: 0,
+    } as LearnerQuestionSource & Record<string, unknown>;
+
+    const dto = toLearnerQuestionDTO(source);
+
+    expect(dto.options).toEqual([
+      { id: "A", text: "The students" },
+      { id: "B", text: "was" },
+      { id: "C", text: "ready" },
+      { id: "D", text: "4" },
+    ]);
+    expect(serialized(dto)).not.toContain(ANSWER_SENTINEL);
+    expect(serialized(dto)).not.toContain(EXPLANATION_SENTINEL);
+    expect(dto).not.toHaveProperty("answer");
+  });
+
+  it("orders valid Error Identification parts A-D regardless of persisted source order", () => {
+    const dto = toLearnerQuestionDTO({
+      id: "ordered-error-question",
+      type: "ERROR_IDENTIFICATION",
+      skillType: "ERROR_IDENTIFICATION",
+      difficulty: "C1",
+      prompt: "Find the error.",
+      passage: null,
+      options: [
+        { id: "D", text: "four" },
+        { id: "b", text: 2 },
+        { id: " A ", text: "one" },
+        { id: "C", text: "three" },
+      ],
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: null,
+      orderIndex: 0,
+    });
+
+    expect(dto.options).toEqual([
+      { id: "A", text: "one" },
+      { id: "B", text: "2" },
+      { id: "C", text: "three" },
+      { id: "D", text: "four" },
+    ]);
+  });
+
+  it.each([
+    ["legacy null options", null],
+    ["fewer than four", [{ id: "A", text: "one" }]],
+    ["duplicate IDs", [
+      { id: "A", text: "one" },
+      { id: " a ", text: "duplicate" },
+      { id: "C", text: "three" },
+      { id: "D", text: "four" },
+    ]],
+    ["invalid display text", [
+      { id: "A", text: "one" },
+      { id: "B", text: "two" },
+      { id: "C", text: "three" },
+      { id: "D", text: null },
+    ]],
+  ])("fails closed for Error Identification %s", (_name, options) => {
+    const dto = toLearnerQuestionDTO({
+      id: "malformed-error-question",
+      type: "ERROR_IDENTIFICATION",
+      skillType: "ERROR_IDENTIFICATION",
+      difficulty: "C1",
+      prompt: "Find the error.",
+      passage: null,
+      options,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: null,
+      orderIndex: 0,
+    });
+
+    expect(dto.options).toEqual([]);
+  });
+
   it("returns fixed correct, incorrect, and review-pending feedback", () => {
     expect(toQuestionResult("q1", true).feedback).toBe(LEARNER_FEEDBACK.correct);
     expect(toQuestionResult("q2", false).feedback).toBe(LEARNER_FEEDBACK.incorrect);

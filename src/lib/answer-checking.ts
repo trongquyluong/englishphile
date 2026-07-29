@@ -1,4 +1,10 @@
 import type { Question, SubmissionStatus } from "@prisma/client";
+import {
+  canonicalizeErrorIdentificationPart,
+  ERROR_IDENTIFICATION_CORRECTION_LIMITS,
+  isErrorIdentificationPartId,
+  parseErrorIdentificationCorrectionVariants,
+} from "@/lib/questions/error-identification-contract";
 
 type JsonObject = Record<string, unknown>;
 
@@ -152,13 +158,30 @@ export function checkQuestionAnswer(
     const selectedPart = response.part;
     const correction = response.correction;
     const correctionText = typeof answer.correction === "string" ? answer.correction : "";
-    const acceptedCorrections = correctionText
-      .split("/")
-      .map((item) => item.trim())
-      .filter(Boolean);
-    const partCorrect = checkMCQ(selectedPart, answer.correctPart);
+    const rawCorrectionVariants = parseErrorIdentificationCorrectionVariants(
+      correctionText,
+    );
+    const acceptedCorrections = rawCorrectionVariants.filter(Boolean);
+    const correctionContractValid =
+      Boolean(correctionText.trim()) &&
+      correctionText.length <= ERROR_IDENTIFICATION_CORRECTION_LIMITS.maxTotalLength &&
+      rawCorrectionVariants.length <= ERROR_IDENTIFICATION_CORRECTION_LIMITS.maxVariants &&
+      rawCorrectionVariants.every(
+        (variant) =>
+          Boolean(variant) &&
+          variant.length <= ERROR_IDENTIFICATION_CORRECTION_LIMITS.maxVariantLength,
+      );
+    const submittedPart = canonicalizeErrorIdentificationPart(selectedPart);
+    const expectedPart = canonicalizeErrorIdentificationPart(answer.correctPart);
+    const partCorrect =
+      isErrorIdentificationPartId(submittedPart) &&
+      isErrorIdentificationPartId(expectedPart) &&
+      submittedPart === expectedPart;
     const correctionCorrect =
-      acceptedCorrections.length === 0 || checkMultipleAcceptedAnswers(correction, acceptedCorrections);
+      correctionContractValid &&
+      typeof correction === "string" &&
+      Boolean(correction.trim()) &&
+      checkMultipleAcceptedAnswers(correction, acceptedCorrections);
     const isCorrect = partCorrect && correctionCorrect;
 
     return {

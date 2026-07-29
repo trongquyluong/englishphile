@@ -326,6 +326,12 @@ describe("content-pack repository audit", () => {
     { id: "A", text: "One" },
     { id: "B", text: "Two" },
   ];
+  const validErrorOptions = [
+    { id: "A", text: "One" },
+    { id: "B", text: "Two" },
+    { id: "C", text: "Three" },
+    { id: "D", text: "Four" },
+  ];
 
   it.each([
     ["zero options", [], { correctOptionId: "A" }, true],
@@ -500,15 +506,15 @@ describe("content-pack repository audit", () => {
   });
 
   it.each([
-    ["correctPart", validOptions, { correctPart: "A", correction: "is" }, false],
-    ["errorPart alias", validOptions, { errorPart: "a", correction: "is" }, false],
-    ["blank correctPart does not fall through to alias", validOptions, { correctPart: " ", errorPart: "A", correction: "is" }, true],
-    ["numeric values", [{ id: 1, text: 1 }, { id: 2, text: "Two" }], { correctPart: 1, correction: "is" }, false],
-    ["whitespace/case correctPart", validOptions, { correctPart: " a ", correction: "is" }, false],
+    ["correctPart", validErrorOptions, { correctPart: "A", correction: "is" }, false],
+    ["errorPart alias", validErrorOptions, { errorPart: "a", correction: "is" }, false],
+    ["blank correctPart does not fall through to alias", validErrorOptions, { correctPart: " ", errorPart: "A", correction: "is" }, true],
+    ["numeric IDs are not canonical A-D", [{ id: 1, text: 1 }, { id: 2, text: "Two" }], { correctPart: 1, correction: "is" }, true],
+    ["whitespace/case correctPart", validErrorOptions, { correctPart: " a ", correction: "is" }, false],
     ["absent options", null, { correctPart: "A", correction: "is" }, true],
-    ["null ID", [{ id: null, text: "One" }, validOptions[1]], { correctPart: "B", correction: "is" }, true],
-    ["null text", [{ id: "A", text: null }, validOptions[1]], { correctPart: "A", correction: "is" }, true],
-    ["malformed option object", [{}, validOptions[1]], { correctPart: "B", correction: "is" }, true],
+    ["null ID", [{ id: null, text: "One" }, ...validErrorOptions.slice(1)], { correctPart: "B", correction: "is" }, true],
+    ["null text", [{ id: "A", text: null }, ...validErrorOptions.slice(1)], { correctPart: "A", correction: "is" }, true],
+    ["malformed option object", [{}, ...validErrorOptions.slice(1)], { correctPart: "B", correction: "is" }, true],
   ])(
     "checks Error Identification option contract: %s",
     (_name, options, answer, expectedFinding) => {
@@ -835,7 +841,7 @@ describe("content-pack repository audit", () => {
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);
-    expect(report.normalizerWarnings).toEqual([]);
+    expect(report.normalizerWarnings).toHaveLength(56);
     expect(report.hasInventoryErrors).toBe(false);
   });
 

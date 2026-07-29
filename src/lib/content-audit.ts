@@ -1,4 +1,9 @@
 import { normalizeContentPackFileName } from "@/lib/content-packs/file-identity";
+import {
+  normalizeErrorIdentificationAnswer,
+  normalizeErrorIdentificationOptions,
+  validateErrorIdentificationContract,
+} from "@/lib/questions/error-identification-contract";
 
 export const SHORT_EXPLANATION_THRESHOLD = 45;
 const MAX_OPTION_AMBIGUITY_GROUPS = 12;
@@ -90,6 +95,7 @@ export type DuplicatePromptGroup = {
 
 export type RendererOptionIssue =
   | "TOO_FEW_RENDERABLE_OPTIONS"
+  | "OPTION_COUNT_NOT_FOUR"
   | "INVALID_OPTION_ID"
   | "DUPLICATE_OPTION_ID"
   | "INVALID_OPTION_TEXT"
@@ -894,8 +900,12 @@ export function auditContentPacks(
           }
 
           if (optionRendererQuestionTypes.has(questionType)) {
-            const options = Array.isArray(rawQuestion.options)
-              ? rawQuestion.options
+            const rendererOptions =
+              questionType === "ERROR_IDENTIFICATION"
+                ? normalizeErrorIdentificationOptions(rawQuestion.options)
+                : rawQuestion.options;
+            const options = Array.isArray(rendererOptions)
+              ? rendererOptions
               : [];
             const projectedOptions = options.map((option) => {
               if (!isRecord(option)) {
@@ -926,28 +936,63 @@ export function auditContentPacks(
               rawQuestion.answer,
             );
             const issues: RendererOptionIssue[] = [];
-            if (renderableOptions.length < 2) {
-              issues.push("TOO_FEW_RENDERABLE_OPTIONS");
-            }
-            if (projectedOptions.some((option) => !option.canonicalId)) {
-              issues.push("INVALID_OPTION_ID");
-            }
-            if (
-              new Set(canonicalIdentifiers).size !==
-              canonicalIdentifiers.length
-            ) {
-              issues.push("DUPLICATE_OPTION_ID");
-            }
-            if (
-              renderableOptions.some((option) => !option.displayText)
-            ) {
-              issues.push("INVALID_OPTION_TEXT");
-            }
-            if (
-              !expectedAnswer ||
-              !canonicalIdentifiers.includes(expectedAnswer)
-            ) {
-              issues.push("ANSWER_NOT_IN_RENDERED_OPTIONS");
+            if (questionType === "ERROR_IDENTIFICATION") {
+              const contract = validateErrorIdentificationContract(
+                rendererOptions,
+                normalizeErrorIdentificationAnswer(rawQuestion.answer),
+              );
+              const contractCodes = new Set(
+                contract.issues.map((contractIssue) => contractIssue.code),
+              );
+              if (
+                contractCodes.has("OPTIONS_REQUIRED") ||
+                contractCodes.has("OPTION_COUNT_NOT_FOUR")
+              ) {
+                issues.push("OPTION_COUNT_NOT_FOUR");
+              }
+              if (
+                contractCodes.has("INVALID_OPTION_ID") ||
+                contractCodes.has("MISSING_CANONICAL_OPTION_ID")
+              ) {
+                issues.push("INVALID_OPTION_ID");
+              }
+              if (contractCodes.has("DUPLICATE_OPTION_ID")) {
+                issues.push("DUPLICATE_OPTION_ID");
+              }
+              if (contractCodes.has("INVALID_OPTION_TEXT")) {
+                issues.push("INVALID_OPTION_TEXT");
+              }
+              if (
+                contractCodes.has("CORRECT_PART_REQUIRED") ||
+                contractCodes.has("CORRECT_PART_INVALID") ||
+                contractCodes.has("CORRECT_PART_NOT_IN_OPTIONS")
+              ) {
+                issues.push("ANSWER_NOT_IN_RENDERED_OPTIONS");
+              }
+            } else {
+              if (renderableOptions.length < 2) {
+                issues.push("TOO_FEW_RENDERABLE_OPTIONS");
+              }
+              if (projectedOptions.some((option) => !option.canonicalId)) {
+                issues.push("INVALID_OPTION_ID");
+              }
+              if (
+                new Set(canonicalIdentifiers).size !==
+                canonicalIdentifiers.length
+              ) {
+                issues.push("DUPLICATE_OPTION_ID");
+              }
+              if (
+                renderableOptions.some((option) => !option.displayText)
+              ) {
+                issues.push("INVALID_OPTION_TEXT");
+              }
+              if (
+                !expectedAnswer ||
+                !canonicalIdentifiers.includes(expectedAnswer)
+              ) {
+                issues.push("ANSWER_NOT_IN_RENDERED_OPTIONS");
+              }
             }
             if (issues.length > 0) {
               report.findings.rendererIncompatibleOptions.push(

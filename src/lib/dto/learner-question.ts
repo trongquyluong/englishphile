@@ -4,6 +4,10 @@ import type {
   QuestionType,
   SkillType,
 } from "@prisma/client";
+import {
+  ERROR_IDENTIFICATION_PART_IDS,
+  validateErrorIdentificationOptions,
+} from "@/lib/questions/error-identification-contract";
 
 export type LearnerOptionDTO = {
   id: string;
@@ -126,6 +130,22 @@ export function normalizeLearnerOptions(value: unknown): LearnerOptionDTO[] {
     .filter((item): item is LearnerOptionDTO => item !== null);
 }
 
+export function normalizeLearnerQuestionOptions(
+  questionType: QuestionType,
+  value: unknown,
+): LearnerOptionDTO[] {
+  if (questionType !== "ERROR_IDENTIFICATION") {
+    return normalizeLearnerOptions(value);
+  }
+
+  const contract = validateErrorIdentificationOptions(value);
+  if (!contract.valid) return [];
+  return ERROR_IDENTIFICATION_PART_IDS.flatMap((partId) => {
+    const option = contract.options.find((candidate) => candidate.id === partId);
+    return option ? [option] : [];
+  });
+}
+
 export function toLearnerQuestionDTO(question: LearnerQuestionSource): LearnerQuestionDTO {
   const metadata = asRecord(question.metadata);
 
@@ -136,7 +156,7 @@ export function toLearnerQuestionDTO(question: LearnerQuestionSource): LearnerQu
     difficulty: question.difficulty,
     prompt: question.prompt,
     passage: question.passage,
-    options: normalizeLearnerOptions(question.options),
+    options: normalizeLearnerQuestionOptions(question.type, question.options),
     rootWord: question.rootWord,
     keyword: question.keyword,
     targetSentence: question.targetSentence,

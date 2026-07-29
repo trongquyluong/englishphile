@@ -44,4 +44,57 @@ describe("Phase 1D-A admin preview runtime regression", () => {
     expect(result.questions[0]?.answer).toEqual({ correctOptionId: "A", sentinel: answerSentinel });
     expect(result.questions[0]?.rawOptions).toEqual([{ id: "A", text: "Choice", correct: true }]);
   });
+
+  it("provides canonical Error Identification render data while retaining admin-only answer data", () => {
+    const result = toAdminProblemPreviewDTO({
+      id: "error-problem",
+      title: "Error Identification preview",
+      slug: "error-identification-preview",
+      skillType: "ERROR_IDENTIFICATION",
+      questionType: "ERROR_IDENTIFICATION",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Chọn phần sai.",
+      instructions: "Chọn A-D và sửa lại.",
+      estimatedMinutes: 5,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "error-question",
+        type: "ERROR_IDENTIFICATION",
+        skillType: "ERROR_IDENTIFICATION",
+        difficulty: "C1",
+        prompt: "The students was ready.",
+        passage: null,
+        options: [
+          { id: "d", text: "today" },
+          { id: "b", text: "was" },
+          { id: " a ", text: "The students" },
+          { id: "C", text: "ready" },
+        ],
+        answer: { correctPart: "B", correction: "were" },
+        explanation: "Students là số nhiều.",
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata: null,
+        orderIndex: 0,
+      }],
+    });
+
+    expect(result.questions[0]?.options.map((option) => option.id))
+      .toEqual(["A", "B", "C", "D"]);
+    expect(result.questions[0]?.answer).toEqual({
+      correctPart: "B",
+      correction: "were",
+    });
+    expect(result.questions[0]?.rawOptions).toEqual([
+      { id: "d", text: "today" },
+      { id: "b", text: "was" },
+      { id: " a ", text: "The students" },
+      { id: "C", text: "ready" },
+    ]);
+  });
 });

@@ -37,10 +37,10 @@ Preview, Production, provider, environment, or deployed content.
   learner DTO does not carry `metadata.sentences` and `TriosQuestion` only shows
   `prompt`.
 - All 55 current `ERROR_IDENTIFICATION` questions lack renderable options.
-  Import validation requires `correctPart` and `correction` but not the complete
-  renderable option contract, and persisted QA option validation currently
-  excludes `ERROR_IDENTIFICATION`. The planned Error Identification contract PR
-  must resolve this gap before its pilot content can be publication-ready.
+  Phase 2 PR 3 now reports this as a non-fatal import/repository warning and
+  enforces the complete contract in persisted QA and every publication path.
+  The files remain unchanged and are not publication-ready; a separate reviewed
+  content-repair PR must author their real A–D spans.
 - Pronunciation pack metadata has `focus`, but no learner-safe target-span or
   underline contract renders it.
 - Writing uses a hard-coded checklist and English control labels; authored
@@ -48,8 +48,10 @@ Preview, Production, provider, environment, or deployed content.
 - Listening enums, checker branches, and a component exist, but there is no
   dedicated schema/import contract for audio or transcript. The component only
   reads unvalidated `metadata.audioUrl` and `metadata.sectionType`.
-- Persisted QA is enforced by bulk `publish-safe`, but single publish and
-  immediate import-publish use only minimal publish validation.
+- Persisted QA is enforced by bulk `publish-safe`. Single publish and immediate
+  import-publish still use the repository's minimal publication layer in
+  general, but Phase 2 PR 3 makes that layer complete and fail-closed for
+  `ERROR_IDENTIFICATION`.
 - `copyrightNote` is optional in Prisma/import schema. It is mandatory for this
   process, not an implemented schema error.
 - The schema supports `SkillType.COLLOCATIONS`; pilot Collocations should use it
@@ -165,7 +167,7 @@ Prefer canonical normalized answer names: `correctOptionId`, `correctPart`, and
 | `OPEN_CLOZE` | shared passage, slot prompt; `OpenClozeQuestion` | `acceptedAnswers`; auto exact normalized text | UI expects one word; include all legitimate bounded variants |
 | `WORD_FORMATION` | prompt + `rootWord`; dedicated renderer | `acceptedAnswers`; auto exact normalized text | Review word class, polarity/plural, and visible root |
 | `SENTENCE_TRANSFORMATION` | prompt, optional `keyword`/`targetSentence`; dedicated renderer | exact accepted answer = true; otherwise `null` | Never count non-exact as wrong; review equivalence/variants; no active manual-grading UI |
-| `ERROR_IDENTIFICATION` | prompt + options; dedicated part/correction renderer | `correctPart` + `correction`; auto both, `/` separates correction variants | Import/persisted QA do not enforce the complete option contract. Pilot requires four unique A–D options and member `correctPart`; block publication until the dedicated contract PR passes |
+| `ERROR_IDENTIFICATION` | `prompt` + exactly four parts `options[{id,text}]`; IDs canonicalize to unique A–D | canonical member `correctPart` + non-empty `correction`; auto-score requires both; `/` separates at most eight bounded variants | Normal `NEEDS_REVIEW` import warns and retains renderer/option gaps and a syntactically present string `correctPart` that is invalid or outside the rendered set. Missing/non-string/blank `correctPart`, missing/blank correction, and correction-bound violations remain import errors. Persisted QA, bulk safe, individual publish, edit-to-publish, and immediate import-publish enforce the full contract |
 | `TRIOS_GAPPED_SENTENCES` | current component renders only prompt | exactly one shared `acceptedAnswers`; auto | Review three natural contexts; learner DTO omits stored sentences, so block publication |
 
 `SHORT_ANSWER` exists but is not a pilot substitute for
@@ -205,8 +207,8 @@ application; this is coverage rationale, not calibration evidence.
 
 - Editorial master scope: 21/84.
 - Organizationally importable non-Listening core: `phase2-pilot-core-001`,
-  19/76. It is not publication-ready while Error Identification, Trios,
-  Pronunciation, and Writing contracts remain unresolved.
+  19/76. It is not publication-ready while Trios, Pronunciation, and Writing
+  contracts remain unresolved and no reviewed pilot content has been authored.
 - Separately blocked Listening extension: `phase2-listening-pilot-001`, 2/8,
   created only after the Listening media contract passes.
 - Core split files: `01-reading` through separate files for Writing,
@@ -249,9 +251,9 @@ application; this is coverage rationale, not calibration evidence.
 
 Publication is blocked by any automated error, persisted QA `ERROR`, unclear
 rights, ambiguity/language error, unresolved duplicate, missing review evidence,
-immediate-publish use, or unresolved contracts for Error Identification, Trios,
-Pronunciation, or Writing. Listening remains separately blocked by its media
-contract.
+immediate-publish use, unrenderable legacy Error Identification content, or
+unresolved contracts for Trios, Pronunciation, or Writing. Listening remains
+separately blocked by its media contract.
 
 Diagnostic eligibility is additionally blocked until status is `STABLE`, sample
 and agreement bands pass, the item fits the deterministic blueprint, and the
@@ -266,7 +268,7 @@ item has an auto-scored contract. Pilot default is always false.
 | QA | Persisted `/admin/content-qa`, severity report | Disposition every warning manually | Review-record/type gates |
 | Import | Upload-first, split preference, traceability, default review | Disable immediate publish | Lock immediate publish for controlled packs |
 | Preview | Answer-complete admin DTO, production renderer, no submission | Screenshot each type/problem | Visual regression fixtures |
-| Publish | Bulk safe rechecks QA; single publish is weaker | Use only bulk `publish-safe` after sign-off | Enforced approval/reviewer separation |
+| Publish | Bulk safe rechecks QA; Error Identification also has the same fail-closed contract in single and immediate publish | Use only bulk `publish-safe` after sign-off | Enforced approval/reviewer separation for the wider human evidence gate |
 | Correction | Admin JSON edit + archive/status | Minor edit then re-QA; major fix gets versioned slug | Versioned supersede/upsert |
 | Re-import | Duplicate slugs skip; no overwrite | Never treat re-import as update | Explicit reviewed version replacement |
 | Monitoring | Analytics/status/archive primitives | Manual issue log and sampling | Learner report queue/calibration dashboard |
@@ -282,21 +284,22 @@ Copy
 to `REVIEW_RECORD.md` for a pack. It uses role/initials only and requests no
 email, learner identity, or other unnecessary personal data.
 
-## H. Minimal automation in this PR
+## H. PR 2 audit automation preserved by PR 3
 
 The audit adds two deterministic, non-blocking signals. Renderer compatibility
 answers whether required controls/options can be projected, displayed, and
-scored. `rendererIncompatibleOptions` therefore reports fewer than two
-renderable options, missing/invalid IDs, scorer-equivalent duplicate IDs,
-missing/invalid display text, and a selected answer outside the rendered
-options, including for Error Identification.
+scored. For general option renderers,
+`rendererIncompatibleOptions` reports too few renderable options,
+missing/invalid IDs, scorer-equivalent duplicate IDs, missing/invalid display
+text, and a selected answer outside the rendered options. For Error
+Identification it uses the shared exact-four A–D validator.
 
 The contract mirrors current code: learner option projection accepts only
 `string` and `number` IDs/text and converts them with `String(...)`; scorer
 membership trims and uppercases IDs. Error Identification gets selectable parts
-from the same projected options and accepts normalized `correctPart` or the
-import alias `errorPart`; correction validation remains the importer's separate
-rule.
+only from the exact-four safe projection. The importer normalizes the
+`errorPart` alias before the audit/contract checks; correction validation is now
+part of the shared publication contract.
 
 Editorial option ambiguity is separate:
 `duplicateNormalizedOptionTexts` reports when distinct rendered choices
@@ -310,25 +313,125 @@ and up to 12 duplicate groups with up to eight bounded raw values per group;
 occurrence and omission counts preserve remediation context without dumping
 unbounded content.
 
-Both signals are review warnings: neither changes `hasInventoryErrors`, import,
-database, learner, admin, scoring, or publication behavior. No subjective
+Both audit signals remain review warnings and do not change
+`hasInventoryErrors`. Phase 2 PR 3 separately changes Error Identification
+import/learner/scoring/publication behavior through the contract described
+below. No subjective
 language/difficulty rule, explanation-length failure, licensing schema rule,
 answer-position failure threshold, or invented Listening field was added.
-Human mode prints only bounded counts. Full deterministic file/problem/question
-locations, issue codes or duplicate groups, and safe option representations are
-available in JSON mode:
+Human and JSON modes keep option values and prompt excerpts bounded. Full
+deterministic file/problem/question locations, issue codes or duplicate groups,
+and safe option representations are available in JSON mode:
 `npm run --silent audit:content-packs -- --format=json`.
 
-## I. Boundary and recommended next small PR
+## I. Phase 2 PR 3 — Error Identification contract
 
-This PR contains no real pilot questions, Prisma/migration, UI redesign,
-database-backed execution, import/publication, HSG, or diagnostic enablement.
+### Canonical data and scoring contract
+
+No Prisma field or migration is required. The existing `Question.options Json?`
+and `Question.answer Json` fields support the complete contract:
+
+- `options` is exactly four renderer-supported objects;
+- each option has one canonical ID from A, B, C, and D, with no duplicate after
+  trim/uppercase normalization;
+- each option has non-empty learner-visible `text`; string and finite JSON
+  number primitives follow the existing learner projection and become strings;
+- `answer.correctPart` is canonical A–D and belongs to the rendered set;
+- `answer.correction` is a non-empty string;
+- existing slash-delimited correction alternatives remain the only supported
+  alternative contract: at most 8 variants, at most 240 characters per
+  variant, and at most 1,000 characters in the complete field. Empty slash
+  segments are invalid.
+
+The importer alone accepts the existing string `errorPart` alias when
+`correctPart` is not already a string. It then removes the alias and stores
+trimmed/uppercased `correctPart`. It also normalizes the existing option
+`label` alias and supported primitive ID/text values before running the shared
+pure option validator. Persisted QA and publication require canonical `id`
+fields; they do not treat `label` as a persisted substitute.
+
+Scoring trim/uppercases the selected and expected part. It applies the existing
+text-answer normalization independently to each slash-delimited correction
+variant. A result is correct only when both a non-empty selected part and a
+non-empty correction match. Missing/malformed answer configuration, a wrong
+part, or a wrong correction returns false. Writing and Sentence Transformation
+branches are unchanged.
+
+### Import severity and legacy compatibility
+
+The normal JSON and CSV import target remains `NEEDS_REVIEW`. Renderer/options
+gaps and a syntactically present string `correctPart` that is invalid or not a
+member of the rendered option set are `warning` issues with exact
+`problems.<index>.questions.<index>...` or `rows.<number>.question...`
+locations. This deliberately allows incomplete draft/review content to be
+retained for admin repair without declaring the repository inventory malformed.
+Missing/non-string/blank `correctPart` or correction and unbounded/malformed
+correction alternatives remain import `error` issues because they are not a
+bounded scoring answer.
+
+At an immediate JSON/CSV publication boundary, every Error Identification
+contract warning is promoted to a publication error before the atomic executor
+can write published content. This repository enforcement is not database
+evidence: it does not establish that unknown historical published rows were
+inspected, repaired, or retroactively unpublished.
+
+The two repository files still contain 55 legacy questions with `options=null`;
+none was edited or silently given generated spans. Repository audit therefore
+continues to exit zero, reports exactly 55
+`rendererIncompatibleOptions` findings, and now also carries 56 non-fatal
+normalizer warnings with file/problem/question
+paths (one legacy `correctPart=OK` adds a separate canonical-ID warning). JSON order remains
+deterministic and option values/excerpts remain bounded.
+`duplicateNormalizedOptionTexts` stays a separate editorial signal.
+
+### Publication, DTO, rendering, and evidence
+
+The same pure contract is enforced in:
+
+1. persisted content QA (`ERROR`, `canPublish=false`);
+2. bulk `publish-safe`, including its under-lock QA recheck;
+3. individual status publish and edit-to-publish minimal validation;
+4. immediate JSON/CSV import-publish before published rows can be written.
+
+Every boundary rejects missing options, counts other than four, non-A–D or
+duplicate canonical IDs, missing display text, invalid/non-member
+`correctPart`, missing correction, and invalid correction bounds.
+
+The learner DTO still positively allowlists presentation fields. For Error
+Identification it emits only canonical safe `{id,text}` A–D parts when the
+complete option projection is renderable; malformed persisted options produce
+an empty list. It never emits `correctPart`, correction data, accepted
+alternatives, explanation, raw options, or metadata. Admin preview remains a
+separate server-only answer-complete mapper, carries `rawOptions` for repair,
+uses the safe canonical options for the production renderer, and suppresses
+submission persistence through existing preview mode.
+
+The existing learner interaction remains one native labelled radio group plus
+a separate correction input. Invalid legacy preview data shows a fixed
+Vietnamese unavailable notice instead of invalid part controls and does not
+crash. This PR does not create a new reviewed-answer surface; existing
+learner-safe submission feedback and admin-only answer access remain unchanged.
+
+Repository tests cover pure contract fixtures, JSON/CSV normalization,
+immediate publication, persisted QA, individual and bulk publication, learner
+DTO non-disclosure/fail-closed behavior, admin preview mapping, renderer
+interaction shape, scoring, the 55-question repository inventory, and
+deterministic audit output. They are repository/local evidence only: no
+database, deployed environment, provider, import, publication, migration,
+seed, or content repair was executed.
+
+## J. Boundary and recommended next small PR
+
+Phase 2 PR 3 contains no real pilot questions, Prisma/migration, broad UI
+redesign, database-backed execution, executed import/publication, HSG, or
+diagnostic enablement.
 
 Use the following independently reviewable bounded PRs; none is implemented in
 this branch:
 
-1. **Error Identification options:** importer/audit/persisted-QA contract and
-   renderer tests.
+1. **Error Identification content repair:** author and independently review
+   real A–D spans for the 55 legacy questions; do not synthesize them from
+   sentence text or metadata.
 2. **Trios:** learner-safe DTO projection and three-sentence rendering.
 3. **Pronunciation:** target-span schema/normalization, safe DTO, renderer, and
    migration plan.
