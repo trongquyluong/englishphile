@@ -89,8 +89,16 @@ Production build, and the production dependency audit. Owner-attested Preview
 evidence at hotfix commit `02e9ef357ab08b985fdc10abdead1303ca8cbe49`
 records one successful real grade with the reviewed Llama model plus the
 bounded failure/draft/review checks described in the D1 report. This is not
-comprehensive provider/model coverage. Production deployment and post-merge
-verification remain pending and Production is not described as passing.
+comprehensive provider/model coverage.
+
+Owner-attested post-merge Production evidence records that merge commit
+`f42d80f1c7cfaffdd877c68bab12d2fb2f48d9f7` reached a matching `READY`
+Production deployment and passed the selected health, origin/auth, one-grade,
+quota, refresh/review, admin/student, regression, and checked-log boundaries.
+The D1 Writing invalid-response hotfix is Production-verified within those
+boundaries. This is one real Production grade, not a second attempt or
+comprehensive provider/model, managed-PostgreSQL, or provider-retention test.
+It is not blanket security completion or public-signup release clearance.
 Writing retention is unchanged, so H-11 remains **Partially remediated**. See
 `docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
 

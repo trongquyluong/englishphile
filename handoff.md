@@ -76,16 +76,47 @@ request. The checked runtime window had no errors or sensitive log data.
 
 This owner-attested checkpoint covers one real Preview grade, not comprehensive
 provider/model behavior. It does not claim a second real AI attempt,
-provider-retention verification, Production success, or managed-PostgreSQL
-execution of conditional `FAILED`-row recycling. Earlier provider,
+provider-retention verification, or managed-PostgreSQL execution of conditional
+`FAILED`-row recycling. Earlier provider,
 review-state, and copy-correction Preview evidence remains historical and is
 recorded in the D1 report.
 
+Owner-attested post-merge Production evidence is separate from both local and
+Preview evidence. PR #19 merged as
+`f42d80f1c7cfaffdd877c68bab12d2fb2f48d9f7`; a Production deployment created
+after the merge reached `READY`, and provider commit metadata matched that
+merge. Health passed with `ok=true` and `database=connected`; missing-Origin
+and same-origin anonymous POSTs returned 403 and 401 respectively. Production
+used `@cf/meta/llama-3.1-8b-instruct-fast`.
+
+One real Production Writing grade succeeded without an `INVALID_RESPONSE`
+learner error. Quota updated immediately and decreased by exactly one
+successful grade; refresh preserved the essay/feedback; and “Xem lại” restored
+the latest server-backed review. The previously failed learner allowance was
+available. This is consistent with `FAILED` rows no longer occupying learner
+slots, but no Production row inspection or standalone managed-PostgreSQL
+execution test of the conditional recycling SQL occurred.
+
+OWNER admin access and ordinary `STUDENT` denial passed. Home/public
+navigation, visible images/logo, diagnostic, contest, and Writing regressions
+passed. The checked Production runtime window contained no errors or sensitive
+log data. The operational Git checkpoint was `main` with a clean tracked
+worktree and index.
+
+This is one real Production grade, not comprehensive provider/model coverage.
+No second real Production AI attempt, provider-retention/deletion verification,
+blanket security completion, or public-signup release clearance is claimed.
+Raw output from the historical Production failure was not retained, so its
+exact malformed field, envelope subtype, and truncation subtype remain
+unprovable. Audits, tests, build, Prisma, typecheck, and lint were not rerun
+during the wording-only Production reconciliation.
+
 Only stale Prisma schema comments changed in the implementation hotfix; there
-is no structural schema, migration, dependency, or lockfile change. Production
-deployment and post-merge verification remain pending and Production must not
-be described as passing. Writing essay/result retention is unchanged, so H-11
-remains **Partially remediated**. See
+is no structural schema, migration, dependency, or lockfile change. The D1
+Writing invalid-response hotfix is Production-verified within the selected
+owner-attested boundaries above. Writing essay/result and provider-side
+retention/deletion remain unchanged, so H-11 remains **Partially remediated**.
+See
 `docs/SECURITY_PHASE_1D_D1_WRITING_AI_REPORT.md`.
 
 Security Phase 1D-C2 dependency implementation is recorded at commit `7e582904c392a743dc8a0e62c5d18f4d494efd19`. The formula-validation UI correction began from that HEAD and is recorded at commit `a743e3a18c1fab825f07d6ae81b8de87bdc461c5`. During the supplied Preview verification, PR #16 remained OPEN and Draft, was MERGEABLE, and targeted `main`; that remains historical Preview state. PR #16 later merged as commit `0852c05f9acde31f8bfed0887b2749616edf65f6`, and selected owner-attested Production verification passed within the limits below.

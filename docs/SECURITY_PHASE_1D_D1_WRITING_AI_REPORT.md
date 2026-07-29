@@ -6,12 +6,13 @@ Date: 2026-07-28
 
 Phase 1D-D1 has a narrowly scoped Production `INVALID_RESPONSE` recovery
 hotfix. Local verification and owner-attested Preview reconciliation are
-recorded separately below; Production deployment and post-merge verification
-remain pending. Before this hotfix, the owner observed a real Production
-submission reach the provider and return an unusable structured result. The
-learner allowance changed from 2 to 1 under the previous provider-started
-policy, but no `WritingSubmission` was created, so completion and review could
-not be restored.
+recorded separately below from owner-attested post-merge Production
+verification. The D1 Writing invalid-response hotfix is Production-verified
+within the explicitly tested boundaries below. Before this hotfix, the owner
+observed a real Production submission reach the provider and return an
+unusable structured result. The learner allowance changed from 2 to 1 under
+the previous provider-started policy, but no `WritingSubmission` was created,
+so completion and review could not be restored.
 
 Raw provider output was intentionally not logged or retained. The safe
 root-cause classification is `WritingGraderError: INVALID_RESPONSE`; the exact
@@ -238,8 +239,8 @@ build used the explicit synthetic process values. The final review must retain
 this tooling caveat rather than claiming that the CLI skipped local env files.
 Mocked behavioral concurrency tests and a precise static SQL assertion cover
 legacy `FAILED` reuse. Executing the conditional `ON CONFLICT` statement against
-managed PostgreSQL remains Preview/Production verification debt; no external
-database was accessed for this review.
+managed PostgreSQL remains standalone verification debt; no external database
+was accessed for repository verification.
 
 ## Owner-attested Preview reconciliation
 
@@ -293,8 +294,50 @@ The copy-only checkpoint did not repeat the provider call or claim a new
 quota-consumption, database, cross-user, or provider-retention test. It remains
 historical evidence for the previous reviewed model only. The current
 owner-attested Preview reconciliation above supersedes only the statement that
-Llama-model Preview retesting was pending. Production deployment and post-merge
-verification remain pending; Production is not described as passing.
+Llama-model Preview retesting was pending.
+
+## Owner-attested post-merge Production reconciliation
+
+The owner separately verified selected Production behavior after PR #19
+merged. This is operational evidence, distinct from repository/local tests,
+the historical pre-hotfix Production failure, and Preview evidence.
+
+- PR #19 merged as `f42d80f1c7cfaffdd877c68bab12d2fb2f48d9f7`. The
+  Production deployment was created after that merge, reached `READY`, and its
+  provider commit metadata matched the merge commit.
+- Health passed with `ok=true` and `database=connected`. A missing-Origin POST
+  returned HTTP 403, while a same-origin anonymous POST returned HTTP 401.
+- Production used the reviewed
+  `@cf/meta/llama-3.1-8b-instruct-fast` Writing model.
+- One real Production Writing grade succeeded without an `INVALID_RESPONSE`
+  learner error. Learner quota updated immediately without refresh and
+  decreased by exactly one successful grade.
+- Refresh preserved the essay and feedback, and “Xem lại” restored the latest
+  successful server-backed review.
+- The learner allowance lost during the historical failure was available under
+  the new semantics. This observed behavior is consistent with `FAILED` rows
+  no longer occupying learner slots, but no Production row was inspected and
+  no standalone managed-PostgreSQL execution test of the conditional recycling
+  SQL was performed.
+- OWNER admin access and ordinary `STUDENT` denial passed. Home/public
+  navigation, visible images/logo, diagnostic, contest, and Writing regression
+  checks passed.
+- The checked Production runtime window contained no errors and no sensitive
+  data in the checked logs. The operational Git checkpoint was `main` with a
+  clean tracked worktree and index.
+
+This is one successful real Production grade, not comprehensive provider/model
+coverage. It does not claim a second real Production AI attempt,
+provider-retention/deletion verification, direct database-row evidence,
+standalone managed-PostgreSQL SQL verification, blanket security completion,
+or public-signup release clearance. Raw provider output from the historical
+failure was not retained, so its exact malformed field, envelope subtype, or
+truncation subtype remains unprovable.
+
+Dependency audits, repository tests, Prisma commands, lint, typecheck, and the
+build were not rerun during this wording-only reconciliation. H-11 remains
+**Partially remediated** because Writing and provider-side retention/deletion
+remain outside this hotfix.
 
 ## Deployment runbook
 
