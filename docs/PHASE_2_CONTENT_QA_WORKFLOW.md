@@ -31,14 +31,16 @@ Decisions:
 This document uses repository evidence only. It makes no claim about a database,
 Preview, Production, provider, environment, or deployed content.
 
-- PR #21 proposed renderer correctness as the next PR; this approved PR instead
+- PR #21 proposed renderer correctness as the next PR; this bounded PR instead
   establishes the QA workflow first. Renderer debt remains a publication gate.
 - The audit finds Trios sentences in `metadata.sentences`/`passage`, but the
   learner DTO does not carry `metadata.sentences` and `TriosQuestion` only shows
   `prompt`.
 - All 55 current `ERROR_IDENTIFICATION` questions lack renderable options.
-  Import validation only requires `correctPart` and `correction`, while the
-  learner renderer requires options.
+  Import validation requires `correctPart` and `correction` but not the complete
+  renderable option contract, and persisted QA option validation currently
+  excludes `ERROR_IDENTIFICATION`. The planned Error Identification contract PR
+  must resolve this gap before its pilot content can be publication-ready.
 - Pronunciation pack metadata has `focus`, but no learner-safe target-span or
   underline contract renders it.
 - Writing uses a hard-coded checklist and English control labels; authored
@@ -163,7 +165,7 @@ Prefer canonical normalized answer names: `correctOptionId`, `correctPart`, and
 | `OPEN_CLOZE` | shared passage, slot prompt; `OpenClozeQuestion` | `acceptedAnswers`; auto exact normalized text | UI expects one word; include all legitimate bounded variants |
 | `WORD_FORMATION` | prompt + `rootWord`; dedicated renderer | `acceptedAnswers`; auto exact normalized text | Review word class, polarity/plural, and visible root |
 | `SENTENCE_TRANSFORMATION` | prompt, optional `keyword`/`targetSentence`; dedicated renderer | exact accepted answer = true; otherwise `null` | Never count non-exact as wrong; review equivalence/variants; no active manual-grading UI |
-| `ERROR_IDENTIFICATION` | prompt + options; dedicated part/correction renderer | `correctPart` + `correction`; auto both, `/` separates correction variants | Import does not require options. Pilot requires four unique A–D options and member `correctPart` |
+| `ERROR_IDENTIFICATION` | prompt + options; dedicated part/correction renderer | `correctPart` + `correction`; auto both, `/` separates correction variants | Import/persisted QA do not enforce the complete option contract. Pilot requires four unique A–D options and member `correctPart`; block publication until the dedicated contract PR passes |
 | `TRIOS_GAPPED_SENTENCES` | current component renders only prompt | exactly one shared `acceptedAnswers`; auto | Review three natural contexts; learner DTO omits stored sentences, so block publication |
 
 `SHORT_ANSWER` exists but is not a pilot substitute for
@@ -202,9 +204,11 @@ application; this is coverage rationale, not calibration evidence.
 ### Pack, file, slug, and source rules
 
 - Editorial master scope: 21/84.
-- Importable core release: `phase2-pilot-core-001`, 19/76, excluding Listening.
-- Blocked future release: `phase2-listening-pilot-001`, 2/8, created only after
-  the Listening contract passes.
+- Organizationally importable non-Listening core: `phase2-pilot-core-001`,
+  19/76. It is not publication-ready while Error Identification, Trios,
+  Pronunciation, and Writing contracts remain unresolved.
+- Separately blocked Listening extension: `phase2-listening-pilot-001`, 2/8,
+  created only after the Listening media contract passes.
 - Core split files: `01-reading` through separate files for Writing,
   Pronunciation, MCQ, Guided/Open Cloze, Word Formation, Sentence
   Transformation, Error Identification, Trios, Collocations, Phrasal Verbs,
@@ -245,7 +249,9 @@ application; this is coverage rationale, not calibration evidence.
 
 Publication is blocked by any automated error, persisted QA `ERROR`, unclear
 rights, ambiguity/language error, unresolved duplicate, missing review evidence,
-immediate-publish use, or current Writing/Pronunciation/Trios/Listening blocker.
+immediate-publish use, or unresolved contracts for Error Identification, Trios,
+Pronunciation, or Writing. Listening remains separately blocked by its media
+contract.
 
 Diagnostic eligibility is additionally blocked until status is `STABLE`, sample
 and agreement bands pass, the item fits the deterministic blueprint, and the

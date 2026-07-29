@@ -37,6 +37,7 @@
 - Missing/short explanations and disposition:
 - Exact prompt duplicate groups and disposition:
 - Renderer-incompatible option sets and disposition:
+- Normalized option-text ambiguity groups and disposition (count/evidence; accepted or revised):
 - Answer positions `A/B/C/D`:
 - Skill/difficulty mismatches and disposition:
 
@@ -111,4 +112,3 @@
 | Revision/date | Files or slugs changed | Reason | Gates rerun | Reviewer role/initials |
 | --- | --- | --- | --- | --- |
 |  |  |  |  |  |
-
