@@ -31,6 +31,28 @@ rubric, backlog, curriculum proposal, and the first 21-problem/84-question
 representative batch. This phase does not change learner/admin behavior or
 weaken the Phase 1D-A learner-safe DTO.
 
+Phase 2 PR 2 defines the pre-authoring workflow at canonical base
+`c8b93faaaf1670f432a340675951cc0c65ad088b`. Its operational source is
+[`docs/PHASE_2_CONTENT_QA_WORKFLOW.md`](docs/PHASE_2_CONTENT_QA_WORKFLOW.md),
+with the reusable pack record at
+[`content-packs/CONTENT_PACK_REVIEW_TEMPLATE.md`](content-packs/CONTENT_PACK_REVIEW_TEMPLATE.md).
+It specifies eleven lifecycle stages, human linguistic/rendering/calibration
+gates, contracts for all twelve pilot question types, and the 21/84 acceptance
+boundary without creating content. Listening remains blocked, Writing remains
+non-auto-scored, HSG is deferred, and pilot items remain diagnostic-ineligible
+until stable calibration evidence exists.
+
+The repository audit adds two non-blocking deterministic signals.
+`rendererIncompatibleOptions` covers objective DTO/scorer failures such as too
+few renderable options, invalid or scorer-equivalent duplicate IDs,
+missing/invalid display text, and selected answers outside rendered options,
+including `ERROR_IDENTIFICATION`. It exposes 55 existing Error Identification
+questions with no renderable options. `duplicateNormalizedOptionTexts`
+separately identifies editorial ambiguity after NFKC, whitespace, trim, and
+lowercase normalization; renderers still display the original stringified
+values. Neither warning changes import, database, learner, admin, scoring, or
+publication behavior or replaces human linguistic review.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

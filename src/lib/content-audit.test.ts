@@ -171,6 +171,41 @@ function normalizedAuditFile(
   };
 }
 
+function optionRendererPack(
+  options: unknown,
+  answer: unknown = { correctOptionId: "A" },
+  questionType = "MCQ",
+): ContentPackAuditInput {
+  const skillType =
+    questionType === "ERROR_IDENTIFICATION"
+      ? "ERROR_IDENTIFICATION"
+      : "MULTIPLE_CHOICE";
+  return {
+    directory: "renderer-option-fixture",
+    files: [
+      {
+        fileName: "01-renderer-options.json",
+        payload: {
+          importType: "JSON",
+          problems: [
+            problem(
+              [
+                question({
+                  type: questionType,
+                  skillType,
+                  options,
+                  answer,
+                }),
+              ],
+              { skillType, questionType },
+            ),
+          ],
+        },
+      },
+    ],
+  };
+}
+
 describe("content-pack repository audit", () => {
   it("counts inventory and both current manifest count shapes", () => {
     const modern = pack([problem([question(), question()])]);
@@ -285,6 +320,385 @@ describe("content-pack repository audit", () => {
 
     expect(report.findings.invalidCorrectOptions).toHaveLength(2);
     expect(report.answerPositions).toEqual({});
+  });
+
+  const validOptions = [
+    { id: "A", text: "One" },
+    { id: "B", text: "Two" },
+  ];
+
+  it.each([
+    ["zero options", [], { correctOptionId: "A" }, true],
+    ["one option", [validOptions[0]], { correctOptionId: "A" }, true],
+    ["two valid options", validOptions, { correctOptionId: "A" }, false],
+    ["missing ID", [{ text: "One" }, validOptions[1]], { correctOptionId: "B" }, true],
+    ["blank ID", [{ id: " ", text: "One" }, validOptions[1]], { correctOptionId: "B" }, true],
+    ["exact duplicate ID", [{ id: "A", text: "One" }, { id: "A", text: "Two" }], { correctOptionId: "A" }, true],
+    ["case-equivalent duplicate IDs", [{ id: "A", text: "One" }, { id: "a", text: "Two" }], { correctOptionId: "A" }, true],
+    ["whitespace-equivalent duplicate IDs", [{ id: " A ", text: "One" }, { id: "A", text: "Two" }], { correctOptionId: "A" }, true],
+    ["numeric IDs", [{ id: 1, text: "One" }, { id: 2, text: "Two" }], { correctOptionId: "1" }, false],
+    ["numeric/string-equivalent IDs", [{ id: 1, text: "One" }, { id: "1", text: "Two" }], { correctOptionId: 1 }, true],
+    ["missing text", [{ id: "A" }, validOptions[1]], { correctOptionId: "A" }, true],
+    ["blank text", [{ id: "A", text: " " }, validOptions[1]], { correctOptionId: "A" }, true],
+    ["duplicate normalized text remains renderer-valid", [{ id: "A", text: "Same answer" }, { id: "B", text: "  SAME   ANSWER " }], { correctOptionId: "A" }, false],
+    ["numeric text", [{ id: "A", text: 1 }, { id: "B", text: 2 }], { correctOptionId: "A" }, false],
+    ["numeric/string-equivalent text remains renderer-valid", [{ id: "A", text: 1 }, { id: "B", text: "1" }], { correctOptionId: "A" }, false],
+    ["null ID", [{ id: null, text: "One" }, validOptions[1]], { correctOptionId: "B" }, true],
+    ["undefined ID", [{ id: undefined, text: "One" }, validOptions[1]], { correctOptionId: "B" }, true],
+    ["null text", [{ id: "A", text: null }, validOptions[1]], { correctOptionId: "A" }, true],
+    ["undefined text", [{ id: "A", text: undefined }, validOptions[1]], { correctOptionId: "A" }, true],
+    ["malformed object ID", [{ id: {}, text: "One" }, validOptions[1]], { correctOptionId: "B" }, true],
+    ["malformed array option", [[], validOptions[1]], { correctOptionId: "B" }, true],
+    ["answer present exactly", validOptions, { correctOptionId: "A" }, false],
+    ["answer present after case normalization", validOptions, { correctOptionId: "a" }, false],
+    ["answer present after whitespace normalization", validOptions, { correctOptionId: " A " }, false],
+    ["correctOption alias", validOptions, { correctOption: "a" }, false],
+    ["blank canonical answer does not fall through to alias", validOptions, { correctOptionId: " ", correctOption: "A" }, true],
+    ["answer absent", validOptions, { correctOptionId: "Z" }, true],
+    ["mixed string/numeric DTO-compatible values", [{ id: "1", text: 1 }, { id: 2, text: "Two" }], { correctOptionId: 2 }, false],
+  ])(
+    "checks renderer option edge case: %s",
+    (_name, options, answer, expectedFinding) => {
+      const report = auditContentPacks([
+        optionRendererPack(options, answer),
+      ]);
+      expect(
+        report.findings.rendererIncompatibleOptions.length > 0,
+      ).toBe(expectedFinding);
+      expect(report.hasInventoryErrors).toBe(false);
+    },
+  );
+
+  it.each([
+    [
+      "case-sensitive text",
+      [{ id: "A", text: "US" }, { id: "B", text: "us" }],
+      "us",
+      ["US", "us"],
+    ],
+    [
+      "exact duplicate text",
+      [{ id: "A", text: "Same" }, { id: "B", text: "Same" }],
+      "same",
+      ["Same", "Same"],
+    ],
+    [
+      "NFKC-equivalent text",
+      [{ id: "A", text: "Ａ" }, { id: "B", text: "A" }],
+      "a",
+      ["Ａ", "A"],
+    ],
+    [
+      "whitespace-equivalent text",
+      [{ id: "A", text: "Same   answer" }, { id: "B", text: " same answer " }],
+      "same answer",
+      ["Same   answer", " same answer "],
+    ],
+    [
+      "numeric/string-equivalent text",
+      [{ id: "A", text: 1 }, { id: "B", text: "1" }],
+      "1",
+      ["1", "1"],
+    ],
+  ])(
+    "classifies %s as editorial ambiguity only",
+    (_name, options, normalizedTextKey, rawDisplayValues) => {
+      const report = auditContentPacks([
+        optionRendererPack(options, { correctOptionId: "A" }),
+      ]);
+
+      expect(report.findings.rendererIncompatibleOptions).toEqual([]);
+      expect(report.findings.duplicateNormalizedOptionTexts).toEqual([
+        expect.objectContaining({
+          questionType: "MCQ",
+          duplicateGroupCount: 1,
+          groups: [
+            {
+              normalizedTextKey,
+              occurrences: 2,
+              rawDisplayValues,
+              omittedValues: 0,
+            },
+          ],
+          omittedGroups: 0,
+        }),
+      ]);
+      expect(report.hasInventoryErrors).toBe(false);
+    },
+  );
+
+  it("does not report editorial ambiguity for distinct display text", () => {
+    const report = auditContentPacks([
+      optionRendererPack(validOptions, { correctOptionId: "A" }),
+    ]);
+
+    expect(report.findings.rendererIncompatibleOptions).toEqual([]);
+    expect(report.findings.duplicateNormalizedOptionTexts).toEqual([]);
+  });
+
+  it.each([
+    ["missing text", [{ id: "A" }, validOptions[1]]],
+    ["blank text", [{ id: "A", text: " " }, validOptions[1]]],
+    ["null text", [{ id: "A", text: null }, validOptions[1]]],
+    ["object text", [{ id: "A", text: {} }, validOptions[1]]],
+    ["array text", [{ id: "A", text: [] }, validOptions[1]]],
+  ])(
+    "keeps %s in renderer findings instead of ambiguity findings",
+    (_name, options) => {
+      const report = auditContentPacks([
+        optionRendererPack(options, { correctOptionId: "A" }),
+      ]);
+
+      expect(report.findings.rendererIncompatibleOptions).toEqual([
+        expect.objectContaining({ issues: ["INVALID_OPTION_TEXT"] }),
+      ]);
+      expect(report.findings.duplicateNormalizedOptionTexts).toEqual([]);
+    },
+  );
+
+  it("keeps scorer-equivalent duplicate IDs in renderer findings", () => {
+    const report = auditContentPacks([
+      optionRendererPack(
+        [{ id: "A", text: "One" }, { id: "a", text: "Two" }],
+        { correctOptionId: "A" },
+      ),
+    ]);
+
+    expect(report.findings.rendererIncompatibleOptions).toEqual([
+      expect.objectContaining({ issues: ["DUPLICATE_OPTION_ID"] }),
+    ]);
+    expect(report.findings.duplicateNormalizedOptionTexts).toEqual([]);
+  });
+
+  it("reports renderer defects and editorial ambiguity independently", () => {
+    const report = auditContentPacks([
+      optionRendererPack(
+        [
+          { id: "A", text: "Same" },
+          { id: "B", text: " same " },
+          { id: "C", text: null },
+        ],
+        { correctOptionId: "A" },
+      ),
+    ]);
+
+    expect(report.findings.rendererIncompatibleOptions).toEqual([
+      expect.objectContaining({ issues: ["INVALID_OPTION_TEXT"] }),
+    ]);
+    expect(report.findings.duplicateNormalizedOptionTexts).toEqual([
+      expect.objectContaining({
+        groups: [
+          {
+            normalizedTextKey: "same",
+            occurrences: 2,
+            rawDisplayValues: ["Same", " same "],
+            omittedValues: 0,
+          },
+        ],
+      }),
+    ]);
+  });
+
+  it.each([
+    ["correctPart", validOptions, { correctPart: "A", correction: "is" }, false],
+    ["errorPart alias", validOptions, { errorPart: "a", correction: "is" }, false],
+    ["blank correctPart does not fall through to alias", validOptions, { correctPart: " ", errorPart: "A", correction: "is" }, true],
+    ["numeric values", [{ id: 1, text: 1 }, { id: 2, text: "Two" }], { correctPart: 1, correction: "is" }, false],
+    ["whitespace/case correctPart", validOptions, { correctPart: " a ", correction: "is" }, false],
+    ["absent options", null, { correctPart: "A", correction: "is" }, true],
+    ["null ID", [{ id: null, text: "One" }, validOptions[1]], { correctPart: "B", correction: "is" }, true],
+    ["null text", [{ id: "A", text: null }, validOptions[1]], { correctPart: "A", correction: "is" }, true],
+    ["malformed option object", [{}, validOptions[1]], { correctPart: "B", correction: "is" }, true],
+  ])(
+    "checks Error Identification option contract: %s",
+    (_name, options, answer, expectedFinding) => {
+      const report = auditContentPacks([
+        optionRendererPack(options, answer, "ERROR_IDENTIFICATION"),
+      ]);
+      expect(
+        report.findings.rendererIncompatibleOptions.length > 0,
+      ).toBe(expectedFinding);
+      expect(report.findings.duplicateNormalizedOptionTexts).toEqual([]);
+    },
+  );
+
+  it("keeps one deterministic finding with independently useful issue codes", () => {
+    const report = auditContentPacks([
+      optionRendererPack(
+        [
+          { id: "A", text: "Same" },
+          { id: "a", text: " same " },
+        ],
+        { correctOptionId: "Z" },
+      ),
+    ]);
+
+    expect(report.findings.rendererIncompatibleOptions).toEqual([
+      expect.objectContaining({
+        issues: [
+          "DUPLICATE_OPTION_ID",
+          "ANSWER_NOT_IN_RENDERED_OPTIONS",
+        ],
+        optionIds: ["A", "a"],
+        optionTexts: ["Same", " same "],
+        selectedAnswer: "Z",
+      }),
+    ]);
+    expect(report.findings.duplicateNormalizedOptionTexts).toEqual([
+      expect.objectContaining({
+        groups: [
+          {
+            normalizedTextKey: "same",
+            occurrences: 2,
+            rawDisplayValues: ["Same", " same "],
+            omittedValues: 0,
+          },
+        ],
+      }),
+    ]);
+  });
+
+  it("orders both option finding arrays deterministically without mutating options", () => {
+    const earlierOptions = Object.freeze([
+      Object.freeze({ id: "A", text: "US" }),
+      Object.freeze({ id: "a", text: "us" }),
+    ]);
+    const laterOptions = Object.freeze([
+      Object.freeze({ id: "A", text: "Same" }),
+      Object.freeze({ id: "a", text: " same " }),
+    ]);
+    const earlier = optionRendererPack(
+      earlierOptions,
+      { correctOptionId: "Z" },
+    );
+    earlier.directory = "a-pack";
+    const later = optionRendererPack(
+      laterOptions,
+      { correctOptionId: "Z" },
+    );
+    later.directory = "z-pack";
+    const before = JSON.stringify({ earlierOptions, laterOptions });
+
+    const first = auditContentPacks([later, earlier]);
+    const second = auditContentPacks([later, earlier]);
+
+    expect(
+      first.findings.rendererIncompatibleOptions.map(
+        (finding) => finding.packDirectory,
+      ),
+    ).toEqual(["a-pack", "z-pack"]);
+    expect(
+      first.findings.duplicateNormalizedOptionTexts.map(
+        (finding) => finding.packDirectory,
+      ),
+    ).toEqual(["a-pack", "z-pack"]);
+    expect(JSON.stringify(first.findings.rendererIncompatibleOptions)).toBe(
+      JSON.stringify(second.findings.rendererIncompatibleOptions),
+    );
+    expect(JSON.stringify(first.findings.duplicateNormalizedOptionTexts)).toBe(
+      JSON.stringify(second.findings.duplicateNormalizedOptionTexts),
+    );
+    expect(JSON.stringify({ earlierOptions, laterOptions })).toBe(before);
+  });
+
+  it("bounds normalized ambiguity keys, raw values, and group arrays", () => {
+    const options = Array.from({ length: 13 }, (_, groupIndex) => {
+      const text = `${String.fromCharCode(65 + groupIndex)}${"x".repeat(160)}`;
+      return Array.from(
+        { length: groupIndex === 0 ? 9 : 2 },
+        (_, occurrenceIndex) => ({
+          id: `${groupIndex}-${occurrenceIndex}`,
+          text: occurrenceIndex % 2 === 0 ? text : text.toLowerCase(),
+        }),
+      );
+    }).flat();
+    const report = auditContentPacks([
+      optionRendererPack(options, { correctOptionId: "0-0" }),
+    ]);
+    const finding = report.findings.duplicateNormalizedOptionTexts[0];
+
+    expect(finding).toEqual(
+      expect.objectContaining({
+        duplicateGroupCount: 13,
+        omittedGroups: 1,
+      }),
+    );
+    expect(finding?.groups).toHaveLength(12);
+    expect(finding?.groups[0]).toEqual(
+      expect.objectContaining({
+        occurrences: 9,
+        omittedValues: 1,
+      }),
+    );
+    expect(finding?.groups[0]?.rawDisplayValues).toHaveLength(8);
+    expect(
+      finding?.groups.every(
+        (group) =>
+          group.normalizedTextKey.length <= 120 &&
+          group.rawDisplayValues.every((value) => value.length <= 120),
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps structural option findings consistent with DTO/scorer IDs", () => {
+    const numeric = auditContentPacks([
+      optionRendererPack(
+        [{ id: 1, text: 10 }, { id: 2, text: 20 }],
+        { correctOptionId: "1" },
+      ),
+    ]);
+    const normalizedMembership = auditContentPacks([
+      optionRendererPack(validOptions, { correctOptionId: "a" }),
+    ]);
+    const scorerEquivalentDuplicate = auditContentPacks([
+      optionRendererPack(
+        [{ id: "A", text: "One" }, { id: "a", text: "Two" }],
+        { correctOptionId: "A" },
+      ),
+    ]);
+
+    expect(numeric.findings.invalidCorrectOptions).toEqual([]);
+    expect(numeric.answerPositions).toEqual({ A: 1 });
+    expect(normalizedMembership.findings.invalidCorrectOptions).toEqual([]);
+    expect(normalizedMembership.answerPositions).toEqual({ A: 1 });
+    expect(
+      scorerEquivalentDuplicate.findings.invalidCorrectOptions,
+    ).toHaveLength(1);
+    expect(scorerEquivalentDuplicate.answerPositions).toEqual({});
+  });
+
+  it("leaves missing Error Identification correction to import validation", () => {
+    const normalized = normalizeJsonText(JSON.stringify({
+      sourceCollection: {
+        name: "Error Identification validation fixture",
+        sourceType: "JSON",
+      },
+      problems: [
+        problem(
+          [
+            question({
+              type: "ERROR_IDENTIFICATION",
+              skillType: "ERROR_IDENTIFICATION",
+              options: validOptions,
+              answer: { correctPart: "A" },
+            }),
+          ],
+          {
+            skillType: "ERROR_IDENTIFICATION",
+            questionType: "ERROR_IDENTIFICATION",
+          },
+        ),
+      ],
+    }));
+
+    expect(normalized.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "problems.0.questions.0.answer.correction",
+          level: "error",
+        }),
+      ]),
+    );
   });
 
   it("groups substantive exact duplicate prompts", () => {
@@ -416,6 +830,8 @@ describe("content-pack repository audit", () => {
     });
     expect(report.answerPositions).toEqual({ A: 156, B: 44, C: 18, D: 12 });
     expect(report.findings.shortExplanations).toHaveLength(440);
+    expect(report.findings.rendererIncompatibleOptions).toHaveLength(55);
+    expect(report.findings.duplicateNormalizedOptionTexts).toHaveLength(0);
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);

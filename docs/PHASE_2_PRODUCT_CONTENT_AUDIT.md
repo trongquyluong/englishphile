@@ -116,6 +116,7 @@ This is a strong answer-position imbalance. It is editorial debt, not a malforme
 | Question/problem skill mismatches | 0 | Structural consistency |
 | Question/problem difficulty mismatches | 0 | Structural consistency |
 | Option questions with missing/non-member correct option | 0 | Structural consistency |
+| Option-rendered questions incompatible with the learner renderer | 55 | PR 2 warning: current Error Identification data has no renderable options |
 | Substantive exact duplicate prompt groups | 3 | Editorial duplicate review |
 
 Repeated generic Pronunciation and Trios instructions are excluded from substantive duplicate detection because their distinguishing content is carried by options or three-sentence metadata. Very short Cloze slot labels are also below the substantive prompt threshold.

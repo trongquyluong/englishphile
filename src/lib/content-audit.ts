@@ -1,6 +1,8 @@
 import { normalizeContentPackFileName } from "@/lib/content-packs/file-identity";
 
 export const SHORT_EXPLANATION_THRESHOLD = 45;
+const MAX_OPTION_AMBIGUITY_GROUPS = 12;
+const MAX_OPTION_AMBIGUITY_VALUES_PER_GROUP = 8;
 
 const optionQuestionTypes = new Set([
   "PRONUNCIATION_ODD_ONE_OUT",
@@ -8,6 +10,11 @@ const optionQuestionTypes = new Set([
   "GUIDED_CLOZE",
   "READING_MCQ",
   "LISTENING_MCQ",
+]);
+
+const optionRendererQuestionTypes = new Set([
+  ...optionQuestionTypes,
+  "ERROR_IDENTIFICATION",
 ]);
 
 const genericPromptQuestionTypes = new Set([
@@ -81,6 +88,34 @@ export type DuplicatePromptGroup = {
   locations: AuditLocation[];
 };
 
+export type RendererOptionIssue =
+  | "TOO_FEW_RENDERABLE_OPTIONS"
+  | "INVALID_OPTION_ID"
+  | "DUPLICATE_OPTION_ID"
+  | "INVALID_OPTION_TEXT"
+  | "ANSWER_NOT_IN_RENDERED_OPTIONS";
+
+export type RendererOptionFinding = AuditLocation & {
+  issues: RendererOptionIssue[];
+  optionIds: Array<string | null>;
+  optionTexts: Array<string | null>;
+  selectedAnswer: string | null;
+};
+
+export type DuplicateNormalizedOptionTextGroup = {
+  normalizedTextKey: string;
+  occurrences: number;
+  rawDisplayValues: string[];
+  omittedValues: number;
+};
+
+export type DuplicateNormalizedOptionTextFinding = AuditLocation & {
+  questionType: string;
+  duplicateGroupCount: number;
+  groups: DuplicateNormalizedOptionTextGroup[];
+  omittedGroups: number;
+};
+
 export type ContentAuditReport = {
   inventory: {
     packs: number;
@@ -104,6 +139,8 @@ export type ContentAuditReport = {
     skillMismatches: AuditLocation[];
     difficultyMismatches: AuditLocation[];
     invalidCorrectOptions: AuditLocation[];
+    rendererIncompatibleOptions: RendererOptionFinding[];
+    duplicateNormalizedOptionTexts: DuplicateNormalizedOptionTextFinding[];
     duplicatePromptGroups: DuplicatePromptGroup[];
   };
   manifestMismatches: ManifestMismatch[];
@@ -392,17 +429,69 @@ export function parseContentPackManifest(manifest: unknown): ManifestResult {
   };
 }
 
-function optionIdentifier(option: unknown) {
-  if (!isRecord(option)) return undefined;
-  return nonEmptyString(option.id) ?? nonEmptyString(option.label);
+function learnerVisiblePrimitive(value: unknown) {
+  // Keep this audit-local to avoid coupling the Node CLI to DTO/scorer modules.
+  // Learner options stringify string/number values; checkMCQ then trims and
+  // uppercases identifiers.
+  return typeof value === "string" || typeof value === "number"
+    ? String(value)
+    : undefined;
 }
 
-function correctOptionIdentifier(answer: unknown) {
+function canonicalScoringIdentifier(value: unknown) {
+  const visible = learnerVisiblePrimitive(value);
+  if (!visible?.trim()) return undefined;
+  return visible.trim().toUpperCase();
+}
+
+function learnerVisibleDisplayText(value: unknown) {
+  const visible = learnerVisiblePrimitive(value);
+  return visible?.trim() ? visible : undefined;
+}
+
+function normalizedDisplayText(value: unknown) {
+  const visible = learnerVisibleDisplayText(value);
+  if (!visible) return undefined;
+  // Editorial ambiguity heuristic only. Learner renderers display String(...)
+  // values literally and do not apply this normalization.
+  return visible
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase("en");
+}
+
+function safeVisibleValue(value: unknown) {
+  const visible = learnerVisiblePrimitive(value);
+  if (visible === undefined) return null;
+  return visible.length <= 120 ? visible : `${visible.slice(0, 117)}...`;
+}
+
+function rendererAnswerValue(questionType: string, answer: unknown) {
   if (!isRecord(answer)) return undefined;
-  return (
-    nonEmptyString(answer.correctOptionId) ??
-    nonEmptyString(answer.correctOption)
-  );
+  const canonical =
+    questionType === "ERROR_IDENTIFICATION"
+      ? answer.correctPart
+      : answer.correctOptionId;
+  const alias =
+    questionType === "ERROR_IDENTIFICATION"
+      ? answer.errorPart
+      : answer.correctOption;
+
+  // Mirror importer alias precedence: an existing string canonical field wins
+  // even when blank; otherwise a string alias is promoted. Numeric canonical
+  // values remain scorer-compatible for defensive auditing of stored JSON.
+  if (typeof canonical === "string") return canonical;
+  if (typeof alias === "string") return alias;
+  return typeof canonical === "number" ? canonical : undefined;
+}
+
+function rendererAnswerIdentifier(questionType: string, answer: unknown) {
+  const value = rendererAnswerValue(questionType, answer);
+  if (value === undefined) {
+    return undefined;
+  }
+  return canonicalScoringIdentifier(value);
 }
 
 function hasThreeTriosSentences(question: Record<string, unknown>) {
@@ -504,6 +593,8 @@ export function auditContentPacks(
       skillMismatches: [],
       difficultyMismatches: [],
       invalidCorrectOptions: [],
+      rendererIncompatibleOptions: [],
+      duplicateNormalizedOptionTexts: [],
       duplicatePromptGroups: [],
     },
     manifestMismatches: [],
@@ -774,8 +865,15 @@ export function auditContentPacks(
             const options = Array.isArray(rawQuestion.options)
               ? rawQuestion.options
               : [];
-            const identifiers = options.map(optionIdentifier);
-            const correctOption = correctOptionIdentifier(rawQuestion.answer);
+            const identifiers = options.map((option) =>
+              isRecord(option)
+                ? canonicalScoringIdentifier(option.id)
+                : undefined,
+            );
+            const correctOption = rendererAnswerIdentifier(
+              questionType,
+              rawQuestion.answer,
+            );
             const correctIndex = correctOption
               ? identifiers.indexOf(correctOption)
               : -1;
@@ -792,6 +890,120 @@ export function auditContentPacks(
                   ? String.fromCharCode("A".charCodeAt(0) + correctIndex)
                   : String(correctIndex + 1);
               increment(report.answerPositions, position);
+            }
+          }
+
+          if (optionRendererQuestionTypes.has(questionType)) {
+            const options = Array.isArray(rawQuestion.options)
+              ? rawQuestion.options
+              : [];
+            const projectedOptions = options.map((option) => {
+              if (!isRecord(option)) {
+                return {
+                  visibleId: null,
+                  canonicalId: undefined,
+                  visibleText: null,
+                  displayText: undefined,
+                  normalizedText: undefined,
+                };
+              }
+              return {
+                visibleId: safeVisibleValue(option.id),
+                canonicalId: canonicalScoringIdentifier(option.id),
+                visibleText: safeVisibleValue(option.text),
+                displayText: learnerVisibleDisplayText(option.text),
+                normalizedText: normalizedDisplayText(option.text),
+              };
+            });
+            const renderableOptions = projectedOptions.filter(
+              (option) => option.canonicalId,
+            );
+            const canonicalIdentifiers = renderableOptions.map(
+              (option) => option.canonicalId!,
+            );
+            const expectedAnswer = rendererAnswerIdentifier(
+              questionType,
+              rawQuestion.answer,
+            );
+            const issues: RendererOptionIssue[] = [];
+            if (renderableOptions.length < 2) {
+              issues.push("TOO_FEW_RENDERABLE_OPTIONS");
+            }
+            if (projectedOptions.some((option) => !option.canonicalId)) {
+              issues.push("INVALID_OPTION_ID");
+            }
+            if (
+              new Set(canonicalIdentifiers).size !==
+              canonicalIdentifiers.length
+            ) {
+              issues.push("DUPLICATE_OPTION_ID");
+            }
+            if (
+              renderableOptions.some((option) => !option.displayText)
+            ) {
+              issues.push("INVALID_OPTION_TEXT");
+            }
+            if (
+              !expectedAnswer ||
+              !canonicalIdentifiers.includes(expectedAnswer)
+            ) {
+              issues.push("ANSWER_NOT_IN_RENDERED_OPTIONS");
+            }
+            if (issues.length > 0) {
+              report.findings.rendererIncompatibleOptions.push(
+                {
+                  ...questionLocation,
+                  issues,
+                  optionIds: projectedOptions.map((option) => option.visibleId),
+                  optionTexts: projectedOptions.map(
+                    (option) => option.visibleText,
+                  ),
+                  selectedAnswer: safeVisibleValue(
+                    rendererAnswerValue(questionType, rawQuestion.answer),
+                  ),
+                },
+              );
+            }
+
+            const normalizedTextGroups = new Map<string, string[]>();
+            renderableOptions.forEach((option) => {
+              if (!option.normalizedText || option.visibleText === null) return;
+              const values =
+                normalizedTextGroups.get(option.normalizedText) ?? [];
+              values.push(option.visibleText);
+              normalizedTextGroups.set(option.normalizedText, values);
+            });
+            const duplicateGroups = [...normalizedTextGroups.entries()]
+              .filter(([, values]) => values.length > 1)
+              .sort(([left], [right]) => ordinalCompare(left, right));
+            if (duplicateGroups.length > 0) {
+              const reportedGroups = duplicateGroups.slice(
+                0,
+                MAX_OPTION_AMBIGUITY_GROUPS,
+              );
+              report.findings.duplicateNormalizedOptionTexts.push({
+                ...questionLocation,
+                questionType,
+                duplicateGroupCount: duplicateGroups.length,
+                groups: reportedGroups.map(([normalizedText, values]) => ({
+                  normalizedTextKey: safeVisibleValue(normalizedText)!,
+                  occurrences: values.length,
+                  rawDisplayValues: values.slice(
+                    0,
+                    MAX_OPTION_AMBIGUITY_VALUES_PER_GROUP,
+                  ),
+                  omittedValues: Math.max(
+                    0,
+                    values.length -
+                      MAX_OPTION_AMBIGUITY_VALUES_PER_GROUP,
+                  ),
+                })),
+                omittedGroups: Math.max(
+                  0,
+                  duplicateGroups.length -
+                    MAX_OPTION_AMBIGUITY_GROUPS,
+                ),
+              });
             }
           }
 
@@ -888,6 +1100,14 @@ export function auditContentPacks(
     ),
     invalidCorrectOptions: sortedCopy(
       report.findings.invalidCorrectOptions,
+      compareAuditLocations,
+    ),
+    rendererIncompatibleOptions: sortedCopy(
+      report.findings.rendererIncompatibleOptions,
+      compareAuditLocations,
+    ),
+    duplicateNormalizedOptionTexts: sortedCopy(
+      report.findings.duplicateNormalizedOptionTexts,
       compareAuditLocations,
     ),
     duplicatePromptGroups: [...duplicateCandidates.entries()]
