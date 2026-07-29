@@ -97,4 +97,96 @@ describe("Phase 1D-A admin preview runtime regression", () => {
       { id: "C", text: "ready" },
     ]);
   });
+
+  it("uses the safe Trios tuple for rendering while retaining raw admin repair data", () => {
+    const sharedWord = "ADMIN_ONLY_SHARED_WORD";
+    const metadata = {
+      sentences: [
+        "First _____ sentence.",
+        "Second _____ sentence.",
+        "Third _____ sentence.",
+      ],
+      sharedWord,
+      editorNote: "Admin repair note",
+    };
+    const result = toAdminProblemPreviewDTO({
+      id: "trios-problem",
+      title: "Trios preview",
+      slug: "trios-preview",
+      skillType: "TRIOS",
+      questionType: "TRIOS_GAPPED_SENTENCES",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Điền một từ chung.",
+      instructions: null,
+      estimatedMinutes: 5,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "trios-question",
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        difficulty: "C1",
+        prompt: "Điền một từ.",
+        passage: "Compatibility mirror.",
+        options: null,
+        answer: { accepted: [sharedWord] },
+        explanation: "Admin explanation.",
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata,
+        orderIndex: 0,
+      }],
+    });
+
+    expect(result.questions[0]?.triosSentences).toEqual(metadata.sentences);
+    expect(result.questions[0]?.metadata).toEqual(metadata);
+    expect(result.questions[0]?.answer).toEqual({ accepted: [sharedWord] });
+    expect(JSON.stringify(result)).toContain(sharedWord);
+  });
+
+  it("keeps malformed Trios metadata for admin repair but emits no partial render tuple", () => {
+    const metadata = {
+      sentences: ["First _____.", "Second without a gap.", "Third _____."],
+      sharedWord: "repair-only",
+    };
+    const result = toAdminProblemPreviewDTO({
+      id: "malformed-trios-problem",
+      title: "Malformed Trios preview",
+      slug: "malformed-trios-preview",
+      skillType: "TRIOS",
+      questionType: "TRIOS_GAPPED_SENTENCES",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Điền một từ chung.",
+      instructions: null,
+      estimatedMinutes: 5,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "malformed-trios-question",
+        type: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        difficulty: "C1",
+        prompt: "Điền một từ.",
+        passage: null,
+        options: null,
+        answer: { accepted: ["repair-only"] },
+        explanation: null,
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata,
+        orderIndex: 0,
+      }],
+    });
+
+    expect(result.questions[0]?.triosSentences).toBeNull();
+    expect(result.questions[0]?.metadata).toEqual(metadata);
+  });
 });

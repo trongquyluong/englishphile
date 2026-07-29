@@ -35,6 +35,7 @@ function question(
     problemTitle: "Contract fixture",
     audioUrl: null,
     sectionType: null,
+    triosSentences: null,
   };
 }
 

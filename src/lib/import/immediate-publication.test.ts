@@ -83,6 +83,58 @@ function plan(
   };
 }
 
+function triosPlan(
+  metadata: unknown,
+  importType: ImportPlan["importType"] = "JSON",
+): ImportPlan {
+  const issue = metadata === null
+    ? [{
+        level: "warning" as const,
+        path: "problems.0.questions.0.metadata",
+        message: "Trios cần metadata dạng object chứa đúng ba câu.",
+        code: "TRIOS_METADATA_REQUIRED",
+      }]
+    : [];
+  return {
+    ...plan(null, importType),
+    importType,
+    issues: issue,
+    payload: {
+      importType,
+      problems: [{
+        title: "Trios contract fixture",
+        slug: "trios-contract-fixture",
+        skillType: "TRIOS",
+        questionType: "TRIOS_GAPPED_SENTENCES",
+        difficulty: "C1",
+        sourceCollection: {
+          name: "Synthetic Trios source",
+          description: "Synthetic",
+          sourceType: importType,
+        },
+        statement: "Điền một từ chung.",
+        topics: [],
+        orderIndex: 0,
+        questions: [{
+          type: "TRIOS_GAPPED_SENTENCES",
+          skillType: "TRIOS",
+          difficulty: "C1",
+          prompt: "Điền một từ duy nhất.",
+          passage: "Compatibility mirror.",
+          options: null,
+          answer: { acceptedAnswers: ["conclusion"] },
+          metadata,
+          orderIndex: 0,
+        }],
+      }],
+    },
+    summary: {
+      ...plan(null, importType).summary,
+      warnings: issue.length,
+    },
+  };
+}
+
 describe("immediate JSON import-publish boundary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -172,5 +224,51 @@ describe("immediate JSON import-publish boundary", () => {
       }),
     ]));
     expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("blocks malformed Trios %s before the atomic executor", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(triosPlan(null, importType));
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("FAILED");
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual([
+      expect.objectContaining({
+        level: "error",
+        code: "TRIOS_METADATA_REQUIRED",
+        path: "problems.trios-contract-fixture.questions.0.metadata",
+      }),
+    ]);
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("allows canonical Trios %s immediate publication to reach the executor", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(triosPlan({
+      sentences: [
+        "The committee reached a _____ after two hours.",
+        "Her silence led me to the wrong _____.",
+        "The evidence points to one _____.",
+      ],
+    }, importType));
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("IMPORTED");
+    expect(result.ok).toBe(true);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, issues: [] }),
+      expect.objectContaining({ contentStatus: "PUBLISHED", importType }),
+    );
   });
 });

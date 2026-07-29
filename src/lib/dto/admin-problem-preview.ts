@@ -2,6 +2,7 @@ import "server-only";
 
 import type { LearnerProblemDTO, LearnerQuestionDTO } from "@/lib/dto/learner-question";
 import { normalizeLearnerQuestionOptions } from "@/lib/dto/learner-question";
+import { validateTriosSentences } from "@/lib/questions/trios-contract";
 
 export type AdminPreviewQuestionDTO = LearnerQuestionDTO & {
   answer: unknown;
@@ -72,6 +73,10 @@ export function toAdminProblemPreviewDTO(problem: AdminProblemPreviewSource): Ad
       problemTitle: problem.title,
       audioUrl: metadataString(question.metadata, "audioUrl"),
       sectionType: metadataString(question.metadata, "sectionType"),
+      triosSentences:
+        question.type === "TRIOS_GAPPED_SENTENCES"
+          ? validateTriosSentences(question.metadata).sentences
+          : null,
       answer: question.answer,
       explanation: question.explanation,
       metadata: question.metadata,

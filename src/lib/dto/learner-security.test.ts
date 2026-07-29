@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { DiagnosticAttemptStatus } from "@prisma/client";
 import {
@@ -25,6 +27,27 @@ function serialized(value: unknown) {
   return JSON.stringify(value);
 }
 
+function source(relativePath: string) {
+  return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
+}
+
+function objectBlock(content: string, marker: string) {
+  const markerIndex = content.indexOf(marker);
+  if (markerIndex < 0) throw new Error(`Không tìm thấy block ${marker}.`);
+  const start = content.indexOf("{", markerIndex);
+  if (start < 0) throw new Error(`Block ${marker} không có object.`);
+
+  let depth = 0;
+  for (let index = start; index < content.length; index += 1) {
+    if (content[index] === "{") depth += 1;
+    if (content[index] !== "}") continue;
+    depth -= 1;
+    if (depth === 0) return content.slice(start, index + 1);
+  }
+
+  throw new Error(`Block ${marker} chưa đóng.`);
+}
+
 function diagnosticResultSource(status: DiagnosticAttemptStatus, completedAt: Date | null) {
   const timestamp = new Date("2026-01-01T00:00:00Z");
   return {
@@ -44,6 +67,27 @@ function diagnosticResultSource(status: DiagnosticAttemptStatus, completedAt: Da
 }
 
 describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
+  it("uses the positive question select in the primary learner problem route", () => {
+    const content = source("src/app/problems/[slug]/page.tsx");
+    const questionsBlock = objectBlock(content, "questions:");
+
+    expect(content).toMatch(
+      /import\s*\{[^}]*\blearnerQuestionPresentationSelect\b[^}]*\btoLearnerProblemDTO\b[^}]*\}\s*from\s*"@\/lib\/dto\/learner-question"/,
+    );
+    expect(questionsBlock).toContain(
+      'where: canManageContent ? undefined : { contentStatus: "PUBLISHED" }',
+    );
+    expect(questionsBlock).toContain('orderBy: { orderIndex: "asc" }');
+    expect(questionsBlock).toContain(
+      "select: learnerQuestionPresentationSelect",
+    );
+    expect(questionsBlock).not.toMatch(/\binclude\s*:/);
+    expect(questionsBlock).not.toMatch(/\b(?:answer|explanation)\s*:/);
+    expect(content).toContain(
+      "const clientProblem = toLearnerProblemDTO(problem);",
+    );
+  });
+
   it("recursively allowlists question presentation and normalized option fields", () => {
     const source = {
       id: "question-1",
@@ -207,6 +251,109 @@ describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
       { id: "C", text: "three" },
       { id: "D", text: "four" },
     ]);
+  });
+
+  it("projects only the safe ordered Trios tuple without metadata or answer leakage", () => {
+    const sharedWordSentinel = "H10_TRIOS_SHARED_WORD_9z3q";
+    const source = {
+      id: "trios-question",
+      type: "TRIOS_GAPPED_SENTENCES",
+      skillType: "TRIOS",
+      difficulty: "C1",
+      prompt: "Điền một từ chung.",
+      passage: "Compatibility mirror.",
+      options: null,
+      answer: {
+        accepted: [sharedWordSentinel],
+        display: sharedWordSentinel,
+      },
+      explanation: EXPLANATION_SENTINEL,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: {
+        sentences: [
+          "First _____ sentence.",
+          "Second _____ sentence.",
+          "Third _____ sentence.",
+        ],
+        sharedWord: sharedWordSentinel,
+        nested: { acceptedAnswers: [sharedWordSentinel] },
+      },
+      orderIndex: 0,
+    } as LearnerQuestionSource & Record<string, unknown>;
+    const metadataSnapshot = structuredClone(source.metadata);
+
+    const dto = toLearnerQuestionDTO(source);
+
+    expect(dto.triosSentences).toEqual([
+      "First _____ sentence.",
+      "Second _____ sentence.",
+      "Third _____ sentence.",
+    ]);
+    expect(source.metadata).toEqual(metadataSnapshot);
+    expect(serialized(dto)).not.toContain(sharedWordSentinel);
+    expect(serialized(dto)).not.toContain(EXPLANATION_SENTINEL);
+    expect(serialized(dto)).not.toContain("sharedWord");
+    expect(serialized(dto)).not.toContain("acceptedAnswers");
+    expect(dto).not.toHaveProperty("metadata");
+    expect(dto).not.toHaveProperty("answer");
+    expect(dto).not.toHaveProperty("explanation");
+  });
+
+  it.each([
+    ["missing metadata", null],
+    ["partial sentences", {
+      sentences: ["First _____.", "Second _____."],
+    }],
+    ["invalid gap count", {
+      sentences: ["First _____.", "Second _____ and _____.", "Third _____."],
+    }],
+  ])("returns null rather than partial Trios data for %s", (_name, metadata) => {
+    const dto = toLearnerQuestionDTO({
+      id: "malformed-trios",
+      type: "TRIOS_GAPPED_SENTENCES",
+      skillType: "TRIOS",
+      difficulty: "C1",
+      prompt: "Điền một từ chung.",
+      passage: "1. Passage must not be parsed.\n2. It has three lines.\n3. Still not canonical.",
+      options: null,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata,
+      orderIndex: 0,
+    });
+
+    expect(dto.triosSentences).toBeNull();
+  });
+
+  it("sets triosSentences to null for every other question type", () => {
+    const dto = toLearnerQuestionDTO({
+      id: "ordinary-question",
+      type: "MCQ",
+      skillType: "MULTIPLE_CHOICE",
+      difficulty: "C1",
+      prompt: "Choose.",
+      passage: null,
+      options: [{ id: "A", text: "Visible" }],
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: {
+        sentences: [
+          "First _____.",
+          "Second _____.",
+          "Third _____.",
+        ],
+      },
+      orderIndex: 0,
+    });
+
+    expect(dto.triosSentences).toBeNull();
   });
 
   it.each([

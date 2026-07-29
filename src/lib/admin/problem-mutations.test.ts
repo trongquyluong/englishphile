@@ -35,6 +35,14 @@ const validErrorOptions = [
   { id: "D", text: "today" },
 ];
 
+const validTriosMetadata = {
+  sentences: [
+    "The committee reached a _____ after two hours.",
+    "Her silence led me to the wrong _____.",
+    "The evidence points to one _____.",
+  ],
+};
+
 function questionPayload(id = "question-a"): QuestionEditPayload {
   return {
     id,
@@ -61,6 +69,25 @@ function errorQuestionPayload(
     prompt: "The students was ready today.",
     options,
     answer,
+    orderIndex: 0,
+    contentStatus: "PUBLISHED",
+  };
+}
+
+function triosQuestionPayload(
+  metadata: unknown = validTriosMetadata,
+  answer: unknown = { acceptedAnswers: ["conclusion"] },
+): QuestionEditPayload {
+  return {
+    id: "question-a",
+    type: "TRIOS_GAPPED_SENTENCES",
+    skillType: "TRIOS",
+    difficulty: "C1",
+    prompt: "Điền một từ chung.",
+    passage: "Compatibility mirror.",
+    options: null,
+    answer,
+    metadata,
     orderIndex: 0,
     contentStatus: "PUBLISHED",
   };
@@ -462,6 +489,170 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     expect(tx.problem.findMany).toHaveBeenCalled();
     expect(tx.problem.updateMany).toHaveBeenCalled();
     expect(tx.question.updateMany).toHaveBeenCalled();
+  });
+
+  it("edit-to-publish rejects an omitted malformed Trios row after lock and reload", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...triosQuestionPayload(null),
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await updateProblemWithQuestions(
+      {
+        ...problemPayload,
+        questionType: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        contentStatus: "PUBLISHED",
+      },
+      [],
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("metadata");
+    expect(tx.problem.findUnique).toHaveBeenCalled();
+    expect(tx.problem.update).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("edit-to-publish accepts a complete canonical Trios candidate", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...triosQuestionPayload(null),
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await updateProblemWithQuestions(
+      {
+        ...problemPayload,
+        questionType: "TRIOS_GAPPED_SENTENCES",
+        skillType: "TRIOS",
+        contentStatus: "PUBLISHED",
+      },
+      [triosQuestionPayload()],
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(true);
+    expect(tx.problem.update).toHaveBeenCalled();
+    expect(tx.question.updateMany).toHaveBeenCalled();
+  });
+
+  it("individual publish rejects malformed Trios and accepts canonical Trios", async () => {
+    const malformedTarget = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...triosQuestionPayload({
+          sentences: [
+            validTriosMetadata.sentences[0],
+            "Two _____ gaps _____.",
+            validTriosMetadata.sentences[2],
+          ],
+        }),
+      }],
+    };
+    let tx = transactionWith({
+      targets: [malformedTarget as unknown as ReturnType<typeof storedProblem>],
+    });
+    const blocked = await setProblemContentStatus(
+      "problem-a",
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(blocked.ok).toBe(false);
+    expect(blocked.message).toContain("dấu khuyết");
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+
+    const validTarget = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...triosQuestionPayload(),
+      }],
+    };
+    tx = transactionWith({
+      targets: [validTarget as unknown as ReturnType<typeof storedProblem>],
+    });
+    const accepted = await setProblemContentStatus(
+      "problem-a",
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(accepted.ok).toBe(true);
+    expect(tx.problem.updateMany).toHaveBeenCalled();
+  });
+
+  it("ordinary bulk publish blocks an invalid Trios answer after transaction reload", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...triosQuestionPayload(validTriosMetadata, {
+          acceptedAnswers: ["in conclusion"],
+        }),
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("đúng một từ");
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("bulk publish-safe rechecks persisted Trios QA under locks", async () => {
+    const target = {
+      ...storedProblem("problem-a", "pack-a"),
+      title: "Trios QA fixture",
+      slug: "trios-qa-fixture",
+      statement: "Điền một từ chung.",
+      instructions: "Dùng đúng một từ.",
+      estimatedMinutes: 5,
+      questionType: "TRIOS_GAPPED_SENTENCES" as const,
+      sourceCollection: { id: "source-a", name: "Synthetic source" },
+      problemTopics: [{
+        topic: { id: "topic-a", name: "Trios", slug: "trios" },
+      }],
+      questions: [{
+        ...storedQuestion(),
+        ...triosQuestionPayload(null),
+      }],
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+      { contentPackId: "pack-a", qaRequirement: "safe" },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("QA");
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
   });
 
   it("keeps status audit JSON bounded and excludes question prompts, answers, and arrays", async () => {

@@ -53,7 +53,7 @@ function storedProblem(
   };
 }
 
-function database(problem: ReturnType<typeof storedProblem>) {
+function database(problem: unknown) {
   return {
     problem: {
       findMany: vi.fn().mockResolvedValue([problem]),
@@ -234,6 +234,98 @@ describe("persisted Error Identification QA", () => {
         code: "ERROR_IDENTIFICATION_CORRECT_PART_NOT_IN_OPTIONS",
         path: "questions.2.answer.correctPart",
       }),
+    ]));
+  });
+});
+
+const validTriosSentences = [
+  "The committee reached a _____ after two hours.",
+  "Her silence led me to the wrong _____.",
+  "The evidence points to one _____.",
+];
+
+function storedTriosProblem(
+  metadata: unknown,
+  answer: unknown = { acceptedAnswers: ["conclusion"] },
+) {
+  const base = storedProblem(null);
+  return {
+    ...base,
+    id: "problem-trios",
+    title: "Trios QA fixture",
+    slug: "trios-qa-fixture",
+    statement: "Điền một từ chung.",
+    instructions: "Dùng đúng một từ.",
+    questionType: "TRIOS_GAPPED_SENTENCES",
+    questions: [{
+      ...base.questions[0],
+      id: "question-trios",
+      problemId: "problem-trios",
+      type: "TRIOS_GAPPED_SENTENCES",
+      skillType: "TRIOS",
+      prompt: "Điền một từ duy nhất.",
+      options: null,
+      answer,
+      metadata,
+      orderIndex: 4,
+    }],
+  };
+}
+
+describe("persisted Trios QA", () => {
+  it("marks the complete canonical contract publishable", async () => {
+    const report = await getContentQaReport(
+      {},
+      database(storedTriosProblem({
+        sentences: validTriosSentences,
+        sharedWord: "not-authoritative",
+      })) as never,
+    );
+
+    expect(report.problems[0]?.canPublish).toBe(true);
+    expect(report.issues.filter((candidate) => candidate.severity === "ERROR"))
+      .toEqual([]);
+  });
+
+  it.each([
+    ["missing metadata", null, "TRIOS_METADATA_REQUIRED", "questions.4.metadata"],
+    ["missing sentences", {}, "TRIOS_SENTENCES_REQUIRED", "questions.4.metadata.sentences"],
+    ["wrong count", { sentences: validTriosSentences.slice(0, 2) }, "TRIOS_SENTENCE_COUNT_NOT_THREE", "questions.4.metadata.sentences"],
+    ["malformed entry", { sentences: [validTriosSentences[0], 2, validTriosSentences[2]] }, "TRIOS_SENTENCE_NOT_STRING", "questions.4.metadata.sentences.1"],
+    ["wrong gap count", { sentences: [validTriosSentences[0], "Two _____ gaps _____.", validTriosSentences[2]] }, "TRIOS_GAP_MARKER_INVALID", "questions.4.metadata.sentences.1"],
+  ])("blocks %s with an exact persisted path", async (_name, metadata, code, path) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedTriosProblem(metadata)) as never,
+    );
+
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "ERROR",
+        code,
+        problemId: "problem-trios",
+        entityId: "question-trios",
+        path,
+      }),
+    ]));
+  });
+
+  it.each([
+    ["missing answer", {}, "TRIOS_ACCEPTED_REQUIRED", "questions.4.answer.acceptedAnswers"],
+    ["blank answer", { accepted: [" "] }, "TRIOS_ACCEPTED_EMPTY", "questions.4.answer.accepted.0"],
+    ["multiple answers", { acceptedAnswers: ["one", "two"] }, "TRIOS_ACCEPTED_COUNT_NOT_ONE", "questions.4.answer.acceptedAnswers"],
+    ["multiword answer", { accepted: ["in conclusion"] }, "TRIOS_ACCEPTED_MULTIWORD", "questions.4.answer.accepted.0"],
+    ["malformed answer", ["conclusion"], "TRIOS_ANSWER_REQUIRED", "questions.4.answer"],
+  ])("blocks %s independently of valid sentences", async (_name, answer, code, path) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedTriosProblem({ sentences: validTriosSentences }, answer)) as never,
+    );
+
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ severity: "ERROR", code, path }),
     ]));
   });
 });

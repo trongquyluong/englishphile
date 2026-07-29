@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import { ProblemClient } from "@/components/problems/ProblemClient";
 import { ProblemHeader } from "@/components/problems/ProblemHeader";
 import { getCurrentUser, isContentAdminUser } from "@/lib/auth/session";
-import { toLearnerProblemDTO } from "@/lib/dto/learner-question";
+import {
+  learnerQuestionPresentationSelect,
+  toLearnerProblemDTO,
+} from "@/lib/dto/learner-question";
 import { submissionStatusLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -23,6 +26,7 @@ export default async function ProblemDetailPage({ params }: PageProps) {
       questions: {
         where: canManageContent ? undefined : { contentStatus: "PUBLISHED" },
         orderBy: { orderIndex: "asc" },
+        select: learnerQuestionPresentationSelect,
       },
     },
   });

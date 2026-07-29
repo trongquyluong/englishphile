@@ -4,6 +4,7 @@ import {
   normalizeErrorIdentificationOptions,
   validateErrorIdentificationContract,
 } from "@/lib/questions/error-identification-contract";
+import { validateTriosSentences } from "@/lib/questions/trios-contract";
 
 export const SHORT_EXPLANATION_THRESHOLD = 45;
 const MAX_OPTION_AMBIGUITY_GROUPS = 12;
@@ -501,24 +502,7 @@ function rendererAnswerIdentifier(questionType: string, answer: unknown) {
 }
 
 function hasThreeTriosSentences(question: Record<string, unknown>) {
-  if (isRecord(question.metadata)) {
-    const sentences = question.metadata.sentences;
-    if (
-      Array.isArray(sentences) &&
-      sentences.length === 3 &&
-      sentences.every((sentence) => Boolean(nonEmptyString(sentence)))
-    ) {
-      return true;
-    }
-  }
-
-  const passage = nonEmptyString(question.passage);
-  if (!passage) return false;
-  const lines = passage
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  return lines.length === 3;
+  return validateTriosSentences(question.metadata).valid;
 }
 
 function normalizedPrompt(value: unknown) {
