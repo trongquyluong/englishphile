@@ -36,8 +36,14 @@ npm run audit:content-packs
 npm run --silent audit:content-packs -- --format=json
 ```
 
-The audit reads only split JSON files listed in each `manifest.json`; it does not
-count `00-all-in-one` mirrors. See
+The audit and importer share one JSON/CSV file selector. The audit examines the
+complete importer-selected directory set, including when `manifest.json` is
+absent. When a manifest exists, every selected file must be listed and every
+listed file must be selected and present; duplicate, invalid, missing, and
+unlisted entries are inventory errors. Numbered split files retain their input
+order and take precedence over `00-all-in-one` mirrors when both are present.
+The audit then uses the same pure JSON/CSV normalization and type-specific
+validation rules as import, without Prisma or a database. See
 [`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](../docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
 for the repository evidence boundary, current inventory, product gaps, and
 proposed editorial sequence.

@@ -27,30 +27,19 @@ import {
   isContentAdminTransactionAuthorizationError,
   requireContentAdminInTransaction,
 } from "@/lib/auth/content-admin-transaction";
+import {
+  inferContentPackImportType,
+  selectImportFiles,
+  type ContentPackInputFile,
+  type ContentPackManifest,
+} from "@/lib/content-packs/file-selection";
 
-export type ContentPackInputFile = {
-  fileName: string;
-  content: string;
-};
-
-export type ContentPackManifestFile = {
-  fileName: string;
-  skillType?: string;
-  problemCount?: number;
-  questionCount?: number;
-};
-
-export type ContentPackManifest = {
-  packName?: string;
-  version?: string;
-  description?: string;
-  createdFor?: string;
-  files?: ContentPackManifestFile[];
-  totals?: {
-    problemCount?: number;
-    questionCount?: number;
-  };
-};
+export { selectImportFiles } from "@/lib/content-packs/file-selection";
+export type {
+  ContentPackInputFile,
+  ContentPackManifest,
+  ContentPackManifestFile,
+} from "@/lib/content-packs/file-selection";
 
 export type ContentPackFilePlan = {
   fileName: string;
@@ -100,43 +89,6 @@ function expectedPlanDoesNotMatchStored(
   });
 }
 
-function safeParseManifest(content: string): ContentPackManifest | null {
-  try {
-    const parsed = JSON.parse(content) as ContentPackManifest;
-    return parsed && typeof parsed === "object" ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function inferImportType(fileName: string): ImportType | null {
-  const lower = fileName.toLowerCase();
-  if (lower.endsWith(".json")) return "JSON";
-  if (lower.endsWith(".csv")) return "CSV";
-  return null;
-}
-
-export function selectImportFiles(files: ContentPackInputFile[]) {
-  const manifestFile = files.find((file) => file.fileName.toLowerCase() === "manifest.json");
-  const manifest = manifestFile ? safeParseManifest(manifestFile.content) : null;
-  const importable = files.filter((file) => {
-    const lower = file.fileName.toLowerCase();
-    return (lower.endsWith(".json") || lower.endsWith(".csv")) && lower !== "manifest.json";
-  });
-  const splitFiles = importable.filter((file) => /^\d{2}-/.test(file.fileName) && !file.fileName.startsWith("00-"));
-  const hasAllInOne = importable.some((file) => file.fileName.startsWith("00-"));
-  const selected = splitFiles.length > 0 && hasAllInOne ? splitFiles : importable;
-  const selectedNames = new Set(selected.map((file) => file.fileName));
-  const ignoredFiles = importable.filter((file) => !selectedNames.has(file.fileName)).map((file) => file.fileName);
-
-  return {
-    manifest,
-    manifestFileName: manifestFile?.fileName ?? null,
-    selected,
-    ignoredFiles,
-  };
-}
-
 export async function validateContentPackFiles(files: ContentPackInputFile[]): Promise<ContentPackValidationResult> {
   const { manifest, selected, ignoredFiles } = selectImportFiles(files);
   const packName =
@@ -156,7 +108,7 @@ export async function validateContentPackFiles(files: ContentPackInputFile[]): P
   }
 
   for (const [position, file] of selected.entries()) {
-    const importType = inferImportType(file.fileName);
+    const importType = inferContentPackImportType(file.fileName);
     if (!importType) {
       // selectImportFiles currently excludes this branch. Retain a stable
       // failed identity if a future selector broadens accepted candidates.

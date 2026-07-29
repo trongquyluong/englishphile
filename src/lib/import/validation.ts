@@ -10,7 +10,7 @@ import {
   skillTypeValues,
   sourceTypeValues,
 } from "@/lib/import/types";
-import { generateSlug } from "@/lib/import/duplicates";
+import { generateSlug } from "@/lib/import/slug";
 
 const nullableString = z
   .union([z.string(), z.null(), z.undefined()])

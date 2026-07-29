@@ -1,3 +1,5 @@
+import { normalizeContentPackFileName } from "@/lib/content-packs/file-identity";
+
 export const SHORT_EXPLANATION_THRESHOLD = 45;
 
 const optionQuestionTypes = new Set([
@@ -19,6 +21,7 @@ export type AuditLocation = {
   problemIndex: number;
   problemSlug?: string;
   questionIndex?: number;
+  promptExcerpt?: string;
 };
 
 export type AuditCount = {
@@ -51,6 +54,11 @@ export type ContentPackAuditFileInput = {
   fileName: string;
   payload?: unknown;
   parseError?: string;
+  normalizationIssues?: {
+    level: "error" | "warning";
+    path: string;
+    message: string;
+  }[];
 };
 
 export type ContentPackAuditInput = {
@@ -100,6 +108,7 @@ export type ContentAuditReport = {
   };
   manifestMismatches: ManifestMismatch[];
   malformedInputs: ManifestIssue[];
+  normalizerWarnings: ManifestIssue[];
   hasInventoryErrors: boolean;
 };
 
@@ -124,6 +133,10 @@ function nonEmptyString(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function rawNonEmptyString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
 function nonNegativeInteger(value: unknown): number | undefined {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
     ? value
@@ -144,19 +157,93 @@ function incrementCount(
   record[key] = count;
 }
 
+function ordinalCompare(left: string, right: string) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function compareCanonicalText(left = "", right = "") {
+  const canonicalDifference = ordinalCompare(
+    left.normalize("NFC"),
+    right.normalize("NFC"),
+  );
+  return canonicalDifference || ordinalCompare(left, right);
+}
+
+function compareFileNames(left = "", right = "") {
+  const normalizedDifference = ordinalCompare(
+    normalizeContentPackFileName(left),
+    normalizeContentPackFileName(right),
+  );
+  return normalizedDifference || ordinalCompare(left, right);
+}
+
+function compareAuditLocations(left: AuditLocation, right: AuditLocation) {
+  return (
+    compareCanonicalText(left.packDirectory, right.packDirectory) ||
+    compareFileNames(left.fileName, right.fileName) ||
+    left.problemIndex - right.problemIndex ||
+    (left.questionIndex ?? -1) - (right.questionIndex ?? -1) ||
+    compareCanonicalText(left.problemSlug, right.problemSlug) ||
+    compareCanonicalText(left.promptExcerpt, right.promptExcerpt)
+  );
+}
+
+function compareManifestIssues(left: ManifestIssue, right: ManifestIssue) {
+  return (
+    compareCanonicalText(left.packDirectory, right.packDirectory) ||
+    compareFileNames(left.fileName, right.fileName) ||
+    compareCanonicalText(left.path, right.path) ||
+    compareCanonicalText(left.message, right.message)
+  );
+}
+
+function compareManifestMismatches(
+  left: ManifestMismatch,
+  right: ManifestMismatch,
+) {
+  return (
+    compareCanonicalText(left.packDirectory, right.packDirectory) ||
+    compareFileNames(left.fileName, right.fileName) ||
+    compareCanonicalText(left.field, right.field) ||
+    left.expected - right.expected ||
+    left.actual - right.actual
+  );
+}
+
+function comparePackInventories(
+  left: ContentPackInventory,
+  right: ContentPackInventory,
+) {
+  return (
+    compareCanonicalText(left.directory, right.directory) ||
+    compareCanonicalText(left.name, right.name) ||
+    left.splitFiles - right.splitFiles ||
+    left.problems - right.problems ||
+    left.questions - right.questions
+  );
+}
+
+function sortedCopy<T>(values: T[], compare: (left: T, right: T) => number) {
+  return [...values].sort(compare);
+}
+
 function sortedNumberRecord(record: Record<string, number>) {
   return Object.fromEntries(
-    Object.entries(record).sort(([left], [right]) => left.localeCompare(right)),
+    Object.entries(record).sort(([left], [right]) =>
+      compareCanonicalText(left, right),
+    ),
   );
 }
 
 function sortedCountRecord(record: Record<string, AuditCount>) {
   return Object.fromEntries(
-    Object.entries(record).sort(([left], [right]) => left.localeCompare(right)),
+    Object.entries(record).sort(([left], [right]) =>
+      compareCanonicalText(left, right),
+    ),
   );
 }
 
-function isSafeSplitJsonFileName(fileName: string) {
+function isSafeImportFileName(fileName: string) {
   if (
     fileName.includes("/") ||
     fileName.includes("\\") ||
@@ -167,12 +254,8 @@ function isSafeSplitJsonFileName(fileName: string) {
     return false;
   }
 
-  const normalized = fileName.toLowerCase();
-  return (
-    normalized.endsWith(".json") &&
-    normalized !== "manifest.json" &&
-    !normalized.startsWith("00-all-in-one")
-  );
+  const normalized = normalizeContentPackFileName(fileName);
+  return (normalized.endsWith(".json") || normalized.endsWith(".csv")) && normalized !== "manifest.json";
 }
 
 function parseOptionalCount(
@@ -228,7 +311,7 @@ export function parseContentPackManifest(manifest: unknown): ManifestResult {
     }
 
     const fileName =
-      nonEmptyString(rawEntry.fileName) ?? nonEmptyString(rawEntry.file);
+      rawNonEmptyString(rawEntry.fileName) ?? rawNonEmptyString(rawEntry.file);
     if (!fileName) {
       issues.push({
         path,
@@ -236,16 +319,16 @@ export function parseContentPackManifest(manifest: unknown): ManifestResult {
       });
       return;
     }
-    if (!isSafeSplitJsonFileName(fileName)) {
+    if (!isSafeImportFileName(fileName)) {
       issues.push({
         fileName,
         path,
-        message: "Manifest entry is not a safe supported split JSON file.",
+        message: "Manifest entry is not a safe supported JSON/CSV file.",
       });
       return;
     }
 
-    const normalizedFileName = fileName.toLowerCase();
+    const normalizedFileName = normalizeContentPackFileName(fileName);
     if (seenFileNames.has(normalizedFileName)) {
       issues.push({
         fileName,
@@ -349,12 +432,20 @@ function normalizedPrompt(value: unknown) {
   return prompt.normalize("NFKC").replace(/\s+/g, " ").toLocaleLowerCase("en");
 }
 
+function promptExcerpt(value: unknown) {
+  const prompt = nonEmptyString(value);
+  if (!prompt) return undefined;
+  const compact = prompt.normalize("NFKC").replace(/\s+/g, " ");
+  return compact.length <= 120 ? compact : `${compact.slice(0, 117)}...`;
+}
+
 function locationFor(
   packDirectory: string,
   fileName: string,
   problemIndex: number,
   problem: Record<string, unknown>,
   questionIndex?: number,
+  question?: Record<string, unknown>,
 ): AuditLocation {
   return {
     packDirectory,
@@ -364,6 +455,7 @@ function locationFor(
       ? { problemSlug: nonEmptyString(problem.slug) }
       : {}),
     ...(questionIndex === undefined ? {} : { questionIndex }),
+    ...(question ? { promptExcerpt: promptExcerpt(question.prompt) } : {}),
   };
 }
 
@@ -416,13 +508,23 @@ export function auditContentPacks(
     },
     manifestMismatches: [],
     malformedInputs: [],
+    normalizerWarnings: [],
     hasInventoryErrors: false,
   };
 
   const duplicateCandidates = new Map<string, AuditLocation[]>();
 
   for (const input of inputs) {
-    const manifest = parseContentPackManifest(input.manifest);
+    const hasManifest =
+      input.manifest !== undefined || input.manifestParseError !== undefined;
+    const manifest = hasManifest
+      ? parseContentPackManifest(input.manifest)
+      : {
+          name: input.directory,
+          entries: [],
+          totals: {},
+          issues: [],
+        };
     if (input.manifestParseError) {
       report.malformedInputs.push({
         packDirectory: input.directory,
@@ -437,45 +539,114 @@ export function auditContentPacks(
       })),
     );
 
-    const providedFiles = new Map(
-      input.files.map((file) => [file.fileName.toLowerCase(), file]),
+    const providedFiles = new Map<string, ContentPackAuditFileInput>();
+    const selectedNameCounts = new Map<string, number>();
+    for (const file of input.files) {
+      const normalizedFileName = normalizeContentPackFileName(file.fileName);
+      if (!providedFiles.has(normalizedFileName)) {
+        providedFiles.set(normalizedFileName, file);
+      }
+      selectedNameCounts.set(
+        normalizedFileName,
+        (selectedNameCounts.get(normalizedFileName) ?? 0) + 1,
+      );
+    }
+    const collidedSelectedNames = new Set(
+      [...selectedNameCounts]
+        .filter(([, count]) => count > 1)
+        .map(([normalizedFileName]) => normalizedFileName),
     );
+    for (const file of input.files) {
+      if (collidedSelectedNames.has(normalizeContentPackFileName(file.fileName))) {
+        report.malformedInputs.push({
+          packDirectory: input.directory,
+          fileName: file.fileName,
+          path: "files",
+          message: "Importer-selected filename collides after importer normalization.",
+        });
+      }
+    }
+    const manifestFiles = new Map(
+      manifest.entries.map((entry) => [
+        normalizeContentPackFileName(entry.fileName),
+        entry,
+      ]),
+    );
+    if (hasManifest) {
+      for (const entry of manifest.entries) {
+        if (!providedFiles.has(normalizeContentPackFileName(entry.fileName))) {
+          report.malformedInputs.push({
+            packDirectory: input.directory,
+            fileName: entry.fileName,
+            path: "file",
+            message: "Manifest entry is missing from the importer-selected directory set.",
+          });
+        }
+      }
+      for (const file of input.files) {
+        if (!manifestFiles.has(normalizeContentPackFileName(file.fileName))) {
+          report.malformedInputs.push({
+            packDirectory: input.directory,
+            fileName: file.fileName,
+            path: "file",
+            message: "Importer-selected file is not listed in the manifest.",
+          });
+        }
+      }
+    }
     const packInventory: ContentPackInventory = {
       directory: input.directory,
       name: manifest.name,
-      splitFiles: manifest.entries.length,
+      splitFiles: input.files.length,
       problems: 0,
       questions: 0,
     };
 
-    report.inventory.splitFiles += manifest.entries.length;
+    report.inventory.splitFiles += input.files.length;
 
-    for (const entry of manifest.entries) {
-      const file = providedFiles.get(entry.fileName.toLowerCase());
-      if (!file) {
-        report.malformedInputs.push({
-          packDirectory: input.directory,
-          fileName: entry.fileName,
-          path: "file",
-          message: "Manifest-listed split file was not provided.",
-        });
+    for (const file of input.files) {
+      const normalizedFileName = normalizeContentPackFileName(file.fileName);
+      const entry = manifestFiles.get(normalizedFileName);
+      if (collidedSelectedNames.has(normalizedFileName)) {
         continue;
       }
       if (file.parseError) {
         report.malformedInputs.push({
           packDirectory: input.directory,
-          fileName: entry.fileName,
+          fileName: file.fileName,
           path: "file",
           message: file.parseError,
         });
         continue;
       }
+      const normalizationErrors = (file.normalizationIssues ?? []).filter(
+        (issue) => issue.level === "error",
+      );
+      report.malformedInputs.push(
+        ...normalizationErrors.map((issue) => ({
+          packDirectory: input.directory,
+          fileName: file.fileName,
+          path: issue.path,
+          message: issue.message,
+        })),
+      );
+      report.normalizerWarnings.push(
+        ...(file.normalizationIssues ?? [])
+          .filter((issue) => issue.level === "warning")
+          .map((issue) => ({
+            packDirectory: input.directory,
+            fileName: file.fileName,
+            path: issue.path,
+            message: issue.message,
+          })),
+      );
+      if (normalizationErrors.length > 0) continue;
       if (!isRecord(file.payload) || !Array.isArray(file.payload.problems)) {
         report.malformedInputs.push({
           packDirectory: input.directory,
-          fileName: entry.fileName,
+          fileName: file.fileName,
           path: "payload.problems",
-          message: "Split-file payload must be an object with a problems array.",
+          message: "Normalized import payload must contain a problems array.",
         });
         continue;
       }
@@ -489,7 +660,7 @@ export function auditContentPacks(
         if (!isRecord(rawProblem)) {
           report.malformedInputs.push({
             packDirectory: input.directory,
-            fileName: entry.fileName,
+            fileName: file.fileName,
             path: `problems.${problemIndex}`,
             message: "Problem must be an object.",
           });
@@ -498,7 +669,7 @@ export function auditContentPacks(
 
         const problemLocation = locationFor(
           input.directory,
-          entry.fileName,
+          file.fileName,
           problemIndex,
           rawProblem,
         );
@@ -515,7 +686,7 @@ export function auditContentPacks(
         if (!Array.isArray(rawProblem.questions)) {
           report.malformedInputs.push({
             packDirectory: input.directory,
-            fileName: entry.fileName,
+            fileName: file.fileName,
             path: `problems.${problemIndex}.questions`,
             message: "Problem questions must be an array.",
           });
@@ -533,22 +704,23 @@ export function auditContentPacks(
         );
 
         questions.forEach((rawQuestion, questionIndex) => {
-          const questionLocation = locationFor(
-            input.directory,
-            entry.fileName,
-            problemIndex,
-            rawProblem,
-            questionIndex,
-          );
           if (!isRecord(rawQuestion)) {
             report.malformedInputs.push({
               packDirectory: input.directory,
-              fileName: entry.fileName,
+              fileName: file.fileName,
               path: `problems.${problemIndex}.questions.${questionIndex}`,
               message: "Question must be an object.",
             });
             return;
           }
+          const questionLocation = locationFor(
+            input.directory,
+            file.fileName,
+            problemIndex,
+            rawProblem,
+            questionIndex,
+            rawQuestion,
+          );
 
           const questionType = nonEmptyString(rawQuestion.type) ?? "UNKNOWN";
           const questionSkill =
@@ -635,68 +807,129 @@ export function auditContentPacks(
         });
       });
 
+      if (entry) {
+        addMismatch(
+          report.manifestMismatches,
+          input.directory,
+          "problems",
+          entry.problemCount,
+          problems.length,
+          file.fileName,
+        );
+        addMismatch(
+          report.manifestMismatches,
+          input.directory,
+          "questions",
+          entry.questionCount,
+          fileQuestionCount,
+          file.fileName,
+        );
+      }
+    }
+
+    if (hasManifest) {
+      addMismatch(
+        report.manifestMismatches,
+        input.directory,
+        "files",
+        manifest.totals.files,
+        packInventory.splitFiles,
+      );
       addMismatch(
         report.manifestMismatches,
         input.directory,
         "problems",
-        entry.problemCount,
-        problems.length,
-        entry.fileName,
+        manifest.totals.problems,
+        packInventory.problems,
       );
       addMismatch(
         report.manifestMismatches,
         input.directory,
         "questions",
-        entry.questionCount,
-        fileQuestionCount,
-        entry.fileName,
+        manifest.totals.questions,
+        packInventory.questions,
       );
     }
-
-    addMismatch(
-      report.manifestMismatches,
-      input.directory,
-      "files",
-      manifest.totals.files,
-      packInventory.splitFiles,
-    );
-    addMismatch(
-      report.manifestMismatches,
-      input.directory,
-      "problems",
-      manifest.totals.problems,
-      packInventory.problems,
-    );
-    addMismatch(
-      report.manifestMismatches,
-      input.directory,
-      "questions",
-      manifest.totals.questions,
-      packInventory.questions,
-    );
     report.packs.push(packInventory);
   }
 
-  report.findings.duplicatePromptGroups = [...duplicateCandidates.values()]
-    .filter((locations) => locations.length > 1)
-    .map((locations) => ({
-      occurrences: locations.length,
-      locations,
-    }))
-    .sort((left, right) => {
-      const countDifference = right.occurrences - left.occurrences;
-      if (countDifference) return countDifference;
-      const leftLocation = left.locations[0];
-      const rightLocation = right.locations[0];
-      return `${leftLocation.packDirectory}/${leftLocation.fileName}/${leftLocation.problemIndex}/${leftLocation.questionIndex}`.localeCompare(
-        `${rightLocation.packDirectory}/${rightLocation.fileName}/${rightLocation.problemIndex}/${rightLocation.questionIndex}`,
-      );
-    });
+  report.findings = {
+    problemsWithoutInstructions: sortedCopy(
+      report.findings.problemsWithoutInstructions,
+      compareAuditLocations,
+    ),
+    missingExplanations: sortedCopy(
+      report.findings.missingExplanations,
+      compareAuditLocations,
+    ),
+    shortExplanations: sortedCopy(
+      report.findings.shortExplanations,
+      compareAuditLocations,
+    ),
+    wordFormationWithoutRootWords: sortedCopy(
+      report.findings.wordFormationWithoutRootWords,
+      compareAuditLocations,
+    ),
+    readingQuestionsWithoutPassages: sortedCopy(
+      report.findings.readingQuestionsWithoutPassages,
+      compareAuditLocations,
+    ),
+    triosWithoutThreeSentences: sortedCopy(
+      report.findings.triosWithoutThreeSentences,
+      compareAuditLocations,
+    ),
+    skillMismatches: sortedCopy(
+      report.findings.skillMismatches,
+      compareAuditLocations,
+    ),
+    difficultyMismatches: sortedCopy(
+      report.findings.difficultyMismatches,
+      compareAuditLocations,
+    ),
+    invalidCorrectOptions: sortedCopy(
+      report.findings.invalidCorrectOptions,
+      compareAuditLocations,
+    ),
+    duplicatePromptGroups: [...duplicateCandidates.entries()]
+      .filter(([, locations]) => locations.length > 1)
+      .map(([normalizedDuplicatePrompt, locations]) => ({
+        normalizedDuplicatePrompt,
+        group: {
+          occurrences: locations.length,
+          locations: sortedCopy(locations, compareAuditLocations),
+        },
+      }))
+      .sort(
+        (left, right) =>
+          ordinalCompare(
+            left.normalizedDuplicatePrompt,
+            right.normalizedDuplicatePrompt,
+          ) ||
+          compareAuditLocations(
+            left.group.locations[0],
+            right.group.locations[0],
+          ),
+      )
+      .map(({ group }) => group),
+  };
 
   report.bySkill = sortedCountRecord(report.bySkill);
   report.byQuestionType = sortedNumberRecord(report.byQuestionType);
   report.byDifficulty = sortedCountRecord(report.byDifficulty);
   report.answerPositions = sortedNumberRecord(report.answerPositions);
+  report.packs = sortedCopy(report.packs, comparePackInventories);
+  report.malformedInputs = sortedCopy(
+    report.malformedInputs,
+    compareManifestIssues,
+  );
+  report.normalizerWarnings = sortedCopy(
+    report.normalizerWarnings,
+    compareManifestIssues,
+  );
+  report.manifestMismatches = sortedCopy(
+    report.manifestMismatches,
+    compareManifestMismatches,
+  );
   report.hasInventoryErrors =
     report.malformedInputs.length > 0 ||
     report.manifestMismatches.length > 0;

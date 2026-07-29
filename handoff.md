@@ -18,9 +18,13 @@ Phase 2 PR 1 establishes a repository-only, database-free product/content audit
 baseline at canonical base `52f0ec030196ec202c26872325a29d0ddb5d3db6`.
 Run `npm run audit:content-packs` for readable tables or
 `npm run --silent audit:content-packs -- --format=json` for machine-readable
-output. The command reads only manifest-listed split JSON files and does not
-count `00-all-in-one` mirrors. The baseline parses 2 packs, 17 split files, 101
-problems, and 495 questions; see
+output. The command shares the importer’s pure selector and JSON/CSV
+normalizers, audits every importer-selected file, supports manifest-optional
+packs, and compares any manifest bidirectionally with that selected set.
+Numbered splits take precedence over `00-all-in-one` mirrors when both are
+present. The baseline parses 2 packs, 17 selected split files, 101 problems,
+and 495 questions with zero manifest mismatch and zero import-normalizer error;
+see
 [`docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md`](docs/PHASE_2_PRODUCT_CONTENT_AUDIT.md)
 for evidence classification, route journeys, quality findings, difficulty
 rubric, backlog, curriculum proposal, and the first 21-problem/84-question

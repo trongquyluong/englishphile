@@ -5,11 +5,12 @@
 This report is the repository-only baseline for Phase 2 PR 1.
 
 - Canonical base: `main` at `52f0ec030196ec202c26872325a29d0ddb5d3db6`.
-- Evidence inspected: tracked application code, Prisma schema, import normalization and validation, content-pack QA, modular question renderers, static Wiki/Writing sources, the two repository content-pack manifests, and only the 17 split JSON files listed by those manifests.
+- Evidence inspected: tracked application code, Prisma schema, import normalization and validation, content-pack QA, modular question renderers, static Wiki/Writing sources, the two repository content-pack manifests, and the complete 17-file set selected by the shared importer selector.
 - Inventory command: `npm run audit:content-packs`.
 - Machine-readable command: `npm run --silent audit:content-packs -- --format=json`.
 - The audit is database-free. It does not instantiate Prisma, read environment values, inspect deployed pages, or call an external provider.
-- `00-all-in-one` files are mirrors and are not part of this inventory when manifests declare split files.
+- The audit and importer share one pure JSON/CSV selector and normalization contract. Numbered split files keep importer order and take precedence over `00-all-in-one` mirrors when both are present.
+- A manifest is optional, matching importer behavior. When present, it is checked bidirectionally: missing, duplicate, invalid, or unlisted importer-selected files are inventory errors.
 
 Repository evidence describes what is committed and what pure/local tests prove. It does not prove which content is imported, published, or used in a database.
 
@@ -17,17 +18,18 @@ Preview evidence and Production evidence are separate operational evidence class
 
 ## Repository content inventory
 
-The following values are parsed from the manifests and their listed split files. They are not hard-coded into the audit implementation.
+The following values are parsed from every importer-selected file after the real JSON/CSV normalization and type-specific validation path. They are not hard-coded into the audit implementation.
 
 | Inventory | Count |
 | --- | ---: |
 | Content packs | 2 |
-| Manifest-listed split files | 17 |
+| Importer-selected split files | 17 |
 | Problems | 101 |
 | Questions | 495 |
 | Option-based questions | 230 |
 | Manifest count mismatches | 0 |
 | Malformed manifests/payloads | 0 |
+| Import-normalizer errors | 0 |
 
 | Pack | Split files | Problems | Questions |
 | --- | ---: | ---: | ---: |
@@ -301,7 +303,7 @@ Difficulty is the cognitive/linguistic demand of an item, not the age of the lea
 ## Quality-control workflow
 
 1. **Author against a specification:** assign skill, question type, difficulty evidence, topic, objective, renderer-required fields, answer, and explanation.
-2. **Run repository audit:** `npm run audit:content-packs`; resolve malformed input and manifest mismatches before import. Review heuristic signals without treating every short explanation as an automatic failure.
+2. **Run repository audit:** `npm run audit:content-packs`; resolve importer-normalizer errors and bidirectional manifest/selected-set mismatches before import. Review heuristic signals without treating every short explanation as an automatic failure.
 3. **Run import dry-run:** normalize aliases, validate JSON and type-specific answer requirements, and detect exact/high/possible duplicates.
 4. **Import as `NEEDS_REVIEW`:** retain source, import batch, and content-pack traceability.
 5. **Run persisted QA:** block all `ERROR` items; review warnings and duplicate risk.
@@ -309,7 +311,7 @@ Difficulty is the cognitive/linguistic demand of an item, not the age of the lea
 7. **Admin preview:** verify the actual modular renderer, including passage/audio/metadata-dependent content; preview must not save a submission.
 8. **Publish a bounded batch:** publish only reviewed problems and keep diagnostic eligibility separate.
 9. **Post-publication sampling:** inspect learner reports and aggregate performance after a minimum sample; archive or revise through controlled small PRs/import batches.
-10. **Regression gate:** focused tests, full tests, typecheck, lint, build, dependency audit, and repository audit.
+10. **Regression gate:** focused tests, full tests, typecheck, lint, build, `npm audit --omit=dev`, and repository audit.
 
 ## First representative batch: 21 problems / 84 questions
 
@@ -335,11 +337,22 @@ The first new/rewritten batch should use four questions per problem so review sc
 | **Total** |  | **21** | **16** | **44** | **16** | **8** | **0** | **84** |
 
 - HSG is intentionally excluded from the first validation batch.
+- The 44 C1 questions are deliberate because C1 is the bridge between B2 anchors and C2/CHUYEN application, and it spans the largest number of advanced core formats in this proposal. This is a review-coverage rationale, not evidence that C1 is already calibrated.
 - The difficulty rubric must first be calibrated with B2–CHUYEN examples and independent review.
 - HSG content begins only in a later bounded batch after answer uniqueness, distractor quality, and difficulty judgments are stable.
-- The two Listening problems separately validate `LISTENING_MCQ` and `LISTENING_SHORT_ANSWER`.
+- The two planned Listening problems keep `LISTENING_MCQ` and `LISTENING_SHORT_ANSWER` separate: the former uses options plus `correctOptionId`, while the latter uses accepted short answers. They are reserved in the 21/84 arithmetic but cannot enter a validation batch or be published until the transcript/audio/import/rendering contract is explicitly confirmed or implemented. The current schema has no generic `transcript` field, so this audit does not invent one.
 - Writing remains non-auto-scored.
-- None of these questions becomes diagnostic-eligible before calibration.
+- None of these questions becomes diagnostic-eligible until calibration succeeds.
+
+Calibration succeeds only when independent reviewers agree that:
+
+- **B2** anchors use common language, have one stable answer, and discriminate foundational control without hidden C1 demand;
+- **C1** items require precise context, register, collocation, or discourse control, with one defensible answer and documented treatment of the strongest distractor;
+- **C2** items test genuine nuance or multi-step inference rather than obscurity, with decisive evidence recorded;
+- **CHUYEN** items demonstrate both the intended exam-format purpose and defensible B2–C1 linguistic demand;
+- every included item passes the real normalizer, type-specific renderer preview, answer-uniqueness and explanation review, followed by bounded performance review when learner samples exist.
+
+HSG stays deferred until these B2–CHUYEN judgments are stable. Diagnostic eligibility remains prohibited before that gate succeeds.
 
 Acceptance criteria for this batch:
 
@@ -347,7 +360,8 @@ Acceptance criteria for this batch:
 - every objective answer belongs to the normalized option/answer structure;
 - every explanation is useful on substance; short text is reviewed, not rejected solely by length;
 - answer positions are intentionally balanced within each option-based subset;
-- Reading passages, Listening assets/transcripts, Word Formation roots, Pronunciation targets, and Trios sentences render in admin preview;
+- Reading passages, Word Formation roots, Pronunciation targets, and Trios sentences render in admin preview;
+- no Listening item enters validation or publication until the separate audio/transcript/import/rendering prerequisite is confirmed;
 - no substantive exact/high-similarity duplicate survives review;
 - skill and difficulty labels are justified by the rubric;
 - content defaults to `NEEDS_REVIEW`, passes QA, and is published only through the existing admin path.

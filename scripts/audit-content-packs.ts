@@ -1,12 +1,18 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   auditContentPacks,
-  parseContentPackManifest,
   SHORT_EXPLANATION_THRESHOLD,
   type ContentAuditReport,
   type ContentPackAuditInput,
 } from "@/lib/content-audit";
+import {
+  inferContentPackImportType,
+  selectImportFiles,
+  type ContentPackInputFile,
+} from "@/lib/content-packs/file-selection";
+import { normalizeImportFile } from "@/lib/import/normalize-file";
 
 type OutputFormat = "table" | "json";
 
@@ -16,71 +22,65 @@ function parseOutputFormat(args: string[]): OutputFormat {
   throw new Error("Chỉ hỗ trợ tùy chọn --format=json.");
 }
 
-async function parseJsonFile(filePath: string): Promise<{
-  payload?: unknown;
-  parseError?: string;
-}> {
-  try {
-    const text = await fs.readFile(filePath, "utf8");
-    try {
-      return { payload: JSON.parse(text) as unknown };
-    } catch {
-      return { parseError: "File không chứa JSON hợp lệ." };
-    }
-  } catch {
-    return { parseError: "Không thể đọc file được manifest liệt kê." };
-  }
-}
-
-function safeListedFilePath(packDirectory: string, fileName: string) {
-  const resolvedPackDirectory = path.resolve(packDirectory);
-  const resolvedFile = path.resolve(resolvedPackDirectory, fileName);
-  if (path.dirname(resolvedFile) !== resolvedPackDirectory) return undefined;
-  return resolvedFile;
-}
-
 async function loadPack(
   contentPacksDirectory: string,
   directoryName: string,
 ): Promise<ContentPackAuditInput> {
   const packDirectory = path.join(contentPacksDirectory, directoryName);
-  const manifestPath = path.join(packDirectory, "manifest.json");
-  const manifestResult = await parseJsonFile(manifestPath);
-
-  if (manifestResult.parseError) {
-    return {
-      directory: directoryName,
-      manifestParseError: manifestResult.parseError,
-      files: [],
-    };
-  }
-
-  const manifest = manifestResult.payload;
-  const parsedManifest = parseContentPackManifest(manifest);
-  const files = [];
-
-  for (const entry of parsedManifest.entries) {
-    const listedPath = safeListedFilePath(packDirectory, entry.fileName);
-    if (!listedPath) {
-      files.push({
-        fileName: entry.fileName,
-        parseError: "Đường dẫn split file không an toàn.",
-      });
-      continue;
+  const directoryEntries = await fs.readdir(packDirectory);
+  const readErrors = new Map<string, string>();
+  const candidates: ContentPackInputFile[] = await Promise.all(
+    directoryEntries
+      .filter((entry) => /\.(json|csv)$/i.test(entry))
+      .map(async (entry) => {
+        try {
+          return {
+            fileName: entry,
+            content: await fs.readFile(path.join(packDirectory, entry), "utf8"),
+          };
+        } catch {
+          readErrors.set(entry, "Không thể đọc file importer đã chọn.");
+          return { fileName: entry, content: "" };
+        }
+      }),
+  );
+  const selection = selectImportFiles(candidates);
+  const files = selection.selected.map((file) => {
+    const parseError = readErrors.get(file.fileName);
+    const importType = inferContentPackImportType(file.fileName);
+    if (parseError || !importType) {
+      return {
+        fileName: file.fileName,
+        parseError: parseError ?? "Định dạng file importer đã chọn không được hỗ trợ.",
+      };
     }
-    const parsedFile = await parseJsonFile(listedPath);
-    files.push({ fileName: entry.fileName, ...parsedFile });
-  }
+    const normalized = normalizeImportFile(importType, file.content);
+    return {
+      fileName: file.fileName,
+      payload: normalized.payload ?? undefined,
+      normalizationIssues: normalized.issues,
+    };
+  });
+  const manifestReadError = selection.manifestFileName
+    ? readErrors.get(selection.manifestFileName)
+    : undefined;
+  const manifestParseError =
+    manifestReadError ??
+    (selection.manifestFileName && !selection.manifest
+      ? "Manifest không chứa JSON object hợp lệ."
+      : undefined);
 
   return {
     directory: directoryName,
-    manifest,
+    ...(selection.manifest ? { manifest: selection.manifest } : {}),
+    ...(manifestParseError ? { manifestParseError } : {}),
     files,
   };
 }
 
-async function loadRepositoryContentPacks() {
-  const contentPacksDirectory = path.resolve(process.cwd(), "content-packs");
+export async function loadRepositoryContentPacks(
+  contentPacksDirectory = path.resolve(process.cwd(), "content-packs"),
+) {
   const directoryEntries = await fs.readdir(contentPacksDirectory, {
     withFileTypes: true,
   });
@@ -190,6 +190,22 @@ function printHumanReport(report: ContentAuditReport) {
 
   console.log("Tín hiệu chất lượng");
   console.table(findingRows(report));
+  if (report.findings.shortExplanations.length > 0) {
+    console.log("Vị trí giải thích ngắn (heuristic, excerpt tối đa 120 ký tự)");
+    console.table(report.findings.shortExplanations);
+  }
+  if (report.findings.duplicatePromptGroups.length > 0) {
+    console.log("Vị trí prompt trùng lặp chính xác có nội dung");
+    console.table(
+      report.findings.duplicatePromptGroups.flatMap((group, groupIndex) =>
+        group.locations.map((location) => ({
+          group: groupIndex + 1,
+          occurrences: group.occurrences,
+          ...location,
+        })),
+      ),
+    );
+  }
 
   console.log("Tính nhất quán manifest/inventory");
   console.table([
@@ -205,6 +221,10 @@ function printHumanReport(report: ContentAuditReport) {
   }
   if (report.malformedInputs.length > 0) {
     console.table(report.malformedInputs);
+  }
+  if (report.normalizerWarnings.length > 0) {
+    console.log("Cảnh báo từ import normalizer");
+    console.table(report.normalizerWarnings);
   }
 }
 
@@ -241,4 +261,9 @@ async function main() {
   }
 }
 
-void main();
+const entryPoint = process.argv[1]
+  ? pathToFileURL(path.resolve(process.argv[1])).href
+  : "";
+if (entryPoint === import.meta.url) {
+  void main();
+}
