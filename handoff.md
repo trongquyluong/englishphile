@@ -185,6 +185,55 @@ publication QA, answer-position, difficulty, and calibration review. Current
 `metadata.focus` is insufficient. Structural success does not prove phonetic
 correctness. Phase 2 PR 5 repairs or approves none of the 30 current items.
 
+Phase 2 PR 6 implements bounded Writing learner presentation on branch
+`phase2/06-writing-rubric-ux` from canonical base
+`1c59c49caa71edaa011bd9f6eed5f2ced2af8f46`. The existing Prisma JSON storage
+already supports the authored source, so there is no schema or migration
+change. The exact source is `Question.answer.rubric`, used by the seed, Writing
+import template, and current pilot Writing split as an ordered string array.
+
+A pure all-or-nothing projector accepts one non-empty array of at most 12
+strings, trims each criterion, bounds it to 240 UTF-16 code units, preserves
+authored order/text, and returns `null` for missing, blank, over-bound, scalar,
+object, nested-array, accessor, or otherwise malformed values. It never
+stringifies unknown values, emits a partial rubric, mutates caller data, or
+copies answer siblings, explanations, raw metadata, model/sample answers,
+provider data, admin notes, or repair fields.
+
+The existing positive learner Prisma selector remains answer-free. A dedicated
+`server-only` reader selects `{id, answer}` only for already-authorized Writing
+question IDs and immediately returns only the safe rubric map. The learner DTO
+adds `writingRubric: {criteria: string[]} | null`; every non-Writing question
+gets `null`. Problem detail, random practice, and diagnostic presentation use
+the map. The admin-authorized, `server-only` preview DTO applies the same safe
+projection for the production renderer while retaining its existing raw
+answer/explanation/metadata/options repair fields. `requireAdmin`, learner
+publication filters, and preview persistence suppression are unchanged.
+
+`WritingQuestion` now uses Vietnamese fixed controls and guidance, explicit
+question-specific label/control IDs, a live word count, fail-closed disabled
+handlers, an authored criteria list, and a fixed missing/malformed-rubric
+fallback. Authored English rubric text is displayed faithfully rather than
+automatically translated. Criteria are explicitly framed as self-review, not
+an answer or automatic score. Existing learner text is preserved when planning
+fields change.
+
+Writing practice scoring remains `isCorrect=null`, submission results remain
+neutral `NEEDS_REVIEW`, and authored rubrics never become an answer key or
+numeric correctness score. The separate Writing AI grader remains advisory
+and its provider, model, quota, prompt, retry, recovery, persistence, and
+retention behavior is unchanged. Exact/non-exact Sentence Transformation and
+Error Identification, Trios, and Pronunciation behavior is unchanged.
+
+Phase 2 PR 6 evidence is repository/local only: pure/mocked tests,
+serialization non-disclosure, structural static rendering, focused scorer and
+existing recovery/review regressions, full suite, typecheck, lint, synthetic
+unreachable Production build, diff checks, and file-format checks. It includes
+no database, endpoint, environment-value, provider, import, publication,
+Preview, Production, migration, seed, deployment, browser-E2E, or screen-reader
+verification. Human English/Vietnamese linguistic, rubric-quality, task
+alignment, originality, difficulty, and calibration review remains required.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

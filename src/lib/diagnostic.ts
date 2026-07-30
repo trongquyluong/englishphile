@@ -28,6 +28,7 @@ import {
   toLearnerQuestionDTO,
   type LearnerQuestionDTO,
 } from "@/lib/dto/learner-question";
+import { getLearnerWritingRubrics } from "@/lib/dto/learner-writing-rubric.server";
 import { skillLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 import { runSingleWinnerTransaction } from "@/lib/security/replay-guard";
@@ -282,7 +283,15 @@ export async function getDiagnosticQuestionsForAttempt(attemptId: string, userId
   });
   const order = new Map(questionIds.map((id, index) => [id, index]));
   const sortedQuestions = questions.sort((left, right) => (order.get(left.id) ?? 0) - (order.get(right.id) ?? 0));
-  const learnerQuestions = sortedQuestions.map(toLearnerQuestionDTO);
+  const writingRubrics = await getLearnerWritingRubrics(
+    sortedQuestions.map((question) => question.id),
+  );
+  const learnerQuestions = sortedQuestions.map((question) =>
+    toLearnerQuestionDTO(
+      question,
+      writingRubrics.get(question.id) ?? null,
+    ),
+  );
   return {
     attempt: attemptSummary,
     questions: learnerQuestions,

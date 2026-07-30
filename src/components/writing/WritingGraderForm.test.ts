@@ -73,5 +73,8 @@ describe("Writing grader immediate quota transition", () => {
     expect(html).not.toContain("Workers AI");
     expect(html).not.toContain("thông tin nhạy cảm");
     expect(html).not.toContain("Điểm do AI");
+    expect(html).toContain("chỉ dùng để định hướng luyện tập");
+    expect(html).not.toContain("Đáp án đúng");
+    expect(html).not.toContain("Bài viết chính xác");
   });
 });
