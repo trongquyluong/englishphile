@@ -234,6 +234,44 @@ Preview, Production, migration, seed, deployment, browser-E2E, or screen-reader
 verification. Human English/Vietnamese linguistic, rubric-quality, task
 alignment, originality, difficulty, and calibration review remains required.
 
+Phase 2 PR 7 is the documentation-only Listening contract design on branch
+`phase2/07-listening-contract-design` from canonical base
+`05c424e8aa990054cd9dd3428b444718e0760c9b`. Its authority is
+[`docs/PHASE_2_LISTENING_CONTRACT.md`](docs/PHASE_2_LISTENING_CONTRACT.md).
+It preserves `LISTENING_MCQ` and `LISTENING_SHORT_ANSWER` as separate
+answer/input/scoring types and proposes one versioned
+`Question.metadata.listening` descriptor, a same-origin bounded pilot default,
+reviewed transcript/attribution/rights evidence, fail-closed playback,
+deterministic import/publication severities, an all-or-nothing learner DTO, and
+small implementation PRs.
+
+The inventory was independently recomputed from all 17 importer-selected split
+files: 101 problems and 495 questions overall, with exactly 0 Listening
+problems and 0 Listening questions for both types and every difficulty. The
+selected packs contain no `metadata.audioUrl`, `metadata.sectionType`, or
+transcript key, and no local audio asset exists under the inspected
+application/content roots. Contest-section fields, documentation paths, and
+synthetic test strings are capability/examples only; they do not prove a real
+asset, transcript, licence, provider workflow, database row, or publication.
+
+Current problem detail/random practice pass any non-blank metadata audio URL to
+native controls and leave answer controls visible when audio is missing.
+Diagnostic and problem-backed contest renderers can show Listening answer
+controls without rendering audio. Persisted QA and every problem publication
+path lack a complete media/transcript/rights contract. The proposed follow-ups
+must therefore enforce one pure contract at normal/immediate import, persisted
+QA, individual/edit/ordinary bulk publication, bulk `publish-safe`, and its
+transaction-locked recheck before any content work.
+
+Project-owner approval is still required for storage/provider cost, public
+versus authenticated audio, transcript visibility during assessment, replay
+and seek/speed policy, dialect policy, permitted licence categories, retention,
+deletion, and accommodation/ranking treatment. Until those decisions and the
+implementation PRs are approved, Listening remains synthetic-fixture-only,
+unpublished, and diagnostic-ineligible. PR 7 changes no schema, migration,
+package, lockfile, dependency, importer, QA, DTO, scorer, renderer, test,
+content pack, media, database, provider, deployment, or runtime behavior.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to
