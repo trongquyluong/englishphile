@@ -5,6 +5,12 @@ import {
   validateErrorIdentificationContract,
 } from "@/lib/questions/error-identification-contract";
 import { validateTriosSentences } from "@/lib/questions/trios-contract";
+import {
+  normalizePronunciationAnswer,
+  normalizePronunciationOptions,
+  validatePronunciationContract,
+  type PronunciationContractIssueCode,
+} from "@/lib/questions/pronunciation-contract";
 
 export const SHORT_EXPLANATION_THRESHOLD = 45;
 const MAX_OPTION_AMBIGUITY_GROUPS = 12;
@@ -123,6 +129,10 @@ export type DuplicateNormalizedOptionTextFinding = AuditLocation & {
   omittedGroups: number;
 };
 
+export type PronunciationTargetFinding = AuditLocation & {
+  issues: PronunciationContractIssueCode[];
+};
+
 export type ContentAuditReport = {
   inventory: {
     packs: number;
@@ -143,6 +153,7 @@ export type ContentAuditReport = {
     wordFormationWithoutRootWords: AuditLocation[];
     readingQuestionsWithoutPassages: AuditLocation[];
     triosWithoutThreeSentences: AuditLocation[];
+    pronunciationWithoutValidTargetSpans: PronunciationTargetFinding[];
     skillMismatches: AuditLocation[];
     difficultyMismatches: AuditLocation[];
     invalidCorrectOptions: AuditLocation[];
@@ -580,6 +591,7 @@ export function auditContentPacks(
       wordFormationWithoutRootWords: [],
       readingQuestionsWithoutPassages: [],
       triosWithoutThreeSentences: [],
+      pronunciationWithoutValidTargetSpans: [],
       skillMismatches: [],
       difficultyMismatches: [],
       invalidCorrectOptions: [],
@@ -842,6 +854,20 @@ export function auditContentPacks(
             !hasThreeTriosSentences(rawQuestion)
           ) {
             report.findings.triosWithoutThreeSentences.push(questionLocation);
+          }
+          if (questionType === "PRONUNCIATION_ODD_ONE_OUT") {
+            const contract = validatePronunciationContract(
+              normalizePronunciationOptions(rawQuestion.options),
+              normalizePronunciationAnswer(rawQuestion.answer),
+            );
+            if (!contract.valid) {
+              report.findings.pronunciationWithoutValidTargetSpans.push({
+                ...questionLocation,
+                issues: [...new Set(
+                  contract.issues.map((contractIssue) => contractIssue.code),
+                )].sort(ordinalCompare),
+              });
+            }
           }
           if (questionSkill !== problemSkill) {
             report.findings.skillMismatches.push(questionLocation);
@@ -1117,6 +1143,10 @@ export function auditContentPacks(
     ),
     triosWithoutThreeSentences: sortedCopy(
       report.findings.triosWithoutThreeSentences,
+      compareAuditLocations,
+    ),
+    pronunciationWithoutValidTargetSpans: sortedCopy(
+      report.findings.pronunciationWithoutValidTargetSpans,
       compareAuditLocations,
     ),
     skillMismatches: sortedCopy(

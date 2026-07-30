@@ -135,6 +135,72 @@ function triosPlan(
   };
 }
 
+const validPronunciationOptions = [
+  { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+  { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+  { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+  { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+];
+
+function pronunciationPlan(
+  options: unknown,
+  importType: ImportPlan["importType"] = "JSON",
+): ImportPlan {
+  const missingSpans =
+    Array.isArray(options) &&
+    options.some(
+      (option) =>
+        option &&
+        typeof option === "object" &&
+        !Object.hasOwn(option, "targetSpan"),
+    );
+  const issues = missingSpans
+    ? [{
+        level: "warning" as const,
+        path: "problems.0.questions.0.options.0.targetSpan",
+        message: "Mỗi lựa chọn Pronunciation cần targetSpan với start và end.",
+        code: "PRONUNCIATION_TARGET_SPAN_REQUIRED",
+      }]
+    : [];
+  return {
+    ...plan(null, importType),
+    importType,
+    issues,
+    payload: {
+      importType,
+      problems: [{
+        title: "Pronunciation contract fixture",
+        slug: "pronunciation-contract-fixture",
+        skillType: "PRONUNCIATION",
+        questionType: "PRONUNCIATION_ODD_ONE_OUT",
+        difficulty: "C1",
+        sourceCollection: {
+          name: "Synthetic Pronunciation source",
+          description: "Synthetic",
+          sourceType: importType,
+        },
+        statement: "Chọn từ khác.",
+        topics: [],
+        orderIndex: 0,
+        questions: [{
+          type: "PRONUNCIATION_ODD_ONE_OUT",
+          skillType: "PRONUNCIATION",
+          difficulty: "C1",
+          prompt: "Chọn một từ.",
+          options,
+          answer: { correctOptionId: "C" },
+          metadata: { focus: "not-authoritative" },
+          orderIndex: 0,
+        }],
+      }],
+    },
+    summary: {
+      ...plan(null, importType).summary,
+      warnings: issues.length,
+    },
+  };
+}
+
 describe("immediate JSON import-publish boundary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -259,6 +325,53 @@ describe("immediate JSON import-publish boundary", () => {
         "The evidence points to one _____.",
       ],
     }, importType));
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("IMPORTED");
+    expect(result.ok).toBe(true);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, issues: [] }),
+      expect.objectContaining({ contentStatus: "PUBLISHED", importType }),
+    );
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("blocks malformed Pronunciation %s before atomic persistence", async (importType, importer) => {
+    const missingSpans = validPronunciationOptions.map(
+      ({ id, text }) => ({ id, text }),
+    );
+    mocks.buildImportPlan.mockResolvedValue(
+      pronunciationPlan(missingSpans, importType),
+    );
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("FAILED");
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        level: "error",
+        code: "PRONUNCIATION_TARGET_SPAN_REQUIRED",
+        path: "problems.pronunciation-contract-fixture.questions.0.options.0.targetSpan",
+      }),
+    ]));
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("allows canonical Pronunciation %s immediate publication", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(
+      pronunciationPlan(validPronunciationOptions, importType),
+    );
 
     const result = await importer("payload", "admin-a", {
       publishImmediately: true,

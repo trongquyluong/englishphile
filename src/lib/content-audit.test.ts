@@ -828,6 +828,68 @@ describe("content-pack repository audit", () => {
       .not.toContain("shared");
   });
 
+  it("reports Pronunciation target compatibility with safe deterministic codes", () => {
+    const validOptions = [
+      { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+      { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+      { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+      { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+    ];
+    const pronunciationQuestions = [
+      question({
+        type: "PRONUNCIATION_ODD_ONE_OUT",
+        skillType: "PRONUNCIATION",
+        options: validOptions,
+        answer: { correctOptionId: "C" },
+      }),
+      question({
+        type: "PRONUNCIATION_ODD_ONE_OUT",
+        skillType: "PRONUNCIATION",
+        options: validOptions.map(({ id, text }) => ({ id, text })),
+        answer: { correctOptionId: "C" },
+      }),
+      question({
+        type: "PRONUNCIATION_ODD_ONE_OUT",
+        skillType: "PRONUNCIATION",
+        options: validOptions,
+        answer: { correctOptionId: "E", secret: "AUDIT_ANSWER_SENTINEL" },
+      }),
+    ];
+    const rawProblem = problem(pronunciationQuestions, {
+      skillType: "PRONUNCIATION",
+      questionType: "PRONUNCIATION_ODD_ONE_OUT",
+      slug: "pronunciation-contract-audit",
+    });
+    const input: ContentPackAuditInput = {
+      directory: "pronunciation-audit",
+      files: [{
+        fileName: "01-pronunciation.json",
+        payload: {
+          sourceCollection: { name: "Raw fixture", sourceType: "JSON" },
+          problems: [rawProblem],
+        },
+      }],
+    };
+    const first = auditContentPacks([input]);
+    const second = auditContentPacks([input]);
+
+    expect(first.findings.pronunciationWithoutValidTargetSpans).toEqual([
+      expect.objectContaining({
+        questionIndex: 1,
+        issues: ["TARGET_SPAN_REQUIRED"],
+      }),
+      expect.objectContaining({
+        questionIndex: 2,
+        issues: ["CORRECT_OPTION_INVALID"],
+      }),
+    ]);
+    expect(JSON.stringify(first.findings.pronunciationWithoutValidTargetSpans))
+      .not.toContain("AUDIT_ANSWER_SENTINEL");
+    expect(JSON.stringify(first.findings.pronunciationWithoutValidTargetSpans))
+      .not.toContain("bread");
+    expect(JSON.stringify(first)).toBe(JSON.stringify(second));
+  });
+
   it("reports malformed payloads and manifest count mismatches", () => {
     const malformed = pack([], {
       payload: { problems: "not-an-array" },
@@ -901,9 +963,16 @@ describe("content-pack repository audit", () => {
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
     expect(report.byQuestionType.TRIOS_GAPPED_SENTENCES).toBe(15);
     expect(report.findings.triosWithoutThreeSentences).toEqual([]);
+    expect(report.findings.pronunciationWithoutValidTargetSpans)
+      .toHaveLength(30);
+    expect(report.findings.pronunciationWithoutValidTargetSpans.every(
+      (finding) =>
+        finding.issues.length === 1 &&
+        finding.issues[0] === "TARGET_SPAN_REQUIRED",
+    )).toBe(true);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);
-    expect(report.normalizerWarnings).toHaveLength(56);
+    expect(report.normalizerWarnings).toHaveLength(176);
     expect(report.hasInventoryErrors).toBe(false);
   });
 

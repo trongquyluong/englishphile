@@ -20,6 +20,11 @@ import {
   normalizeTriosAnswer,
   validateTriosContract,
 } from "@/lib/questions/trios-contract";
+import {
+  normalizePronunciationAnswer,
+  normalizePronunciationOptions,
+  validatePronunciationContract,
+} from "@/lib/questions/pronunciation-contract";
 
 const nullableString = z
   .union([z.string(), z.null(), z.undefined()])
@@ -143,6 +148,9 @@ function normalizeAnswer(questionType: QuestionType, answer: unknown) {
   if (questionType === "TRIOS_GAPPED_SENTENCES") {
     return normalizeTriosAnswer(answer);
   }
+  if (questionType === "PRONUNCIATION_ODD_ONE_OUT") {
+    return normalizePronunciationAnswer(answer);
+  }
 
   if (!isRecord(answer)) {
     return answer;
@@ -151,7 +159,7 @@ function normalizeAnswer(questionType: QuestionType, answer: unknown) {
   const normalized = { ...answer };
 
   if (
-    ["MCQ", "GUIDED_CLOZE", "PRONUNCIATION_ODD_ONE_OUT", "READING_MCQ", "LISTENING_MCQ"].includes(questionType) &&
+    ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(questionType) &&
     typeof normalized.correctOptionId !== "string" &&
     typeof normalized.correctOption === "string"
   ) {
@@ -195,14 +203,14 @@ function validateQuestionRules(question: NormalizedQuestion, path: string): Impo
   }
 
   if (
-    ["MCQ", "GUIDED_CLOZE", "PRONUNCIATION_ODD_ONE_OUT", "READING_MCQ", "LISTENING_MCQ"].includes(question.type) &&
+    ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(question.type) &&
     options.length === 0
   ) {
     issues.push({ level: "error", path: `${path}.options`, message: "Dạng trắc nghiệm cần options." });
   }
 
   if (
-    ["MCQ", "GUIDED_CLOZE", "PRONUNCIATION_ODD_ONE_OUT", "READING_MCQ", "LISTENING_MCQ"].includes(question.type) &&
+    ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(question.type) &&
     typeof answer.correctOptionId !== "string"
   ) {
     issues.push({ level: "error", path: `${path}.answer`, message: "Dạng trắc nghiệm cần answer.correctOptionId." });
@@ -223,6 +231,21 @@ function validateQuestionRules(question: NormalizedQuestion, path: string): Impo
         path: `${path}.${contractIssue.path}`,
         message: contractIssue.message,
         code: `TRIOS_${contractIssue.code}`,
+      })),
+    );
+  }
+
+  if (question.type === "PRONUNCIATION_ODD_ONE_OUT") {
+    const contract = validatePronunciationContract(
+      question.options,
+      question.answer,
+    );
+    issues.push(
+      ...contract.issues.map((contractIssue) => ({
+        level: contractIssue.importLevel,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+        code: `PRONUNCIATION_${contractIssue.code}`,
       })),
     );
   }
@@ -284,6 +307,8 @@ export function normalizeQuestion(input: unknown, path: string, orderIndex: numb
     options:
       parsed.data.type === "ERROR_IDENTIFICATION"
         ? normalizeErrorIdentificationOptions(parsed.data.options)
+        : parsed.data.type === "PRONUNCIATION_ODD_ONE_OUT"
+          ? normalizePronunciationOptions(parsed.data.options)
         : normalizeOptions(parsed.data.options),
     answer: normalizeAnswer(parsed.data.type as QuestionType, parsed.data.answer),
     explanation: parsed.data.explanation,

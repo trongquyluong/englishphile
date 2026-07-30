@@ -12,10 +12,15 @@ import {
   validateTriosSentences,
   type TriosSentences,
 } from "@/lib/questions/trios-contract";
+import {
+  validatePronunciationOptions,
+  type PronunciationTargetSpan,
+} from "@/lib/questions/pronunciation-contract";
 
 export type LearnerOptionDTO = {
   id: string;
   text: string;
+  targetSpan?: PronunciationTargetSpan;
 };
 
 export type LearnerQuestionDTO = {
@@ -139,6 +144,9 @@ export function normalizeLearnerQuestionOptions(
   questionType: QuestionType,
   value: unknown,
 ): LearnerOptionDTO[] {
+  if (questionType === "PRONUNCIATION_ODD_ONE_OUT") {
+    return validatePronunciationOptions(value).options;
+  }
   if (questionType !== "ERROR_IDENTIFICATION") {
     return normalizeLearnerOptions(value);
   }

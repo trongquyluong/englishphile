@@ -123,6 +123,10 @@ function findingRows(report: ContentAuditReport) {
       count: report.findings.triosWithoutThreeSentences.length,
     },
     {
+      signal: "Pronunciation thiếu contract target span hợp lệ",
+      count: report.findings.pronunciationWithoutValidTargetSpans.length,
+    },
+    {
       signal: "Lệch skill giữa problem/question",
       count: report.findings.skillMismatches.length,
     },

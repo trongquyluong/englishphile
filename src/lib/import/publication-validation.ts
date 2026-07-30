@@ -2,12 +2,21 @@ import type { ContentStatus } from "@prisma/client";
 import type { ImportIssue, ImportPlan } from "@/lib/import/types";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 import { validateTriosContract } from "@/lib/questions/trios-contract";
+import { validatePronunciationContract } from "@/lib/questions/pronunciation-contract";
 
 function publicationIssues(plan: ImportPlan): ImportIssue[] {
   return plan.payload.problems.flatMap((problem) =>
     problem.questions.flatMap((question) => {
       const contract =
-        question.type === "ERROR_IDENTIFICATION"
+        question.type === "PRONUNCIATION_ODD_ONE_OUT"
+          ? {
+              prefix: "PRONUNCIATION",
+              issues: validatePronunciationContract(
+                question.options,
+                question.answer,
+              ).issues,
+            }
+          : question.type === "ERROR_IDENTIFICATION"
           ? {
               prefix: "ERROR_IDENTIFICATION",
               issues: validateErrorIdentificationContract(
@@ -51,7 +60,8 @@ export function enforceImportPublicationContract(
       candidate.level === "error" ||
       !(
         candidate.code?.startsWith("ERROR_IDENTIFICATION_") ||
-        candidate.code?.startsWith("TRIOS_")
+        candidate.code?.startsWith("TRIOS_") ||
+        candidate.code?.startsWith("PRONUNCIATION_")
       ),
   );
   const issues = [...retainedIssues, ...publicationIssues(plan)];

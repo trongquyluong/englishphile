@@ -59,6 +59,7 @@ const diagnosticScoringQuestionSelect = {
   skillType: true,
   difficulty: true,
   answer: true,
+  options: true,
   explanation: true,
   problem: {
     select: {

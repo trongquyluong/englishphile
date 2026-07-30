@@ -4,6 +4,7 @@ import { createContentAuditLog } from "@/lib/admin/audit";
 import { questionAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 import { validateTriosContract } from "@/lib/questions/trios-contract";
+import { validatePronunciationContract } from "@/lib/questions/pronunciation-contract";
 
 export type AdminResult = {
   ok: boolean;
@@ -65,6 +66,15 @@ export function questionPublishErrors(question: {
 
   if (question.type === "ERROR_IDENTIFICATION") {
     const contract = validateErrorIdentificationContract(
+      question.options,
+      question.answer,
+    );
+    errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
+    return errors;
+  }
+
+  if (question.type === "PRONUNCIATION_ODD_ONE_OUT") {
+    const contract = validatePronunciationContract(
       question.options,
       question.answer,
     );

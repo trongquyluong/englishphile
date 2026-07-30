@@ -329,3 +329,94 @@ describe("persisted Trios QA", () => {
     ]));
   });
 });
+
+const validPronunciationOptions = [
+  { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+  { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+  { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+  { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+];
+
+function storedPronunciationProblem(
+  options: unknown,
+  answer: unknown = { correctOptionId: "C" },
+) {
+  const base = storedProblem(null);
+  return {
+    ...base,
+    id: "problem-pronunciation",
+    title: "Pronunciation QA fixture",
+    slug: "pronunciation-qa-fixture",
+    statement: "Chọn từ có phần gạch chân phát âm khác.",
+    instructions: "Chọn một đáp án.",
+    questionType: "PRONUNCIATION_ODD_ONE_OUT",
+    questions: [{
+      ...base.questions[0],
+      id: "question-pronunciation",
+      problemId: "problem-pronunciation",
+      type: "PRONUNCIATION_ODD_ONE_OUT",
+      skillType: "PRONUNCIATION",
+      prompt: "Chọn một từ.",
+      options,
+      answer,
+      metadata: { focus: "not-authoritative" },
+      orderIndex: 3,
+    }],
+  };
+}
+
+describe("persisted Pronunciation QA", () => {
+  it("marks a complete canonical target contract publishable", async () => {
+    const report = await getContentQaReport(
+      {},
+      database(storedPronunciationProblem(validPronunciationOptions)) as never,
+    );
+
+    expect(report.problems[0]?.canPublish).toBe(true);
+    expect(report.issues.filter((candidate) => candidate.severity === "ERROR"))
+      .toEqual([]);
+  });
+
+  it.each([
+    ["missing spans", validPronunciationOptions.map(({ id, text }) => ({ id, text })), "PRONUNCIATION_TARGET_SPAN_REQUIRED", "questions.3.options.0.targetSpan"],
+    ["malformed span", [{ ...validPronunciationOptions[0], targetSpan: { start: 2, end: 2 } }, ...validPronunciationOptions.slice(1)], "PRONUNCIATION_TARGET_SPAN_RANGE_INVALID", "questions.3.options.0.targetSpan"],
+    ["invalid text", [{ ...validPronunciationOptions[0], text: {} }, ...validPronunciationOptions.slice(1)], "PRONUNCIATION_INVALID_OPTION_TEXT", "questions.3.options.0.text"],
+    ["incomplete options", validPronunciationOptions.slice(0, 3), "PRONUNCIATION_OPTION_COUNT_NOT_FOUR", "questions.3.options"],
+  ])("blocks %s with exact safe location and code", async (_name, options, code, expectedPath) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedPronunciationProblem(options)) as never,
+    );
+
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "ERROR",
+        code,
+        problemId: "problem-pronunciation",
+        entityId: "question-pronunciation",
+        path: expectedPath,
+      }),
+    ]));
+  });
+
+  it.each([
+    ["missing answer", null, "PRONUNCIATION_ANSWER_REQUIRED", "questions.3.answer"],
+    ["blank answer", { correctOptionId: " " }, "PRONUNCIATION_CORRECT_OPTION_REQUIRED", "questions.3.answer.correctOptionId"],
+    ["non-member answer", { correctOptionId: "E" }, "PRONUNCIATION_CORRECT_OPTION_INVALID", "questions.3.answer.correctOptionId"],
+  ])("blocks %s independently of valid options", async (_name, answer, code, expectedPath) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedPronunciationProblem(validPronunciationOptions, answer)) as never,
+    );
+
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "ERROR",
+        code,
+        path: expectedPath,
+      }),
+    ]));
+  });
+});

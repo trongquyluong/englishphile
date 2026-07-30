@@ -39,8 +39,10 @@ Preview, Production, provider, environment, or deployed content.
   enforces the complete contract in persisted QA and every publication path.
   The files remain unchanged and are not publication-ready; a separate reviewed
   content-repair PR must author their real A–D spans.
-- Pronunciation pack metadata has `focus`, but no learner-safe target-span or
-  underline contract renders it.
+- Phase 2 PR 5 implements the Pronunciation target-span contract. The unchanged
+  30 repository questions still have generic `metadata.focus` values but no
+  authored target spans, so all 30 are now publication-blocked pending a
+  separate human-reviewed repair PR.
 - Writing uses a hard-coded checklist and English control labels; authored
   rubric data is not rendered.
 - Listening enums, checker branches, and a component exist, but there is no
@@ -49,8 +51,9 @@ Preview, Production, provider, environment, or deployed content.
 - Persisted QA is enforced by bulk `publish-safe`. Single publish and immediate
   import-publish still use the repository's minimal publication layer in
   general, but Phase 2 PR 3 makes that layer complete and fail-closed for
-  `ERROR_IDENTIFICATION`, and Phase 2 PR 4 does the same for
-  `TRIOS_GAPPED_SENTENCES`.
+  `ERROR_IDENTIFICATION`, Phase 2 PR 4 does the same for
+  `TRIOS_GAPPED_SENTENCES`, and Phase 2 PR 5 does the same for
+  `PRONUNCIATION_ODD_ONE_OUT`.
 - `copyrightNote` is optional in Prisma/import schema. It is mandatory for this
   process, not an implemented schema error.
 - The schema supports `SkillType.COLLOCATIONS`; pilot Collocations should use it
@@ -161,7 +164,7 @@ Prefer canonical normalized answer names: `correctOptionId`, `correctPart`, and
 | `WRITING_PROMPT` | `prompt`; `WritingQuestion` with fixed planning/checklist UI | answer object; `isCorrect=null` | Mandatory rubric review; authored rubric not rendered and English UI remains a publication blocker |
 | `LISTENING_MCQ` | prompt/options; `ListeningQuestion` reads `metadata.audioUrl/sectionType` | `correctOptionId`; auto | Audio/transcript/rights/fallback contract unresolved: block validation/publication |
 | `LISTENING_SHORT_ANSWER` | prompt/text input; same metadata | `acceptedAnswers`; auto exact normalized text | Review accepted variants; remains separately blocked with Listening |
-| `PRONUNCIATION_ODD_ONE_OUT` | prompt/options; `PronunciationQuestion` | `correctOptionId`; auto | Target grapheme must be explicit; current target-span contract is absent, so block |
+| `PRONUNCIATION_ODD_ONE_OUT` | `prompt` + exactly four `options[{id,text,targetSpan:{start,end}}]`; IDs canonicalize to unique A-D; renderer orders A-D and underlines only the validated span | canonical member `correctOptionId`; auto-score independently requires the complete option/span contract and a canonical learner A-D selection | `start` inclusive and `end` exclusive in Unicode code points; text is a non-empty string of at most 200 code points and the target contains a Unicode letter. Normal `NEEDS_REVIEW` import retains option/span defects as warnings; malformed/missing/non-member answers are fatal. Persisted QA and every publication path enforce the full contract. Structural success never proves phonetic correctness |
 | `GUIDED_CLOZE` | shared passage, slot prompt/options; `GuidedClozeQuestion` | `correctOptionId`; auto | Validate blank mapping, context, distractors, A–D balance |
 | `OPEN_CLOZE` | shared passage, slot prompt; `OpenClozeQuestion` | `acceptedAnswers`; auto exact normalized text | UI expects one word; include all legitimate bounded variants |
 | `WORD_FORMATION` | prompt + `rootWord`; dedicated renderer | `acceptedAnswers`; auto exact normalized text | Review word class, polarity/plural, and visible root |
@@ -483,9 +486,10 @@ linguistic quality, or calibration verification.
 
 ## K. Boundary and recommended next small PR
 
-Phase 2 PR 4 contains no real pilot questions, Prisma/migration, broad UI
-redesign, database-backed execution, executed import/publication, HSG, or
-diagnostic enablement.
+Phase 2 PR 5 contains no repaired repository Pronunciation questions,
+Prisma/migration, broad UI redesign, database-backed execution, executed
+import/publication, HSG, or diagnostic enablement. Its renderer tests are
+structural/static repository evidence, not browser-E2E evidence.
 
 Use the following independently reviewable bounded PRs; none is implemented in
 this branch:
@@ -495,11 +499,51 @@ this branch:
    sentence text or metadata.
 2. **Trios linguistic review:** independently review the unchanged 15 current
    items; contract conformance alone does not approve their language or level.
-3. **Pronunciation:** target-span schema/normalization, safe DTO, renderer, and
-   migration plan.
+3. **Pronunciation content repair:** follow the separate migration plan below;
+   do not infer target spans or publish the unchanged legacy items.
 4. **Writing:** Vietnamese controls and authored-rubric presentation while
    preserving non-auto-scoring.
 5. **Listening contract design:** audio policy, transcript, rights, fallback,
    playback, accessibility, import validation, and DTO design.
 6. **Listening implementation and content:** only after the contract-design PR
    is reviewed and approved.
+
+## L. Pronunciation target-span migration plan
+
+Phase 2 PR 5 changes code, tests, audit signals, authoring guidance, and the
+sample import template only. It does not change
+`content-packs/pilot-pack-001/01-pronunciation-pack-001.json`, repair any current
+question, or approve any pronunciation answer.
+
+Repository inspection at canonical base
+`89eb8ce76a94b55bc6a0ca228f90a90e08f7478c` confirms 6 Pronunciation
+problems and 30 `PRONUNCIATION_ODD_ONE_OUT` questions. Every question has four
+options using the supported `label` alias, an answer using the supported
+`correctOption` alias, and a generic `metadata.focus`; none of the 120 options
+has `targetSpan`. `metadata.focus` is insufficient because it does not identify
+the exact grapheme within each displayed option.
+
+The separate repair PR must process every one of the 30 questions
+individually:
+
+1. A human linguist identifies the intended grapheme without automated
+   inference.
+2. The reviewer authors all four zero-based, half-open Unicode-code-point
+   target spans.
+3. The answer is independently revalidated against the actual pronunciation;
+   the existing answer is not presumed correct.
+4. Ambiguity, dialect, and register are reviewed and recorded.
+5. The explanation identifies the decisive pronunciation contrast.
+6. Answer-position balance and difficulty/calibration review remain mandatory.
+7. The repaired content remains `NEEDS_REVIEW`; structural validation does not
+   authorize publication.
+8. Repository audit, persisted/admin publication QA, admin preview, and learner
+   rendering checks are rerun before any later publication decision.
+
+No span may be inferred from `metadata.focus`, the correct answer, matching
+letters, phonetic assumptions, capitalization, `accepted`, `display`, an
+external dictionary, or AI. Passing the structural contract proves only that
+the renderer and scorer have bounded deterministic data; it does not prove
+phonetic, dialectal, ambiguity, difficulty, or calibration correctness. After
+this contract PR, all 30 unchanged questions are publication-blocked until the
+separate repair and human approval are complete.

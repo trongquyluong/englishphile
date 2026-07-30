@@ -2,6 +2,7 @@ import type { Prisma, Problem, Question } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 import { validateTriosContract } from "@/lib/questions/trios-contract";
+import { validatePronunciationContract } from "@/lib/questions/pronunciation-contract";
 
 export type QaSeverity = "ERROR" | "WARNING" | "INFO";
 
@@ -137,6 +138,23 @@ function checkQuestion(problem: ProblemForQa, question: Question, issues: QaIssu
       pushIssue(issues, problem, {
         severity: "ERROR",
         code: `ERROR_IDENTIFICATION_${contractIssue.code}`,
+        entityType: "Question",
+        entityId: question.id,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+      });
+    });
+  }
+
+  if (question.type === "PRONUNCIATION_ODD_ONE_OUT") {
+    const contract = validatePronunciationContract(
+      question.options,
+      question.answer,
+    );
+    contract.issues.forEach((contractIssue) => {
+      pushIssue(issues, problem, {
+        severity: "ERROR",
+        code: `PRONUNCIATION_${contractIssue.code}`,
         entityType: "Question",
         entityId: question.id,
         path: `${path}.${contractIssue.path}`,

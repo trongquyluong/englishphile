@@ -253,6 +253,95 @@ describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
     ]);
   });
 
+  it("projects only complete ordered Pronunciation options with validated spans", () => {
+    const source = {
+      id: "pronunciation-question",
+      type: "PRONUNCIATION_ODD_ONE_OUT",
+      skillType: "PRONUNCIATION",
+      difficulty: "C1",
+      prompt: "Chọn một từ.",
+      passage: null,
+      options: [
+        { id: "D", text: "team", targetSpan: { start: 1, end: 3 }, answer: ANSWER_SENTINEL },
+        { id: "b", text: "leaf", targetSpan: { start: 1, end: 3 } },
+        { id: " A ", text: "seat", targetSpan: { start: 1, end: 3 } },
+        { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+      ],
+      answer: {
+        correctOptionId: "C",
+        accepted: [ANSWER_SENTINEL],
+        display: ANSWER_SENTINEL,
+      },
+      explanation: EXPLANATION_SENTINEL,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: {
+        focus: ANSWER_SENTINEL,
+        nested: { correctOptionId: ANSWER_SENTINEL },
+      },
+      orderIndex: 0,
+    } as LearnerQuestionSource & Record<string, unknown>;
+    const optionsSnapshot = structuredClone(source.options);
+
+    const dto = toLearnerQuestionDTO(source);
+
+    expect(dto.options).toEqual([
+      { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+      { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+      { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+      { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+    ]);
+    expect(source.options).toEqual(optionsSnapshot);
+    expect(serialized(dto)).not.toContain(ANSWER_SENTINEL);
+    expect(serialized(dto)).not.toContain(EXPLANATION_SENTINEL);
+    expect(serialized(dto)).not.toContain("correctOptionId");
+    expect(serialized(dto)).not.toContain("focus");
+    expect(dto).not.toHaveProperty("answer");
+    expect(dto).not.toHaveProperty("metadata");
+    expect(dto).not.toHaveProperty("explanation");
+  });
+
+  it.each([
+    ["missing spans", [
+      { id: "A", text: "seat" },
+      { id: "B", text: "leaf" },
+      { id: "C", text: "bread" },
+      { id: "D", text: "team" },
+    ]],
+    ["malformed range", [
+      { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+      { id: "B", text: "leaf", targetSpan: { start: 1, end: 1 } },
+      { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+      { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+    ]],
+    ["incomplete A-D", [
+      { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+      { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+      { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+    ]],
+  ])("emits no partial Pronunciation choices for %s", (_name, options) => {
+    const dto = toLearnerQuestionDTO({
+      id: "malformed-pronunciation",
+      type: "PRONUNCIATION_ODD_ONE_OUT",
+      skillType: "PRONUNCIATION",
+      difficulty: "C1",
+      prompt: "Chọn một từ.",
+      passage: null,
+      options,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: { focus: "must-not-render" },
+      orderIndex: 0,
+    });
+
+    expect(dto.options).toEqual([]);
+    expect(serialized(dto)).not.toContain("must-not-render");
+  });
+
   it("projects only the safe ordered Trios tuple without metadata or answer leakage", () => {
     const sharedWordSentinel = "H10_TRIOS_SHARED_WORD_9z3q";
     const source = {
