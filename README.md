@@ -171,6 +171,13 @@ specification, and implemented-versus-manual admin workflow. Copy
 [`content-packs/CONTENT_PACK_REVIEW_TEMPLATE.md`](content-packs/CONTENT_PACK_REVIEW_TEMPLATE.md)
 for one pack's review evidence.
 
+See
+[`docs/PHASE_2_LISTENING_CONTRACT.md`](docs/PHASE_2_LISTENING_CONTRACT.md)
+for the documentation-only Listening inventory and proposed media, transcript,
+rights, playback, publication, learner-DTO, migration, and small-PR contract.
+Listening implementation and real content remain blocked until the documented
+project-owner decisions are approved.
+
 ## Database Schema Overview
 
 Main models:

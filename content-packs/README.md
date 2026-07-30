@@ -77,3 +77,9 @@ Before authoring a controlled batch, follow
 Copy [`CONTENT_PACK_REVIEW_TEMPLATE.md`](CONTENT_PACK_REVIEW_TEMPLATE.md) to
 `REVIEW_RECORD.md` inside the new pack and record human linguistic, rendering,
 calibration, and approval evidence separately from automated output.
+
+Do not author or add Listening files yet. Read
+[`docs/PHASE_2_LISTENING_CONTRACT.md`](../docs/PHASE_2_LISTENING_CONTRACT.md)
+for the proposed separate MCQ/short-answer contracts, media/transcript/rights
+descriptor, severity matrix, and unresolved owner decisions. The document is a
+design only; it does not make Listening importable or publishable.
