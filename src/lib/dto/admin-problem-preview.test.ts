@@ -148,6 +148,107 @@ describe("Phase 1D-A admin preview runtime regression", () => {
     expect(JSON.stringify(result)).toContain(sharedWord);
   });
 
+  it("uses safe Pronunciation spans while retaining admin-only repair data", () => {
+    const sentinel = "ADMIN_PRONUNCIATION_REPAIR_ONLY";
+    const rawOptions = [
+      { id: "D", text: "team", targetSpan: { start: 1, end: 3 }, note: sentinel },
+      { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+      { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+      { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+    ];
+    const result = toAdminProblemPreviewDTO({
+      id: "pronunciation-problem",
+      title: "Pronunciation preview",
+      slug: "pronunciation-preview",
+      skillType: "PRONUNCIATION",
+      questionType: "PRONUNCIATION_ODD_ONE_OUT",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Chọn từ khác.",
+      instructions: null,
+      estimatedMinutes: 5,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "pronunciation-question",
+        type: "PRONUNCIATION_ODD_ONE_OUT",
+        skillType: "PRONUNCIATION",
+        difficulty: "C1",
+        prompt: "Chọn một từ.",
+        passage: null,
+        options: rawOptions,
+        answer: { correctOptionId: "C", sentinel },
+        explanation: sentinel,
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata: { focus: sentinel },
+        orderIndex: 0,
+      }],
+    });
+
+    expect(result.questions[0]?.options).toEqual([
+      { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+      { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+      { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+      { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+    ]);
+    expect(result.questions[0]?.rawOptions).toEqual(rawOptions);
+    expect(result.questions[0]?.answer).toEqual({
+      correctOptionId: "C",
+      sentinel,
+    });
+    expect(result.questions[0]?.metadata).toEqual({ focus: sentinel });
+    expect(JSON.stringify(result)).toContain(sentinel);
+  });
+
+  it("keeps malformed Pronunciation options for admin repair but emits no partial renderer choices", () => {
+    const rawOptions = [
+      { id: "A", text: "seat" },
+      { id: "B", text: "leaf" },
+      { id: "C", text: "bread" },
+      { id: "D", text: "team" },
+    ];
+    const result = toAdminProblemPreviewDTO({
+      id: "malformed-pronunciation-problem",
+      title: "Malformed Pronunciation preview",
+      slug: "malformed-pronunciation-preview",
+      skillType: "PRONUNCIATION",
+      questionType: "PRONUNCIATION_ODD_ONE_OUT",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Chọn từ khác.",
+      instructions: null,
+      estimatedMinutes: 5,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "malformed-pronunciation-question",
+        type: "PRONUNCIATION_ODD_ONE_OUT",
+        skillType: "PRONUNCIATION",
+        difficulty: "C1",
+        prompt: "Chọn một từ.",
+        passage: null,
+        options: rawOptions,
+        answer: { correctOptionId: "C" },
+        explanation: null,
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata: { focus: "repair-only" },
+        orderIndex: 0,
+      }],
+    });
+
+    expect(result.questions[0]?.options).toEqual([]);
+    expect(result.questions[0]?.rawOptions).toEqual(rawOptions);
+    expect(result.questions[0]?.metadata).toEqual({ focus: "repair-only" });
+  });
+
   it("keeps malformed Trios metadata for admin repair but emits no partial render tuple", () => {
     const metadata = {
       sentences: ["First _____.", "Second without a gap.", "Third _____."],

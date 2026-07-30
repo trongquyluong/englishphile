@@ -259,6 +259,7 @@ export function scoreContest(
       // Cast answerJson to the shape checkQuestionAnswer expects
       const questionWithAnswer = {
         type: question.type,
+        options: question.optionsJson as unknown,
         answer: question.answerJson as unknown,
         explanation: question.explanation,
       } as Parameters<typeof checkQuestionAnswer>[0];

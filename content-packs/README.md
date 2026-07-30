@@ -23,6 +23,30 @@ Guidelines:
 - Do not import a `00-all-in-one` file together with split `01-10` files. The app and CLI prefer split files and ignore `00-all-in-one` when both are present.
 - Imported content defaults to `NEEDS_REVIEW`; run QA and preview before publishing.
 
+Pronunciation options use the existing `options` JSON field. Each question must
+have exactly four canonical A-D options and every option must include one
+explicit target span:
+
+```json
+{
+  "id": "A",
+  "text": "example",
+  "targetSpan": {
+    "start": 0,
+    "end": 2
+  }
+}
+```
+
+`start` is inclusive and `end` is exclusive. Both are zero-based Unicode
+code-point offsets into the unchanged display `text`, not UTF-16 code-unit or
+grapheme-cluster offsets. Option `text` is limited to 200 Unicode code points.
+A combining mark therefore counts as its own code point. Never infer or repair
+target spans from metadata, answer position,
+letter matching, capitalization, phonetic assumptions, dictionaries, or AI.
+Normal import can retain structural defects as `NEEDS_REVIEW` warnings, but
+publication requires the complete target-span and canonical-answer contract.
+
 Import locally:
 
 ```bash

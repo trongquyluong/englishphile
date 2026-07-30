@@ -6,6 +6,11 @@ import {
   parseErrorIdentificationCorrectionVariants,
 } from "@/lib/questions/error-identification-contract";
 import { validateTriosAnswer } from "@/lib/questions/trios-contract";
+import {
+  canonicalizePronunciationOptionId,
+  isPronunciationOptionId,
+  validatePronunciationContract,
+} from "@/lib/questions/pronunciation-contract";
 
 type JsonObject = Record<string, unknown>;
 
@@ -104,7 +109,9 @@ export function summarizeCorrectAnswer(question: Pick<Question, "answer" | "type
 }
 
 export function checkQuestionAnswer(
-  question: Pick<Question, "type" | "answer" | "explanation">,
+  question: Pick<Question, "type" | "answer" | "explanation"> & {
+    options?: unknown;
+  },
   studentAnswer: unknown,
 ): QuestionCheckResult {
   const answer = asObject(question.answer);
@@ -114,7 +121,6 @@ export function checkQuestionAnswer(
   if (
     question.type === "MCQ" ||
     question.type === "GUIDED_CLOZE" ||
-    question.type === "PRONUNCIATION_ODD_ONE_OUT" ||
     question.type === "READING_MCQ" ||
     question.type === "LISTENING_MCQ"
   ) {
@@ -123,6 +129,27 @@ export function checkQuestionAnswer(
       isCorrect,
       feedback: isCorrect ? `Chính xác. ${explanation}` : `Chưa đúng. Đáp án đúng là ${correctAnswer}. ${explanation}`,
       correctAnswer,
+    };
+  }
+
+  if (question.type === "PRONUNCIATION_ODD_ONE_OUT") {
+    const contract = validatePronunciationContract(
+      question.options,
+      question.answer,
+    );
+    const learnerOptionId = canonicalizePronunciationOptionId(studentAnswer);
+    const isCorrect =
+      contract.valid &&
+      Boolean(contract.correctOptionId) &&
+      isPronunciationOptionId(learnerOptionId) &&
+      learnerOptionId === contract.correctOptionId;
+    const pronunciationCorrectAnswer = contract.correctOptionId ?? "—";
+    return {
+      isCorrect,
+      feedback: isCorrect
+        ? `Chính xác. ${explanation}`
+        : `Chưa đúng. Đáp án đúng là ${pronunciationCorrectAnswer}. ${explanation}`,
+      correctAnswer: pronunciationCorrectAnswer,
     };
   }
 

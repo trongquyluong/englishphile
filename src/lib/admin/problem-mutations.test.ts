@@ -43,6 +43,13 @@ const validTriosMetadata = {
   ],
 };
 
+const validPronunciationOptions = [
+  { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
+  { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
+  { id: "C", text: "bread", targetSpan: { start: 2, end: 4 } },
+  { id: "D", text: "team", targetSpan: { start: 1, end: 3 } },
+];
+
 function questionPayload(id = "question-a"): QuestionEditPayload {
   return {
     id,
@@ -88,6 +95,24 @@ function triosQuestionPayload(
     options: null,
     answer,
     metadata,
+    orderIndex: 0,
+    contentStatus: "PUBLISHED",
+  };
+}
+
+function pronunciationQuestionPayload(
+  options: unknown = validPronunciationOptions,
+  answer: unknown = { correctOptionId: "C" },
+): QuestionEditPayload {
+  return {
+    id: "question-a",
+    type: "PRONUNCIATION_ODD_ONE_OUT",
+    skillType: "PRONUNCIATION",
+    difficulty: "C1",
+    prompt: "Chọn một từ.",
+    options,
+    answer,
+    metadata: { focus: "not-authoritative" },
     orderIndex: 0,
     contentStatus: "PUBLISHED",
   };
@@ -489,6 +514,150 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     expect(tx.problem.findMany).toHaveBeenCalled();
     expect(tx.problem.updateMany).toHaveBeenCalled();
     expect(tx.question.updateMany).toHaveBeenCalled();
+  });
+
+  it("individual publish blocks missing Pronunciation spans and accepts a complete row", async () => {
+    const missingSpans = validPronunciationOptions.map(
+      ({ id, text }) => ({ id, text }),
+    );
+    let target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...pronunciationQuestionPayload(missingSpans),
+      }],
+    };
+    let tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const blocked = await setProblemContentStatus(
+      "problem-a",
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(blocked.ok).toBe(false);
+    expect(blocked.message).toContain("targetSpan");
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+
+    target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...pronunciationQuestionPayload(),
+      }],
+    };
+    tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const accepted = await setProblemContentStatus(
+      "problem-a",
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(accepted.ok).toBe(true);
+    expect(tx.problem.updateMany).toHaveBeenCalled();
+    expect(tx.question.updateMany).toHaveBeenCalled();
+  });
+
+  it("edit-to-publish rechecks omitted Pronunciation rows after lock/reload", async () => {
+    const missingSpans = validPronunciationOptions.map(
+      ({ id, text }) => ({ id, text }),
+    );
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...pronunciationQuestionPayload(missingSpans),
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await updateProblemWithQuestions(
+      {
+        ...problemPayload,
+        questionType: "PRONUNCIATION_ODD_ONE_OUT",
+        skillType: "PRONUNCIATION",
+        contentStatus: "PUBLISHED",
+      },
+      [],
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("targetSpan");
+    expect(tx.problem.findUnique).toHaveBeenCalled();
+    expect(tx.problem.update).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("ordinary bulk publication blocks malformed Pronunciation after locked reload", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{
+        ...storedQuestion(),
+        ...pronunciationQuestionPayload(validPronunciationOptions, {
+          correctOptionId: "E",
+        }),
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("A, B, C hoặc D");
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("bulk publish-safe rechecks Pronunciation QA under locks", async () => {
+    const target = {
+      ...storedProblem("problem-a", "pack-a"),
+      title: "Pronunciation QA fixture",
+      slug: "pronunciation-qa-fixture",
+      statement: "Chọn từ có phần gạch chân phát âm khác.",
+      instructions: "Chọn một đáp án.",
+      estimatedMinutes: 5,
+      questionType: "PRONUNCIATION_ODD_ONE_OUT" as const,
+      sourceCollection: { id: "source-a", name: "Synthetic source" },
+      problemTopics: [{
+        topic: { id: "topic-a", name: "Pronunciation", slug: "pronunciation" },
+      }],
+      questions: [{
+        ...storedQuestion(),
+        ...pronunciationQuestionPayload(
+          validPronunciationOptions.map(
+            ({ id, text }) => ({ id, text }),
+          ),
+        ),
+      }],
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+      { contentPackId: "pack-a", qaRequirement: "safe" },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toContain("QA");
+    expect(tx.problem.findMany).toHaveBeenCalled();
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+    expect(tx.question.updateMany).not.toHaveBeenCalled();
   });
 
   it("edit-to-publish rejects an omitted malformed Trios row after lock and reload", async () => {

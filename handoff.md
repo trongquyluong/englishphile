@@ -136,6 +136,55 @@ not automatically pilot-ready. Phase 2 PR 4 evidence is repository/local only;
 it includes no database, endpoint, import, publication, Preview, Production,
 deployment, migration, seed, provider, browser-E2E, or content-pack change.
 
+Phase 2 PR 5 implements the Pronunciation target-span contract on branch
+`phase2/05-pronunciation-target-contract` from canonical base
+`89eb8ce76a94b55bc6a0ca228f90a90e08f7478c`. The database-free shared
+contract requires exactly four unique canonical A-D options, bounded non-empty
+string text, one explicit valid target span per option, and a canonical member
+`correctOptionId`. Spans use zero-based, half-open Unicode code-point offsets;
+combining marks count as separate code points. No span is inferred, clamped,
+repaired, or synthesized.
+
+Normal `NEEDS_REVIEW` JSON/CSV import preserves supported `label`/`correctOption`
+aliases and target-span data. Option/text/span defects are exact-location
+warnings so repairable drafts remain importable; missing, malformed, blank, or
+non-member answers are fatal. Persisted QA, individual publish,
+edit-to-publish, immediate JSON/CSV publish, ordinary bulk publish, bulk
+`publish-safe`, and transaction-locked reload/recheck all enforce the complete
+contract.
+
+The learner DTO projects Pronunciation options only as an all-or-nothing,
+ordered A-D safe shape containing `id`, `text`, and the validated target span.
+It remains answer-free and does not expose raw options, explanation, metadata,
+`metadata.focus`, accepted/display aliases, or correct answers. The server-only
+admin preview uses the same renderer-safe projection while retaining raw
+options, answer, metadata, and explanation for authorized repair. The
+Pronunciation renderer uses a semantic fieldset, labelled native radios,
+question-specific IDs/names, visible underlining, and the shared code-point
+slicer; malformed data shows a fixed Vietnamese review notice with no controls.
+
+Pronunciation scoring now independently requires a complete option/span
+contract, a canonical configured A-D member, and a canonical learner A-D
+selection. Diagnostic scoring adds only server-side `options` to its scoring
+projection; learner presentation queries remain unchanged. Historical
+malformed rows cannot score true.
+
+The unchanged Pronunciation pack still contains 6 problems, 30 questions, and
+120 options with no target spans. The repository audit reports 30
+`pronunciationWithoutValidTargetSpans` findings and 120 new non-fatal
+normalizer warnings, for 176 total normalizer warnings including the existing
+56 Error Identification warnings. Inventory remains 2 packs / 17 files / 101
+problems / 495 questions, 55 Error Identification renderer findings, 15 valid
+Trios structures, and `hasInventoryErrors=false`.
+
+The separate content-repair PR must have a human linguist identify and author
+all four spans for each question, independently revalidate the pronunciation
+answer, review ambiguity/dialect/register, improve the explanation, retain
+`NEEDS_REVIEW`, and rerun repository audit, admin preview, learner rendering,
+publication QA, answer-position, difficulty, and calibration review. Current
+`metadata.focus` is insufficient. Structural success does not prove phonetic
+correctness. Phase 2 PR 5 repairs or approves none of the 30 current items.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to
