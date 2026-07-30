@@ -7,6 +7,7 @@ import {
   learnerQuestionPresentationSelect,
   toLearnerQuestionDTO,
 } from "@/lib/dto/learner-question";
+import { getLearnerWritingRubrics } from "@/lib/dto/learner-writing-rubric.server";
 import { difficultyLabels, difficultyOrder, skillLabels, skillOrder } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -105,9 +106,16 @@ export default async function RandomPracticePage({ searchParams }: PageProps) {
     select: learnerQuestionPresentationSelect,
   });
 
-  const randomQuestions = shuffleWithCrypto(questions)
-    .slice(0, take)
-    .map(toLearnerQuestionDTO);
+  const selectedQuestions = shuffleWithCrypto(questions).slice(0, take);
+  const writingRubrics = await getLearnerWritingRubrics(
+    selectedQuestions.map((question) => question.id),
+  );
+  const randomQuestions = selectedQuestions.map((question) =>
+    toLearnerQuestionDTO(
+      question,
+      writingRubrics.get(question.id) ?? null,
+    ),
+  );
 
   if (!randomQuestions.length) {
     return (

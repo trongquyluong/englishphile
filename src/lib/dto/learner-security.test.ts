@@ -84,8 +84,39 @@ describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
     expect(questionsBlock).not.toMatch(/\binclude\s*:/);
     expect(questionsBlock).not.toMatch(/\b(?:answer|explanation)\s*:/);
     expect(content).toContain(
-      "const clientProblem = toLearnerProblemDTO(problem);",
+      "const writingRubrics = await getLearnerWritingRubrics(",
     );
+    expect(content).toContain(
+      "const clientProblem = toLearnerProblemDTO(problem, writingRubrics);",
+    );
+  });
+
+  it("wires only the safe Writing rubric map into every learner presentation path", () => {
+    const problemPage = source("src/app/problems/[slug]/page.tsx");
+    const randomPage = source("src/app/practice/random/page.tsx");
+    const diagnostic = source("src/lib/diagnostic.ts");
+    const serverBoundary = source(
+      "src/lib/dto/learner-writing-rubric.server.ts",
+    );
+
+    for (const content of [problemPage, randomPage, diagnostic]) {
+      expect(content).toContain(
+        'import { getLearnerWritingRubrics } from "@/lib/dto/learner-writing-rubric.server";',
+      );
+      expect(content).toContain("await getLearnerWritingRubrics(");
+    }
+    expect(problemPage).toContain(
+      "toLearnerProblemDTO(problem, writingRubrics)",
+    );
+    expect(randomPage).toContain("writingRubrics.get(question.id) ?? null");
+    expect(diagnostic).toContain("writingRubrics.get(question.id) ?? null");
+
+    expect(serverBoundary).toContain('import "server-only";');
+    expect(serverBoundary).toContain('type: "WRITING_PROMPT"');
+    expect(serverBoundary).toContain("answer: true");
+    expect(serverBoundary).not.toContain("explanation: true");
+    expect(serverBoundary).not.toContain("metadata: true");
+    expect(serverBoundary).not.toContain("options: true");
   });
 
   it("recursively allowlists question presentation and normalized option fields", () => {
@@ -132,6 +163,72 @@ describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
     expect(serialized(dto)).not.toContain(EXPLANATION_SENTINEL);
     expect(serialized(dto)).not.toContain("correctOptionId");
     expect(serialized(dto)).not.toContain("transcript");
+  });
+
+  it("serializes only the safe authored Writing rubric presentation", () => {
+    const rubricSentinel = "SAFE_AUTHORED_CRITERION";
+    const hiddenAnswerSentinel = "WRITING_MODEL_ANSWER_SENTINEL";
+    const hiddenMetadataSentinel = "WRITING_ADMIN_NOTE_SENTINEL";
+    const source = {
+      id: "writing-question",
+      type: "WRITING_PROMPT",
+      skillType: "WRITING",
+      difficulty: "C1",
+      prompt: "Write an essay.",
+      passage: null,
+      options: null,
+      answer: {
+        rubric: [rubricSentinel],
+        modelAnswer: hiddenAnswerSentinel,
+      },
+      explanation: hiddenAnswerSentinel,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: {
+        adminNote: hiddenMetadataSentinel,
+        providerPrompt: hiddenAnswerSentinel,
+      },
+      orderIndex: 0,
+    } as LearnerQuestionSource & Record<string, unknown>;
+
+    const dto = toLearnerQuestionDTO(source, {
+      criteria: [rubricSentinel],
+    });
+
+    expect(dto.writingRubric).toEqual({ criteria: [rubricSentinel] });
+    expect(serialized(dto)).toContain(rubricSentinel);
+    expect(serialized(dto)).not.toContain(hiddenAnswerSentinel);
+    expect(serialized(dto)).not.toContain(hiddenMetadataSentinel);
+    expect(serialized(dto)).not.toContain("modelAnswer");
+    expect(serialized(dto)).not.toContain("providerPrompt");
+    expect(serialized(dto)).not.toContain("adminNote");
+  });
+
+  it("forces a neutral Writing rubric value for non-Writing questions", () => {
+    const source = {
+      id: "mcq-question",
+      type: "MCQ",
+      skillType: "MULTIPLE_CHOICE",
+      difficulty: "C1",
+      prompt: "Choose one.",
+      passage: null,
+      options: [{ id: "A", text: "Choice" }],
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: null,
+      orderIndex: 0,
+    } satisfies LearnerQuestionSource;
+
+    const dto = toLearnerQuestionDTO(source, {
+      criteria: ["MUST_NOT_REACH_NON_WRITING"],
+    });
+
+    expect(dto.writingRubric).toBeNull();
+    expect(serialized(dto)).not.toContain("MUST_NOT_REACH_NON_WRITING");
   });
 
   it("uses a positive problem allowlist instead of spreading source records", () => {

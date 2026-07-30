@@ -43,8 +43,11 @@ Preview, Production, provider, environment, or deployed content.
   30 repository questions still have generic `metadata.focus` values but no
   authored target spans, so all 30 are now publication-blocked pending a
   separate human-reviewed repair PR.
-- Writing uses a hard-coded checklist and English control labels; authored
-  rubric data is not rendered.
+- Phase 2 PR 6 replaces the Writing hard-coded English checklist/control copy
+  with Vietnamese product chrome and a bounded authored-rubric presentation.
+  The exact source remains `Question.answer.rubric`, whose supported shape is
+  an ordered non-empty array of bounded strings. Missing or malformed rubrics
+  render a fixed Vietnamese no-detail fallback; no criteria are fabricated.
 - Listening enums, checker branches, and a component exist, but there is no
   dedicated schema/import contract for audio or transcript. The component only
   reads unvalidated `metadata.audioUrl` and `metadata.sectionType`.
@@ -161,7 +164,7 @@ Prefer canonical normalized answer names: `correctOptionId`, `correctPart`, and
 | --- | --- | --- | --- |
 | `MCQ` | `prompt`, `options[{id,text}]`; `MultipleChoiceQuestion` | `correctOptionId`; auto exact ID | Explain decisive rule/strongest distractor; review uniqueness and balance |
 | `READING_MCQ` | first non-empty shared `passage`, prompt/options; `ReadingQuestion` | `correctOptionId`; auto | Passage rights, textual evidence, inference uniqueness |
-| `WRITING_PROMPT` | `prompt`; `WritingQuestion` with fixed planning/checklist UI | answer object; `isCorrect=null` | Mandatory rubric review; authored rubric not rendered and English UI remains a publication blocker |
+| `WRITING_PROMPT` | `prompt`; Vietnamese planning/essay controls; learner DTO receives only safe `writingRubric.criteria` projected from `answer.rubric` | answer object; `isCorrect=null` | Rubric is an ordered non-empty bounded string array; missing/malformed data shows a fixed no-detail fallback. Authored text is displayed faithfully, not translated. Human rubric/language/level/calibration review remains mandatory |
 | `LISTENING_MCQ` | prompt/options; `ListeningQuestion` reads `metadata.audioUrl/sectionType` | `correctOptionId`; auto | Audio/transcript/rights/fallback contract unresolved: block validation/publication |
 | `LISTENING_SHORT_ANSWER` | prompt/text input; same metadata | `acceptedAnswers`; auto exact normalized text | Review accepted variants; remains separately blocked with Listening |
 | `PRONUNCIATION_ODD_ONE_OUT` | `prompt` + exactly four `options[{id,text,targetSpan:{start,end}}]`; IDs canonicalize to unique A-D; renderer orders A-D and underlines only the validated span | canonical member `correctOptionId`; auto-score independently requires the complete option/span contract and a canonical learner A-D selection | `start` inclusive and `end` exclusive in Unicode code points; text is a non-empty string of at most 200 code points and the target contains a Unicode letter. Normal `NEEDS_REVIEW` import retains option/span defects as warnings; malformed/missing/non-member answers are fatal. Persisted QA and every publication path enforce the full contract. Structural success never proves phonetic correctness |
@@ -491,8 +494,9 @@ Prisma/migration, broad UI redesign, database-backed execution, executed
 import/publication, HSG, or diagnostic enablement. Its renderer tests are
 structural/static repository evidence, not browser-E2E evidence.
 
-Use the following independently reviewable bounded PRs; none is implemented in
-this branch:
+Use the following independently reviewable bounded follow-ups. The Writing
+learner-presentation item is implemented by Phase 2 PR 6 in this branch; the
+remaining content-repair and Listening items are not:
 
 1. **Error Identification content repair:** author and independently review
    real A–D spans for the 55 legacy questions; do not synthesize them from
@@ -501,14 +505,71 @@ this branch:
    items; contract conformance alone does not approve their language or level.
 3. **Pronunciation content repair:** follow the separate migration plan below;
    do not infer target spans or publish the unchanged legacy items.
-4. **Writing:** Vietnamese controls and authored-rubric presentation while
-   preserving non-auto-scoring.
+4. **Writing learner presentation (implemented in Phase 2 PR 6):** fixed
+   controls are Vietnamese; the learner-safe DTO carries only a bounded
+   `writingRubric` projection from `Question.answer.rubric`; missing/malformed
+   data shows a fixed fallback. Writing stays non-auto-scored and separate AI
+   feedback stays advisory.
 5. **Listening contract design:** audio policy, transcript, rights, fallback,
    playback, accessibility, import validation, and DTO design.
 6. **Listening implementation and content:** only after the contract-design PR
    is reviewed and approved.
 
-## L. Pronunciation target-span migration plan
+## L. Writing authored-rubric presentation
+
+The repository-authored rubric source is `Question.answer.rubric`. The seed,
+Writing import template, and current pilot Writing split use one ordered array
+of criterion strings. `metadata.planningHints` and
+`metadata.suggestedLength` are separate authored metadata and are not part of
+this bounded rubric projection.
+
+Phase 2 PR 6 adds an all-or-nothing pure presentation contract. It accepts only
+a non-empty array of at most 12 strings, trims each string, limits each visible
+criterion to 240 UTF-16 code units, preserves authored order/text, and returns
+`null` for missing, blank, over-bound, scalar, object, nested-array, or otherwise
+malformed values. It does not mutate input, invoke accessors, stringify unknown
+values, or copy answer siblings, explanations, metadata, provider data, admin
+notes, samples, or model answers. No partial rubric is emitted.
+
+The existing positive learner Prisma selector remains answer-free. A dedicated
+`server-only` source reader selects `{id, answer}` only for already-authorized
+Writing question IDs, immediately applies the pure projector, and returns only
+the safe map. The learner DTO adds exactly
+`writingRubric: {criteria: string[]} | null`; non-Writing questions always get
+`null`. Problem detail, random practice, and diagnostic presentation use that
+safe map. Admin preview applies the same safe projection for the production
+renderer while its existing admin-authorized, `server-only` DTO retains raw
+answer/explanation/metadata/options for repair. `requireAdmin` and preview
+submission suppression are unchanged.
+
+Fixed learner controls are now Vietnamese: `Luận điểm chính`, `Ý chính 1`,
+`Ý chính 2`, `Từ vựng dự định dùng`, `Bài viết`, the Vietnamese placeholder,
+live word count guidance, and `Tiêu chí tự rà soát`. Authored rubric strings are
+shown faithfully and are not automatically translated. Missing/malformed
+rubrics show “Người biên soạn chưa cung cấp bộ tiêu chí chi tiết cho đề này.” The
+renderer states that criteria are for self-review, not an answer or automatic
+score.
+
+Writing scoring is unchanged: `checkQuestionAnswer` returns `isCorrect=null`,
+submission results use the neutral review state, and neither the rubric nor AI
+feedback becomes an answer key or automatic correctness score. The separate
+Writing AI grader retains its reviewed advisory framing, quota, retry,
+recovery, provider, and persistence policies; this PR changes none of them.
+Exact/non-exact Sentence Transformation and Error Identification, Trios, and
+Pronunciation scoring contracts are unchanged.
+
+Evidence for this PR is repository/local only: pure projection tests, mocked
+server-source tests, DTO serialization/non-disclosure tests, structural
+server-rendered component tests, existing recovery/review tests, scoring
+regressions, typecheck, lint, full suite, synthetic-unreachable Production
+build, diff checks, and file-format checks. It is not browser-E2E,
+screen-reader, Preview, Production, provider, managed-database, import,
+publication, linguistic, rubric-quality, difficulty, or calibration evidence.
+Human reviewers must still assess English/Vietnamese quality, rubric
+appropriateness, task alignment, level, originality, difficulty, and
+calibration before publication.
+
+## M. Pronunciation target-span migration plan
 
 Phase 2 PR 5 changes code, tests, audit signals, authoring guidance, and the
 sample import template only. It does not change

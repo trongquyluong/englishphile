@@ -45,6 +45,101 @@ describe("Phase 1D-A admin preview runtime regression", () => {
     expect(result.questions[0]?.rawOptions).toEqual([{ id: "A", text: "Choice", correct: true }]);
   });
 
+  it("uses the safe Writing rubric projection while retaining raw repair data only in admin fields", () => {
+    const answerSentinel = "ADMIN_WRITING_MODEL_ANSWER";
+    const metadataSentinel = "ADMIN_WRITING_REPAIR_NOTE";
+    const result = toAdminProblemPreviewDTO({
+      id: "writing-problem",
+      title: "Writing preview",
+      slug: "writing-preview",
+      skillType: "WRITING",
+      questionType: "WRITING_PROMPT",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Viết bài luận.",
+      instructions: null,
+      estimatedMinutes: 40,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "writing-question",
+        type: "WRITING_PROMPT",
+        skillType: "WRITING",
+        difficulty: "C1",
+        prompt: "Discuss both views.",
+        passage: null,
+        options: null,
+        answer: {
+          rubric: [" Task response ", "Coherence"],
+          modelAnswer: answerSentinel,
+        },
+        explanation: answerSentinel,
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata: { repairNote: metadataSentinel },
+        orderIndex: 0,
+      }],
+    });
+
+    const question = result.questions[0];
+    expect(question?.writingRubric).toEqual({
+      criteria: ["Task response", "Coherence"],
+    });
+    expect(JSON.stringify(question?.writingRubric)).not.toContain(answerSentinel);
+    expect(JSON.stringify(question?.writingRubric)).not.toContain(metadataSentinel);
+    expect(question?.answer).toEqual({
+      rubric: [" Task response ", "Coherence"],
+      modelAnswer: answerSentinel,
+    });
+    expect(question?.metadata).toEqual({ repairNote: metadataSentinel });
+    expect(question?.explanation).toBe(answerSentinel);
+  });
+
+  it("keeps malformed Writing repair data but emits no partial renderer rubric", () => {
+    const malformedAnswer = {
+      rubric: ["Task response", { descriptor: "not supported" }],
+      internalNote: "ADMIN_ONLY",
+    };
+    const result = toAdminProblemPreviewDTO({
+      id: "malformed-writing-problem",
+      title: "Malformed Writing preview",
+      slug: "malformed-writing-preview",
+      skillType: "WRITING",
+      questionType: "WRITING_PROMPT",
+      difficulty: "C1",
+      contentStatus: "NEEDS_REVIEW",
+      statement: "Viết bài luận.",
+      instructions: null,
+      estimatedMinutes: 40,
+      acceptanceRate: null,
+      sourceCollection: null,
+      problemTopics: [],
+      questions: [{
+        id: "malformed-writing-question",
+        type: "WRITING_PROMPT",
+        skillType: "WRITING",
+        difficulty: "C1",
+        prompt: "Discuss both views.",
+        passage: null,
+        options: null,
+        answer: malformedAnswer,
+        explanation: null,
+        rootWord: null,
+        keyword: null,
+        targetSentence: null,
+        lineNumber: null,
+        metadata: null,
+        orderIndex: 0,
+      }],
+    });
+
+    expect(result.questions[0]?.writingRubric).toBeNull();
+    expect(result.questions[0]?.answer).toEqual(malformedAnswer);
+  });
+
   it("provides canonical Error Identification render data while retaining admin-only answer data", () => {
     const result = toAdminProblemPreviewDTO({
       id: "error-problem",

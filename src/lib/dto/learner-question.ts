@@ -16,6 +16,7 @@ import {
   validatePronunciationOptions,
   type PronunciationTargetSpan,
 } from "@/lib/questions/pronunciation-contract";
+import type { WritingRubricPresentation } from "@/lib/questions/writing-rubric-contract";
 
 export type LearnerOptionDTO = {
   id: string;
@@ -40,6 +41,7 @@ export type LearnerQuestionDTO = {
   audioUrl: string | null;
   sectionType: string | null;
   triosSentences: TriosSentences | null;
+  writingRubric: WritingRubricPresentation | null;
 };
 
 export type LearnerProblemDTO = {
@@ -159,7 +161,10 @@ export function normalizeLearnerQuestionOptions(
   });
 }
 
-export function toLearnerQuestionDTO(question: LearnerQuestionSource): LearnerQuestionDTO {
+export function toLearnerQuestionDTO(
+  question: LearnerQuestionSource,
+  writingRubric: WritingRubricPresentation | null = null,
+): LearnerQuestionDTO {
   const metadata = asRecord(question.metadata);
   const triosSentences =
     question.type === "TRIOS_GAPPED_SENTENCES"
@@ -183,10 +188,15 @@ export function toLearnerQuestionDTO(question: LearnerQuestionSource): LearnerQu
     audioUrl: nullableString(metadata.audioUrl),
     sectionType: nullableString(metadata.sectionType),
     triosSentences,
+    writingRubric:
+      question.type === "WRITING_PROMPT" ? writingRubric : null,
   };
 }
 
-export function toLearnerProblemDTO(problem: LearnerProblemSource): LearnerProblemDTO {
+export function toLearnerProblemDTO(
+  problem: LearnerProblemSource,
+  writingRubrics: ReadonlyMap<string, WritingRubricPresentation> = new Map(),
+): LearnerProblemDTO {
   return {
     id: problem.id,
     title: problem.title,
@@ -205,6 +215,11 @@ export function toLearnerProblemDTO(problem: LearnerProblemSource): LearnerProbl
     problemTopics: problem.problemTopics.map(({ topic }) => ({
       topic: { name: topic.name, slug: topic.slug },
     })),
-    questions: problem.questions.map(toLearnerQuestionDTO),
+    questions: problem.questions.map((question) =>
+      toLearnerQuestionDTO(
+        question,
+        writingRubrics.get(question.id) ?? null,
+      ),
+    ),
   };
 }

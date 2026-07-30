@@ -3,6 +3,7 @@ import "server-only";
 import type { LearnerProblemDTO, LearnerQuestionDTO } from "@/lib/dto/learner-question";
 import { normalizeLearnerQuestionOptions } from "@/lib/dto/learner-question";
 import { validateTriosSentences } from "@/lib/questions/trios-contract";
+import { projectWritingRubric } from "@/lib/questions/writing-rubric-contract";
 
 export type AdminPreviewQuestionDTO = LearnerQuestionDTO & {
   answer: unknown;
@@ -76,6 +77,10 @@ export function toAdminProblemPreviewDTO(problem: AdminProblemPreviewSource): Ad
       triosSentences:
         question.type === "TRIOS_GAPPED_SENTENCES"
           ? validateTriosSentences(question.metadata).sentences
+          : null,
+      writingRubric:
+        question.type === "WRITING_PROMPT"
+          ? projectWritingRubric(question.answer)
           : null,
       answer: question.answer,
       explanation: question.explanation,

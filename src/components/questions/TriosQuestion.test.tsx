@@ -38,6 +38,7 @@ function question(
     audioUrl: null,
     sectionType: null,
     triosSentences,
+    writingRubric: null,
   };
 }
 

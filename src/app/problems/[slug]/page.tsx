@@ -6,6 +6,7 @@ import {
   learnerQuestionPresentationSelect,
   toLearnerProblemDTO,
 } from "@/lib/dto/learner-question";
+import { getLearnerWritingRubrics } from "@/lib/dto/learner-writing-rubric.server";
 import { submissionStatusLabels } from "@/lib/labels";
 import { prisma } from "@/lib/prisma";
 
@@ -47,7 +48,10 @@ export default async function ProblemDetailPage({ params }: PageProps) {
       })
     : [];
 
-  const clientProblem = toLearnerProblemDTO(problem);
+  const writingRubrics = await getLearnerWritingRubrics(
+    problem.questions.map((question) => question.id),
+  );
+  const clientProblem = toLearnerProblemDTO(problem, writingRubrics);
 
   return (
     <div className="grid gap-5">
