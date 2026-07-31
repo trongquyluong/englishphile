@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 import { validateTriosContract } from "@/lib/questions/trios-contract";
 import { validatePronunciationContract } from "@/lib/questions/pronunciation-contract";
+import {
+  validateListeningMCQContract,
+  validateListeningShortAnswerContract,
+} from "@/lib/questions/listening-contract";
 
 export type QaSeverity = "ERROR" | "WARNING" | "INFO";
 
@@ -213,6 +217,43 @@ function checkQuestion(problem: ProblemForQa, question: Question, issues: QaIssu
       pushIssue(issues, problem, {
         severity: "ERROR",
         code: `TRIOS_${contractIssue.code}`,
+        entityType: "Question",
+        entityId: question.id,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+      });
+    });
+  }
+
+  if (question.type === "LISTENING_MCQ") {
+    const contract = validateListeningMCQContract(
+      question.options,
+      question.answer,
+      question.metadata,
+      question.prompt
+    );
+    contract.issues.forEach((contractIssue) => {
+      pushIssue(issues, problem, {
+        severity: "ERROR",
+        code: contractIssue.code,
+        entityType: "Question",
+        entityId: question.id,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+      });
+    });
+  }
+
+  if (question.type === "LISTENING_SHORT_ANSWER") {
+    const contract = validateListeningShortAnswerContract(
+      question.answer,
+      question.metadata,
+      question.prompt
+    );
+    contract.issues.forEach((contractIssue) => {
+      pushIssue(issues, problem, {
+        severity: "ERROR",
+        code: contractIssue.code,
         entityType: "Question",
         entityId: question.id,
         path: `${path}.${contractIssue.path}`,

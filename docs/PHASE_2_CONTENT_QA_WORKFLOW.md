@@ -21,10 +21,7 @@ Decisions:
    calibration review.
 4. Writing remains non-auto-scored. Non-exact Sentence Transformation responses
    also remain unscored (`isCorrect=null`).
-5. Keep `LISTENING_MCQ` and `LISTENING_SHORT_ANSWER` separate, but block both
-   from the validation batch and publication until the approved media contract
-   is implemented. The documentation-only design is
-   [`PHASE_2_LISTENING_CONTRACT.md`](PHASE_2_LISTENING_CONTRACT.md).
+5. Keep `LISTENING_MCQ` and `LISTENING_SHORT_ANSWER` separate. The pure media contract is now implemented in JSON/CSV import, QA, and publication boundaries, but Listening remains blocked from the validation batch until the DTO projection, component playback, and approved media are integrated. See [`PHASE_2_LISTENING_CONTRACT.md`](PHASE_2_LISTENING_CONTRACT.md).
 6. Defer HSG. Keep every pilot item diagnostic-ineligible until stable
    calibration evidence exists.
 
@@ -50,10 +47,7 @@ Preview, Production, provider, environment, or deployed content.
   The exact source remains `Question.answer.rubric`, whose supported shape is
   an ordered non-empty array of bounded strings. Missing or malformed rubrics
   render a fixed Vietnamese no-detail fallback; no criteria are fabricated.
-- Listening enums, checker branches, and a component exist, but there is no
-  implemented schema/import contract for audio or transcript. The component
-  only reads unvalidated `metadata.audioUrl` and `metadata.sectionType`.
-  Phase 2 PR 7 documents the proposed contract without changing this behavior.
+- Listening enums, checker branches, and a component exist. Phase 2 PR 8 implements the pure JSON/CSV schema validation contract for audio, transcript, rights, and attribution (`metadata.listening`). The component still only reads unvalidated legacy aliases; DTO projection and learner component upgrades remain deferred.
 - Persisted QA is enforced by bulk `publish-safe`. Single publish and immediate
   import-publish still use the repository's minimal publication layer in
   general, but Phase 2 PR 3 makes that layer complete and fail-closed for
@@ -168,8 +162,8 @@ Prefer canonical normalized answer names: `correctOptionId`, `correctPart`, and
 | `MCQ` | `prompt`, `options[{id,text}]`; `MultipleChoiceQuestion` | `correctOptionId`; auto exact ID | Explain decisive rule/strongest distractor; review uniqueness and balance |
 | `READING_MCQ` | first non-empty shared `passage`, prompt/options; `ReadingQuestion` | `correctOptionId`; auto | Passage rights, textual evidence, inference uniqueness |
 | `WRITING_PROMPT` | `prompt`; Vietnamese planning/essay controls; learner DTO receives only safe `writingRubric.criteria` projected from `answer.rubric` | answer object; `isCorrect=null` | Rubric is an ordered non-empty bounded string array; missing/malformed data shows a fixed no-detail fallback. Authored text is displayed faithfully, not translated. Human rubric/language/level/calibration review remains mandatory |
-| `LISTENING_MCQ` | prompt/options; `ListeningQuestion` reads `metadata.audioUrl/sectionType` | `correctOptionId`; auto | Proposed audio/transcript/rights/fallback contract is documented but unimplemented: block validation/publication |
-| `LISTENING_SHORT_ANSWER` | prompt/text input; same metadata | `acceptedAnswers`; auto exact normalized text | Review accepted variants; proposed contract remains unimplemented and Listening stays blocked |
+| `LISTENING_MCQ` | prompt/options; `ListeningQuestion` reads legacy `metadata.audioUrl/sectionType` | `correctOptionId`; auto | Pure validation contract is enforced at import/QA/publication boundaries, but learner projection and components are unimplemented. Listening stays blocked. |
+| `LISTENING_SHORT_ANSWER` | prompt/text input; same metadata | `acceptedAnswers`; auto exact normalized text | Review accepted variants; validation contract is enforced, but projection is unimplemented and Listening stays blocked. |
 | `PRONUNCIATION_ODD_ONE_OUT` | `prompt` + exactly four `options[{id,text,targetSpan:{start,end}}]`; IDs canonicalize to unique A-D; renderer orders A-D and underlines only the validated span | canonical member `correctOptionId`; auto-score independently requires the complete option/span contract and a canonical learner A-D selection | `start` inclusive and `end` exclusive in Unicode code points; text is a non-empty string of at most 200 code points and the target contains a Unicode letter. Normal `NEEDS_REVIEW` import retains option/span defects as warnings; malformed/missing/non-member answers are fatal. Persisted QA and every publication path enforce the full contract. Structural success never proves phonetic correctness |
 | `GUIDED_CLOZE` | shared passage, slot prompt/options; `GuidedClozeQuestion` | `correctOptionId`; auto | Validate blank mapping, context, distractors, A–D balance |
 | `OPEN_CLOZE` | shared passage, slot prompt; `OpenClozeQuestion` | `acceptedAnswers`; auto exact normalized text | UI expects one word; include all legitimate bounded variants |
@@ -518,8 +512,9 @@ remaining content-repair and Listening items are not:
    repository inventory, proposed audio/transcript/rights/fallback/playback
    contract, publication matrix, DTO boundary, migration policy, owner
    decisions, and small-PR sequence. It implements no runtime contract.
-6. **Listening implementation and content:** only after the contract-design PR
-   and its owner decisions are reviewed and approved.
+6. **Listening pure contract implementation (Phase 2 PR 8):** implements the pure `metadata.listening` validation contract, integrated into JSON/CSV normalization, immediate import-publish, individual/edit publish, bulk `publish-safe`, persisted QA, and repository audit. No media integration, DTO projection, rendering, database interaction, or real content is implemented yet.
+7. **Listening DTO and learner integration:** implement the learner-safe and admin projection boundaries and playback components.
+8. **Listening content repair:** author, review, and validate real media assets and metadata against the pure contract.
 
 ## L. Writing authored-rubric presentation
 

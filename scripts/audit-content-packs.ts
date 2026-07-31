@@ -127,6 +127,10 @@ function findingRows(report: ContentAuditReport) {
       count: report.findings.pronunciationWithoutValidTargetSpans.length,
     },
     {
+      signal: "Listening lỗi contract truyền thông / metadata",
+      count: report.findings.listeningContractIssues.length,
+    },
+    {
       signal: "Lệch skill giữa problem/question",
       count: report.findings.skillMismatches.length,
     },

@@ -135,6 +135,189 @@ function triosPlan(
   };
 }
 
+const validListeningMetadata = {
+  listening: {
+    version: 1,
+    audio: {
+      assetRef: "/media/listening/pilot-001/dialogue-01-v1.mp3",
+      mimeType: "audio/mpeg",
+      byteLength: 2457600,
+      durationMs: 92000,
+    },
+    transcript: {
+      text: "Transcript",
+      languageTag: "en",
+      availabilityPolicy: "AFTER_SUBMISSION",
+    },
+    attribution: {
+      displayText: "Attribution",
+    },
+    rights: {
+      classification: "OWNED",
+      evidenceRef: "rights:1",
+    },
+    unavailableBehavior: "BLOCK_PROBLEM",
+  },
+};
+
+function listeningMCQPlan(
+  options: unknown,
+  importType: ImportPlan["importType"] = "JSON",
+): ImportPlan {
+  const issues = Array.isArray(options) && options.length === 3 ? [] : [{
+    level: "warning" as const,
+    path: "problems.0.questions.0.options",
+    message: "LISTENING_MCQ cần đúng 3 hoặc 4 options.",
+    code: "LISTENING_MCQ_OPTION_COUNT_INVALID",
+  }];
+  return {
+    ...plan(null, importType),
+    importType,
+    issues,
+    payload: {
+      importType,
+      problems: [{
+        title: "Listening MCQ contract fixture",
+        slug: "listening-mcq-contract-fixture",
+        skillType: "LISTENING",
+        questionType: "LISTENING_MCQ",
+        difficulty: "C1",
+        sourceCollection: {
+          name: "Synthetic Listening source",
+          description: "Synthetic",
+          sourceType: importType,
+        },
+        statement: "Listen and choose.",
+        topics: [],
+        orderIndex: 0,
+        questions: [{
+          type: "LISTENING_MCQ",
+          skillType: "LISTENING",
+          difficulty: "C1",
+          prompt: "What is said?",
+          options,
+          answer: { correctOptionId: "B" },
+          metadata: validListeningMetadata,
+          orderIndex: 0,
+        }],
+      }],
+    },
+    summary: {
+      ...plan(null, importType).summary,
+      warnings: issues.length,
+    },
+  };
+}
+
+function listeningLegacyAliasPlan(
+  aliasCode: "LISTENING_LEGACY_AUDIO_URL" | "LISTENING_LEGACY_SECTION_TYPE" | "BOTH",
+  importType: ImportPlan["importType"] = "JSON",
+): ImportPlan {
+  const issues = [];
+  if (aliasCode === "LISTENING_LEGACY_AUDIO_URL" || aliasCode === "BOTH") {
+    issues.push({
+      level: "warning" as const,
+      path: "problems.0.questions.0.metadata.audioUrl",
+      message: "Sử dụng trường audioUrl cũ.",
+      code: "LISTENING_LEGACY_AUDIO_URL",
+    });
+  }
+  if (aliasCode === "LISTENING_LEGACY_SECTION_TYPE" || aliasCode === "BOTH") {
+    issues.push({
+      level: "warning" as const,
+      path: "problems.0.questions.0.metadata.sectionType",
+      message: "Sử dụng trường sectionType cũ.",
+      code: "LISTENING_LEGACY_SECTION_TYPE",
+    });
+  }
+  return {
+    ...plan(null, importType),
+    importType,
+    issues,
+    payload: {
+      importType,
+      problems: [{
+        title: "Listening Alias fixture",
+        slug: "listening-alias-fixture",
+        skillType: "LISTENING",
+        questionType: "LISTENING_MCQ",
+        difficulty: "C1",
+        sourceCollection: {
+          name: "Synthetic Listening source",
+          description: "Synthetic",
+          sourceType: importType,
+        },
+        statement: "Listen and choose.",
+        topics: [],
+        orderIndex: 0,
+        questions: [{
+          type: "LISTENING_MCQ",
+          skillType: "LISTENING",
+          difficulty: "C1",
+          prompt: "What is said?",
+          options: [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }],
+          answer: { correctOptionId: "B" },
+          metadata: validListeningMetadata,
+          orderIndex: 0,
+        }],
+      }],
+    },
+    summary: {
+      ...plan(null, importType).summary,
+      warnings: issues.length,
+    },
+  };
+}
+
+function listeningShortAnswerPlan(
+  answer: unknown,
+  importType: ImportPlan["importType"] = "JSON",
+): ImportPlan {
+  const issues = answer && typeof answer === "object" && Array.isArray((answer as Record<string, unknown>).acceptedAnswers) && ((answer as Record<string, unknown>).acceptedAnswers as unknown[]).length > 0 ? [] : [{
+    level: "warning" as const,
+    path: "problems.0.questions.0.answer.acceptedAnswers",
+    message: "LISTENING_SHORT_ANSWER cần ít nhất một acceptedAnswers không rỗng.",
+    code: "LISTENING_SHORT_ACCEPTED_REQUIRED",
+  }];
+  return {
+    ...plan(null, importType),
+    importType,
+    issues,
+    payload: {
+      importType,
+      problems: [{
+        title: "Listening Short Answer contract fixture",
+        slug: "listening-short-answer-contract-fixture",
+        skillType: "LISTENING",
+        questionType: "LISTENING_SHORT_ANSWER",
+        difficulty: "C1",
+        sourceCollection: {
+          name: "Synthetic Listening source",
+          description: "Synthetic",
+          sourceType: importType,
+        },
+        statement: "Listen and answer.",
+        topics: [],
+        orderIndex: 0,
+        questions: [{
+          type: "LISTENING_SHORT_ANSWER",
+          skillType: "LISTENING",
+          difficulty: "C1",
+          prompt: "What is said?",
+          options: null,
+          answer,
+          metadata: validListeningMetadata,
+          orderIndex: 0,
+        }],
+      }],
+    },
+    summary: {
+      ...plan(null, importType).summary,
+      warnings: issues.length,
+    },
+  };
+}
+
 const validPronunciationOptions = [
   { id: "A", text: "seat", targetSpan: { start: 1, end: 3 } },
   { id: "B", text: "leaf", targetSpan: { start: 1, end: 3 } },
@@ -382,6 +565,157 @@ describe("immediate JSON import-publish boundary", () => {
     expect(mocks.execute).toHaveBeenCalledWith(
       expect.objectContaining({ ok: true, issues: [] }),
       expect.objectContaining({ contentStatus: "PUBLISHED", importType }),
+    );
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("blocks malformed LISTENING_MCQ %s before atomic persistence", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(
+      listeningMCQPlan([{ id: "A", text: "A" }], importType),
+    );
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("FAILED");
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        level: "error",
+        code: "LISTENING_MCQ_OPTION_COUNT_INVALID",
+        path: "problems.listening-mcq-contract-fixture.questions.0.options",
+      }),
+    ]));
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("allows canonical LISTENING_MCQ %s immediate publication", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(
+      listeningMCQPlan([{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }], importType),
+    );
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("IMPORTED");
+    expect(result.ok).toBe(true);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, issues: [] }),
+      expect.objectContaining({ contentStatus: "PUBLISHED", importType }),
+    );
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("blocks malformed LISTENING_SHORT_ANSWER %s before atomic persistence", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(
+      listeningShortAnswerPlan({ acceptedAnswers: [] }, importType),
+    );
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("FAILED");
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        level: "error",
+        code: "LISTENING_SHORT_ACCEPTED_REQUIRED",
+        path: "problems.listening-short-answer-contract-fixture.questions.0.answer.acceptedAnswers",
+      }),
+    ]));
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("allows canonical LISTENING_SHORT_ANSWER %s immediate publication", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(
+      listeningShortAnswerPlan({ acceptedAnswers: ["answer"] }, importType),
+    );
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("IMPORTED");
+    expect(result.ok).toBe(true);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, issues: [] }),
+      expect.objectContaining({ contentStatus: "PUBLISHED", importType }),
+    );
+  });
+
+  it.each([
+    ["JSON", importJsonPayload, "audioUrl only", "LISTENING_LEGACY_AUDIO_URL", "problems.0.questions.0.metadata.audioUrl"],
+    ["CSV", importCsvRows, "audioUrl only", "LISTENING_LEGACY_AUDIO_URL", "problems.0.questions.0.metadata.audioUrl"],
+    ["JSON", importJsonPayload, "sectionType only", "LISTENING_LEGACY_SECTION_TYPE", "problems.0.questions.0.metadata.sectionType"],
+    ["CSV", importCsvRows, "sectionType only", "LISTENING_LEGACY_SECTION_TYPE", "problems.0.questions.0.metadata.sectionType"],
+  ] as const)("blocks %s immediate publication for %s alias before atomic persistence", async (importType, importer, name, aliasCode, path) => {
+    mocks.buildImportPlan.mockResolvedValue(listeningLegacyAliasPlan(aliasCode, importType));
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("FAILED");
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        level: "error",
+        code: aliasCode,
+        path,
+      }),
+    ]));
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("blocks %s immediate publication for BOTH aliases before atomic persistence", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(listeningLegacyAliasPlan("BOTH", importType));
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: true,
+    });
+
+    expect(result.status).toBe("FAILED");
+    expect(result.ok).toBe(false);
+    expect(result.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ level: "error", code: "LISTENING_LEGACY_AUDIO_URL" }),
+      expect.objectContaining({ level: "error", code: "LISTENING_LEGACY_SECTION_TYPE" }),
+    ]));
+    expect(mocks.execute).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["JSON", importJsonPayload],
+    ["CSV", importCsvRows],
+  ] as const)("allows %s NEEDS_REVIEW import with alias warnings", async (importType, importer) => {
+    mocks.buildImportPlan.mockResolvedValue(listeningLegacyAliasPlan("BOTH", importType));
+
+    const result = await importer("payload", "admin-a", {
+      publishImmediately: false,
+    });
+
+    expect(result.status).toBe("IMPORTED");
+    expect(result.ok).toBe(true);
+    expect(result.issues.filter(i => i.level === "warning").length).toBe(2);
+    expect(result.issues.filter(i => i.level === "error").length).toBe(0);
+    expect(mocks.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true }),
+      expect.objectContaining({ contentStatus: "NEEDS_REVIEW" }),
     );
   });
 });

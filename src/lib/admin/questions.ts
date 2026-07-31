@@ -5,6 +5,7 @@ import { questionAuditSnapshots } from "@/lib/admin/audit-snapshots";
 import { validateErrorIdentificationContract } from "@/lib/questions/error-identification-contract";
 import { validateTriosContract } from "@/lib/questions/trios-contract";
 import { validatePronunciationContract } from "@/lib/questions/pronunciation-contract";
+import { validateListeningMCQContract, validateListeningShortAnswerContract } from "@/lib/questions/listening-contract";
 
 export type AdminResult = {
   ok: boolean;
@@ -84,6 +85,27 @@ export function questionPublishErrors(question: {
 
   if (question.type === "TRIOS_GAPPED_SENTENCES") {
     const contract = validateTriosContract(question.metadata, question.answer);
+    errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
+    return errors;
+  }
+
+  if (question.type === "LISTENING_MCQ") {
+    const contract = validateListeningMCQContract(
+      question.options,
+      question.answer,
+      question.metadata,
+      question.prompt
+    );
+    errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
+    return errors;
+  }
+
+  if (question.type === "LISTENING_SHORT_ANSWER") {
+    const contract = validateListeningShortAnswerContract(
+      question.answer,
+      question.metadata,
+      question.prompt
+    );
     errors.push(...contract.issues.map((contractIssue) => contractIssue.message));
     return errors;
   }

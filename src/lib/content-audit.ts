@@ -11,6 +11,11 @@ import {
   validatePronunciationContract,
   type PronunciationContractIssueCode,
 } from "@/lib/questions/pronunciation-contract";
+import {
+  validateListeningMCQContract,
+  validateListeningShortAnswerContract,
+  type ListeningContractIssueCode,
+} from "@/lib/questions/listening-contract";
 
 export const SHORT_EXPLANATION_THRESHOLD = 45;
 const MAX_OPTION_AMBIGUITY_GROUPS = 12;
@@ -133,6 +138,10 @@ export type PronunciationTargetFinding = AuditLocation & {
   issues: PronunciationContractIssueCode[];
 };
 
+export type ListeningContractFinding = AuditLocation & {
+  issues: ListeningContractIssueCode[];
+};
+
 export type ContentAuditReport = {
   inventory: {
     packs: number;
@@ -154,6 +163,7 @@ export type ContentAuditReport = {
     readingQuestionsWithoutPassages: AuditLocation[];
     triosWithoutThreeSentences: AuditLocation[];
     pronunciationWithoutValidTargetSpans: PronunciationTargetFinding[];
+    listeningContractIssues: ListeningContractFinding[];
     skillMismatches: AuditLocation[];
     difficultyMismatches: AuditLocation[];
     invalidCorrectOptions: AuditLocation[];
@@ -592,6 +602,7 @@ export function auditContentPacks(
       readingQuestionsWithoutPassages: [],
       triosWithoutThreeSentences: [],
       pronunciationWithoutValidTargetSpans: [],
+      listeningContractIssues: [],
       skillMismatches: [],
       difficultyMismatches: [],
       invalidCorrectOptions: [],
@@ -909,6 +920,27 @@ export function auditContentPacks(
             }
           }
 
+          if (questionType === "LISTENING_MCQ" || questionType === "LISTENING_SHORT_ANSWER") {
+            const contract = questionType === "LISTENING_MCQ"
+              ? validateListeningMCQContract(
+                  rawQuestion.options,
+                  rawQuestion.answer,
+                  rawQuestion.metadata,
+                  typeof rawQuestion.prompt === "string" ? rawQuestion.prompt : undefined
+                )
+              : validateListeningShortAnswerContract(
+                  rawQuestion.answer,
+                  rawQuestion.metadata,
+                  typeof rawQuestion.prompt === "string" ? rawQuestion.prompt : undefined
+                );
+            if (contract.issues.length > 0) {
+              report.findings.listeningContractIssues.push({
+                ...questionLocation,
+                issues: contract.issues.map((i) => i.code),
+              });
+            }
+          }
+
           if (optionRendererQuestionTypes.has(questionType)) {
             const rendererOptions =
               questionType === "ERROR_IDENTIFICATION"
@@ -1147,6 +1179,10 @@ export function auditContentPacks(
     ),
     pronunciationWithoutValidTargetSpans: sortedCopy(
       report.findings.pronunciationWithoutValidTargetSpans,
+      compareAuditLocations,
+    ),
+    listeningContractIssues: sortedCopy(
+      report.findings.listeningContractIssues,
       compareAuditLocations,
     ),
     skillMismatches: sortedCopy(

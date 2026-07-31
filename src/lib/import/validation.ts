@@ -25,6 +25,10 @@ import {
   normalizePronunciationOptions,
   validatePronunciationContract,
 } from "@/lib/questions/pronunciation-contract";
+import {
+  validateListeningMCQContract,
+  validateListeningShortAnswerContract,
+} from "@/lib/questions/listening-contract";
 
 const nullableString = z
   .union([z.string(), z.null(), z.undefined()])
@@ -121,6 +125,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
+function normalizeMetadata(metadata: unknown) {
+  if (!isRecord(metadata)) return metadata ?? null;
+
+  const normalized = { ...metadata };
+  if (isRecord(normalized.listening)) {
+    const listening = { ...normalized.listening };
+    if (isRecord(listening.transcript) && typeof listening.transcript.text === "string") {
+      listening.transcript = {
+        ...listening.transcript,
+        text: listening.transcript.text.replace(/\r\n/g, "\n"),
+      };
+    }
+    normalized.listening = listening;
+  }
+  return normalized;
+}
+
 function getAcceptedAnswers(answer: Record<string, unknown>) {
   const accepted = answer.accepted ?? answer.acceptedAnswers;
   if (Array.isArray(accepted)) {
@@ -159,10 +180,14 @@ function normalizeAnswer(questionType: QuestionType, answer: unknown) {
   const normalized = { ...answer };
 
   if (
-    ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(questionType) &&
+    ["MCQ", "GUIDED_CLOZE", "READING_MCQ"].includes(questionType) &&
     typeof normalized.correctOptionId !== "string" &&
     typeof normalized.correctOption === "string"
   ) {
+    normalized.correctOptionId = normalized.correctOption;
+  }
+
+  if (questionType === "LISTENING_MCQ" && typeof normalized.correctOptionId !== "string" && typeof normalized.correctOption === "string") {
     normalized.correctOptionId = normalized.correctOption;
   }
 
@@ -202,22 +227,41 @@ function validateQuestionRules(question: NormalizedQuestion, path: string): Impo
     issues.push({ level: "error", path: `${path}.prompt`, message: "Question cần prompt hoặc passage." });
   }
 
+  if (isRecord(question.metadata)) {
+    if (Object.prototype.hasOwnProperty.call(question.metadata, "audioUrl")) {
+      issues.push({
+        level: "warning",
+        path: `${path}.metadata.audioUrl`,
+        message: "Sử dụng trường audioUrl cũ.",
+        code: "LISTENING_LEGACY_AUDIO_URL",
+      });
+    }
+    if (Object.prototype.hasOwnProperty.call(question.metadata, "sectionType")) {
+      issues.push({
+        level: "warning",
+        path: `${path}.metadata.sectionType`,
+        message: "Sử dụng trường sectionType cũ.",
+        code: "LISTENING_LEGACY_SECTION_TYPE",
+      });
+    }
+  }
+
   if (
-    ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(question.type) &&
+    ["MCQ", "GUIDED_CLOZE", "READING_MCQ"].includes(question.type) &&
     options.length === 0
   ) {
     issues.push({ level: "error", path: `${path}.options`, message: "Dạng trắc nghiệm cần options." });
   }
 
   if (
-    ["MCQ", "GUIDED_CLOZE", "READING_MCQ", "LISTENING_MCQ"].includes(question.type) &&
+    ["MCQ", "GUIDED_CLOZE", "READING_MCQ"].includes(question.type) &&
     typeof answer.correctOptionId !== "string"
   ) {
     issues.push({ level: "error", path: `${path}.answer`, message: "Dạng trắc nghiệm cần answer.correctOptionId." });
   }
 
   if (
-    ["OPEN_CLOZE", "WORD_FORMATION", "SHORT_ANSWER", "LISTENING_SHORT_ANSWER"].includes(question.type) &&
+    ["OPEN_CLOZE", "WORD_FORMATION", "SHORT_ANSWER"].includes(question.type) &&
     getAcceptedAnswers(answer).length === 0
   ) {
     issues.push({ level: "error", path: `${path}.answer`, message: "Dạng điền từ cần accepted/acceptedAnswers." });
@@ -246,6 +290,39 @@ function validateQuestionRules(question: NormalizedQuestion, path: string): Impo
         path: `${path}.${contractIssue.path}`,
         message: contractIssue.message,
         code: `PRONUNCIATION_${contractIssue.code}`,
+      })),
+    );
+  }
+
+  if (question.type === "LISTENING_MCQ") {
+    const contract = validateListeningMCQContract(
+      question.options,
+      question.answer,
+      question.metadata,
+      question.prompt
+    );
+    issues.push(
+      ...contract.issues.map((contractIssue) => ({
+        level: contractIssue.importLevel,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+        code: contractIssue.code,
+      })),
+    );
+  }
+
+  if (question.type === "LISTENING_SHORT_ANSWER") {
+    const contract = validateListeningShortAnswerContract(
+      question.answer,
+      question.metadata,
+      question.prompt
+    );
+    issues.push(
+      ...contract.issues.map((contractIssue) => ({
+        level: contractIssue.importLevel,
+        path: `${path}.${contractIssue.path}`,
+        message: contractIssue.message,
+        code: contractIssue.code,
       })),
     );
   }
@@ -316,7 +393,7 @@ export function normalizeQuestion(input: unknown, path: string, orderIndex: numb
     keyword: parsed.data.keyword,
     targetSentence: parsed.data.targetSentence,
     lineNumber: parsed.data.lineNumber,
-    metadata: parsed.data.metadata ?? null,
+    metadata: normalizeMetadata(parsed.data.metadata),
     orderIndex,
   };
 
