@@ -420,3 +420,143 @@ describe("persisted Pronunciation QA", () => {
     ]));
   });
 });
+
+const validListeningMetadata = {
+  listening: {
+    version: 1,
+    audio: {
+      assetRef: "/media/listening/pilot-001/dialogue-01-v1.mp3",
+      mimeType: "audio/mpeg",
+      byteLength: 2457600,
+      durationMs: 92000,
+    },
+    transcript: {
+      text: "Transcript",
+      languageTag: "en",
+      availabilityPolicy: "AFTER_SUBMISSION",
+    },
+    attribution: {
+      displayText: "Attribution",
+    },
+    rights: {
+      classification: "OWNED",
+      evidenceRef: "rights:1",
+    },
+    unavailableBehavior: "BLOCK_PROBLEM",
+  },
+};
+
+function storedListeningProblem(type: "LISTENING_MCQ" | "LISTENING_SHORT_ANSWER", options: unknown, answer: unknown, metadata: unknown = validListeningMetadata) {
+  return {
+    id: "problem-listening",
+    title: "Listening QA fixture",
+    slug: "listening-qa-fixture",
+    contentStatus: "NEEDS_REVIEW",
+    statement: "Listen and answer.",
+    instructions: "Choose the correct option.",
+    estimatedMinutes: 5,
+    questionType: type,
+    sourceCollection: { id: "source", name: "Synthetic source" },
+    problemTopics: [{ topic: { id: "topic", name: "Listening", slug: "listening" } }],
+    questions: [{
+      id: "question-listening",
+      problemId: "problem-listening",
+      type: type,
+      skillType: "LISTENING",
+      difficulty: "C1",
+      prompt: "Question prompt?",
+      passage: null,
+      options,
+      answer,
+      explanation: "Explanation.",
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata,
+      contentStatus: "NEEDS_REVIEW",
+      reviewedAt: null,
+      reviewedById: null,
+      orderIndex: 4,
+      createdAt: new Date("2026-01-01T00:00:00Z"),
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
+    }],
+    updatedAt: new Date("2026-01-01T00:00:00Z"),
+  };
+}
+
+describe("persisted Listening QA", () => {
+  it("marks a complete LISTENING_MCQ contract publishable", async () => {
+    const report = await getContentQaReport(
+      {},
+      database(storedListeningProblem("LISTENING_MCQ", [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }], { correctOptionId: "B" })) as never,
+    );
+    expect(report.problems[0]?.canPublish).toBe(true);
+    expect(report.issues.filter((candidate) => candidate.severity === "ERROR")).toEqual([]);
+  });
+
+  it("marks a complete LISTENING_SHORT_ANSWER contract publishable", async () => {
+    const report = await getContentQaReport(
+      {},
+      database(storedListeningProblem("LISTENING_SHORT_ANSWER", null, { acceptedAnswers: ["answer"] })) as never,
+    );
+    expect(report.problems[0]?.canPublish).toBe(true);
+    expect(report.issues.filter((candidate) => candidate.severity === "ERROR")).toEqual([]);
+  });
+
+  it("blocks invalid MCQ answer with QA ERROR", async () => {
+    const report = await getContentQaReport(
+      {},
+      database(storedListeningProblem("LISTENING_MCQ", [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }], { correctOptionId: "Z" })) as never,
+    );
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "ERROR",
+        code: "LISTENING_MCQ_CORRECT_OPTION_NOT_IN_OPTIONS",
+        problemId: "problem-listening",
+        entityId: "question-listening",
+      }),
+    ]));
+  });
+
+  it("blocks invalid Short Answer with QA ERROR", async () => {
+    const report = await getContentQaReport(
+      {},
+      database(storedListeningProblem("LISTENING_SHORT_ANSWER", null, { acceptedAnswers: [] })) as never,
+    );
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "ERROR",
+        code: "LISTENING_SHORT_ACCEPTED_REQUIRED",
+        problemId: "problem-listening",
+        entityId: "question-listening",
+      }),
+    ]));
+  });
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  it.each([
+    ["Asset-reference defect", "LISTENING_ASSET_REF_INVALID", (m: any) => { m.listening.audio.assetRef = "invalid"; }],
+    ["MIME defect", "LISTENING_MIME_UNSUPPORTED", (m: any) => { m.listening.audio.mimeType = "invalid"; }],
+    ["Duration/size defect", "LISTENING_DURATION_INVALID", (m: any) => { m.listening.audio.durationMs = -1; }],
+    ["Transcript/control defect", "LISTENING_TRANSCRIPT_TEXT_INVALID", (m: any) => { m.listening.transcript.text = ""; }],
+    ["Attribution/rights defect", "LISTENING_RIGHTS_EVIDENCE_INVALID", (m: any) => { m.listening.rights.evidenceRef = ""; }],
+  ])("blocks %s with QA ERROR and makes canPublish=false", async (_name, code, mutate) => {
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+    const defectiveMetadata = JSON.parse(JSON.stringify(validListeningMetadata));
+    mutate(defectiveMetadata);
+    const report = await getContentQaReport(
+      {},
+      database(storedListeningProblem("LISTENING_MCQ", [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }], { correctOptionId: "B" }, defectiveMetadata)) as never,
+    );
+    expect(report.problems[0]?.canPublish).toBe(false);
+    expect(report.issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "ERROR",
+        code,
+      }),
+    ]));
+  });
+});

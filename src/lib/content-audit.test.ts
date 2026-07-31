@@ -1529,4 +1529,29 @@ describe("content-pack repository audit", () => {
     expect(report.inventory).toMatchObject({ packs: 1, splitFiles: 1, problems: 1, questions: 1 });
     expect(report.hasInventoryErrors).toBe(false);
   });
+
+  it("reports Listening contract violations independently", () => {
+    const report = auditContentPacks([
+      pack([
+        problem([
+          question({
+            type: "LISTENING_MCQ",
+            skillType: "LISTENING",
+            options: [
+              { id: "A", text: "One" },
+              { id: "B", text: "Two" },
+              { id: "C", text: "Three" },
+            ],
+            answer: { correctOptionId: "C" },
+            metadata: null,
+          }),
+        ]),
+      ]),
+    ]);
+
+    expect(report.findings.listeningContractIssues).toHaveLength(1);
+    expect(report.findings.listeningContractIssues[0].issues).toEqual(
+      expect.arrayContaining(["LISTENING_DESCRIPTOR_REQUIRED"])
+    );
+  });
 });

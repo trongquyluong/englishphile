@@ -272,6 +272,26 @@ unpublished, and diagnostic-ineligible. PR 7 changes no schema, migration,
 package, lockfile, dependency, importer, QA, DTO, scorer, renderer, test,
 content pack, media, database, provider, deployment, or runtime behavior.
 
+Phase 2 PR 8 implements the pure Listening validation contract on branch
+`phase2/08-listening-contract-enforcement` from canonical base
+`f5be3cb4643ade6af00a6a09d76beb279a842499`. The shared `metadata.listening`
+descriptor validation enforces exactly the bounds proposed in PR 7: same-origin
+`/media/listening/` reference, MIME type `audio/mpeg`, byte/duration bounds,
+transcript text/language, explicit attribution, rights classification/evidence,
+and fail-closed fallback behavior.
+
+The contract is now enforced at all defined validation boundaries: normal JSON/CSV
+import normalization, immediate import-publish, individual status publication,
+edit-to-publish, ordinary bulk publish, bulk `publish-safe`, and its transaction-locked
+QA recheck. The static repository audit adds a new `listeningContractIssues` category,
+maintaining the current 0/0 Listening inventory.
+
+Phase 2 PR 8 evidence is repository/local only, using synthetic fixtures. It does
+not implement the learner/admin DTO projection, rendering components, storage/provider
+integration, or real Listening content. It executes no database, deployed environment,
+migration, import, or provider request. Listening problems remain unpublished and
+diagnostic-ineligible.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

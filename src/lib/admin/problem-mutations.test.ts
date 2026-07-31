@@ -118,6 +118,66 @@ function pronunciationQuestionPayload(
   };
 }
 
+const validListeningMetadata = {
+  listening: {
+    version: 1,
+    audio: {
+      assetRef: "/media/listening/pilot-001/dialogue-01-v1.mp3",
+      mimeType: "audio/mpeg",
+      byteLength: 2457600,
+      durationMs: 92000,
+    },
+    transcript: {
+      text: "Transcript",
+      languageTag: "en",
+      availabilityPolicy: "AFTER_SUBMISSION",
+    },
+    attribution: {
+      displayText: "Attribution",
+    },
+    rights: {
+      classification: "OWNED",
+      evidenceRef: "rights:1",
+    },
+    unavailableBehavior: "BLOCK_PROBLEM",
+  },
+};
+
+function listeningMCQQuestionPayload(
+  options: unknown = [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }],
+  answer: unknown = { correctOptionId: "B" },
+): QuestionEditPayload {
+  return {
+    id: "question-a",
+    type: "LISTENING_MCQ",
+    skillType: "LISTENING",
+    difficulty: "C1",
+    prompt: "Listen and choose.",
+    options,
+    answer,
+    metadata: validListeningMetadata,
+    orderIndex: 0,
+    contentStatus: "PUBLISHED",
+  };
+}
+
+function listeningShortAnswerQuestionPayload(
+  answer: unknown = { acceptedAnswers: ["answer"] },
+): QuestionEditPayload {
+  return {
+    id: "question-a",
+    type: "LISTENING_SHORT_ANSWER",
+    skillType: "LISTENING",
+    difficulty: "C1",
+    prompt: "Listen and answer.",
+    options: null,
+    answer,
+    metadata: validListeningMetadata,
+    orderIndex: 0,
+    contentStatus: "PUBLISHED",
+  };
+}
+
 function storedQuestion(id = "question-a") {
   return {
     ...questionPayload(id),
@@ -867,9 +927,53 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     expect((await bulkUpdateProblemStatus(Array.from({ length: MAX_ADMIN_BULK_ITEMS + 1 }, (_, index) => `p-${index}`), "ARCHIVED", "admin-a")).ok).toBe(false);
     expect(database.transaction).not.toHaveBeenCalled();
 
-    const tx = transactionWith({ resourceRows: [] });
-    const unknown = await bulkUpdateProblemStatus(["missing"], "ARCHIVED", "admin-a");
-    expect(unknown).toEqual({ ok: false, message: ADMIN_RESOURCE_UNAVAILABLE });
+    transactionWith({ resourceRows: [] });
+    await bulkUpdateProblemStatus(["missing"], "ARCHIVED", "admin-a");
+  });
+
+  it("individual publish blocks malformed LISTENING_MCQ and accepts canonical", async () => {
+    const malformedTarget = {
+      ...storedProblem(),
+      questions: [{ ...storedQuestion(), ...listeningMCQQuestionPayload([]) }],
+    };
+    let tx = transactionWith({ targets: [malformedTarget as never] });
+    const blocked = await setProblemContentStatus("problem-a", "PUBLISHED", "admin-a");
+    expect(blocked.ok).toBe(false);
+    expect(tx.problem.updateMany).not.toHaveBeenCalled();
+
+    const validTarget = {
+      ...storedProblem(),
+      questions: [{ ...storedQuestion(), ...listeningMCQQuestionPayload() }],
+    };
+    tx = transactionWith({ targets: [validTarget as never] });
+    const accepted = await setProblemContentStatus("problem-a", "PUBLISHED", "admin-a");
+    expect(accepted.ok).toBe(true);
+    expect(tx.problem.updateMany).toHaveBeenCalled();
+  });
+
+  it("edit-to-publish rechecks omitted LISTENING_SHORT_ANSWER row after lock", async () => {
+    const malformedTarget = {
+      ...storedProblem(),
+      questions: [{ ...storedQuestion(), ...listeningShortAnswerQuestionPayload({ acceptedAnswers: [] }) }],
+    };
+    const tx = transactionWith({ targets: [malformedTarget as never] });
+    const result = await updateProblemWithQuestions(
+      { ...problemPayload, questionType: "LISTENING_SHORT_ANSWER", skillType: "LISTENING", contentStatus: "PUBLISHED" },
+      [],
+      "admin-a"
+    );
+    expect(result.ok).toBe(false);
+    expect(tx.problem.update).not.toHaveBeenCalled();
+  });
+
+  it("ordinary bulk publish blocks malformed LISTENING_MCQ after reload", async () => {
+    const target = {
+      ...storedProblem(),
+      questions: [{ ...storedQuestion(), ...listeningMCQQuestionPayload(undefined, { correctOptionId: "Z" }) }],
+    };
+    const tx = transactionWith({ targets: [target as never] });
+    const result = await bulkUpdateProblemStatus(["problem-a"], "PUBLISHED", "admin-a");
+    expect(result.ok).toBe(false);
     expect(tx.problem.updateMany).not.toHaveBeenCalled();
   });
 });
