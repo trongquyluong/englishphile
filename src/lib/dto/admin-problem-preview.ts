@@ -4,6 +4,7 @@ import type { LearnerProblemDTO, LearnerQuestionDTO } from "@/lib/dto/learner-qu
 import { normalizeLearnerQuestionOptions } from "@/lib/dto/learner-question";
 import { validateTriosSentences } from "@/lib/questions/trios-contract";
 import { projectWritingRubric } from "@/lib/questions/writing-rubric-contract";
+import { projectListeningPresentation } from "@/lib/questions/listening-contract";
 
 export type AdminPreviewQuestionDTO = LearnerQuestionDTO & {
   answer: unknown;
@@ -58,34 +59,48 @@ export function toAdminProblemPreviewDTO(problem: AdminProblemPreviewSource): Ad
     acceptanceRate: problem.acceptanceRate,
     sourceCollection: problem.sourceCollection,
     problemTopics: problem.problemTopics,
-    questions: problem.questions.map((question) => ({
-      id: question.id,
-      type: question.type,
-      skillType: question.skillType,
-      difficulty: question.difficulty,
-      prompt: question.prompt,
-      passage: question.passage,
-      options: normalizeLearnerQuestionOptions(question.type, question.options),
-      rootWord: question.rootWord,
-      keyword: question.keyword,
-      targetSentence: question.targetSentence,
-      lineNumber: question.lineNumber,
-      orderIndex: question.orderIndex,
-      problemTitle: problem.title,
-      audioUrl: metadataString(question.metadata, "audioUrl"),
-      sectionType: metadataString(question.metadata, "sectionType"),
-      triosSentences:
-        question.type === "TRIOS_GAPPED_SENTENCES"
-          ? validateTriosSentences(question.metadata).sentences
-          : null,
-      writingRubric:
-        question.type === "WRITING_PROMPT"
-          ? projectWritingRubric(question.answer)
-          : null,
-      answer: question.answer,
-      explanation: question.explanation,
-      metadata: question.metadata,
-      rawOptions: question.options,
-    })),
+    questions: problem.questions.map((question) => {
+      const listeningPresentation = projectListeningPresentation(
+        question.metadata,
+        question.options,
+        question.type
+      );
+
+      let options = normalizeLearnerQuestionOptions(question.type, question.options);
+      if (question.type === "LISTENING_MCQ" && (!listeningPresentation || listeningPresentation.state === "UNAVAILABLE")) {
+        options = [];
+      }
+
+      return {
+        id: question.id,
+        type: question.type,
+        skillType: question.skillType,
+        difficulty: question.difficulty,
+        prompt: question.prompt,
+        passage: question.passage,
+        options,
+        rootWord: question.rootWord,
+        keyword: question.keyword,
+        targetSentence: question.targetSentence,
+        lineNumber: question.lineNumber,
+        orderIndex: question.orderIndex,
+        problemTitle: problem.title,
+        audioUrl: question.type.startsWith("LISTENING_") ? null : metadataString(question.metadata, "audioUrl"),
+        sectionType: question.type.startsWith("LISTENING_") ? null : metadataString(question.metadata, "sectionType"),
+        triosSentences:
+          question.type === "TRIOS_GAPPED_SENTENCES"
+            ? validateTriosSentences(question.metadata).sentences
+            : null,
+        writingRubric:
+          question.type === "WRITING_PROMPT"
+            ? projectWritingRubric(question.answer)
+            : null,
+        listeningPresentation,
+        answer: question.answer,
+        explanation: question.explanation,
+        metadata: question.metadata,
+        rawOptions: question.options,
+      };
+    }),
   };
 }

@@ -17,6 +17,7 @@ import {
   type PronunciationTargetSpan,
 } from "@/lib/questions/pronunciation-contract";
 import type { WritingRubricPresentation } from "@/lib/questions/writing-rubric-contract";
+import { projectListeningPresentation } from "@/lib/questions/listening-contract";
 
 export type LearnerOptionDTO = {
   id: string;
@@ -42,6 +43,7 @@ export type LearnerQuestionDTO = {
   sectionType: string | null;
   triosSentences: TriosSentences | null;
   writingRubric: WritingRubricPresentation | null;
+  listeningPresentation: import("@/lib/questions/listening-contract").ListeningPresentationDTO | null;
 };
 
 export type LearnerProblemDTO = {
@@ -149,16 +151,27 @@ export function normalizeLearnerQuestionOptions(
   if (questionType === "PRONUNCIATION_ODD_ONE_OUT") {
     return validatePronunciationOptions(value).options;
   }
-  if (questionType !== "ERROR_IDENTIFICATION") {
-    return normalizeLearnerOptions(value);
+  if (questionType === "ERROR_IDENTIFICATION") {
+    const contract = validateErrorIdentificationOptions(value);
+    if (!contract.valid) return [];
+    return ERROR_IDENTIFICATION_PART_IDS.flatMap((partId) => {
+      const option = contract.options.find((candidate) => candidate.id === partId);
+      return option ? [option] : [];
+    });
   }
 
-  const contract = validateErrorIdentificationOptions(value);
-  if (!contract.valid) return [];
-  return ERROR_IDENTIFICATION_PART_IDS.flatMap((partId) => {
-    const option = contract.options.find((candidate) => candidate.id === partId);
-    return option ? [option] : [];
-  });
+  const options = normalizeLearnerOptions(value);
+  if (questionType === "LISTENING_MCQ") {
+    if (options.length !== 3 && options.length !== 4) return [];
+    const validIds = ["A", "B", "C", "D"];
+    const ids = options.map((o) => o.id.toUpperCase());
+    const uniqueIds = new Set(ids);
+    if (uniqueIds.size !== ids.length || !ids.every((id) => validIds.includes(id))) {
+      return [];
+    }
+  }
+
+  return options;
 }
 
 export function toLearnerQuestionDTO(
@@ -171,6 +184,17 @@ export function toLearnerQuestionDTO(
       ? validateTriosSentences(question.metadata).sentences
       : null;
 
+  const listeningPresentation = projectListeningPresentation(
+    question.metadata,
+    question.options,
+    question.type
+  );
+
+  let options = normalizeLearnerQuestionOptions(question.type, question.options);
+  if (question.type === "LISTENING_MCQ" && (!listeningPresentation || listeningPresentation.state === "UNAVAILABLE")) {
+    options = [];
+  }
+
   return {
     id: question.id,
     type: question.type,
@@ -178,18 +202,19 @@ export function toLearnerQuestionDTO(
     difficulty: question.difficulty,
     prompt: question.prompt,
     passage: question.passage,
-    options: normalizeLearnerQuestionOptions(question.type, question.options),
+    options,
     rootWord: question.rootWord,
     keyword: question.keyword,
     targetSentence: question.targetSentence,
     lineNumber: question.lineNumber,
     orderIndex: question.orderIndex,
     problemTitle: question.problem?.title ?? null,
-    audioUrl: nullableString(metadata.audioUrl),
-    sectionType: nullableString(metadata.sectionType),
+    audioUrl: question.type.startsWith("LISTENING_") ? null : nullableString(metadata.audioUrl),
+    sectionType: question.type.startsWith("LISTENING_") ? null : nullableString(metadata.sectionType),
     triosSentences,
     writingRubric:
       question.type === "WRITING_PROMPT" ? writingRubric : null,
+    listeningPresentation,
   };
 }
 

@@ -292,6 +292,10 @@ integration, or real Listening content. It executes no database, deployed enviro
 migration, import, or provider request. Listening problems remain unpublished and
 diagnostic-ineligible.
 
+Phase 2 PR 9 implements the pure learner-safe and admin projection boundaries for Listening. It extracts `projectListeningPresentation` which validates the presentation payload and explicitly returns a fixed `UNAVAILABLE` state because delivery is not yet configured. It omits legacy `audioUrl` and `sectionType` and ensures the transcript text and raw `assetRef` are never exposed to learners. For `LISTENING_MCQ`, learner options are structurally suppressed (empty array `[]`) whenever the media presentation is unavailable, preventing blind guessing. Admin previews consume the same safe projection structure while retaining the raw metadata and original options for potential repairs.
+
+Phase 2 PR 9 evidence is repository/local only: pure serialization tests in `learner-security.test.ts` and `listening-contract.test.ts` prove boundaries are upheld, including the suppression of MCQ options. Playback components, storage/provider integration, and real content remain unimplemented.
+
 Security Phase 1D-D1 implements the Writing grader through Cloudflare Workers
 AI directly. A narrow Production hotfix changes the only reviewed model from
 `@cf/qwen/qwen3-30b-a3b-fp8` to

@@ -27,6 +27,7 @@ function question(
     sectionType: null,
     triosSentences: null,
     writingRubric,
+    listeningPresentation: null,
   };
 }
 

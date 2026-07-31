@@ -3,6 +3,7 @@ import {
   validateListeningMCQContract,
   validateListeningShortAnswerContract,
   validateListeningMetadata,
+  projectListeningPresentation,
 } from "./listening-contract";
 
 describe("Listening Contract", () => {
@@ -224,11 +225,11 @@ describe("Listening Contract", () => {
       expect(validateListeningMetadata("string").some(i => i.code === "LISTENING_DESCRIPTOR_REQUIRED")).toBe(true);
       expect(validateListeningMetadata(123).some(i => i.code === "LISTENING_DESCRIPTOR_REQUIRED")).toBe(true);
       expect(validateListeningMetadata([]).some(i => i.code === "LISTENING_DESCRIPTOR_REQUIRED")).toBe(true);
-      
+
       const invalidAudio = JSON.parse(JSON.stringify(validMetadata));
       invalidAudio.listening.audio = "string";
       expect(validateListeningMetadata(invalidAudio).some(i => i.code === "LISTENING_AUDIO_REQUIRED")).toBe(true);
-      
+
       const invalidTranscript = JSON.parse(JSON.stringify(validMetadata));
       invalidTranscript.listening.transcript = null;
       expect(validateListeningMetadata(invalidTranscript).some(i => i.code === "LISTENING_TRANSCRIPT_REQUIRED")).toBe(true);
@@ -239,10 +240,10 @@ describe("Listening Contract", () => {
       Object.freeze(input);
       Object.freeze(input.listening);
       Object.freeze(input.listening.audio);
-      
+
       const issues1 = validateListeningMetadata(input);
       const issues2 = validateListeningMetadata(input);
-      
+
       expect(issues1).toHaveLength(0);
       expect(issues2).toHaveLength(0);
       expect(JSON.stringify(input)).toEqual(JSON.stringify(validMetadata));
@@ -254,7 +255,7 @@ describe("Listening Contract", () => {
       invalidAudio.mimeType = "audio/mpeg";
       invalidAudio.byteLength = 2457600;
       invalidAudio.durationMs = 92000;
-      
+
       const invalid = JSON.parse(JSON.stringify(validMetadata));
       invalid.listening.audio = invalidAudio;
       // validateListeningMetadata validates own properties correctly because
@@ -270,7 +271,7 @@ describe("Listening Contract", () => {
       { id: "B", text: "Option B" },
       { id: "C", text: "Option C" },
     ];
-    
+
     it("accepts valid MCQ contract (3 options)", () => {
       const answer = { correctOptionId: "B" };
       const result = validateListeningMCQContract(validOptions, answer, validMetadata, "Prompt?");
@@ -336,7 +337,7 @@ describe("Listening Contract", () => {
       expect(result.valid).toBe(false);
       expect(result.issues.some(i => i.code === "LISTENING_MCQ_CORRECT_OPTION_REQUIRED")).toBe(true);
     });
-    
+
     it("never becomes answer authority from transcript/metadata", () => {
       const result = validateListeningMCQContract(validOptions, { correctOptionId: "B" }, validMetadata, "Prompt?");
       expect(result.valid).toBe(true);
@@ -383,12 +384,65 @@ describe("Listening Contract", () => {
       expect(result.valid).toBe(false);
       expect(result.issues.some(i => i.code === "LISTENING_SHORT_ACCEPTED_DUPLICATE")).toBe(true);
     });
-    
+
     it("answer defects use fatal severity and do not become repairable", () => {
       const answer = { acceptedAnswers: [] };
       const result = validateListeningShortAnswerContract(answer, validMetadata, "Prompt?");
       expect(result.valid).toBe(false);
       expect(result.issues.some(i => i.code === "LISTENING_SHORT_ACCEPTED_REQUIRED" && i.importLevel === "error")).toBe(true);
+    });
+  });
+
+  describe("projectListeningPresentation", () => {
+    it("projects valid MCQ presentation safely", () => {
+      const opts = [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }];
+      const result = projectListeningPresentation(validMetadata, opts, "LISTENING_MCQ");
+      expect(result).not.toBeNull();
+      if (result?.state === "UNAVAILABLE" && "reason" in result) {
+        expect(result.reason).toBe("DELIVERY_NOT_CONFIGURED");
+        expect(result.mimeType).toBe("audio/mpeg");
+        expect(result.durationMs).toBe(92000);
+        expect(result.partLabel).toBe("Part 1");
+        expect(result.attributionText).toBe("Produced by Englishphile.");
+        expect(result.transcriptPolicy).toBe("AFTER_SUBMISSION");
+        expect(result.transcript).toBeNull(); // transcript NEVER exposed
+        expect((result as Record<string, unknown>).text).toBeUndefined();
+        expect((result as Record<string, unknown>).src).toBeUndefined(); // raw assetRef NEVER exposed
+      } else {
+        expect.fail("Expected state to be UNAVAILABLE with reason");
+      }
+    });
+
+    it("returns null when metadata is malformed or missing", () => {
+      const opts = [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "C", text: "C" }];
+      expect(projectListeningPresentation(null, opts, "LISTENING_MCQ")).toBeNull();
+
+      const invalid = JSON.parse(JSON.stringify(validMetadata));
+      invalid.listening.audio.durationMs = 1; // invalid duration
+      expect(projectListeningPresentation(invalid, opts, "LISTENING_MCQ")).toBeNull();
+    });
+
+    it("returns null for MCQ when options are malformed", () => {
+      const opts = [{ id: "A", text: "A" }, { id: "B", text: "B" }]; // too few
+      expect(projectListeningPresentation(validMetadata, opts, "LISTENING_MCQ")).toBeNull();
+
+      const optsInvalidId = [{ id: "A", text: "A" }, { id: "B", text: "B" }, { id: "Z", text: "C" }];
+      expect(projectListeningPresentation(validMetadata, optsInvalidId, "LISTENING_MCQ")).toBeNull();
+    });
+
+    it("projects valid short answer presentation safely", () => {
+      const result = projectListeningPresentation(validMetadata, null, "LISTENING_SHORT_ANSWER");
+      expect(result).not.toBeNull();
+      if (result?.state === "UNAVAILABLE" && "reason" in result) {
+        expect(result.transcript).toBeNull();
+      } else {
+        expect.fail("Expected state to be UNAVAILABLE");
+      }
+    });
+
+    it("returns null for non-listening types", () => {
+      const result = projectListeningPresentation(validMetadata, null, "MCQ");
+      expect(result).toBeNull();
     });
   });
 });

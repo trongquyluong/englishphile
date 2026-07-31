@@ -39,6 +39,7 @@ function question(
     sectionType: null,
     triosSentences: null,
     writingRubric: null,
+    listeningPresentation: null,
   };
 }
 
