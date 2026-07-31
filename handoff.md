@@ -762,3 +762,9 @@ User accounts must sign up again on production (passwords are not exported). The
     - Never run seed on populated data without explicit approval.
     - Vercel Hobby + Neon Free for free beta deployment.
     - Do not use SQLite for deployed production.
+
+### Phase 2 Listening PR 3A — Listening playback accessibility (branch `phase2/10-listening-playback-accessibility`)
+- Branch identifier `phase2/10-listening-playback-accessibility` is not GitHub PR #10; this is the "PR 3A: unavailable/accessibility UI state" pass.
+- Implemented an explicit unavailable-only `ListeningQuestion` renderer with no answer-control branch and structural accessibility states (status region, polite live, question-specific heading target).
+- No approved `READY` DTO variant, no delivery resolver, no approved playback policy. Actual audio playback, transcript visibility, and storage delivery remain unimplemented.
+- Future playback must use a positive runtime validator for a complete resolved-delivery shape and is out of scope here.
