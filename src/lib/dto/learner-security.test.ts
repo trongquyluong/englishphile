@@ -720,4 +720,102 @@ describe("Phase 1D-A learner-safe DTO runtime regressions", () => {
       )).toBeNull();
     },
   );
+
+  it("projects canonical Listening MCQ safe boundaries without leaking metadata, answers, or transcripts", () => {
+    const source = {
+      id: "listening-mcq-1",
+      type: "LISTENING_MCQ",
+      skillType: "LISTENING",
+      difficulty: "C1",
+      prompt: "Listen and choose.",
+      passage: null,
+      options: [
+        { id: "A", text: "One" },
+        { id: "B", text: "Two" },
+        { id: "C", text: "Three" },
+      ],
+      answer: { correctOptionId: "B" },
+      correctAnswer: ANSWER_SENTINEL,
+      explanation: EXPLANATION_SENTINEL,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: {
+        audioUrl: "/audio/legacy-safe.mp3",
+        sectionType: "legacy-section",
+        listening: {
+          version: 1,
+          partLabel: "Part 1",
+          audio: {
+            assetRef: "/media/listening/pilot-001/dialogue-01-v1.mp3",
+            mimeType: "audio/mpeg",
+            byteLength: 2457600,
+            durationMs: 92000,
+          },
+          transcript: {
+            text: "SPEAKER_SECRET",
+            languageTag: "en",
+            availabilityPolicy: "AFTER_SUBMISSION",
+          },
+          attribution: {
+            displayText: "Produced by Englishphile.",
+          },
+          rights: {
+            classification: "OWNED",
+            evidenceRef: "rights:secret",
+          },
+          unavailableBehavior: "BLOCK_PROBLEM",
+        }
+      },
+      orderIndex: 0,
+    } as LearnerQuestionSource & Record<string, unknown>;
+
+    const dto = toLearnerQuestionDTO(source);
+
+    expect(dto.options).toEqual([]); // Suppressed because delivery is UNAVAILABLE
+    expect(dto.audioUrl).toBeNull();
+    expect(dto.sectionType).toBeNull();
+    expect(dto.listeningPresentation).not.toBeNull();
+    if (dto.listeningPresentation?.state === "UNAVAILABLE" && "reason" in dto.listeningPresentation) {
+      expect(dto.listeningPresentation.transcript).toBeNull();
+    } else {
+      expect.fail("Expected state to be UNAVAILABLE with reason");
+    }
+
+    expect(serialized(dto)).not.toContain(ANSWER_SENTINEL);
+    expect(serialized(dto)).not.toContain(EXPLANATION_SENTINEL);
+    expect(serialized(dto)).not.toContain("SPEAKER_SECRET");
+    expect(serialized(dto)).not.toContain("rights:secret");
+    expect(serialized(dto)).not.toContain("/audio/legacy-safe.mp3");
+    expect(serialized(dto)).not.toContain("legacy-section");
+  });
+
+  it("fails closed for malformed Listening DTOs with null listeningPresentation and empty options", () => {
+    const source = {
+      id: "listening-mcq-malformed",
+      type: "LISTENING_MCQ",
+      skillType: "LISTENING",
+      difficulty: "C1",
+      prompt: "Listen and choose.",
+      passage: null,
+      options: [
+        { id: "A", text: "One" },
+        { id: "B", text: "Two" },
+      ],
+      answer: { correctOptionId: "B" },
+      explanation: null,
+      rootWord: null,
+      keyword: null,
+      targetSentence: null,
+      lineNumber: null,
+      metadata: { listening: null },
+      orderIndex: 0,
+    } as LearnerQuestionSource;
+
+    const dto = toLearnerQuestionDTO(source);
+
+    expect(dto.options).toEqual([]);
+    expect(dto.listeningPresentation).toBeNull();
+  });
 });

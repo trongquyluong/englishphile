@@ -260,3 +260,80 @@ export function validateListeningShortAnswerContract(
     issues,
   };
 }
+
+export type ListeningPresentationDTO =
+  | {
+      state: "UNAVAILABLE";
+      reason: "DELIVERY_NOT_CONFIGURED";
+      mimeType: "audio/mpeg";
+      durationMs: number;
+      partLabel: string | null;
+      attributionText: string;
+      transcriptPolicy: "AFTER_SUBMISSION";
+      transcript: null;
+    }
+  | {
+      state: "UNAVAILABLE";
+      messageCode: "LISTENING_MEDIA_UNAVAILABLE";
+    };
+
+export function projectListeningPresentation(
+  metadataValue: unknown,
+  optionsValue: unknown,
+  questionType: string,
+): ListeningPresentationDTO | null {
+  if (
+    questionType !== "LISTENING_MCQ" &&
+    questionType !== "LISTENING_SHORT_ANSWER"
+  ) {
+    return null;
+  }
+
+  const metadataIssues = validateListeningMetadata(metadataValue);
+  const metadataValid = !metadataIssues.some(
+    (i) => i.importLevel === "error" || i.importLevel === "warning"
+  );
+
+  if (!metadataValid) {
+    return null;
+  }
+
+  if (questionType === "LISTENING_MCQ") {
+    if (!Array.isArray(optionsValue) || (optionsValue.length !== 3 && optionsValue.length !== 4)) {
+      return null;
+    }
+
+    const canonicalOptionIds: string[] = [];
+    for (const rawOption of optionsValue) {
+      const option = isRecord(rawOption) ? rawOption : {};
+      const canonicalId = visiblePrimitive(option.id)?.trim().toUpperCase() || null;
+      const rawText = visiblePrimitive(option.text);
+
+      if (!canonicalId || !(LISTENING_MCQ_OPTION_IDS as readonly string[]).includes(canonicalId)) {
+        return null;
+      }
+      if (canonicalOptionIds.includes(canonicalId)) {
+        return null;
+      }
+      canonicalOptionIds.push(canonicalId);
+
+      if (rawText === null || !rawText.trim() || rawText.trim().length > 500) {
+        return null;
+      }
+    }
+  }
+
+  const metadata = metadataValue as Record<string, unknown>;
+  const listening = metadata.listening as Record<string, unknown>;
+
+  return {
+    state: "UNAVAILABLE",
+    reason: "DELIVERY_NOT_CONFIGURED",
+    mimeType: "audio/mpeg",
+    durationMs: Number((listening.audio as Record<string, unknown>).durationMs),
+    partLabel: typeof listening.partLabel === "string" ? listening.partLabel.trim() : null,
+    attributionText: String((listening.attribution as Record<string, unknown>).displayText).trim(),
+    transcriptPolicy: "AFTER_SUBMISSION",
+    transcript: null,
+  };
+}

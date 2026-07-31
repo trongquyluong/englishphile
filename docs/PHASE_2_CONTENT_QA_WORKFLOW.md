@@ -513,7 +513,7 @@ remaining content-repair and Listening items are not:
    contract, publication matrix, DTO boundary, migration policy, owner
    decisions, and small-PR sequence. It implements no runtime contract.
 6. **Listening pure contract implementation (Phase 2 PR 8):** implements the pure `metadata.listening` validation contract, integrated into JSON/CSV normalization, immediate import-publish, individual/edit publish, bulk `publish-safe`, persisted QA, and repository audit. No media integration, DTO projection, rendering, database interaction, or real content is implemented yet.
-7. **Listening DTO and learner integration:** implement the learner-safe and admin projection boundaries and playback components.
+7. **Listening DTO projection (Phase 2 PR 9):** implements the pure learner-safe and admin projection boundaries. Playback components remain unimplemented.
 8. **Listening content repair:** author, review, and validate real media assets and metadata against the pure contract.
 
 ## L. Writing authored-rubric presentation
