@@ -417,7 +417,7 @@ learner-safe submission feedback and admin-only answer access remain unchanged.
 Repository tests cover pure contract fixtures, JSON/CSV normalization,
 immediate publication, persisted QA, individual and bulk publication, learner
 DTO non-disclosure/fail-closed behavior, admin preview mapping, renderer
-interaction shape, scoring, the 55-question repository inventory, and
+interaction shape, scoring, the historical 55-question repository inventory baseline, and
 deterministic audit output. They are repository/local evidence only: no
 database, deployed environment, provider, import, publication, migration,
 seed, or content repair was executed.
@@ -496,7 +496,7 @@ learner-presentation item is implemented by Phase 2 PR 6 in this branch; the
 remaining content-repair and Listening items are not:
 
 1. **Error Identification content repair:** author and independently review
-   real A–D spans for the 55 legacy questions; do not synthesize them from
+   real A–D spans for the 31 remaining legacy questions (from the historical 55); do not synthesize them from
    sentence text or metadata.
 2. **Trios linguistic review:** independently review the unchanged 15 current
    items; contract conformance alone does not approve their language or level.
