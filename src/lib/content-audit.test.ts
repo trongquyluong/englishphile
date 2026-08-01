@@ -958,7 +958,7 @@ describe("content-pack repository audit", () => {
     });
     expect(report.answerPositions).toEqual({ A: 156, B: 44, C: 18, D: 12 });
     expect(report.findings.shortExplanations).toHaveLength(440);
-    expect(report.findings.rendererIncompatibleOptions).toHaveLength(55);
+    expect(report.findings.rendererIncompatibleOptions).toHaveLength(31);
     expect(report.findings.duplicateNormalizedOptionTexts).toHaveLength(0);
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
     expect(report.byQuestionType.TRIOS_GAPPED_SENTENCES).toBe(15);
@@ -972,7 +972,7 @@ describe("content-pack repository audit", () => {
     )).toBe(true);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);
-    expect(report.normalizerWarnings).toHaveLength(176);
+    expect(report.normalizerWarnings).toHaveLength(152);
     expect(report.hasInventoryErrors).toBe(false);
   });
 

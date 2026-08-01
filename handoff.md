@@ -46,7 +46,7 @@ The repository audit adds two non-blocking deterministic signals.
 `rendererIncompatibleOptions` covers objective DTO/scorer failures such as too
 few renderable options, invalid or scorer-equivalent duplicate IDs,
 missing/invalid display text, and selected answers outside rendered options,
-including `ERROR_IDENTIFICATION`. It exposes 55 existing Error Identification
+including `ERROR_IDENTIFICATION`. Historically, it exposed 55 existing Error Identification
 questions with no renderable options. `duplicateNormalizedOptionTexts`
 separately identifies editorial ambiguity after NFKC, whitespace, trim, and
 lowercase normalization; renderers still display the original stringified
@@ -768,3 +768,17 @@ User accounts must sign up again on production (passwords are not exported). The
 - Implemented an explicit unavailable-only `ListeningQuestion` renderer with no answer-control branch and structural accessibility states (status region, polite live, question-specific heading target).
 - No approved `READY` DTO variant, no delivery resolver, no approved playback policy. Actual audio playback, transcript visibility, and storage delivery remain unimplemented.
 - Future playback must use a positive runtime validator for a complete resolved-delivery shape and is out of scope here.
+
+
+### Phase 2 PR 11A: Error Identification content repair pilot 001
+
+- 24 canonical A–D structural repairs in `pilot-pack-001`.
+- Q7 `BLOCKED_DIALECT_AMBIGUITY`.
+- Q25 `BLOCKED_NO_ERROR_ITEM`.
+- 30 untouched questions in the other pack.
+- Q23 pre-existing apostrophe-normalization scoring debt.
+- All content remains `NEEDS_REVIEW`.
+- Required future human linguistic, ambiguity, rendering, answer, difficulty, and calibration review.
+- No import, publication, database, deployment, or provider action.
+- 31 remaining renderer findings
+- 152 current normalizer warnings

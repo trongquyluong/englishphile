@@ -28,14 +28,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Despite of the heavy rain, the debate continued as planned.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Despite of"
+            },
+            {
+              "id": "B",
+              "text": "the heavy rain,"
+            },
+            {
+              "id": "C",
+              "text": "the debate continued"
+            },
+            {
+              "id": "D",
+              "text": "as planned."
+            }
+          ],
           "answer": {
-            "errorPart": "A",
-            "correction": "Despite the heavy rain",
-            "accepted": [
-              "A"
-            ],
-            "display": "A: Despite the heavy rain"
+            "correctPart": "A",
+            "correction": "Despite"
           },
           "explanation": "Despite is not followed by of.",
           "rootWord": null,
@@ -54,14 +67,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The number of students taking the exam have increased sharply.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The number of students"
+            },
+            {
+              "id": "B",
+              "text": "taking the exam"
+            },
+            {
+              "id": "C",
+              "text": "have increased"
+            },
+            {
+              "id": "D",
+              "text": "sharply."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "has increased",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: has increased"
+            "correctPart": "C",
+            "correction": "has increased"
           },
           "explanation": "The subject is The number, singular.",
           "rootWord": null,
@@ -80,14 +106,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Hardly the teacher had entered the room when the class fell silent.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Hardly"
+            },
+            {
+              "id": "B",
+              "text": "the teacher had entered"
+            },
+            {
+              "id": "C",
+              "text": "the room when"
+            },
+            {
+              "id": "D",
+              "text": "the class fell silent."
+            }
+          ],
           "answer": {
-            "errorPart": "A",
-            "correction": "Hardly had the teacher entered",
-            "accepted": [
-              "A"
-            ],
-            "display": "A: Hardly had the teacher entered"
+            "correctPart": "B",
+            "correction": "had the teacher entered"
           },
           "explanation": "Hardly requires inversion.",
           "rootWord": null,
@@ -106,14 +145,27 @@
           "difficulty": "CHUYEN",
           "prompt": "She suggested me to rewrite the introduction more clearly.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "She suggested"
+            },
+            {
+              "id": "B",
+              "text": "me to rewrite"
+            },
+            {
+              "id": "C",
+              "text": "the introduction"
+            },
+            {
+              "id": "D",
+              "text": "more clearly."
+            }
+          ],
           "answer": {
-            "errorPart": "A",
-            "correction": "suggested that I rewrite / suggested rewriting",
-            "accepted": [
-              "A"
-            ],
-            "display": "A: suggested that I rewrite / suggested rewriting"
+            "correctPart": "B",
+            "correction": "that I rewrite / rewriting"
           },
           "explanation": "suggest does not take object + to-infinitive.",
           "rootWord": null,
@@ -132,14 +184,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The essay is consisted of four main sections.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The essay"
+            },
+            {
+              "id": "B",
+              "text": "is consisted of"
+            },
+            {
+              "id": "C",
+              "text": "four main"
+            },
+            {
+              "id": "D",
+              "text": "sections."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "consists of",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: consists of"
+            "correctPart": "B",
+            "correction": "consists of"
           },
           "explanation": "consist of is not passive.",
           "rootWord": null,
@@ -175,14 +240,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Neither the students nor the teacher were aware of the change.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Neither the students"
+            },
+            {
+              "id": "B",
+              "text": "nor the teacher"
+            },
+            {
+              "id": "C",
+              "text": "were aware"
+            },
+            {
+              "id": "D",
+              "text": "of the change."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "was aware",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: was aware"
+            "correctPart": "C",
+            "correction": "was aware"
           },
           "explanation": "Verb agrees with nearer subject teacher.",
           "rootWord": null,
@@ -201,14 +279,27 @@
           "difficulty": "CHUYEN",
           "prompt": "It is essential that every applicant submits the form on time.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "It is essential"
+            },
+            {
+              "id": "B",
+              "text": "that every applicant"
+            },
+            {
+              "id": "C",
+              "text": "submits"
+            },
+            {
+              "id": "D",
+              "text": "the form on time."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "submit",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: submit"
+            "correctPart": "C",
+            "correction": "submit"
           },
           "explanation": "Subjunctive after essential.",
           "rootWord": null,
@@ -227,14 +318,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The explanation was too complicated that most students gave up.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The explanation was"
+            },
+            {
+              "id": "B",
+              "text": "too complicated"
+            },
+            {
+              "id": "C",
+              "text": "that most students"
+            },
+            {
+              "id": "D",
+              "text": "gave up."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "so complicated that / too complicated for",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: so complicated that / too complicated for"
+            "correctPart": "B",
+            "correction": "so complicated"
           },
           "explanation": "too...that is incorrect.",
           "rootWord": null,
@@ -253,14 +357,27 @@
           "difficulty": "CHUYEN",
           "prompt": "She is one of the most capable student in the class.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "She is one of"
+            },
+            {
+              "id": "B",
+              "text": "the most capable"
+            },
+            {
+              "id": "C",
+              "text": "student"
+            },
+            {
+              "id": "D",
+              "text": "in the class."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "students",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: students"
+            "correctPart": "C",
+            "correction": "students"
           },
           "explanation": "one of + plural noun.",
           "rootWord": null,
@@ -279,14 +396,27 @@
           "difficulty": "CHUYEN",
           "prompt": "I look forward to hear from you soon.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "I look forward to"
+            },
+            {
+              "id": "B",
+              "text": "hear"
+            },
+            {
+              "id": "C",
+              "text": "from you"
+            },
+            {
+              "id": "D",
+              "text": "soon."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "hearing",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: hearing"
+            "correctPart": "B",
+            "correction": "hearing"
           },
           "explanation": "look forward to + gerund.",
           "rootWord": null,
@@ -322,14 +452,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The reason why he failed was because he ignored the instructions.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The reason why"
+            },
+            {
+              "id": "B",
+              "text": "he failed"
+            },
+            {
+              "id": "C",
+              "text": "was because"
+            },
+            {
+              "id": "D",
+              "text": "he ignored the instructions."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "that he ignored",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: that he ignored"
+            "correctPart": "C",
+            "correction": "was that"
           },
           "explanation": "The reason was that.",
           "rootWord": null,
@@ -348,14 +491,27 @@
           "difficulty": "CHUYEN",
           "prompt": "No matter how hard did he try, he could not solve the puzzle.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "No matter how hard"
+            },
+            {
+              "id": "B",
+              "text": "did he try,"
+            },
+            {
+              "id": "C",
+              "text": "he could not solve"
+            },
+            {
+              "id": "D",
+              "text": "the puzzle."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "he tried",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: he tried"
+            "correctPart": "B",
+            "correction": "he tried,"
           },
           "explanation": "No matter how does not use inversion here.",
           "rootWord": null,
@@ -374,14 +530,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The data shows that reading habits has changed.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The data shows"
+            },
+            {
+              "id": "B",
+              "text": "that"
+            },
+            {
+              "id": "C",
+              "text": "reading habits"
+            },
+            {
+              "id": "D",
+              "text": "has changed."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "have changed",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: have changed"
+            "correctPart": "D",
+            "correction": "have changed."
           },
           "explanation": "reading habits = plural.",
           "rootWord": null,
@@ -400,14 +569,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Scarcely had we sat down than the fire alarm rang.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Scarcely had we"
+            },
+            {
+              "id": "B",
+              "text": "sat down"
+            },
+            {
+              "id": "C",
+              "text": "than"
+            },
+            {
+              "id": "D",
+              "text": "the fire alarm rang."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "when",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: when"
+            "correctPart": "C",
+            "correction": "when"
           },
           "explanation": "Scarcely...when.",
           "rootWord": null,
@@ -426,14 +608,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Each of the answers were checked twice.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Each of"
+            },
+            {
+              "id": "B",
+              "text": "the answers"
+            },
+            {
+              "id": "C",
+              "text": "were checked"
+            },
+            {
+              "id": "D",
+              "text": "twice."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "was checked",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: was checked"
+            "correctPart": "C",
+            "correction": "was checked"
           },
           "explanation": "Each is singular.",
           "rootWord": null,
@@ -469,14 +664,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The teacher made us to rewrite the paragraph.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The teacher"
+            },
+            {
+              "id": "B",
+              "text": "made us"
+            },
+            {
+              "id": "C",
+              "text": "to rewrite"
+            },
+            {
+              "id": "D",
+              "text": "the paragraph."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "rewrite",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: rewrite"
+            "correctPart": "C",
+            "correction": "rewrite"
           },
           "explanation": "make + object + bare infinitive.",
           "rootWord": null,
@@ -495,14 +703,27 @@
           "difficulty": "CHUYEN",
           "prompt": "She is used to wake up early before exams.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "She is used to"
+            },
+            {
+              "id": "B",
+              "text": "wake"
+            },
+            {
+              "id": "C",
+              "text": "up early"
+            },
+            {
+              "id": "D",
+              "text": "before exams."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "waking",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: waking"
+            "correctPart": "B",
+            "correction": "waking"
           },
           "explanation": "be used to + gerund.",
           "rootWord": null,
@@ -521,14 +742,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Not only he passed the exam, but he also won a scholarship.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Not only"
+            },
+            {
+              "id": "B",
+              "text": "he passed"
+            },
+            {
+              "id": "C",
+              "text": "the exam, but he also"
+            },
+            {
+              "id": "D",
+              "text": "won a scholarship."
+            }
+          ],
           "answer": {
-            "errorPart": "A",
-            "correction": "Not only did he pass",
-            "accepted": [
-              "A"
-            ],
-            "display": "A: Not only did he pass"
+            "correctPart": "B",
+            "correction": "did he pass"
           },
           "explanation": "Not only at front requires inversion.",
           "rootWord": null,
@@ -547,14 +781,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The article provides many evidences for its claim.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The article provides"
+            },
+            {
+              "id": "B",
+              "text": "many evidences"
+            },
+            {
+              "id": "C",
+              "text": "for its"
+            },
+            {
+              "id": "D",
+              "text": "claim."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "much evidence / many pieces of evidence",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: much evidence / many pieces of evidence"
+            "correctPart": "B",
+            "correction": "much evidence / many pieces of evidence"
           },
           "explanation": "Evidence is uncountable.",
           "rootWord": null,
@@ -573,14 +820,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Had I knew the answer, I would have told you.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Had I knew"
+            },
+            {
+              "id": "B",
+              "text": "the answer,"
+            },
+            {
+              "id": "C",
+              "text": "I would have"
+            },
+            {
+              "id": "D",
+              "text": "told you."
+            }
+          ],
           "answer": {
-            "errorPart": "A",
-            "correction": "Had I known",
-            "accepted": [
-              "A"
-            ],
-            "display": "A: Had I known"
+            "correctPart": "A",
+            "correction": "Had I known"
           },
           "explanation": "Third conditional inversion uses past participle.",
           "rootWord": null,
@@ -616,14 +876,27 @@
           "difficulty": "CHUYEN",
           "prompt": "There is a growing concern about how social media affects to attention.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "There is a growing concern"
+            },
+            {
+              "id": "B",
+              "text": "about how"
+            },
+            {
+              "id": "C",
+              "text": "social media"
+            },
+            {
+              "id": "D",
+              "text": "affects to attention."
+            }
+          ],
           "answer": {
-            "errorPart": "C",
-            "correction": "affects attention",
-            "accepted": [
-              "C"
-            ],
-            "display": "C: affects attention"
+            "correctPart": "D",
+            "correction": "affects attention."
           },
           "explanation": "affect is transitive.",
           "rootWord": null,
@@ -642,14 +915,27 @@
           "difficulty": "CHUYEN",
           "prompt": "Rarely students are asked to explain why an answer is wrong.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "Rarely students are asked"
+            },
+            {
+              "id": "B",
+              "text": "to explain why"
+            },
+            {
+              "id": "C",
+              "text": "an answer"
+            },
+            {
+              "id": "D",
+              "text": "is wrong."
+            }
+          ],
           "answer": {
-            "errorPart": "A",
-            "correction": "Rarely are students asked",
-            "accepted": [
-              "A"
-            ],
-            "display": "A: Rarely are students asked"
+            "correctPart": "A",
+            "correction": "Rarely are students asked"
           },
           "explanation": "Rarely at front requires inversion.",
           "rootWord": null,
@@ -668,14 +954,27 @@
           "difficulty": "CHUYEN",
           "prompt": "I would rather you don’t discuss this with the class.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "I would rather you"
+            },
+            {
+              "id": "B",
+              "text": "don’t discuss"
+            },
+            {
+              "id": "C",
+              "text": "this with"
+            },
+            {
+              "id": "D",
+              "text": "the class."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "didn’t discuss",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: didn’t discuss"
+            "correctPart": "B",
+            "correction": "didn’t discuss"
           },
           "explanation": "would rather + past simple.",
           "rootWord": null,
@@ -694,14 +993,27 @@
           "difficulty": "CHUYEN",
           "prompt": "The passage is worth to read twice.",
           "passage": null,
-          "options": null,
+          "options": [
+            {
+              "id": "A",
+              "text": "The passage"
+            },
+            {
+              "id": "B",
+              "text": "is worth"
+            },
+            {
+              "id": "C",
+              "text": "to read"
+            },
+            {
+              "id": "D",
+              "text": "twice."
+            }
+          ],
           "answer": {
-            "errorPart": "B",
-            "correction": "worth reading",
-            "accepted": [
-              "B"
-            ],
-            "display": "B: worth reading"
+            "correctPart": "C",
+            "correction": "reading"
           },
           "explanation": "worth + gerund.",
           "rootWord": null,
