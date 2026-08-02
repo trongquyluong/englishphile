@@ -33,11 +33,31 @@ Preview, Production, provider, environment, or deployed content.
 - Phase 2 PR 4 implements the bounded Trios learner-safe contract. The
   structured source is only `metadata.sentences`; `passage` remains an optional
   display/compatibility mirror and is never split into a tuple.
-- All 55 current `ERROR_IDENTIFICATION` questions lack renderable options.
-  Phase 2 PR 3 now reports this as a non-fatal import/repository warning and
-  enforces the complete contract in persisted QA and every publication path.
-  The files remain unchanged and are not publication-ready; a separate reviewed
-  content-repair PR must author their real A–D spans.
+- At the historical Phase 2 PR 3 baseline, all 55 `ERROR_IDENTIFICATION`
+  questions lacked renderable options. Both Error Identification pack files
+  were then unchanged with `options=null`, so a separate reviewed content-repair
+  pass was required to author real A–D spans. Phase 2 PR 3 reported those gaps as
+  non-fatal import/repository warnings and enforced the complete contract in
+  persisted QA and every publication path.
+- After PR 11A, 24 pilot rows had reviewed canonical A–D structural repairs; 31
+  renderer findings and 152 normalizer warnings remained. PR 11B then repaired
+  26 Pack 002 rows, bringing the total to 50 structurally repaired questions:
+  24 in `pilot-pack-001` and 26 in `content-pack-002`. Exactly five
+  renderer-incompatible Error Identification rows remain: `pilot-pack-001` Q25
+  (`BLOCKED_NO_ERROR_ITEM`); and `content-pack-002` Q7
+  (`BLOCKED_REGISTER_AMBIGUITY`), Q9 (`BLOCKED_MANDATIVE_AMBIGUITY`), Q27
+  (`BLOCKED_NO_ERROR_ITEM`), and Q30 (`BLOCKED_MANDATIVE_AMBIGUITY`). The
+  verified current audit remains at five Error Identification renderer findings
+  and 126 normalizer warnings.
+- All repaired rows remain `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`.
+  Structural validity does not establish linguistic, difficulty, calibration,
+  or publication approval; already-repaired rows do not require further A–D
+  authoring. See the later PR 11A/11B repair-status passages in this document
+  and the review records
+  [`PHASE_2_ERROR_IDENTIFICATION_REPAIR_PILOT_001.md`](PHASE_2_ERROR_IDENTIFICATION_REPAIR_PILOT_001.md)
+  and
+  [`PHASE_2_ERROR_IDENTIFICATION_REPAIR_PACK_002.md`](PHASE_2_ERROR_IDENTIFICATION_REPAIR_PACK_002.md)
+  for current per-question details.
 - Phase 2 PR 5 implements the Pronunciation target-span contract. The unchanged
   30 repository questions still have generic `metadata.focus` values but no
   authored target spans, so all 30 are now publication-blocked pending a
@@ -377,14 +397,23 @@ can write published content. This repository enforcement is not database
 evidence: it does not establish that unknown historical published rows were
 inspected, repaired, or retroactively unpublished.
 
-The two repository files still contain 55 legacy questions with `options=null`;
-none was edited or silently given generated spans. Repository audit therefore
-continues to exit zero, reports exactly 55
-`rendererIncompatibleOptions` findings, and now also carries 56 non-fatal
-normalizer warnings with file/problem/question
-paths (one legacy `correctPart=OK` adds a separate canonical-ID warning). JSON order remains
-deterministic and option values/excerpts remain bounded.
-`duplicateNormalizedOptionTexts` stays a separate editorial signal.
+At the historical Phase 2 PR 3 baseline, the two repository files contained 55
+legacy questions with `options=null`. The audit then reported 55
+`rendererIncompatibleOptions` findings and, after Pronunciation contract work,
+176 total normalizer warnings: 56 Error Identification warnings plus 120
+missing-target-span warnings. Those figures remain historical evidence; they
+must not be read as the current repository state.
+
+After PR 11A repaired 24 pilot rows, the audit reported 31 renderer findings
+and 152 total normalizer warnings. PR 11B then reviewed all 30 rows in
+`content-pack-002`, canonically repaired 26, and left four genuinely ambiguous
+or no-error rows unchanged. The verified current audit reports 5 renderer
+findings and 126 normalizer warnings, with 30 unchanged
+`pronunciationWithoutValidTargetSpans` findings and
+`hasInventoryErrors=false`. The five renderer findings are pilot Q25 plus pack
+002 Q7, Q9, Q27, and Q30. JSON order remains deterministic and option
+values/excerpts remain bounded. `duplicateNormalizedOptionTexts` stays a
+separate editorial signal.
 
 ### Publication, DTO, rendering, and evidence
 
@@ -495,9 +524,14 @@ Use the following independently reviewable bounded follow-ups. The Writing
 learner-presentation item is implemented by Phase 2 PR 6 in this branch; the
 remaining content-repair and Listening items are not:
 
-1. **Error Identification content repair:** author and independently review
-   real A–D spans for the 31 remaining legacy questions (from the historical 55); do not synthesize them from
-   sentence text or metadata.
+1. **Error Identification blocked-item resolution:** the historical baseline
+   was 55 renderer-incompatible rows; PR 11A reduced it to 31, and PR 11B
+   reduced it to the verified current 5. Do not force an answer into pilot Q25
+   (`BLOCKED_NO_ERROR_ITEM`) or pack 002 Q7, Q9, Q27, and Q30 without a separate
+   human editorial decision. Pilot Q7 remains
+   `BLOCKED_DIALECT_AMBIGUITY` at the editorial level despite valid A–D
+   structure, and pilot Q23 retains separate apostrophe-normalization scoring
+   debt.
 2. **Trios linguistic review:** independently review the unchanged 15 current
    items; contract conformance alone does not approve their language or level.
 3. **Pronunciation content repair:** follow the separate migration plan below;

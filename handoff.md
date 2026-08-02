@@ -82,10 +82,10 @@ show a fixed Vietnamese unavailable notice without crashing. Scoring requires
 both the canonical part and one normalized slash-delimited correction variant.
 Writing and Sentence Transformation scoring are unchanged.
 
-The 55 legacy repository questions in
+At the historical Phase 2 PR 3 checkpoint, the 55 legacy repository questions in
 `content-packs/pilot-pack-001/07-error-identification-pack-001.json` and
-`content-packs/content-pack-002/07-error-identification-pack-002.json` remain
-unchanged with `options=null`. They are still exactly 55 non-fatal
+`content-packs/content-pack-002/07-error-identification-pack-002.json` were
+unchanged with `options=null`. They produced exactly 55 non-fatal
 `rendererIncompatibleOptions` findings and 56 import-normalizer warnings (the
 legacy `correctPart=OK` item adds one canonical-ID warning); the
 repository audit exits zero. They are not publication-ready and every
@@ -169,7 +169,8 @@ selection. Diagnostic scoring adds only server-side `options` to its scoring
 projection; learner presentation queries remain unchanged. Historical
 malformed rows cannot score true.
 
-The unchanged Pronunciation pack still contains 6 problems, 30 questions, and
+At the historical Phase 2 PR 5 checkpoint, the unchanged Pronunciation pack
+contained 6 problems, 30 questions, and
 120 options with no target spans. The repository audit reports 30
 `pronunciationWithoutValidTargetSpans` findings and 120 new non-fatal
 normalizer warnings, for 176 total normalizer warnings including the existing
@@ -780,5 +781,28 @@ User accounts must sign up again on production (passwords are not exported). The
 - All content remains `NEEDS_REVIEW`.
 - Required future human linguistic, ambiguity, rendering, answer, difficulty, and calibration review.
 - No import, publication, database, deployment, or provider action.
-- 31 remaining renderer findings
-- 152 current normalizer warnings
+- 31 remaining renderer findings at the PR 11A checkpoint
+- 152 normalizer warnings at the PR 11A checkpoint
+
+### Phase 2 PR 11B: Error Identification content repair pack 002
+
+- Historical baseline before content repair: 55 renderer-incompatible Error
+  Identification rows and 176 total normalizer warnings.
+- State after PR 11A and before this pass: 31 renderer findings and 152
+  normalizer warnings.
+- Reviewed all 30 rows in
+  `content-packs/content-pack-002/07-error-identification-pack-002.json` before
+  structural editing; 26 received canonical A–D repairs.
+- Four pack-002 rows remain unchanged and fail closed: Q7
+  `BLOCKED_REGISTER_AMBIGUITY`, Q9 `BLOCKED_MANDATIVE_AMBIGUITY`, Q27
+  `BLOCKED_NO_ERROR_ITEM`, and Q30 `BLOCKED_MANDATIVE_AMBIGUITY`.
+- Verified current repository audit: 5 renderer findings, 126 normalizer
+  warnings, 30 Pronunciation target-span findings, and
+  `hasInventoryErrors=false`.
+- Pilot Q25 remains `BLOCKED_NO_ERROR_ITEM`; pilot Q7 remains
+  `BLOCKED_DIALECT_AMBIGUITY` editorially despite valid A–D structure; pilot
+  Q23 retains known pre-existing apostrophe-normalization scoring debt.
+- All repaired content remains `NEEDS_REVIEW`. Structural validity does not
+  establish linguistic, difficulty, calibration, or publication approval.
+- No import, publication, database, migration, seed, deployment, Preview,
+  Production, browser-E2E, or provider action.
