@@ -203,3 +203,13 @@ no raw correction text or unrelated sensitive content was emitted.
 - `pilot-pack-001` Q23 retains the pre-existing smart-apostrophe normalization scoring debt; this repair does not change scorer normalization.
 - Structural tests are repository/local evidence only. They are not browser-E2E, real-database, import, publication, Preview, or Production evidence.
 - No structural result establishes publication readiness, and no item was imported or published.
+
+Later scorer-resolution note (2026-08-02, Phase 2 PR 13): the historical Q23
+debt above is resolved by bounded equivalence among U+0027, U+2018, and U+2019
+under the existing punctuation-insensitive scorer policy. Stored content was
+not rewritten, and arbitrary Unicode punctuation is not normalized. Pilot Q23
+remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`; scorer equivalence does not
+establish linguistic, difficulty, calibration, or publication approval. The
+five Error Identification blockers and audit counts remain unchanged: 5
+renderer findings, 126 normalizer warnings, 30 Pronunciation target-span
+findings, and `hasInventoryErrors=false`.
