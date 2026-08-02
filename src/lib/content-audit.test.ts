@@ -975,8 +975,20 @@ describe("content-pack repository audit", () => {
       optionQuestions: 230,
     });
     expect(report.answerPositions).toEqual({ A: 156, B: 44, C: 18, D: 12 });
-    expect(report.findings.shortExplanations).toHaveLength(437);
+    expect(report.findings.shortExplanations).toHaveLength(419);
     expect(report.findings.rendererIncompatibleOptions).toHaveLength(5);
+    expect(report.findings.rendererIncompatibleOptions.map((finding) => ({
+      packDirectory: finding.packDirectory,
+      fileName: finding.fileName,
+      problemIndex: finding.problemIndex,
+      questionIndex: finding.questionIndex,
+    }))).toEqual([
+      { packDirectory: "content-pack-002", fileName: "07-error-identification-pack-002.json", problemIndex: 1, questionIndex: 1 },
+      { packDirectory: "content-pack-002", fileName: "07-error-identification-pack-002.json", problemIndex: 1, questionIndex: 3 },
+      { packDirectory: "content-pack-002", fileName: "07-error-identification-pack-002.json", problemIndex: 5, questionIndex: 1 },
+      { packDirectory: "content-pack-002", fileName: "07-error-identification-pack-002.json", problemIndex: 5, questionIndex: 4 },
+      { packDirectory: "pilot-pack-001", fileName: "07-error-identification-pack-001.json", problemIndex: 4, questionIndex: 4 },
+    ]);
     expect(report.findings.duplicateNormalizedOptionTexts).toHaveLength(0);
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
     expect(report.findings.duplicatePromptGroups.map((group) =>
@@ -1033,7 +1045,21 @@ describe("content-pack repository audit", () => {
     expect(report.byQuestionType.TRIOS_GAPPED_SENTENCES).toBe(15);
     expect(report.findings.triosWithoutThreeSentences).toEqual([]);
     expect(report.findings.pronunciationWithoutValidTargetSpans)
-      .toHaveLength(30);
+      .toHaveLength(10);
+    expect(report.findings.pronunciationWithoutValidTargetSpans.map(
+      (finding) => [finding.problemIndex, finding.questionIndex],
+    )).toEqual([
+      [0, 1],
+      [0, 2],
+      [1, 1],
+      [1, 4],
+      [2, 0],
+      [2, 3],
+      [3, 1],
+      [3, 4],
+      [4, 0],
+      [5, 3],
+    ]);
     expect(report.findings.pronunciationWithoutValidTargetSpans.every(
       (finding) =>
         finding.issues.length === 1 &&
@@ -1041,7 +1067,7 @@ describe("content-pack repository audit", () => {
     )).toBe(true);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);
-    expect(report.normalizerWarnings).toHaveLength(126);
+    expect(report.normalizerWarnings).toHaveLength(46);
     expect(report.hasInventoryErrors).toBe(false);
   });
 
