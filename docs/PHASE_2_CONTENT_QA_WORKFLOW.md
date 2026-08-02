@@ -393,8 +393,8 @@ publication approval. `canPublish` remains derived exclusively from zero
 `getPublishableProblemIds` and existing warning-tolerant bulk publication.
 Existing structural publication gates remain unchanged.
 
-PR 14 does not change repository-audit output or exit semantics. Current
-post-repair repository evidence remains `rendererIncompatibleOptions: 5`,
+PR 14 did not change repository-audit output or exit semantics. At the PR 14
+checkpoint, repository evidence remained `rendererIncompatibleOptions: 5`,
 `normalizerWarnings: 126`, `pronunciationWithoutValidTargetSpans: 30`,
 `shortExplanations: 437`, and `hasInventoryErrors: false`. The number of new
 persisted QA warnings depends on actual database rows and is not claimed from
@@ -659,13 +659,16 @@ remaining content-repair and Listening items are not:
    rewritten, and arbitrary Unicode punctuation is not normalized. Pilot Q23
    remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`; scorer equivalence does
    not establish linguistic, difficulty, calibration, or publication approval.
-   The five Error Identification blockers and repository-audit counts remain
-   unchanged: 5 renderer findings, 126 normalizer warnings, 30 Pronunciation
-   target-span findings, and `hasInventoryErrors=false`.
+   At the PR 13 checkpoint, the five Error Identification blockers and
+   repository-audit counts remained unchanged: 5 renderer findings, 126
+   normalizer warnings, 30 Pronunciation target-span findings, and
+   `hasInventoryErrors=false`.
 2. **Trios linguistic review:** independently review the unchanged 15 current
    items; contract conformance alone does not approve their language or level.
-3. **Pronunciation content repair:** follow the separate migration plan below;
-   do not infer target spans or publish the unchanged legacy items.
+3. **Pronunciation content repair (executed by Phase 2 PR 16):** follow the
+   separate migration plan and PR 16 result below. Twenty rows are structurally
+   repaired; ten documented blockers remain fail-closed. Do not infer spans or
+   publish either group without the required human approval.
 4. **Writing learner presentation (implemented in Phase 2 PR 6):** fixed
    controls are Vietnamese; the learner-safe DTO carries only a bounded
    `writingRubric` projection from `Question.answer.rubric`; missing/malformed
@@ -772,8 +775,41 @@ letters, phonetic assumptions, capitalization, `accepted`, `display`, an
 external dictionary, or AI. Passing the structural contract proves only that
 the renderer and scorer have bounded deterministic data; it does not prove
 phonetic, dialectal, ambiguity, difficulty, or calibration correctness. After
-this contract PR, all 30 unchanged questions are publication-blocked until the
-separate repair and human approval are complete.
+this contract PR, all 30 unchanged questions were publication-blocked until a
+separate repair and human approval could be completed.
+
+### Phase 2 PR 16 repair result
+
+PR 16 reviewed all 30 pilot rows individually under a declared General British
+primary keying variety. It structurally repaired 20 rows with ordered canonical
+A-D options, authored Unicode-code-point target spans, canonical member answers,
+and target-specific Vietnamese explanations. No answer position or option text
+changed, and no whole-word span was used. The complete evidence matrix is in
+[`PHASE_2_PRONUNCIATION_REPAIR_PILOT_001.md`](PHASE_2_PRONUNCIATION_REPAIR_PILOT_001.md).
+
+Ten complete question objects remain value-identical to the canonical base and
+fail closed: Q2, Q10, and Q29 are `BLOCKED_DIALECT_AMBIGUITY`; Q3, Q11, Q14,
+Q17, and Q21 are `BLOCKED_MULTIPLE_DEFENSIBLE_ANSWERS`; Q7 and Q20 are
+`BLOCKED_UNCLEAR_UNDERLINE`. No fake or partial spans were added.
+
+The verified current repository audit is
+`rendererIncompatibleOptions: 5`, `normalizerWarnings: 46`,
+`pronunciationWithoutValidTargetSpans: 10`, `shortExplanations: 419`,
+`duplicatePromptGroups: 3`, and `hasInventoryErrors: false`. Inventory,
+manifests, option counts, question counts, answer positions, duplicates, and
+the five Error Identification renderer findings are unchanged. The 80-warning
+decrease is exactly four missing-span warnings for each repaired row; 18 short
+explanation findings were removed by deliberate explanation improvements.
+
+All 20 structurally repaired rows remain `NEEDS_REVIEW` and
+`PENDING_HUMAN_SIGN_OFF`. Structural validity is not linguistic approval,
+dialect approval, naturalness, difficulty, calibration, accessibility
+certification, or publication approval. The ten blockers remain unavailable to
+the learner renderer and blocked by normalizer/publication/QA gates. Evidence is
+repository/local and dictionary-reference only: no real database, import,
+publication, Preview, Production, browser-E2E, migration, seed, deployment,
+provider, or GitHub action occurred. Listening remains separately blocked
+pending approved delivery work; PR 16 does not make all modes complete.
 
 ## N. Phase 2 PR 7 — Listening contract design
 

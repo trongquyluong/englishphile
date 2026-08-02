@@ -239,7 +239,7 @@ describe("Pronunciation JSON/CSV real-normalizer parity", () => {
     )).toBe(true);
   });
 
-  it("retains all 30 current questions with exactly 120 target warnings", () => {
+  it("retains all 30 current questions and warns only for the 10 documented blocked rows", () => {
     const file = fs.readFileSync(
       path.join(
         process.cwd(),
@@ -261,11 +261,51 @@ describe("Pronunciation JSON/CSV real-normalizer parity", () => {
     expect(normalized.issues.some((candidate) => candidate.level === "error"))
       .toBe(false);
     expect(questions).toBe(30);
-    expect(targetWarnings).toHaveLength(120);
+    const blockedQuestions = [
+      { globalQuestion: 2, problemIndex: 0, questionIndex: 1 },
+      { globalQuestion: 3, problemIndex: 0, questionIndex: 2 },
+      { globalQuestion: 7, problemIndex: 1, questionIndex: 1 },
+      { globalQuestion: 10, problemIndex: 1, questionIndex: 4 },
+      { globalQuestion: 11, problemIndex: 2, questionIndex: 0 },
+      { globalQuestion: 14, problemIndex: 2, questionIndex: 3 },
+      { globalQuestion: 17, problemIndex: 3, questionIndex: 1 },
+      { globalQuestion: 20, problemIndex: 3, questionIndex: 4 },
+      { globalQuestion: 21, problemIndex: 4, questionIndex: 0 },
+      { globalQuestion: 29, problemIndex: 5, questionIndex: 3 },
+    ] as const;
+    const expectedWarningPaths = blockedQuestions.flatMap(
+      ({ problemIndex, questionIndex }) =>
+        Array.from(
+          { length: 4 },
+          (_, optionIndex) =>
+            `problems.${problemIndex}.questions.${questionIndex}.options.${optionIndex}.targetSpan`,
+        ),
+    );
+
+    expect(targetWarnings).toHaveLength(40);
     expect(targetWarnings.every((candidate) =>
       /^problems\.\d+\.questions\.\d+\.options\.[0-3]\.targetSpan$/.test(
         candidate.path,
       ),
     )).toBe(true);
+    expect(targetWarnings.map((candidate) => candidate.path).sort()).toEqual(
+      [...expectedWarningPaths].sort(),
+    );
+
+    const warnedGlobalQuestions = new Set<number>(blockedQuestions.map(
+      ({ globalQuestion }) => globalQuestion,
+    ));
+    const repairedQuestionsWithWarnings = Array.from(
+      { length: 30 },
+      (_, index) => index + 1,
+    ).filter((globalQuestion) =>
+      !warnedGlobalQuestions.has(globalQuestion) &&
+      targetWarnings.some((candidate) => {
+        const match = /^problems\.(\d+)\.questions\.(\d+)\./.exec(candidate.path);
+        return match !== null &&
+          Number(match[1]) * 5 + Number(match[2]) + 1 === globalQuestion;
+      })
+    );
+    expect(repairedQuestionsWithWarnings).toEqual([]);
   });
 });

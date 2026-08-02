@@ -891,3 +891,32 @@ User accounts must sign up again on production (passwords are not exported). The
   real database, deployed admin page, semantic duplicate judgment, linguistic
   review, publication approval, import, migration, seed, deployment, provider,
   or GitHub action is claimed.
+
+### Phase 2 PR 16: human-reviewable Pronunciation repair pilot 001
+
+- Historical baseline: 6 problems, 30 `PRONUNCIATION_ODD_ONE_OUT` questions,
+  and 120 options without authored `targetSpan` in the pilot split file.
+- Reviewed every row under a declared General British primary variety and
+  structurally repaired 20 rows. Repaired options are canonical ordered A-D,
+  use exact zero-based half-open Unicode-code-point spans, retain all option
+  texts and answer positions, and have target-specific Vietnamese explanations.
+- Ten complete question objects remain canonical-base-identical and fail
+  closed: Q2/Q10/Q29 `BLOCKED_DIALECT_AMBIGUITY`;
+  Q3/Q11/Q14/Q17/Q21 `BLOCKED_MULTIPLE_DEFENSIBLE_ANSWERS`; Q7/Q20
+  `BLOCKED_UNCLEAR_UNDERLINE`.
+- Current repository audit: `rendererIncompatibleOptions: 5`,
+  `normalizerWarnings: 46`, `pronunciationWithoutValidTargetSpans: 10`,
+  `shortExplanations: 419`, `duplicatePromptGroups: 3`, and
+  `hasInventoryErrors: false`. Inventory/manifests, answer positions, and the
+  five Error Identification renderer findings are unchanged.
+- The full Q1-Q30 record, target slices, evidence, blockers, and reconciliation
+  are in
+  [`docs/PHASE_2_PRONUNCIATION_REPAIR_PILOT_001.md`](docs/PHASE_2_PRONUNCIATION_REPAIR_PILOT_001.md).
+- All repaired rows remain `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`.
+  Structural validity is not linguistic or dialect approval, naturalness,
+  difficulty, calibration, accessibility certification, or publication
+  approval. Blocked rows remain fail-closed.
+- Evidence is repository/local and dictionary-reference only. No real database,
+  import, publication, Preview, Production, browser-E2E, migration, seed,
+  deployment, provider, or GitHub action occurred. Listening remains separately
+  blocked pending approved delivery work; this PR does not complete all modes.

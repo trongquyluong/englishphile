@@ -145,7 +145,7 @@ persisted QA still derives `canPublish` exclusively from `errors === 0`.
 Existing Error Identification, Pronunciation, Trios, Listening, import, and
 publication blockers are unchanged.
 
-The current post-repair repository audit remains unchanged at
+At the Phase 2 PR 14 checkpoint, the repository audit remained
 `rendererIncompatibleOptions: 5`, `normalizerWarnings: 126`,
 `pronunciationWithoutValidTargetSpans: 30`, `shortExplanations: 437`, and
 `hasInventoryErrors: false`. Persisted warning totals depend on actual database
@@ -311,7 +311,7 @@ Every `/admin` page is protected by the admin layout, and mutation/API boundarie
 
 - **Trios rendering is incomplete.** All 15 repository Trios questions carry three sentences in `metadata.sentences`, but `TriosQuestion.tsx` renders only `question.prompt` and a text input. The learner cannot see the three sentences needed to solve the question.
 - **Post-submission copy conflicts with the safe DTO.** `ProblemClient.tsx` says submitting opens “đáp án đúng và giải thích”, while the Phase 1D-A learner-safe response intentionally returns only correctness and fixed generic feedback. This PR must not weaken that DTO. Any future review contract must be explicitly completion-gated and must never expose active contest or diagnostic answers.
-- **Pronunciation target marking is not represented.** The renderer adds a generic instruction and renders plain option text. The repository format has no consistently rendered target-span/underline contract, so the learner may not know which letters are being compared.
+- **Pronunciation target marking was absent from all 30 pilot rows at the historical baseline.** The production renderer now supports an authored target-span contract. Phase 2 PR 16 makes 20 rows structurally renderable; Q2, Q3, Q7, Q10, Q11, Q14, Q17, Q20, Q21, and Q29 remain documented fail-closed blockers and receive no inferred underline.
 
 ### Empty or split content systems
 
@@ -453,6 +453,33 @@ Acceptance criteria for this batch:
 - no substantive exact/high-similarity duplicate survives review;
 - skill and difficulty labels are justified by the rubric;
 - content defaults to `NEEDS_REVIEW`, passes QA, and is published only through the existing admin path.
+
+## Phase 2 PR 16 Pronunciation repair update
+
+The historical baseline was 6 pilot Pronunciation problems, 30 questions, and
+120 options without authored target spans. PR 16 reviewed every row under a
+declared General British primary keying variety and structurally repaired 20.
+The repaired rows retain their original option text and answer position, use
+ordered canonical A-D options and exact zero-based half-open Unicode-code-point
+spans, and remain `NEEDS_REVIEW` plus `PENDING_HUMAN_SIGN_OFF`.
+
+Ten question objects remain base-identical and fail closed: Q2, Q10, and Q29
+are `BLOCKED_DIALECT_AMBIGUITY`; Q3, Q11, Q14, Q17, and Q21 are
+`BLOCKED_MULTIPLE_DEFENSIBLE_ANSWERS`; Q7 and Q20 are
+`BLOCKED_UNCLEAR_UNDERLINE`. Pronunciation becomes structurally renderable only
+for the repaired rows. The current audit is 5 renderer-incompatible Error
+Identification rows, 46 normalizer warnings, 10 Pronunciation target-span
+findings, 419 short explanations, 3 substantive duplicate-prompt groups, and
+`hasInventoryErrors: false`; inventory and manifest counts are unchanged.
+
+The complete 30-row evidence matrix is
+[`PHASE_2_PRONUNCIATION_REPAIR_PILOT_001.md`](PHASE_2_PRONUNCIATION_REPAIR_PILOT_001.md).
+Structural validity does not establish linguistic approval, dialect approval,
+naturalness, difficulty, calibration, accessibility certification, or
+publication approval. No real database, import, publication, Preview,
+Production, browser-E2E, migration, seed, deployment, provider, or GitHub
+evidence exists for this repair. Listening remains separately blocked pending
+approved delivery work, so the platform modes are not all complete.
 
 ## Practical small-PR sequence
 

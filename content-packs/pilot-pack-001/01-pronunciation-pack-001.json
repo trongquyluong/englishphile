@@ -29,30 +29,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "wreath"
+              "id": "A",
+              "text": "wreath",
+              "targetSpan": { "start": 2, "end": 4 }
             },
             {
-              "label": "B",
-              "text": "breadth"
+              "id": "B",
+              "text": "breadth",
+              "targetSpan": { "start": 2, "end": 4 }
             },
             {
-              "label": "C",
-              "text": "heath"
+              "id": "C",
+              "text": "heath",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "D",
-              "text": "seethe"
+              "id": "D",
+              "text": "seethe",
+              "targetSpan": { "start": 1, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "B",
-            "accepted": [
-              "B"
-            ],
-            "display": "B"
+            "correctOptionId": "B"
           },
-          "explanation": "breadth has a different vowel/consonant pattern.",
+          "explanation": "Phần ea trong breadth được phát âm /e/; các phần được gạch chân còn lại được phát âm /iː/ trong General British.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -152,30 +152,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "asked"
+              "id": "A",
+              "text": "asked",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "B",
-              "text": "played"
+              "id": "B",
+              "text": "played",
+              "targetSpan": { "start": 4, "end": 6 }
             },
             {
-              "label": "C",
-              "text": "laughed"
+              "id": "C",
+              "text": "laughed",
+              "targetSpan": { "start": 5, "end": 7 }
             },
             {
-              "label": "D",
-              "text": "watched"
+              "id": "D",
+              "text": "watched",
+              "targetSpan": { "start": 5, "end": 7 }
             }
           ],
           "answer": {
-            "correctOption": "B",
-            "accepted": [
-              "B"
-            ],
-            "display": "B"
+            "correctOptionId": "B"
           },
-          "explanation": "played ends /d/; others end /t/.",
+          "explanation": "Hậu tố -ed trong played được phát âm /d/; hậu tố -ed trong asked, laughed và watched được phát âm /t/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -193,30 +193,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "measure"
+              "id": "A",
+              "text": "measure",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "B",
-              "text": "pleasure"
+              "id": "B",
+              "text": "pleasure",
+              "targetSpan": { "start": 4, "end": 5 }
             },
             {
-              "label": "C",
-              "text": "pressure"
+              "id": "C",
+              "text": "pressure",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "D",
-              "text": "leisure"
+              "id": "D",
+              "text": "leisure",
+              "targetSpan": { "start": 3, "end": 4 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "C"
           },
-          "explanation": "pressure has /ʃ/; others often have /ʒ/.",
+          "explanation": "Phần ss trong pressure được phát âm /ʃ/; chữ s được gạch chân trong measure, pleasure và leisure được phát âm /ʒ/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -250,30 +250,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "choir"
+              "id": "A",
+              "text": "choir",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "chemist"
+              "id": "B",
+              "text": "chemist",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "chaos"
+              "id": "C",
+              "text": "chaos",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "charity"
+              "id": "D",
+              "text": "charity",
+              "targetSpan": { "start": 0, "end": 2 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "D"
           },
-          "explanation": "charity begins /tʃ/; others use /k/.",
+          "explanation": "Phần ch trong charity được phát âm /tʃ/; phần ch trong choir, chemist và chaos được phát âm /k/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -332,30 +332,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "sword"
+              "id": "A",
+              "text": "sword",
+              "targetSpan": { "start": 1, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "swore"
+              "id": "B",
+              "text": "swore",
+              "targetSpan": { "start": 1, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "swarm"
+              "id": "C",
+              "text": "swarm",
+              "targetSpan": { "start": 1, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "swallow"
+              "id": "D",
+              "text": "swallow",
+              "targetSpan": { "start": 1, "end": 2 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "sword has silent w.",
+          "explanation": "Chữ w được gạch chân trong sword là âm câm; chữ w trong swore, swarm và swallow được phát âm /w/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -373,30 +373,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "island"
+              "id": "A",
+              "text": "island",
+              "targetSpan": { "start": 1, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "aisle"
+              "id": "B",
+              "text": "aisle",
+              "targetSpan": { "start": 2, "end": 3 }
             },
             {
-              "label": "C",
-              "text": "isle"
+              "id": "C",
+              "text": "isle",
+              "targetSpan": { "start": 1, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "issue"
+              "id": "D",
+              "text": "issue",
+              "targetSpan": { "start": 1, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "D"
           },
-          "explanation": "issue does not follow the silent-s pattern.",
+          "explanation": "Trong island, aisle và isle, chữ s không được phát âm; trong issue, ss được phát âm /ʃ/ hoặc /s/ trước /j/ theo các biến thể Anh-Anh được chấp nhận, nên D vẫn là lựa chọn duy nhất khác A–C.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -512,30 +512,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "subtle"
+              "id": "A",
+              "text": "subtle",
+              "targetSpan": { "start": 2, "end": 3 }
             },
             {
-              "label": "B",
-              "text": "doubt"
+              "id": "B",
+              "text": "doubt",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "C",
-              "text": "debris"
+              "id": "C",
+              "text": "debris",
+              "targetSpan": { "start": 2, "end": 3 }
             },
             {
-              "label": "D",
-              "text": "plumber"
+              "id": "D",
+              "text": "plumber",
+              "targetSpan": { "start": 4, "end": 5 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "C"
           },
-          "explanation": "debris has silent s; others feature silent b.",
+          "explanation": "Chữ b được gạch chân trong debris được phát âm /b/; chữ b trong subtle, doubt và plumber là âm câm.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -553,30 +553,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "height"
+              "id": "A",
+              "text": "height",
+              "targetSpan": { "start": 1, "end": 5 }
             },
             {
-              "label": "B",
-              "text": "weight"
+              "id": "B",
+              "text": "weight",
+              "targetSpan": { "start": 1, "end": 5 }
             },
             {
-              "label": "C",
-              "text": "eight"
+              "id": "C",
+              "text": "eight",
+              "targetSpan": { "start": 0, "end": 4 }
             },
             {
-              "label": "D",
-              "text": "neighbour"
+              "id": "D",
+              "text": "neighbour",
+              "targetSpan": { "start": 1, "end": 5 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "height has /aɪ/; others have /eɪ/.",
+          "explanation": "Phần eigh trong height được phát âm /aɪ/; phần được gạch chân trong weight, eight và neighbour được phát âm /eɪ/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -635,30 +635,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "cough"
+              "id": "A",
+              "text": "cough",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "B",
-              "text": "rough"
+              "id": "B",
+              "text": "rough",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "C",
-              "text": "tough"
+              "id": "C",
+              "text": "tough",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "D",
-              "text": "though"
+              "id": "D",
+              "text": "though",
+              "targetSpan": { "start": 4, "end": 6 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "D"
           },
-          "explanation": "though has /əʊ/; others end /f/.",
+          "explanation": "Phần gh trong cough, rough và tough được phát âm /f/; phần gh trong though là âm câm.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -692,30 +692,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "sergeant"
+              "id": "A",
+              "text": "sergeant",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "B",
-              "text": "germ"
+              "id": "B",
+              "text": "germ",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "C",
-              "text": "gesture"
+              "id": "C",
+              "text": "gesture",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "D",
-              "text": "gear"
+              "id": "D",
+              "text": "gear",
+              "targetSpan": { "start": 0, "end": 1 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "D"
           },
-          "explanation": "gear has hard /g/.",
+          "explanation": "Chữ g được gạch chân trong gear được phát âm /ɡ/; chữ g trong sergeant, germ và gesture được phát âm /dʒ/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -774,30 +774,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "said"
+              "id": "A",
+              "text": "said",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "B",
-              "text": "paid"
+              "id": "B",
+              "text": "paid",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "C",
-              "text": "laid"
+              "id": "C",
+              "text": "laid",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "D",
-              "text": "maid"
+              "id": "D",
+              "text": "maid",
+              "targetSpan": { "start": 1, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "said has /e/; others have /eɪ/.",
+          "explanation": "Phần ai trong said được phát âm /e/; phần ai trong paid, laid và maid được phát âm /eɪ/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -815,30 +815,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "heir"
+              "id": "A",
+              "text": "heir",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "B",
-              "text": "honest"
+              "id": "B",
+              "text": "honest",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "C",
-              "text": "hour"
+              "id": "C",
+              "text": "hour",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "D",
-              "text": "host"
+              "id": "D",
+              "text": "host",
+              "targetSpan": { "start": 0, "end": 1 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "D"
           },
-          "explanation": "host pronounces h.",
+          "explanation": "Chữ h được gạch chân trong host được phát âm /h/; chữ h trong heir, honest và hour là âm câm.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -954,30 +954,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "draught"
+              "id": "A",
+              "text": "draught",
+              "targetSpan": { "start": 4, "end": 6 }
             },
             {
-              "label": "B",
-              "text": "daughter"
+              "id": "B",
+              "text": "daughter",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "C",
-              "text": "caught"
+              "id": "C",
+              "text": "caught",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "D",
-              "text": "taught"
+              "id": "D",
+              "text": "taught",
+              "targetSpan": { "start": 3, "end": 5 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "draught is /drɑːft/ or /dræft/.",
+          "explanation": "Phần gh trong draught được phát âm /f/; phần gh trong daughter, caught và taught là âm câm.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -995,30 +995,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "mauve"
+              "id": "A",
+              "text": "mauve",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "B",
-              "text": "laugh"
+              "id": "B",
+              "text": "laugh",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "C",
-              "text": "calf"
+              "id": "C",
+              "text": "calf",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "D",
-              "text": "half"
+              "id": "D",
+              "text": "half",
+              "targetSpan": { "start": 3, "end": 4 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "mauve ends /v/.",
+          "explanation": "Phần được gạch chân ở cuối mauve được phát âm /v/; các phần cuối trong laugh, calf và half được phát âm /f/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1036,30 +1036,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "ache"
+              "id": "A",
+              "text": "ache",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "B",
-              "text": "chorus"
+              "id": "B",
+              "text": "chorus",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "champagne"
+              "id": "C",
+              "text": "champagne",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "scheme"
+              "id": "D",
+              "text": "scheme",
+              "targetSpan": { "start": 1, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "C"
           },
-          "explanation": "champagne has /ʃ/.",
+          "explanation": "Phần ch trong champagne được phát âm /ʃ/; phần ch trong ache, chorus và scheme được phát âm /k/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1077,30 +1077,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "edged"
+              "id": "A",
+              "text": "edged",
+              "targetSpan": { "start": 3, "end": 5 }
             },
             {
-              "label": "B",
-              "text": "marked"
+              "id": "B",
+              "text": "marked",
+              "targetSpan": { "start": 4, "end": 6 }
             },
             {
-              "label": "C",
-              "text": "washed"
+              "id": "C",
+              "text": "washed",
+              "targetSpan": { "start": 4, "end": 6 }
             },
             {
-              "label": "D",
-              "text": "missed"
+              "id": "D",
+              "text": "missed",
+              "targetSpan": { "start": 4, "end": 6 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "edged does not end /t/.",
+          "explanation": "Hậu tố -ed trong edged được phát âm /d/; hậu tố -ed trong marked, washed và missed được phát âm /t/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1134,30 +1134,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "zealous"
+              "id": "A",
+              "text": "zealous",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "B",
-              "text": "measure"
+              "id": "B",
+              "text": "measure",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "C",
-              "text": "treasure"
+              "id": "C",
+              "text": "treasure",
+              "targetSpan": { "start": 4, "end": 5 }
             },
             {
-              "label": "D",
-              "text": "vision"
+              "id": "D",
+              "text": "vision",
+              "targetSpan": { "start": 2, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "zealous has /z/, others have /ʒ/.",
+          "explanation": "Chữ z được gạch chân trong zealous được phát âm /z/; chữ s trong measure, treasure và vision được phát âm /ʒ/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1175,30 +1175,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "quarantine"
+              "id": "A",
+              "text": "quarantine",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "quilt"
+              "id": "B",
+              "text": "quilt",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "queen"
+              "id": "C",
+              "text": "queen",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "queue"
+              "id": "D",
+              "text": "queue",
+              "targetSpan": { "start": 0, "end": 2 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "D"
           },
-          "explanation": "queue begins /kjuː/, not /kw/.",
+          "explanation": "Phần qu trong queue được phát âm /kj/ trước /uː/; phần qu trong quarantine, quilt và queen được phát âm /kw/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1216,30 +1216,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "debris"
+              "id": "A",
+              "text": "debris",
+              "targetSpan": { "start": 2, "end": 3 }
             },
             {
-              "label": "B",
-              "text": "debt"
+              "id": "B",
+              "text": "debt",
+              "targetSpan": { "start": 2, "end": 3 }
             },
             {
-              "label": "C",
-              "text": "doubt"
+              "id": "C",
+              "text": "doubt",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "D",
-              "text": "dumb"
+              "id": "D",
+              "text": "dumb",
+              "targetSpan": { "start": 3, "end": 4 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "A"
           },
-          "explanation": "debris has silent s; others silent b.",
+          "explanation": "Chữ b được gạch chân trong debris được phát âm /b/; chữ b trong debt, doubt và dumb là âm câm.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1298,30 +1298,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "lose"
+              "id": "A",
+              "text": "lose",
+              "targetSpan": { "start": 2, "end": 3 }
             },
             {
-              "label": "B",
-              "text": "loose"
+              "id": "B",
+              "text": "loose",
+              "targetSpan": { "start": 3, "end": 4 }
             },
             {
-              "label": "C",
-              "text": "choose"
+              "id": "C",
+              "text": "choose",
+              "targetSpan": { "start": 4, "end": 5 }
             },
             {
-              "label": "D",
-              "text": "whose"
+              "id": "D",
+              "text": "whose",
+              "targetSpan": { "start": 3, "end": 4 }
             }
           ],
           "answer": {
-            "correctOption": "B",
-            "accepted": [
-              "B"
-            ],
-            "display": "B"
+            "correctOptionId": "B"
           },
-          "explanation": "loose has /s/; others /z/.",
+          "explanation": "Chữ s được gạch chân trong loose được phát âm /s/; chữ s trong lose, choose và whose được phát âm /z/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
