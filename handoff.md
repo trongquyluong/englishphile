@@ -853,3 +853,41 @@ User accounts must sign up again on production (passwords are not exported). The
 - Evidence is repository/local only. No real database, deployed admin page,
   import, publication, migration, seed, deployment, Preview, Production,
   provider, or GitHub action is claimed.
+
+### Phase 2 PR 15: bounded persisted substantive exact-duplicate prompt QA
+
+- Persisted admin-only Content QA adds `DUPLICATE_PROMPT_EXACT` as a
+  question-level `WARNING` at `questions.<orderIndex>.prompt`. It reports only
+  the count of other active questions in the exact normalized group and never
+  exposes comparison IDs, problems, raw/normalized prompts, answers, options,
+  explanations, metadata, provider data, or user data.
+- The shared pure contract accepts only safe strings, trims, applies NFKC,
+  collapses whitespace to one ASCII space, trims again, and applies
+  `toLocaleLowerCase("en")`. The normalized minimum is 20 UTF-16 code units.
+  Punctuation, digits, diacritics, symbols, and wording remain significant.
+  `PRONUNCIATION_ODD_ONE_OUT` and `TRIOS_GAPPED_SENTENCES` generic prompts are
+  excluded.
+- Grouping accepts only own data properties for `id`, `problemId`, `type`, and
+  `prompt`, rejects accessor/inherited fields without invoking getters,
+  deduplicates question IDs, ignores self-only matches, and returns groups and
+  members in deterministic ordinal order.
+- A non-empty target QA run makes one extra narrow query through the injected
+  client, selecting only `id`, `problemId`, `type`, and `prompt`, ordered by
+  `problemId` then `id`. Questions and parents must both be non-`ARCHIVED`, so
+  active `DRAFT`, `NEEDS_REVIEW`, and `PUBLISHED` rows participate. Empty
+  target results skip the corpus query. There is no arbitrary truncation or
+  N+1 query. A future normalized fingerprint/index may be needed at larger
+  scale; no schema or migration is added now.
+- The warning is editorial and non-blocking. It does not change `errors === 0`,
+  `canPublish`, `getPublishableProblemIds`, ordinary bulk, or `publish-safe`.
+  Structural errors and imported `DUPLICATE_POSSIBLE` metadata errors remain
+  blocking.
+- Import fingerprint/similarity detection remains separate and unchanged:
+  exact/high-similarity imports are skipped and possible matches remain
+  `NEEDS_REVIEW`. PR 15 does not edit importer production code or thresholds.
+- Repository audit JSON remains byte-identical with exactly three substantive
+  duplicate groups and state `5/126/30/437/false`. Persisted warning totals are
+  database-dependent. Evidence is repository/local and mocked-client only; no
+  real database, deployed admin page, semantic duplicate judgment, linguistic
+  review, publication approval, import, migration, seed, deployment, provider,
+  or GitHub action is claimed.

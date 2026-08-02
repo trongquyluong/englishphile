@@ -217,6 +217,12 @@ function transactionWith(options: {
   principal?: { id: string; email: string; role: "STUDENT" | "ADMIN" } | null;
   resourceRows?: Array<{ id: string }>;
   targets?: ReturnType<typeof storedProblem>[];
+  corpusQuestions?: Array<{
+    id: string;
+    problemId: string;
+    type: string;
+    prompt: string;
+  }>;
 } = {}) {
   let resourceRows = options.resourceRows ?? [{ id: "problem-a" }];
   const targets = options.targets ?? [storedProblem()];
@@ -240,6 +246,15 @@ function transactionWith(options: {
     question: {
       findFirst: vi.fn().mockResolvedValue(storedQuestion()),
       findUnique: vi.fn().mockResolvedValue(storedQuestion()),
+      findMany: vi.fn().mockResolvedValue(options.corpusQuestions ??
+        targets.flatMap((target) =>
+          target.questions.map((question) => ({
+            id: question.id,
+            problemId: question.problemId,
+            type: question.type,
+            prompt: question.prompt,
+          })),
+        )),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     topic: { findFirst: vi.fn(), create: vi.fn() },
@@ -521,6 +536,56 @@ describe("problem/question atomic admin mutations (production helpers with mocke
     expect(result.message).toContain("QA");
     expect(tx.problem.updateMany).not.toHaveBeenCalled();
     expect(tx.question.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("bulk publish-safe remains tolerant of substantive duplicate-prompt warnings", async () => {
+    const duplicatePrompt = "Which option completes this substantive sentence correctly?";
+    const target = {
+      ...storedProblem("problem-a", "pack-a"),
+      title: "Duplicate prompt warning fixture",
+      slug: "duplicate-prompt-warning-fixture",
+      statement: "Chọn đáp án đúng.",
+      instructions: "Chọn một đáp án.",
+      estimatedMinutes: 5,
+      questionType: "MCQ" as const,
+      sourceCollection: { id: "source-a", name: "Synthetic source" },
+      problemTopics: [{
+        topic: { id: "topic-a", name: "Grammar", slug: "grammar" },
+      }],
+      questions: [{
+        ...storedQuestion(),
+        prompt: duplicatePrompt,
+        explanation: "Giải thích đầy đủ cho câu hỏi kiểm thử cảnh báo trùng prompt.",
+      }],
+    };
+    const tx = transactionWith({
+      targets: [target as unknown as ReturnType<typeof storedProblem>],
+      corpusQuestions: [
+        {
+          id: "question-a",
+          problemId: "problem-a",
+          type: "MCQ",
+          prompt: duplicatePrompt,
+        },
+        {
+          id: "question-comparison",
+          problemId: "problem-comparison",
+          type: "OPEN_CLOZE",
+          prompt: duplicatePrompt.toUpperCase(),
+        },
+      ],
+    });
+    const result = await bulkUpdateProblemStatus(
+      ["problem-a"],
+      "PUBLISHED",
+      "admin-a",
+      { contentPackId: "pack-a", qaRequirement: "safe" },
+    );
+
+    expect(result.ok).toBe(true);
+    expect(tx.question.findMany).toHaveBeenCalledTimes(1);
+    expect(tx.problem.updateMany).toHaveBeenCalled();
+    expect(tx.question.updateMany).toHaveBeenCalled();
   });
 
   it("ordinary bulk publish rejects an invalid Error Identification row after transaction reload", async () => {

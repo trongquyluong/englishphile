@@ -16,7 +16,10 @@ import {
   validateListeningShortAnswerContract,
   type ListeningContractIssueCode,
 } from "@/lib/questions/listening-contract";
-import { isShortNonBlankExplanation } from "@/lib/content-quality-heuristics";
+import {
+  isShortNonBlankExplanation,
+  normalizeSubstantivePromptForReview,
+} from "@/lib/content-quality-heuristics";
 
 export { SHORT_EXPLANATION_THRESHOLD } from "@/lib/content-quality-heuristics";
 const MAX_OPTION_AMBIGUITY_GROUPS = 12;
@@ -33,11 +36,6 @@ const optionQuestionTypes = new Set([
 const optionRendererQuestionTypes = new Set([
   ...optionQuestionTypes,
   "ERROR_IDENTIFICATION",
-]);
-
-const genericPromptQuestionTypes = new Set([
-  "PRONUNCIATION_ODD_ONE_OUT",
-  "TRIOS_GAPPED_SENTENCES",
 ]);
 
 export type AuditLocation = {
@@ -525,12 +523,6 @@ function rendererAnswerIdentifier(questionType: string, answer: unknown) {
 
 function hasThreeTriosSentences(question: Record<string, unknown>) {
   return validateTriosSentences(question.metadata).valid;
-}
-
-function normalizedPrompt(value: unknown) {
-  const prompt = nonEmptyString(value);
-  if (!prompt) return "";
-  return prompt.normalize("NFKC").replace(/\s+/g, " ").toLocaleLowerCase("en");
 }
 
 function promptExcerpt(value: unknown) {
@@ -1095,11 +1087,11 @@ export function auditContentPacks(
             }
           }
 
-          const prompt = normalizedPrompt(rawQuestion.prompt);
-          if (
-            prompt.length >= 20 &&
-            !genericPromptQuestionTypes.has(questionType)
-          ) {
+          const prompt = normalizeSubstantivePromptForReview(
+            questionType,
+            rawQuestion.prompt,
+          );
+          if (prompt) {
             const locations = duplicateCandidates.get(prompt) ?? [];
             locations.push(questionLocation);
             duplicateCandidates.set(prompt, locations);

@@ -979,6 +979,57 @@ describe("content-pack repository audit", () => {
     expect(report.findings.rendererIncompatibleOptions).toHaveLength(5);
     expect(report.findings.duplicateNormalizedOptionTexts).toHaveLength(0);
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
+    expect(report.findings.duplicatePromptGroups.map((group) =>
+      group.locations.map((location) => ({
+        packDirectory: location.packDirectory,
+        fileName: location.fileName,
+        problemIndex: location.problemIndex,
+        questionIndex: location.questionIndex,
+      })),
+    )).toEqual([
+      [
+        {
+          packDirectory: "content-pack-002",
+          fileName: "06-grammar-focus-pack-002.json",
+          problemIndex: 1,
+          questionIndex: 0,
+        },
+        {
+          packDirectory: "pilot-pack-001",
+          fileName: "02-mcq-pack-001.json",
+          problemIndex: 1,
+          questionIndex: 1,
+        },
+      ],
+      [
+        {
+          packDirectory: "content-pack-002",
+          fileName: "07-error-identification-pack-002.json",
+          problemIndex: 0,
+          questionIndex: 3,
+        },
+        {
+          packDirectory: "pilot-pack-001",
+          fileName: "07-error-identification-pack-001.json",
+          problemIndex: 0,
+          questionIndex: 3,
+        },
+      ],
+      [
+        {
+          packDirectory: "content-pack-002",
+          fileName: "07-error-identification-pack-002.json",
+          problemIndex: 3,
+          questionIndex: 0,
+        },
+        {
+          packDirectory: "pilot-pack-001",
+          fileName: "07-error-identification-pack-001.json",
+          problemIndex: 2,
+          questionIndex: 0,
+        },
+      ],
+    ]);
     expect(report.byQuestionType.TRIOS_GAPPED_SENTENCES).toBe(15);
     expect(report.findings.triosWithoutThreeSentences).toEqual([]);
     expect(report.findings.pronunciationWithoutValidTargetSpans)

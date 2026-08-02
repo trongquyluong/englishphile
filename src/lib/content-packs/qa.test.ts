@@ -57,10 +57,29 @@ function storedProblem(
 }
 
 function database(problem: unknown) {
+  const questions = (problem as { questions?: unknown[] }).questions ?? [];
   return {
     problem: {
       findMany: vi.fn().mockResolvedValue([problem]),
     },
+    question: {
+      findMany: vi.fn().mockResolvedValue(questions.map(narrowQuestion)),
+    },
+  };
+}
+
+function narrowQuestion(value: unknown) {
+  const question = value as {
+    id: string;
+    problemId: string;
+    type: string;
+    prompt: string;
+  };
+  return {
+    id: question.id,
+    problemId: question.problemId,
+    type: question.type,
+    prompt: question.prompt,
   };
 }
 
@@ -601,8 +620,664 @@ function databaseProblems(problems: unknown[]) {
     problem: {
       findMany: vi.fn().mockResolvedValue(problems),
     },
+    question: {
+      findMany: vi.fn().mockResolvedValue(problems.flatMap((problem) =>
+        ((problem as { questions?: unknown[] }).questions ?? []).map(
+          narrowQuestion,
+        ),
+      )),
+    },
   };
 }
+
+function identifiedMcqProblem(
+  problemId: string,
+  questionId: string,
+  prompt: string,
+  contentStatus = "NEEDS_REVIEW",
+) {
+  const problem = storedMcqProblem(["A"], [{ prompt }]);
+  return {
+    ...problem,
+    id: problemId,
+    slug: problemId,
+    contentStatus,
+    questions: problem.questions.map((question) => ({
+      ...question,
+      id: questionId,
+      problemId,
+      contentStatus,
+    })),
+  };
+}
+
+function databaseWithCorpus(problems: unknown[], corpus: unknown[]) {
+  return {
+    problem: {
+      findMany: vi.fn().mockResolvedValue(problems),
+    },
+    question: {
+      findMany: vi.fn().mockResolvedValue(corpus),
+    },
+  };
+}
+
+describe("persisted substantive exact-prompt review signal", () => {
+  const duplicatePrompt = "Which option best completes this substantive sentence?";
+  const activeCorpusQuery = {
+    where: {
+      contentStatus: { not: "ARCHIVED" },
+      problem: { contentStatus: { not: "ARCHIVED" } },
+    },
+    select: {
+      id: true,
+      problemId: true,
+      type: true,
+      prompt: true,
+    },
+    orderBy: [{ problemId: "asc" }, { id: "asc" }],
+  };
+
+  it("warns both members of a duplicate within one targeted problem", async () => {
+    const problem = storedMcqProblem(
+      ["A", "B"],
+      [{ prompt: duplicatePrompt }, { prompt: duplicatePrompt.toUpperCase() }],
+    );
+    const report = await getContentQaReport({}, database(problem) as never);
+    const warnings = report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    );
+
+    expect(warnings).toHaveLength(2);
+    expect(warnings.map((warning) => warning.path)).toEqual([
+      "questions.0.prompt",
+      "questions.1.prompt",
+    ]);
+    expect(warnings.every((warning) =>
+      warning.message.includes("với 1 câu hỏi đang hoạt động khác"),
+    )).toBe(true);
+  });
+
+  it("warns both matched questions across two targeted problems", async () => {
+    const first = identifiedMcqProblem(
+      "problem-a",
+      "question-a",
+      duplicatePrompt,
+    );
+    const second = identifiedMcqProblem(
+      "problem-b",
+      "question-b",
+      `  ${duplicatePrompt.toUpperCase()}  `,
+    );
+    const db = databaseWithCorpus(
+      [first, second],
+      [first.questions[0], second.questions[0]].map(narrowQuestion),
+    );
+    const report = await getContentQaReport({}, db as never);
+
+    expect(report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    ).map((issue) => issue.entityId)).toEqual(["question-a", "question-b"]);
+  });
+
+  it("finds a problemIds match outside the target and serializes no comparison-only data", async () => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const comparison = {
+      id: "COMPARISON_QUESTION_ID_SENTINEL",
+      problemId: "COMPARISON_PROBLEM_ID_SENTINEL",
+      type: "OPEN_CLOZE",
+      prompt: `\t${duplicatePrompt.toUpperCase()}\n`,
+      problemTitle: "COMPARISON_PROBLEM_TITLE_SENTINEL",
+      answer: "COMPARISON_ANSWER_SENTINEL",
+      options: ["COMPARISON_OPTIONS_SENTINEL"],
+      explanation: "COMPARISON_EXPLANATION_SENTINEL",
+      metadata: { value: "COMPARISON_METADATA_SENTINEL" },
+      provider: "COMPARISON_PROVIDER_SENTINEL",
+      user: "COMPARISON_USER_SENTINEL",
+    };
+    const db = databaseWithCorpus(
+      [target],
+      [narrowQuestion(target.questions[0]), comparison],
+    );
+    const report = await getContentQaReport(
+      { problemIds: ["problem-target"] },
+      db as never,
+    );
+    const warnings = report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    );
+    const serialized = JSON.stringify(report);
+
+    expect(warnings).toEqual([expect.objectContaining({
+      severity: "WARNING",
+      entityType: "Question",
+      entityId: "question-target",
+      problemId: "problem-target",
+      path: "questions.0.prompt",
+      message: "Prompt này trùng sau chuẩn hóa với 1 câu hỏi đang hoạt động khác; cần biên tập viên rà soát.",
+    })]);
+    expect(report.problems.map((problem) => problem.problemId)).toEqual([
+      "problem-target",
+    ]);
+    expect(db.problem.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: { in: ["problem-target"] } },
+    }));
+    expect(db.question.findMany).toHaveBeenCalledWith(activeCorpusQuery);
+    for (const sentinel of [
+      "COMPARISON_QUESTION_ID_SENTINEL",
+      "COMPARISON_PROBLEM_ID_SENTINEL",
+      "COMPARISON_PROBLEM_TITLE_SENTINEL",
+      comparison.prompt,
+      duplicatePrompt.toLocaleLowerCase("en"),
+      "COMPARISON_ANSWER_SENTINEL",
+      "COMPARISON_OPTIONS_SENTINEL",
+      "COMPARISON_EXPLANATION_SENTINEL",
+      "COMPARISON_METADATA_SENTINEL",
+      "COMPARISON_PROVIDER_SENTINEL",
+      "COMPARISON_USER_SENTINEL",
+    ]) {
+      expect(serialized).not.toContain(sentinel);
+    }
+  });
+
+  it("finds a contentPackId match outside the target pack without emitting an outside issue", async () => {
+    const target = identifiedMcqProblem(
+      "problem-in-pack",
+      "question-in-pack",
+      duplicatePrompt,
+    );
+    const comparison = {
+      id: "question-outside-pack",
+      problemId: "problem-outside-pack",
+      type: "MCQ",
+      prompt: duplicatePrompt.toUpperCase(),
+    };
+    const db = databaseWithCorpus(
+      [target],
+      [narrowQuestion(target.questions[0]), comparison],
+    );
+    const report = await getContentQaReport(
+      { contentPackId: "pack-target" },
+      db as never,
+    );
+    const warnings = report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    );
+
+    expect(warnings).toEqual([expect.objectContaining({
+      entityId: "question-in-pack",
+      problemId: "problem-in-pack",
+    })]);
+    expect(report.problems.map((problem) => problem.problemId)).toEqual([
+      "problem-in-pack",
+    ]);
+    expect(db.problem.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { contentPackId: "pack-target" },
+    }));
+    expect(db.question.findMany).toHaveBeenCalledWith(activeCorpusQuery);
+  });
+
+  it("does not warn a target omitted from the canonical active corpus", async () => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const comparisonOnly = {
+      id: "question-comparison-only",
+      problemId: "problem-comparison-only",
+      type: "MCQ",
+      prompt: duplicatePrompt,
+    };
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus([target], [comparisonOnly]) as never,
+    );
+
+    expect(report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    )).toEqual([]);
+  });
+
+  it("warns two targets once each against a three-member active group", async () => {
+    const first = identifiedMcqProblem(
+      "problem-target-a",
+      "question-target-a",
+      duplicatePrompt,
+    );
+    const second = identifiedMcqProblem(
+      "problem-target-b",
+      "question-target-b",
+      duplicatePrompt.toUpperCase(),
+    );
+    const comparisonOnly = {
+      id: "question-comparison-only",
+      problemId: "problem-comparison-only",
+      type: "OPEN_CLOZE",
+      prompt: `  ${duplicatePrompt}  `,
+    };
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus(
+        [first, second],
+        [
+          narrowQuestion(first.questions[0]),
+          narrowQuestion(second.questions[0]),
+          comparisonOnly,
+        ],
+      ) as never,
+    );
+    const warnings = report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    );
+
+    expect(warnings.map((warning) => warning.entityId)).toEqual([
+      "question-target-a",
+      "question-target-b",
+    ]);
+    expect(warnings).toHaveLength(2);
+    expect(warnings.every((warning) =>
+      warning.message.includes("với 2 câu hỏi đang hoạt động khác"),
+    )).toBe(true);
+    expect(warnings.some((warning) =>
+      warning.entityId === "question-comparison-only",
+    )).toBe(false);
+  });
+
+  it("emits one warning per targeted member of a three-question group", async () => {
+    const targets = ["c", "a", "b"].map((suffix, index) =>
+      identifiedMcqProblem(
+        `problem-${suffix}`,
+        `question-${suffix}`,
+        index === 0 ? duplicatePrompt : duplicatePrompt.toUpperCase(),
+      ),
+    );
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus(
+        targets,
+        targets.map((problem) => narrowQuestion(problem.questions[0])),
+      ) as never,
+    );
+    const warnings = report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    );
+
+    expect(warnings).toHaveLength(3);
+    expect(warnings.every((warning) =>
+      warning.message.includes("với 2 câu hỏi đang hoạt động khác"),
+    )).toBe(true);
+    expect(new Set(warnings.map((warning) => warning.entityId)).size).toBe(3);
+  });
+
+  it.each([
+    ["archived question", "ARCHIVED", "PUBLISHED"],
+    ["question under archived problem", "PUBLISHED", "ARCHIVED"],
+  ])("excludes an %s from the comparison corpus", async (
+    _label,
+    questionStatus,
+    problemStatus,
+  ) => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const storedRows = [
+      {
+        ...narrowQuestion(target.questions[0]),
+        contentStatus: "PUBLISHED",
+        problemContentStatus: "PUBLISHED",
+      },
+      {
+        id: "question-archived",
+        problemId: "problem-archived",
+        type: "MCQ",
+        prompt: duplicatePrompt,
+        contentStatus: questionStatus,
+        problemContentStatus: problemStatus,
+      },
+    ];
+    const db = {
+      problem: { findMany: vi.fn().mockResolvedValue([target]) },
+      question: {
+        findMany: vi.fn().mockImplementation(async (query) => {
+          expect(query.where).toEqual({
+            contentStatus: { not: "ARCHIVED" },
+            problem: { contentStatus: { not: "ARCHIVED" } },
+          });
+          return storedRows
+            .filter((row) =>
+              row.contentStatus !== "ARCHIVED" &&
+              row.problemContentStatus !== "ARCHIVED",
+            )
+            .map(narrowQuestion);
+        }),
+      },
+    };
+    const report = await getContentQaReport({}, db as never);
+
+    expect(report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    )).toEqual([]);
+  });
+
+  it.each(["DRAFT", "NEEDS_REVIEW", "PUBLISHED"])(
+    "includes active %s comparison rows",
+    async (contentStatus) => {
+      const target = identifiedMcqProblem(
+        "problem-target",
+        "question-target",
+        duplicatePrompt,
+      );
+      const comparison = identifiedMcqProblem(
+        `problem-${contentStatus}`,
+        `question-${contentStatus}`,
+        duplicatePrompt,
+        contentStatus,
+      );
+      const report = await getContentQaReport(
+        {},
+        databaseWithCorpus(
+          [target],
+          [target.questions[0], comparison.questions[0]].map(narrowQuestion),
+        ) as never,
+      );
+
+      expect(report.issues.filter(
+        (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+      )).toHaveLength(1);
+    },
+  );
+
+  it("excludes generic, short, punctuation-different, and diacritic-different prompts", async () => {
+    const base = storedMcqProblem(
+      ["A", "B", "C", "D", "A", "B", "C", "D"],
+      [
+        { type: "PRONUNCIATION_ODD_ONE_OUT", prompt: duplicatePrompt },
+        { type: "PRONUNCIATION_ODD_ONE_OUT", prompt: duplicatePrompt },
+        { type: "TRIOS_GAPPED_SENTENCES", prompt: duplicatePrompt },
+        { type: "TRIOS_GAPPED_SENTENCES", prompt: duplicatePrompt },
+        { prompt: "x".repeat(19) },
+        { prompt: "x".repeat(19) },
+        { prompt: "Is résumé punctuation retained here?" },
+        { prompt: "Is resume punctuation retained here!" },
+      ],
+    );
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus(
+        [base],
+        base.questions.map(narrowQuestion),
+      ) as never,
+    );
+
+    expect(report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    )).toEqual([]);
+  });
+
+  it("ignores a self-only corpus row and repeated copies of the same ID", async () => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const row = narrowQuestion(target.questions[0]);
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus([target], [row, { ...row }]) as never,
+    );
+
+    expect(report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    )).toEqual([]);
+  });
+
+  it("skips the corpus query when the target query returns no problems", async () => {
+    const db = databaseWithCorpus([], []);
+    const report = await getContentQaReport({}, db as never);
+
+    expect(report.summary.problemsChecked).toBe(0);
+    expect(db.problem.findMany).toHaveBeenCalledTimes(1);
+    expect(db.question.findMany).not.toHaveBeenCalled();
+  });
+
+  it("uses one exact narrow ordered corpus query on the injected client", async () => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const db = databaseWithCorpus([target], [narrowQuestion(target.questions[0])]);
+
+    await getContentQaReport({}, db as never);
+
+    expect(db.problem.findMany).toHaveBeenCalledTimes(1);
+    expect(db.problem.findMany).toHaveBeenCalledWith({
+      where: {},
+      include: {
+        sourceCollection: true,
+        problemTopics: { include: { topic: true } },
+        questions: {
+          orderBy: [{ orderIndex: "asc" }, { id: "asc" }],
+        },
+      },
+      orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+    });
+    expect(db.question.findMany).toHaveBeenCalledTimes(1);
+    expect(db.question.findMany).toHaveBeenCalledWith(activeCorpusQuery);
+    const serializedQuery = JSON.stringify(db.question.findMany.mock.calls);
+    for (const forbiddenField of [
+      "answer",
+      "options",
+      "explanation",
+      "metadata",
+      "passage",
+      "provider",
+      "submission",
+      "user",
+      "include",
+      "take",
+    ]) {
+      expect(serializedQuery).not.toContain(forbiddenField);
+    }
+  });
+
+  it("keeps equal-timestamp problem and equal-orderIndex question issue order deterministic", async () => {
+    const firstBase = storedMcqProblem(
+      ["A", "B"],
+      [{ prompt: duplicatePrompt }, { prompt: duplicatePrompt.toUpperCase() }],
+    );
+    const tiedUpdatedAt = new Date("2026-02-01T00:00:00.000Z");
+    const first = {
+      ...firstBase,
+      id: "problem-a",
+      slug: "problem-a",
+      updatedAt: tiedUpdatedAt,
+      questions: firstBase.questions.map((question, index) => ({
+        ...question,
+        id: index === 0 ? "question-a-z" : "question-a-a",
+        problemId: "problem-a",
+        orderIndex: 0,
+      })),
+    };
+    const second = {
+      ...identifiedMcqProblem(
+        "problem-b",
+        "question-b",
+        duplicatePrompt,
+      ),
+      updatedAt: tiedUpdatedAt,
+    };
+    const storedProblems = [second, first];
+    const db = {
+      problem: {
+        findMany: vi.fn().mockImplementation(async (query: unknown) => {
+          expect(query).toEqual({
+            where: {},
+            include: {
+              sourceCollection: true,
+              problemTopics: { include: { topic: true } },
+              questions: {
+                orderBy: [{ orderIndex: "asc" }, { id: "asc" }],
+              },
+            },
+            orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+          });
+          return [...storedProblems]
+            .sort((left, right) =>
+              right.updatedAt.getTime() - left.updatedAt.getTime() ||
+              left.id.localeCompare(right.id),
+            )
+            .map((problem) => ({
+              ...problem,
+              questions: [...problem.questions].sort((left, right) =>
+                left.orderIndex - right.orderIndex ||
+                left.id.localeCompare(right.id),
+              ),
+            }));
+        }),
+      },
+      question: {
+        findMany: vi.fn().mockResolvedValue([
+          ...first.questions.map(narrowQuestion),
+          narrowQuestion(second.questions[0]),
+        ]),
+      },
+    };
+    const report = await getContentQaReport({}, db as never);
+
+    expect(report.problems.map((problem) => problem.problemId)).toEqual([
+      "problem-a",
+      "problem-b",
+    ]);
+    expect(report.issues.filter(
+      (issue) => issue.code === "DUPLICATE_PROMPT_EXACT",
+    ).map((issue) => issue.entityId)).toEqual([
+      "question-a-a",
+      "question-a-z",
+      "question-b",
+    ]);
+  });
+
+  it("fails closed when the active corpus query rejects", async () => {
+    const rawCorpusSentinel = "RAW_CORPUS_VALUE_MUST_NOT_ESCAPE";
+    const corpusFailure = new Error("Synthetic active corpus query failure.");
+    const mutationExecutor = vi.fn();
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const db = {
+      problem: {
+        findMany: vi.fn().mockResolvedValue([target]),
+        updateMany: mutationExecutor,
+      },
+      question: {
+        findMany: vi.fn().mockRejectedValue(corpusFailure),
+      },
+    };
+
+    await expect(getContentQaReport({}, db as never)).rejects.toBe(corpusFailure);
+    let publishableIds: string[] | undefined;
+    let selectionError: unknown;
+    try {
+      publishableIds = await getPublishableProblemIds(
+        [target.id],
+        db as never,
+      );
+    } catch (error) {
+      selectionError = error;
+    }
+
+    expect(selectionError).toBe(corpusFailure);
+    expect(publishableIds).toBeUndefined();
+    expect(db.question.findMany).toHaveBeenCalledTimes(2);
+    expect(mutationExecutor).not.toHaveBeenCalled();
+    expect(corpusFailure.message).not.toContain(rawCorpusSentinel);
+  });
+
+  it("keeps duplicate-warning-only QA publishable and returned by the helper", async () => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const corpus = [
+      narrowQuestion(target.questions[0]),
+      {
+        id: "question-comparison",
+        problemId: "problem-comparison",
+        type: "MCQ",
+        prompt: duplicatePrompt,
+      },
+    ];
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus([target], corpus) as never,
+    );
+    const publishableIds = await getPublishableProblemIds(
+      [target.id],
+      databaseWithCorpus([target], corpus) as never,
+    );
+
+    expect(report.problems[0]).toMatchObject({
+      errors: 0,
+      warnings: 1,
+      canPublish: true,
+    });
+    expect(publishableIds).toEqual(["problem-target"]);
+  });
+
+  it("keeps the existing possible-import-duplicate error blocking alongside the warning", async () => {
+    const target = identifiedMcqProblem(
+      "problem-target",
+      "question-target",
+      duplicatePrompt,
+    );
+    const targetWithDuplicateRisk = {
+      ...target,
+      questions: target.questions.map((question) => ({
+        ...question,
+        metadata: { duplicateRisk: { level: "POSSIBLE" } },
+      })),
+    };
+    const corpus = [
+      narrowQuestion(targetWithDuplicateRisk.questions[0]),
+      {
+        id: "question-comparison",
+        problemId: "problem-comparison",
+        type: "MCQ",
+        prompt: duplicatePrompt,
+      },
+    ];
+    const report = await getContentQaReport(
+      {},
+      databaseWithCorpus([targetWithDuplicateRisk], corpus) as never,
+    );
+    const publishableIds = await getPublishableProblemIds(
+      [targetWithDuplicateRisk.id],
+      databaseWithCorpus([targetWithDuplicateRisk], corpus) as never,
+    );
+
+    expect(report.issues).toContainEqual(expect.objectContaining({
+      code: "DUPLICATE_POSSIBLE",
+      severity: "ERROR",
+    }));
+    expect(report.issues).toContainEqual(expect.objectContaining({
+      code: "DUPLICATE_PROMPT_EXACT",
+      severity: "WARNING",
+    }));
+    expect(report.problems[0]).toMatchObject({ errors: 1, canPublish: false });
+    expect(publishableIds).toEqual([]);
+  });
+});
 
 describe("persisted explanation-depth review signal", () => {
   it.each([
@@ -983,6 +1658,7 @@ describe("QA warning publication semantics", () => {
           ...question,
           id: `question-skew-${index}`,
           problemId: "problem-skew",
+          prompt: `${question.prompt} cho problem skew.`,
         }),
       ),
     };

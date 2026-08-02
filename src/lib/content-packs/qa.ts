@@ -9,6 +9,7 @@ import {
 } from "@/lib/questions/listening-contract";
 import {
   ANSWER_POSITIONS,
+  groupSubstantiveDuplicatePromptsForReview,
   isShortNonBlankExplanation,
   ownDataValue,
   reviewAnswerPositionDistribution,
@@ -438,9 +439,34 @@ export async function getContentQaReport(
     include: {
       sourceCollection: true,
       problemTopics: { include: { topic: true } },
-      questions: { orderBy: { orderIndex: "asc" } },
+      questions: {
+        orderBy: [{ orderIndex: "asc" }, { id: "asc" }],
+      },
     },
-    orderBy: [{ updatedAt: "desc" }],
+    orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+  });
+  const duplicatePromptGroups = problems.length > 0
+    ? groupSubstantiveDuplicatePromptsForReview(
+        await db.question.findMany({
+          where: {
+            contentStatus: { not: "ARCHIVED" },
+            problem: { contentStatus: { not: "ARCHIVED" } },
+          },
+          select: {
+            id: true,
+            problemId: true,
+            type: true,
+            prompt: true,
+          },
+          orderBy: [{ problemId: "asc" }, { id: "asc" }],
+        }),
+      )
+    : [];
+  const duplicatePromptOtherCounts = new Map<string, number>();
+  duplicatePromptGroups.forEach((group) => {
+    group.members.forEach((member) => {
+      duplicatePromptOtherCounts.set(member.questionId, group.members.length - 1);
+    });
   });
 
   const slugCounts = problems.reduce<Record<string, number>>((current, problem) => {
@@ -450,6 +476,18 @@ export async function getContentQaReport(
 
   const results = problems.map((problem) => {
     const issues = checkProblem(problem);
+    problem.questions.forEach((question) => {
+      const otherActiveQuestions = duplicatePromptOtherCounts.get(question.id);
+      if (otherActiveQuestions === undefined) return;
+      pushIssue(issues, problem, {
+        severity: "WARNING",
+        code: "DUPLICATE_PROMPT_EXACT",
+        entityType: "Question",
+        entityId: question.id,
+        path: `questions.${question.orderIndex}.prompt`,
+        message: `Prompt này trùng sau chuẩn hóa với ${otherActiveQuestions} câu hỏi đang hoạt động khác; cần biên tập viên rà soát.`,
+      });
+    });
     if (slugCounts[problem.slug] > 1) {
       pushIssue(issues, problem, {
         severity: "ERROR",
