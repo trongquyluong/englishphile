@@ -27,6 +27,10 @@ Decisions:
 7. Phase 2 PR 14 adds two persisted admin-review signals for explanation
    depth and within-problem answer-position skew. Both are heuristic
    `WARNING`s; neither changes the existing `errors === 0` publication rule.
+8. Phase 2 PR 15 adds an admin-only persisted substantive exact-prompt
+   `WARNING`. It uses the authoritative PR 15 forward normalization contract,
+   compares against the complete active editorial corpus, and remains distinct
+   from import fingerprint/similarity detection.
 
 ## Repository evidence and confirmed contradictions
 
@@ -396,6 +400,71 @@ post-repair repository evidence remains `rendererIncompatibleOptions: 5`,
 persisted QA warnings depends on actual database rows and is not claimed from
 repository-only evidence. No real database or deployed admin page was
 inspected.
+
+### Phase 2 PR 15 persisted substantive exact-prompt review signal
+
+Persisted admin Content QA now emits `DUPLICATE_PROMPT_EXACT` at
+`questions.<orderIndex>.prompt` for targeted questions whose substantive
+prompt is exactly equal under the PR 15 normalization contract.
+The pure contract accepts only safe string `type` and `prompt` values, trims
+the prompt, applies NFKC, collapses every whitespace run to one ASCII space,
+trims again, and applies `toLocaleLowerCase("en")`. Values shorter than 20
+UTF-16 code units after normalization are ineligible. Punctuation, digits,
+diacritics, combining-mark meaning, symbols, and wording are retained;
+Pronunciation Odd One Out and Trios / Gapped Sentences prompts are excluded as
+generic instructions. No stringification, NFKD, transliteration, tokenization,
+edit distance, Jaccard, trigram, AI, or fuzzy comparison is used.
+
+The second trim after NFKC is intentional and is the authoritative forward
+contract. Exotic compatibility characters such as U+00A8 can introduce edge
+whitespace during NFKC, so those inputs may normalize differently from the
+former repository-audit helper, which did not perform that second trim. The
+current repository corpus is unaffected: all three duplicate groups, their
+membership, and the machine-readable audit bytes remain unchanged. This
+bounded equivalence still implies no semantic duplicate judgment.
+
+The grouping contract reads only own data properties for `id`, `problemId`,
+`type`, and `prompt`; inherited or accessor-backed values are rejected without
+invoking getters. Repeated rows with the same question ID are deduplicated,
+self-only matches do not warn, and groups and member IDs are ordinally ordered.
+A group produces at most one warning per targeted member. The Vietnamese
+message reports only the number of *other* active questions in that group. It
+does not disclose comparison question/problem IDs, titles, prompts, normalized
+keys, answers, options, explanations, metadata, provider data, or user data.
+
+When at least one target problem exists, QA performs exactly one additional
+narrow `Question` scan through the same injected Prisma/transaction client. It
+selects only `id`, `problemId`, `type`, and `prompt`, ordered by `problemId`
+then `id`. Both the question and parent problem must be non-`ARCHIVED`, so
+`DRAFT`, `NEEDS_REVIEW`, and `PUBLISHED` rows participate while retired rows do
+not. No corpus query runs when the target query is empty, and there is no
+per-problem or per-question query. A complete narrow scan avoids false
+negatives at the current beta scale; a persisted normalized fingerprint/index
+may be needed if the editorial bank becomes materially larger, but PR 15 adds
+no schema or migration. A target absent from this canonical active corpus is
+intentionally not warned, including an archived or otherwise inactive target.
+
+This persisted warning is an editorial review signal only. It does not claim
+that answers or pedagogical purposes match, does not change `errors === 0`,
+does not independently set `canPublish=false`, and does not block
+`getPublishableProblemIds`, ordinary bulk publication, or `publish-safe`.
+Existing structural `ERROR`s and imported
+`metadata.duplicateRisk.level="POSSIBLE"` remain blocking.
+
+The import duplicate system is unchanged and separate: it continues to use a
+broader question/skill/context/passage/options/answer fingerprint plus
+similarity thresholds, skipping exact and high-similarity imports and retaining
+possible matches as `NEEDS_REVIEW`. PR 15 neither calls that system nor changes
+its normalization or thresholds.
+
+Repository audit output remains byte-identical with exactly three substantive
+duplicate prompt groups and current state `5/126/30/437/false` for
+`rendererIncompatibleOptions` / `normalizerWarnings` /
+`pronunciationWithoutValidTargetSpans` / `shortExplanations` /
+`hasInventoryErrors`. Persisted duplicate-warning totals depend on active
+database rows. Repository and mocked-client evidence does not claim a real
+database scan, deployed admin-page behavior, semantic duplicate judgment,
+linguistic review, or publication approval.
 
 ## I. Phase 2 PR 3 — Error Identification contract
 

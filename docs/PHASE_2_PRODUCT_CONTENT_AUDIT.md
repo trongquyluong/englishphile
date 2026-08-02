@@ -152,6 +152,62 @@ The current post-repair repository audit remains unchanged at
 rows, so no total is claimed here. No real database or deployed admin QA page
 was inspected for PR 14.
 
+### Later persisted-QA note: Phase 2 PR 15
+
+Phase 2 PR 15 defines the authoritative forward substantive exact-prompt
+contract for persisted admin-only Content QA and the repository audit. It
+accepts only safe string values, trims, applies NFKC, collapses whitespace to
+one ASCII space, trims again, and uses English-locale lowercase. Normalized
+prompts must contain at least 20 UTF-16 code units. Punctuation, digits,
+diacritics, symbols, and wording remain significant. Generic
+`PRONUNCIATION_ODD_ONE_OUT` and
+`TRIOS_GAPPED_SENTENCES` prompts are excluded. The pure grouping rejects
+inherited/accessor-backed `id`, `problemId`, `type`, and `prompt` properties
+without invoking getters, deduplicates repeated question IDs, and orders groups
+and IDs ordinally.
+
+The second trim after NFKC is intentional. Exotic compatibility characters
+that introduce edge whitespace during NFKC may therefore normalize differently
+from the former audit helper. That is a defined forward-contract edge, not a
+claim of universal Unicode parity or semantic equivalence. It has no impact on
+the current repository corpus: the three duplicate groups, their membership,
+and the machine-readable output remain byte-identical.
+
+For a non-empty target result, persisted QA uses its injected database client
+for one additional complete active-corpus query. Both question and parent
+problem must be non-`ARCHIVED`; `DRAFT`, `NEEDS_REVIEW`, and `PUBLISHED` rows
+participate. The positive selector contains only `id`, `problemId`, `type`, and
+`prompt`, ordered by `problemId` then `id`. It reads no answer, options,
+explanation, metadata, passage, provider, submission, or user data, performs no
+N+1 queries, and skips the corpus query when there are no target problems. A
+future normalized fingerprint/index may be appropriate at larger scale; this
+bounded beta implementation adds no schema or migration. Targets absent from
+the canonical active corpus, including archived or otherwise inactive targets,
+intentionally receive no duplicate warning.
+
+Each targeted member receives at most one `DUPLICATE_PROMPT_EXACT` `WARNING` at
+`questions.<orderIndex>.prompt`; comparison-only rows receive no output issue.
+The message discloses only the count of other active group members, not their
+IDs, problem data, raw prompts, normalized key, or content JSON. This is an
+editorial signal, not a claim of answer or pedagogical equivalence. It leaves
+`errors === 0`, `canPublish`, `getPublishableProblemIds`, ordinary bulk, and
+`publish-safe` semantics unchanged. Existing structural errors and import
+`DUPLICATE_POSSIBLE` errors remain blocking.
+
+Import duplicate detection remains a distinct broader system using question
+type, skill, problem context, passage, options, answer fingerprinting, and
+similarity thresholds. Its exact/high-similarity skip and possible-match
+`NEEDS_REVIEW` behavior is unchanged; the persisted warning does not replace or
+weaken it.
+
+The machine-readable repository audit remains byte-identical with exactly
+three substantive duplicate groups and current state `5/126/30/437/false` for
+renderer incompatibilities, normalizer warnings, Pronunciation target-span
+findings, short explanations, and inventory errors. Persisted warning totals
+are database-dependent. PR 15 evidence does not claim a real database or
+deployed admin-page inspection, semantic duplicate judgment, linguistic
+review, or publication approval.
+
 ## Current learner journeys
 
 The route inventory below is repository evidence. Database-dependent availability or counts are not asserted.

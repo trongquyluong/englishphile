@@ -1,5 +1,22 @@
 export const SHORT_EXPLANATION_THRESHOLD = 45;
 
+export const SUBSTANTIVE_PROMPT_MIN_LENGTH = 20;
+
+const genericPromptQuestionTypes = new Set([
+  "PRONUNCIATION_ODD_ONE_OUT",
+  "TRIOS_GAPPED_SENTENCES",
+]);
+
+export type SubstantivePromptDuplicateMember = {
+  questionId: string;
+  problemId: string;
+};
+
+export type SubstantivePromptDuplicateGroup = {
+  normalizedPrompt: string;
+  members: SubstantivePromptDuplicateMember[];
+};
+
 export function isShortNonBlankExplanation(value: unknown): boolean {
   if (typeof value !== "string") return false;
   const length = value.trim().length;
@@ -51,6 +68,126 @@ function ownDataProperty(
 export function ownDataValue(value: unknown, key: PropertyKey): unknown {
   const property = ownDataProperty(value, key);
   return property.present && property.safe ? property.value : undefined;
+}
+
+export function normalizeSubstantivePromptForReview(
+  questionType: unknown,
+  prompt: unknown,
+): string | null {
+  if (typeof questionType !== "string" || typeof prompt !== "string") {
+    return null;
+  }
+  const trimmedPrompt = prompt.trim();
+  if (trimmedPrompt.length === 0) return null;
+
+  const normalized = trimmedPrompt
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase("en");
+
+  if (normalized.length < SUBSTANTIVE_PROMPT_MIN_LENGTH) return null;
+  return genericPromptQuestionTypes.has(questionType) ? null : normalized;
+}
+
+function ordinalCompare(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+type SafeSubstantivePromptCandidate = {
+  questionId: string;
+  problemId: string;
+  questionType: string;
+  normalizedPrompt: string;
+};
+
+function readSubstantivePromptCandidate(
+  value: unknown,
+): SafeSubstantivePromptCandidate | null {
+  const id = ownDataProperty(value, "id");
+  const problemId = ownDataProperty(value, "problemId");
+  const type = ownDataProperty(value, "type");
+  const prompt = ownDataProperty(value, "prompt");
+  if (
+    !id.present ||
+    !id.safe ||
+    typeof id.value !== "string" ||
+    id.value.length === 0 ||
+    !problemId.present ||
+    !problemId.safe ||
+    typeof problemId.value !== "string" ||
+    problemId.value.length === 0 ||
+    !type.present ||
+    !type.safe ||
+    typeof type.value !== "string" ||
+    !prompt.present ||
+    !prompt.safe
+  ) {
+    return null;
+  }
+
+  const normalizedPrompt = normalizeSubstantivePromptForReview(
+    type.value,
+    prompt.value,
+  );
+  return normalizedPrompt
+    ? {
+        questionId: id.value,
+        problemId: problemId.value,
+        questionType: type.value,
+        normalizedPrompt,
+      }
+    : null;
+}
+
+function compareSubstantivePromptCandidates(
+  left: SafeSubstantivePromptCandidate,
+  right: SafeSubstantivePromptCandidate,
+): number {
+  return (
+    ordinalCompare(left.questionId, right.questionId) ||
+    ordinalCompare(left.normalizedPrompt, right.normalizedPrompt) ||
+    ordinalCompare(left.problemId, right.problemId) ||
+    ordinalCompare(left.questionType, right.questionType)
+  );
+}
+
+export function groupSubstantiveDuplicatePromptsForReview(
+  candidates: readonly unknown[],
+): SubstantivePromptDuplicateGroup[] {
+  const safeCandidates = candidates
+    .map(readSubstantivePromptCandidate)
+    .filter((candidate): candidate is SafeSubstantivePromptCandidate =>
+      candidate !== null,
+    )
+    .sort(compareSubstantivePromptCandidates);
+  const uniqueCandidates = new Map<string, SafeSubstantivePromptCandidate>();
+  for (const candidate of safeCandidates) {
+    if (!uniqueCandidates.has(candidate.questionId)) {
+      uniqueCandidates.set(candidate.questionId, candidate);
+    }
+  }
+
+  const grouped = new Map<string, SubstantivePromptDuplicateMember[]>();
+  for (const candidate of uniqueCandidates.values()) {
+    const members = grouped.get(candidate.normalizedPrompt) ?? [];
+    members.push({
+      questionId: candidate.questionId,
+      problemId: candidate.problemId,
+    });
+    grouped.set(candidate.normalizedPrompt, members);
+  }
+
+  return [...grouped.entries()]
+    .filter(([, members]) => members.length >= 2)
+    .sort(([left], [right]) => ordinalCompare(left, right))
+    .map(([normalizedPrompt, members]) => ({
+      normalizedPrompt,
+      members: [...members].sort((left, right) =>
+        ordinalCompare(left.questionId, right.questionId) ||
+        ordinalCompare(left.problemId, right.problemId),
+      ),
+    }));
 }
 
 function canonicalAnswerPosition(value: unknown): AnswerPosition | null {
