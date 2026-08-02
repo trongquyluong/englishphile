@@ -16,8 +16,9 @@ import {
   validateListeningShortAnswerContract,
   type ListeningContractIssueCode,
 } from "@/lib/questions/listening-contract";
+import { isShortNonBlankExplanation } from "@/lib/content-quality-heuristics";
 
-export const SHORT_EXPLANATION_THRESHOLD = 45;
+export { SHORT_EXPLANATION_THRESHOLD } from "@/lib/content-quality-heuristics";
 const MAX_OPTION_AMBIGUITY_GROUPS = 12;
 const MAX_OPTION_AMBIGUITY_VALUES_PER_GROUP = 8;
 
@@ -842,7 +843,7 @@ export function auditContentPacks(
           const explanation = nonEmptyString(rawQuestion.explanation);
           if (!explanation) {
             report.findings.missingExplanations.push(questionLocation);
-          } else if (explanation.length < SHORT_EXPLANATION_THRESHOLD) {
+          } else if (isShortNonBlankExplanation(rawQuestion.explanation)) {
             report.findings.shortExplanations.push(questionLocation);
           }
 

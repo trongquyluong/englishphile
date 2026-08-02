@@ -24,6 +24,9 @@ Decisions:
 5. Keep `LISTENING_MCQ` and `LISTENING_SHORT_ANSWER` separate. The pure media contract is now implemented in JSON/CSV import, QA, and publication boundaries, but Listening remains blocked from the validation batch until the DTO projection, component playback, and approved media are integrated. See [`PHASE_2_LISTENING_CONTRACT.md`](PHASE_2_LISTENING_CONTRACT.md).
 6. Defer HSG. Keep every pilot item diagnostic-ineligible until stable
    calibration evidence exists.
+7. Phase 2 PR 14 adds two persisted admin-review signals for explanation
+   depth and within-problem answer-position skew. Both are heuristic
+   `WARNING`s; neither changes the existing `errors === 0` publication rule.
 
 ## Repository evidence and confirmed contradictions
 
@@ -345,6 +348,54 @@ Human and JSON modes keep option values and prompt excerpts bounded. Full
 deterministic file/problem/question locations, issue codes or duplicate groups,
 and safe option representations are available in JSON mode:
 `npm run --silent audit:content-packs -- --format=json`.
+
+### Phase 2 PR 14 persisted Content QA review signals
+
+Persisted Content QA now reuses one pure explanation-depth heuristic with the
+repository audit. `SHORT_EXPLANATION_THRESHOLD` is 45 trimmed UTF-16 code
+units. A trimmed, non-empty explanation from 1 through 44 code units emits one
+`WARNING` with code `EXPLANATION_TOO_SHORT` at
+`questions.<orderIndex>.explanation`. Missing, non-string, or whitespace-only
+values continue to emit only the pre-existing missing-explanation warning;
+they do not also emit the short-explanation warning. Exactly 45 code units is
+outside the short category.
+
+The problem-level answer-position signal uses only
+`PRONUNCIATION_ODD_ONE_OUT`, `MCQ`, `GUIDED_CLOZE`, `READING_MCQ`, and
+`LISTENING_MCQ`. A question contributes only when existing question QA has no
+structural `ERROR`, it has exactly four safe options with unique canonical A-D
+identifiers in display order, and its supported `correctOptionId` or
+`correctOption` answer resolves to one of those identifiers. Malformed,
+partial, duplicate, non-member, inherited, accessor-backed, and unsupported
+values are excluded without stringification or answer inference.
+`ERROR_IDENTIFICATION` is deliberately excluded from this PR.
+
+One `ANSWER_POSITION_SKEW` `WARNING` is emitted per affected problem at
+`questions.answerPositionDistribution` when either:
+
+- at least four eligible questions exist and one position is more than 50% of
+  the eligible answers; or
+- at least eight eligible questions exist and at least one of A, B, C, or D is
+  absent.
+
+Fewer than four eligible questions never trigger the signal. The message may
+contain only bounded aggregate counts in deterministic A, B, C, D order; it
+does not contain a per-question answer map or raw answer data.
+
+Both signals are review prompts only. They do not establish semantic quality,
+linguistic correctness, explanation adequacy, difficulty, calibration, or
+publication approval. `canPublish` remains derived exclusively from zero
+`ERROR`s, so warning-only problems remain eligible for
+`getPublishableProblemIds` and existing warning-tolerant bulk publication.
+Existing structural publication gates remain unchanged.
+
+PR 14 does not change repository-audit output or exit semantics. Current
+post-repair repository evidence remains `rendererIncompatibleOptions: 5`,
+`normalizerWarnings: 126`, `pronunciationWithoutValidTargetSpans: 30`,
+`shortExplanations: 437`, and `hasInventoryErrors: false`. The number of new
+persisted QA warnings depends on actual database rows and is not claimed from
+repository-only evidence. No real database or deployed admin page was
+inspected.
 
 ## I. Phase 2 PR 3 — Error Identification contract
 

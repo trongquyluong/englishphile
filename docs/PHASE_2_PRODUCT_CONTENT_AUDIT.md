@@ -109,7 +109,7 @@ This is a strong answer-position imbalance. It is editorial debt, not a malforme
 | --- | ---: | --- |
 | Problems without instructions | 0 | Structural check |
 | Missing explanations | 0 | Structural/editorial check |
-| Explanations shorter than 45 characters | 440 | Heuristic signal only; not an automatic editorial failure |
+| Historical Phase 2 audit baseline: explanations shorter than 45 characters | 440 | Heuristic signal only; not an automatic editorial failure |
 | Word Formation without root word | 0 | Type-specific check |
 | Reading without a shared passage | 0 | Type-specific check |
 | Trios without exactly three sentences in passage/metadata | 0 | Type-specific check |
@@ -120,6 +120,37 @@ This is a strong answer-position imbalance. It is editorial debt, not a malforme
 | Substantive exact duplicate prompt groups | 3 | Editorial duplicate review |
 
 Repeated generic Pronunciation and Trios instructions are excluded from substantive duplicate detection because their distinguishing content is carried by options or three-sentence metadata. Very short Cloze slot labels are also below the substantive prompt threshold.
+
+### Later persisted-QA note: Phase 2 PR 14
+
+Phase 2 PR 14 adds two deterministic persisted admin-review warnings without
+changing this repository-audit baseline, its JSON shape, ordering, bytes, or
+exit behavior. `EXPLANATION_TOO_SHORT` marks only trimmed, non-empty
+explanations from 1 through 44 UTF-16 code units; the threshold is 45, and
+blank/missing explanations retain only their existing warning.
+
+`ANSWER_POSITION_SKEW` evaluates each problem independently across the same
+option family used by the repository answer-position inventory:
+`PRONUNCIATION_ODD_ONE_OUT`, `MCQ`, `GUIDED_CLOZE`, `READING_MCQ`, and
+`LISTENING_MCQ`. It excludes `ERROR_IDENTIFICATION` and every unsafe,
+malformed, structurally invalid, incomplete, duplicate-ID, or non-member-answer
+question. It emits at most one warning when at least four eligible questions
+have a position above 50%, or when at least eight eligible questions omit any
+A-D position. Fewer than four eligible questions never trigger it.
+
+These are heuristic `WARNING`s, not structural validation, linguistic or
+semantic approval, correctness proof, difficulty/calibration evidence, or
+publication approval. Warning-only problems remain publishable because
+persisted QA still derives `canPublish` exclusively from `errors === 0`.
+Existing Error Identification, Pronunciation, Trios, Listening, import, and
+publication blockers are unchanged.
+
+The current post-repair repository audit remains unchanged at
+`rendererIncompatibleOptions: 5`, `normalizerWarnings: 126`,
+`pronunciationWithoutValidTargetSpans: 30`, `shortExplanations: 437`, and
+`hasInventoryErrors: false`. Persisted warning totals depend on actual database
+rows, so no total is claimed here. No real database or deployed admin QA page
+was inspected for PR 14.
 
 ## Current learner journeys
 
@@ -243,8 +274,8 @@ Every `/admin` page is protected by the admin layout, and mutation/API boundarie
 
 - **Mojibake exists in admin JSX.** Confirmed examples include corrupted separators/placeholders in problem/source/review/admin detail surfaces. This is source-level presentation debt, not a terminal-display inference.
 - **Problem editing is JSON-heavy.** Options, answers, and metadata are edited in generic textareas. Validation prevents invalid JSON from saving, but the workflow is error-prone and does not provide type-specific editorial affordances.
-- **Editorial QA is insufficient for the present debt.** Existing QA catches important structural errors, but it does not fail on severe answer-position imbalance, very short explanations, cross-pack exact prompts, difficulty calibration, renderability of metadata, or curriculum coverage.
-- **Explanations are mostly too short for independent learning.** 440/495 are below the 45-character heuristic. Length alone is not proof of poor quality, but this concentration warrants structured review.
+- **At the PR 1 baseline, editorial QA was insufficient for the present debt.** It caught important structural errors but did not signal severe answer-position imbalance or very short explanations, and it still did not establish cross-pack duplicate resolution, difficulty calibration, renderability approval, or curriculum coverage. The later Phase 2 PR 14 note above records the two new warning-only signals without converting them into failures.
+- **Explanations were mostly too short for independent learning at the historical Phase 2 audit baseline.** At that historical checkpoint, 440/495 were below the 45-character heuristic; the current post-repair repository count is 437. Length alone is not proof of poor quality, but this concentration warrants structured review.
 
 ## Must fix before a controlled beta
 
