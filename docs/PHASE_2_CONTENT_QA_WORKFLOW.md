@@ -532,6 +532,16 @@ remaining content-repair and Listening items are not:
    `BLOCKED_DIALECT_AMBIGUITY` at the editorial level despite valid A–D
    structure, and pilot Q23 retains separate apostrophe-normalization scoring
    debt.
+
+   **Later scorer-resolution note (2026-08-02, Phase 2 PR 13):** the bounded
+   scorer correction now treats U+0027, U+2018, and U+2019 as equivalent under
+   the existing punctuation-insensitive scoring policy. Stored content was not
+   rewritten, and arbitrary Unicode punctuation is not normalized. Pilot Q23
+   remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`; scorer equivalence does
+   not establish linguistic, difficulty, calibration, or publication approval.
+   The five Error Identification blockers and repository-audit counts remain
+   unchanged: 5 renderer findings, 126 normalizer warnings, 30 Pronunciation
+   target-span findings, and `hasInventoryErrors=false`.
 2. **Trios linguistic review:** independently review the unchanged 15 current
    items; contract conformance alone does not approve their language or level.
 3. **Pronunciation content repair:** follow the separate migration plan below;

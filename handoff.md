@@ -806,3 +806,20 @@ User accounts must sign up again on production (passwords are not exported). The
   establish linguistic, difficulty, calibration, or publication approval.
 - No import, publication, database, migration, seed, deployment, Preview,
   Production, browser-E2E, or provider action.
+
+### Phase 2 PR 13: bounded Unicode-apostrophe scoring correction
+
+- The scorer now treats U+0027, U+2018, and U+2019 as equivalent under the
+  existing punctuation-insensitive scoring policy. It does not broadly remove
+  arbitrary Unicode punctuation or repair missing letters, spaces, or word
+  order.
+- Stored content was not rewritten. Pilot Q23 retains its authored U+2019 text
+  and remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`.
+- This scorer equivalence does not establish linguistic, difficulty,
+  calibration, or publication approval. The five Error Identification
+  blockers and repository-audit counts remain unchanged: 5 renderer findings,
+  126 normalizer warnings, 30 Pronunciation target-span findings, and
+  `hasInventoryErrors=false`.
+- Evidence is repository/local only. No import, publication, database,
+  migration, seed, deployment, Preview, Production, browser-E2E, provider, or
+  GitHub action is claimed.

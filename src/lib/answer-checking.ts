@@ -25,7 +25,7 @@ export function normalizeAnswer(value: unknown) {
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[“”"'.?!,;:()[\]{}]/g, "")
+    .replace(/[\u0027\u2018\u2019“”".?!,;:()[\]{}]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }

@@ -451,6 +451,18 @@
 
 
 - **Note**: KNOWN_PRE_EXISTING_SCORING_DEBT. The source uses U+2019 curly apostrophes. A learner using a straight U+0027 apostrophe can receive a false negative. This existed in HEAD before PR 11A; it is not introduced or fixed by this content-repair PR. It must be handled in a separate scorer-normalization PR before Q23 can be published.
+
+- **Later scorer-resolution note (2026-08-02, Phase 2 PR 13)**: the separate
+  bounded scorer correction now treats U+0027, U+2018, and U+2019 as
+  equivalent under the existing punctuation-insensitive scoring policy.
+  Stored content, including Q23's authored U+2019, was not rewritten, and
+  arbitrary Unicode punctuation is not normalized. Q23 remains
+  `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`; scorer equivalence does not
+  establish linguistic, difficulty, calibration, or publication approval.
+  The five Error Identification blockers and repository-audit counts remain
+  unchanged: 5 renderer findings, 126 normalizer warnings, 30 Pronunciation
+  target-span findings, and `hasInventoryErrors=false`.
+
 ## Question 24
 
 - **Pack**: pilot-pack-001
