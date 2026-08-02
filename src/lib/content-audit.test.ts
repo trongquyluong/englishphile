@@ -290,6 +290,24 @@ describe("content-pack repository audit", () => {
     expect(report.hasInventoryErrors).toBe(false);
   });
 
+  it("preserves the trimmed explanation boundary through the shared heuristic", () => {
+    const shortExplanation = `  ${"x".repeat(44)}  `;
+    const boundaryExplanation = `  ${"x".repeat(45)}  `;
+    const input = pack([
+      problem([
+        question({ explanation: shortExplanation }),
+        question({ explanation: boundaryExplanation }),
+      ]),
+    ]);
+    const before = JSON.stringify(input);
+    const report = auditContentPacks([input]);
+
+    expect(report.findings.shortExplanations).toHaveLength(1);
+    expect(report.findings.shortExplanations[0]?.questionIndex).toBe(0);
+    expect(JSON.stringify(input)).toBe(before);
+    expect(report.hasInventoryErrors).toBe(false);
+  });
+
   it("reports question/problem skill and difficulty mismatches", () => {
     const report = auditContentPacks([
       pack([

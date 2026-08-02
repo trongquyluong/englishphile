@@ -7,6 +7,13 @@ import {
   validateListeningMCQContract,
   validateListeningShortAnswerContract,
 } from "@/lib/questions/listening-contract";
+import {
+  ANSWER_POSITIONS,
+  isShortNonBlankExplanation,
+  ownDataValue,
+  reviewAnswerPositionDistribution,
+  SHORT_EXPLANATION_THRESHOLD,
+} from "@/lib/content-quality-heuristics";
 
 export type QaSeverity = "ERROR" | "WARNING" | "INFO";
 
@@ -73,23 +80,39 @@ function asObject(value: unknown) {
 }
 
 function hasAcceptedAnswer(answer: unknown) {
-  const object = asObject(answer);
+  if (!answer || typeof answer !== "object" || Array.isArray(answer)) return false;
+  const accepted = ownDataValue(answer, "accepted");
+  const acceptedAnswers = ownDataValue(answer, "acceptedAnswers");
   return (
-    (Array.isArray(object.accepted) && object.accepted.length > 0) ||
-    (Array.isArray(object.acceptedAnswers) && object.acceptedAnswers.length > 0) ||
-    typeof object.correctForm === "string" ||
-    typeof object.modelAnswer === "string" ||
-    typeof object.correctOptionId === "string" ||
-    typeof object.correctPart === "string"
+    (Array.isArray(accepted) && accepted.length > 0) ||
+    (Array.isArray(acceptedAnswers) && acceptedAnswers.length > 0) ||
+    typeof ownDataValue(answer, "correctForm") === "string" ||
+    typeof ownDataValue(answer, "modelAnswer") === "string" ||
+    typeof ownDataValue(answer, "correctOptionId") === "string" ||
+    typeof ownDataValue(answer, "correctPart") === "string"
   );
 }
 
 function optionsValid(options: unknown) {
   if (!Array.isArray(options)) return false;
-  return options.length >= 2 && options.every((option) => {
-    const item = asObject(option);
-    return typeof item.id === "string" && typeof item.text === "string";
-  });
+  if (options.length < 2) return false;
+
+  for (let index = 0; index < options.length; index += 1) {
+    const option = ownDataValue(options, index);
+    if (!option || typeof option !== "object" || Array.isArray(option)) return false;
+
+    const id = ownDataValue(option, "id");
+    const text = ownDataValue(option, "text");
+    if (
+      typeof id !== "string" ||
+      typeof text !== "string" ||
+      text.trim().length === 0
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function pushIssue(issues: QaIssue[], problem: ProblemForQa, issue: Omit<QaIssue, "problemId" | "problemTitle">) {
@@ -174,6 +197,17 @@ function checkQuestion(problem: ProblemForQa, question: Question, issues: QaIssu
       entityId: question.id,
       path: `${path}.explanation`,
       message: "Thiếu explanation; học sinh sẽ khó tự review.",
+    });
+  }
+
+  if (isShortNonBlankExplanation(question.explanation)) {
+    pushIssue(issues, problem, {
+      severity: "WARNING",
+      code: "EXPLANATION_TOO_SHORT",
+      entityType: "Question",
+      entityId: question.id,
+      path: `${path}.explanation`,
+      message: `Phần giải thích ngắn hơn ${SHORT_EXPLANATION_THRESHOLD} ký tự; cần người biên soạn rà soát độ đầy đủ.`,
     });
   }
 
@@ -360,6 +394,33 @@ function checkProblem(problem: ProblemForQa): QaIssue[] {
   }
 
   problem.questions.forEach((question) => checkQuestion(problem, question, issues));
+
+  const structurallyInvalidQuestionIds = new Set(
+    issues
+      .filter(
+        (issue) =>
+          issue.severity === "ERROR" && issue.entityType === "Question",
+      )
+      .map((issue) => issue.entityId),
+  );
+  const distribution = reviewAnswerPositionDistribution(
+    problem.questions.filter(
+      (question) => !structurallyInvalidQuestionIds.has(question.id),
+    ),
+  );
+  if (distribution.isSkewed) {
+    const counts = ANSWER_POSITIONS.map(
+      (position) => `${position}=${distribution.counts[position]}`,
+    ).join(", ");
+    pushIssue(issues, problem, {
+      severity: "WARNING",
+      code: "ANSWER_POSITION_SKEW",
+      entityType: "Problem",
+      entityId: problem.id,
+      path: "questions.answerPositionDistribution",
+      message: `Tín hiệu rà soát phân bố vị trí đáp án: ${counts}.`,
+    });
+  }
   return issues;
 }
 
@@ -429,7 +490,10 @@ export async function getContentQaReport(
   };
 }
 
-export async function getPublishableProblemIds(problemIds: string[]) {
-  const report = await getContentQaReport({ problemIds });
+export async function getPublishableProblemIds(
+  problemIds: string[],
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  const report = await getContentQaReport({ problemIds }, db);
   return report.problems.filter((problem) => problem.canPublish).map((problem) => problem.problemId);
 }

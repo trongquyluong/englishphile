@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/prisma", () => ({ prisma: {} }));
 
-import { getContentQaReport } from "@/lib/content-packs/qa";
+import {
+  getContentQaReport,
+  getPublishableProblemIds,
+} from "@/lib/content-packs/qa";
 
 const validOptions = [
   { id: "A", text: "The students" },
@@ -558,5 +561,441 @@ describe("persisted Listening QA", () => {
         code,
       }),
     ]));
+  });
+});
+
+const completeExplanation =
+  "Giải thích này đủ dài để không kích hoạt tín hiệu rà soát độ dài.";
+
+function storedMcqProblem(
+  positions: string[],
+  questionOverrides: Array<Record<string, unknown>> = [],
+) {
+  const base = storedProblem(validOptions);
+  return {
+    ...base,
+    id: "problem-mcq",
+    title: "MCQ QA fixture",
+    slug: "mcq-qa-fixture",
+    statement: "Chọn đáp án đúng.",
+    instructions: "Chọn một đáp án A-D.",
+    questionType: "MCQ",
+    questions: positions.map((position, index) => ({
+      ...base.questions[0],
+      id: `question-mcq-${index}`,
+      problemId: "problem-mcq",
+      type: "MCQ",
+      skillType: "MULTIPLE_CHOICE",
+      prompt: `Câu hỏi ${index + 1} có nội dung đầy đủ.`,
+      options: validOptions.map((option) => ({ ...option })),
+      answer: { correctOptionId: position },
+      explanation: completeExplanation,
+      orderIndex: index,
+      ...questionOverrides[index],
+    })),
+  };
+}
+
+function databaseProblems(problems: unknown[]) {
+  return {
+    problem: {
+      findMany: vi.fn().mockResolvedValue(problems),
+    },
+  };
+}
+
+describe("persisted explanation-depth review signal", () => {
+  it.each([
+    ["missing", null],
+    ["whitespace-only", "   "],
+  ])("emits only the existing missing warning for %s explanation", async (_label, explanation) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedMcqProblem(["A"], [{ explanation }])) as never,
+    );
+    const explanationIssues = report.issues.filter(
+      (issue) => issue.path === "questions.0.explanation",
+    );
+
+    expect(explanationIssues).toHaveLength(1);
+    expect(explanationIssues[0]).toMatchObject({
+      severity: "WARNING",
+      entityType: "Question",
+      entityId: "question-mcq-0",
+    });
+    expect(explanationIssues[0]?.code).toBeUndefined();
+  });
+
+  it.each([
+    ["one code unit", "x", true],
+    ["44 code units", "x".repeat(44), true],
+    ["45 code units", "x".repeat(45), false],
+    ["more than 45 code units", "x".repeat(46), false],
+    ["trimmed 44 code units", `  ${"x".repeat(44)}  `, true],
+    ["trimmed 45 code units", `  ${"x".repeat(45)}  `, false],
+  ])("classifies %s at persisted QA", async (_label, explanation, expected) => {
+    const problem = storedMcqProblem(["A"], [{ explanation }]);
+    const before = problem.questions[0]?.explanation;
+    const report = await getContentQaReport(
+      {},
+      database(problem) as never,
+    );
+    const shortIssues = report.issues.filter(
+      (issue) => issue.code === "EXPLANATION_TOO_SHORT",
+    );
+
+    expect(shortIssues).toHaveLength(expected ? 1 : 0);
+    if (expected) {
+      expect(shortIssues[0]).toMatchObject({
+        severity: "WARNING",
+        entityType: "Question",
+        entityId: "question-mcq-0",
+        path: "questions.0.explanation",
+      });
+    }
+    expect(problem.questions[0]?.explanation).toBe(before);
+  });
+});
+
+describe("persisted answer-position review signal", () => {
+  it.each([
+    ["A,A,A,B", ["A", "A", "A", "B"], 1],
+    ["A,A,B,B", ["A", "A", "B", "B"], 0],
+    ["A,B,C,D", ["A", "B", "C", "D"], 0],
+    ["A,A,A", ["A", "A", "A"], 0],
+    ["eight with D absent", ["A", "A", "B", "B", "B", "C", "C", "C"], 1],
+  ])("emits the expected warning for %s", async (_label, positions, expectedWarnings) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedMcqProblem(positions)) as never,
+    );
+
+    expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+      .toHaveLength(expectedWarnings);
+  });
+
+  it.each([
+    ["invalid option count", { options: validOptions.slice(0, 3) }],
+    [
+      "duplicate option IDs",
+      { options: [validOptions[0], { ...validOptions[1], id: "A" }, validOptions[2], validOptions[3]] },
+    ],
+    ["answer outside options", { answer: { correctOptionId: "Z" } }],
+  ])("excludes %s from the eligible sample", async (_label, invalidOverride) => {
+    const report = await getContentQaReport(
+      {},
+      database(storedMcqProblem(
+        ["A", "A", "A", "A"],
+        [{}, {}, {}, invalidOverride],
+      )) as never,
+    );
+
+    expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+      .toEqual([]);
+  });
+
+  it.each([
+    ["blank", ""],
+    ["whitespace-only", " \t "],
+  ])("rejects %s option text and excludes that question", async (_label, text) => {
+    const invalidOptions = validOptions.map((option) => ({ ...option }));
+    invalidOptions[1] = { ...invalidOptions[1], text };
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "B"],
+      [{}, {}, {}, { options: invalidOptions }],
+    );
+
+    const report = await getContentQaReport({}, database(problem) as never);
+    const invalidQuestionIssues = report.issues.filter(
+      (issue) => issue.entityId === "question-mcq-3",
+    );
+
+    expect(invalidQuestionIssues).toContainEqual(expect.objectContaining({
+      severity: "ERROR",
+      entityType: "Question",
+      path: "questions.3.options",
+    }));
+    expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+      .toEqual([]);
+  });
+
+  it.each(["id", "text"] as const)(
+    "does not invoke an option %s getter in production QA",
+    async (key) => {
+      let getterCalls = 0;
+      const option: Record<string, unknown> = key === "id"
+        ? { text: "The students" }
+        : { id: "A" };
+      Object.defineProperty(option, key, {
+        enumerable: true,
+        get: () => {
+          getterCalls += 1;
+          throw new Error(`${key} getter must not run`);
+        },
+      });
+      const descriptor = Object.getOwnPropertyDescriptor(option, key);
+      const hostileOptions = [option, ...validOptions.slice(1).map((item) => ({ ...item }))];
+      const problem = storedMcqProblem(
+        ["A", "A", "A", "B"],
+        [{}, {}, {}, { options: hostileOptions }],
+      );
+
+      const report = await getContentQaReport({}, database(problem) as never);
+
+      expect(getterCalls).toBe(0);
+      expect(report.issues).toContainEqual(expect.objectContaining({
+        severity: "ERROR",
+        entityId: "question-mcq-3",
+        path: "questions.3.options",
+      }));
+      expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+        .toEqual([]);
+      expect(Object.getOwnPropertyDescriptor(option, key)).toEqual(descriptor);
+      expect(problem.questions[3]?.options).toBe(hostileOptions);
+    },
+  );
+
+  it("does not invoke a correctOptionId getter in production QA", async () => {
+    let getterCalls = 0;
+    const answer = Object.defineProperty({}, "correctOptionId", {
+      enumerable: true,
+      get: () => {
+        getterCalls += 1;
+        throw new Error("correctOptionId getter must not run");
+      },
+    });
+    const descriptor = Object.getOwnPropertyDescriptor(answer, "correctOptionId");
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "B"],
+      [{}, {}, {}, { answer }],
+    );
+
+    const report = await getContentQaReport({}, database(problem) as never);
+
+    expect(getterCalls).toBe(0);
+    expect(report.issues).toContainEqual(expect.objectContaining({
+      severity: "ERROR",
+      entityId: "question-mcq-3",
+      path: "questions.3.answer",
+    }));
+    expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+      .toEqual([]);
+    expect(Object.getOwnPropertyDescriptor(answer, "correctOptionId")).toEqual(
+      descriptor,
+    );
+    expect(problem.questions[3]?.answer).toBe(answer);
+  });
+
+  it.each(["id", "text"] as const)(
+    "rejects an inherited option %s in production QA",
+    async (key) => {
+      const inheritedValue = key === "id" ? "A" : "The students";
+      const option = Object.create({ [key]: inheritedValue }) as Record<
+        string,
+        unknown
+      >;
+      option[key === "id" ? "text" : "id"] = key === "id"
+        ? "The students"
+        : "A";
+      const prototype = Object.getPrototypeOf(option);
+      const problem = storedMcqProblem(
+        ["A", "A", "A", "B"],
+        [{}, {}, {}, { options: [option, ...validOptions.slice(1)] }],
+      );
+
+      const report = await getContentQaReport({}, database(problem) as never);
+
+      expect(report.issues).toContainEqual(expect.objectContaining({
+        severity: "ERROR",
+        entityId: "question-mcq-3",
+        path: "questions.3.options",
+      }));
+      expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+        .toEqual([]);
+      expect(Object.getPrototypeOf(option)).toBe(prototype);
+    },
+  );
+
+  it("rejects an inherited correctOptionId in production QA", async () => {
+    const answer = Object.create({ correctOptionId: "B" }) as Record<
+      string,
+      unknown
+    >;
+    const prototype = Object.getPrototypeOf(answer);
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "B"],
+      [{}, {}, {}, { answer }],
+    );
+
+    const report = await getContentQaReport({}, database(problem) as never);
+
+    expect(report.issues).toContainEqual(expect.objectContaining({
+      severity: "ERROR",
+      entityId: "question-mcq-3",
+      path: "questions.3.answer",
+    }));
+    expect(report.issues.filter((issue) => issue.code === "ANSWER_POSITION_SKEW"))
+      .toEqual([]);
+    expect(Object.getPrototypeOf(answer)).toBe(prototype);
+  });
+
+  it("keeps a hostile question from contaminating valid distribution counts", async () => {
+    let getterCalls = 0;
+    const hostileOption = Object.defineProperty(
+      { text: "The students" },
+      "id",
+      {
+        enumerable: true,
+        get: () => {
+          getterCalls += 1;
+          throw new Error("hostile getter must not run");
+        },
+      },
+    );
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "B", "B"],
+      [
+        {},
+        {},
+        {},
+        {},
+        { options: [hostileOption, ...validOptions.slice(1)] },
+      ],
+    );
+
+    const report = await getContentQaReport({}, database(problem) as never);
+    const skewIssues = report.issues.filter(
+      (issue) => issue.code === "ANSWER_POSITION_SKEW",
+    );
+
+    expect(getterCalls).toBe(0);
+    expect(skewIssues).toHaveLength(1);
+    expect(skewIssues[0]?.message).toContain("A=3, B=1, C=0, D=0");
+  });
+
+  it("excludes unsupported types and handles a mixed sample deterministically", async () => {
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "B", "A", "A"],
+      [
+        {},
+        {},
+        {},
+        {},
+        {
+          type: "OPEN_CLOZE",
+          options: null,
+          answer: { acceptedAnswers: ["answer"] },
+        },
+        { answer: { correctOptionId: "Z" } },
+      ],
+    );
+    const report = await getContentQaReport({}, database(problem) as never);
+    const skewIssues = report.issues.filter(
+      (issue) => issue.code === "ANSWER_POSITION_SKEW",
+    );
+
+    expect(skewIssues).toHaveLength(1);
+    expect(skewIssues[0]).toMatchObject({
+      severity: "WARNING",
+      entityType: "Problem",
+      entityId: "problem-mcq",
+      path: "questions.answerPositionDistribution",
+      message: "Tín hiệu rà soát phân bố vị trí đáp án: A=3, B=1, C=0, D=0.",
+    });
+  });
+
+  it("emits at most one bounded warning without answer-key mappings", async () => {
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "A", "A", "A", "B", "C"],
+      Array.from({ length: 8 }, (_, index) => ({
+        id: `QUESTION_MAPPING_SENTINEL_${index}`,
+        answer: {
+          correctOptionId: index < 6 ? "A" : index === 6 ? "B" : "C",
+          secret: "RAW_ANSWER_SENTINEL",
+        },
+      })),
+    );
+    const report = await getContentQaReport({}, database(problem) as never);
+    const skewIssues = report.issues.filter(
+      (issue) => issue.code === "ANSWER_POSITION_SKEW",
+    );
+    const serialized = JSON.stringify(skewIssues);
+
+    expect(skewIssues).toHaveLength(1);
+    expect(skewIssues[0]?.message).toContain("A=6, B=1, C=1, D=0");
+    expect(serialized).not.toContain("QUESTION_MAPPING_SENTINEL");
+    expect(serialized).not.toContain("RAW_ANSWER_SENTINEL");
+    expect(serialized).not.toContain("correctOptionId");
+  });
+});
+
+describe("QA warning publication semantics", () => {
+  it("keeps a warning-only problem publishable and included in publishable IDs", async () => {
+    const problem = storedMcqProblem(["A", "A", "A", "B"]);
+    const db = database(problem);
+    const report = await getContentQaReport({}, db as never);
+    const publishableIds = await getPublishableProblemIds(
+      [problem.id],
+      database(problem) as never,
+    );
+
+    expect(report.summary).toMatchObject({
+      problemsChecked: 1,
+      publishableProblems: 1,
+      errors: 0,
+      warnings: 1,
+    });
+    expect(report.problems[0]).toMatchObject({
+      problemId: "problem-mcq",
+      errors: 0,
+      warnings: 1,
+      canPublish: true,
+    });
+    expect(publishableIds).toEqual(["problem-mcq"]);
+  });
+
+  it("keeps existing blocking errors authoritative", async () => {
+    const problem = storedMcqProblem(
+      ["A", "A", "A", "B"],
+      [{ prompt: "", passage: null }],
+    );
+    const report = await getContentQaReport({}, database(problem) as never);
+    const publishableIds = await getPublishableProblemIds(
+      [problem.id],
+      database(problem) as never,
+    );
+
+    expect(report.problems[0]).toMatchObject({
+      errors: 1,
+      canPublish: false,
+    });
+    expect(publishableIds).toEqual([]);
+  });
+
+  it("totals independent explanation and distribution warnings", async () => {
+    const shortProblem = storedMcqProblem(["A"], [{ explanation: "x" }]);
+    const skewProblem = {
+      ...storedMcqProblem(["A", "A", "A", "B"]),
+      id: "problem-skew",
+      slug: "problem-skew",
+      questions: storedMcqProblem(["A", "A", "A", "B"]).questions.map(
+        (question, index) => ({
+          ...question,
+          id: `question-skew-${index}`,
+          problemId: "problem-skew",
+        }),
+      ),
+    };
+    const report = await getContentQaReport(
+      {},
+      databaseProblems([shortProblem, skewProblem]) as never,
+    );
+
+    expect(report.summary).toMatchObject({
+      problemsChecked: 2,
+      publishableProblems: 2,
+      errors: 0,
+      warnings: 2,
+    });
   });
 });

@@ -823,3 +823,33 @@ User accounts must sign up again on production (passwords are not exported). The
 - Evidence is repository/local only. No import, publication, database,
   migration, seed, deployment, Preview, Production, browser-E2E, provider, or
   GitHub action is claimed.
+
+### Phase 2 PR 14: bounded persisted Content QA review signals
+
+- Persisted admin QA now emits `EXPLANATION_TOO_SHORT` only for trimmed,
+  non-empty explanations from 1 through 44 UTF-16 code units. The shared
+  threshold is 45; blank/missing explanations retain only the existing
+  missing-explanation warning.
+- Persisted admin QA emits at most one problem-level `ANSWER_POSITION_SKEW`
+  warning for the existing option-audit family. It triggers when at least four
+  eligible questions put more than 50% of answers in one A-D position, or when
+  at least eight eligible questions omit any A-D position. Fewer than four
+  eligible questions never trigger it.
+- Only structurally valid, exact-four, canonical A-D questions with a member
+  answer contribute. Malformed, partial, duplicate, non-member, inherited,
+  accessor-backed, unsupported, and Error Identification questions are
+  excluded. Messages expose only bounded aggregate A/B/C/D counts, never a
+  per-question answer map or raw answer data.
+- Both signals are heuristic `WARNING`s. They do not establish semantic
+  quality, linguistic correctness, explanation adequacy, difficulty,
+  calibration, or publication approval. `canPublish` remains `errors === 0`,
+  and warning-only problems remain eligible for `getPublishableProblemIds` and
+  warning-tolerant bulk publication.
+- The current post-repair repository audit output and exit semantics remain
+  unchanged: `rendererIncompatibleOptions: 5`, `normalizerWarnings: 126`,
+  `pronunciationWithoutValidTargetSpans: 30`, `shortExplanations: 437`, and
+  `hasInventoryErrors: false`. The new persisted QA warning total depends on
+  actual database rows and is not claimed from repository-only evidence.
+- Evidence is repository/local only. No real database, deployed admin page,
+  import, publication, migration, seed, deployment, Preview, Production,
+  provider, or GitHub action is claimed.
