@@ -796,8 +796,8 @@ User accounts must sign up again on production (passwords are not exported). The
 - Four pack-002 rows remain unchanged and fail closed: Q7
   `BLOCKED_REGISTER_AMBIGUITY`, Q9 `BLOCKED_MANDATIVE_AMBIGUITY`, Q27
   `BLOCKED_NO_ERROR_ITEM`, and Q30 `BLOCKED_MANDATIVE_AMBIGUITY`.
-- Verified current repository audit: 5 renderer findings, 126 normalizer
-  warnings, 30 Pronunciation target-span findings, and
+- At the post-PR11B historical checkpoint, the repository audit reported 5
+  renderer findings, 126 normalizer warnings, 30 Pronunciation target-span findings, and
   `hasInventoryErrors=false`.
 - Pilot Q25 remains `BLOCKED_NO_ERROR_ITEM`; pilot Q7 remains
   `BLOCKED_DIALECT_AMBIGUITY` editorially despite valid A–D structure; pilot
@@ -816,9 +816,9 @@ User accounts must sign up again on production (passwords are not exported). The
 - Stored content was not rewritten. Pilot Q23 retains its authored U+2019 text
   and remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`.
 - This scorer equivalence does not establish linguistic, difficulty,
-  calibration, or publication approval. The five Error Identification
-  blockers and repository-audit counts remain unchanged: 5 renderer findings,
-  126 normalizer warnings, 30 Pronunciation target-span findings, and
+  calibration, or publication approval. At the PR 13 historical checkpoint,
+  the five Error Identification blockers and repository-audit counts were
+  unchanged: 5 renderer findings, 126 normalizer warnings, 30 Pronunciation target-span findings, and
   `hasInventoryErrors=false`.
 - Evidence is repository/local only. No import, publication, database,
   migration, seed, deployment, Preview, Production, browser-E2E, provider, or
@@ -845,8 +845,8 @@ User accounts must sign up again on production (passwords are not exported). The
   calibration, or publication approval. `canPublish` remains `errors === 0`,
   and warning-only problems remain eligible for `getPublishableProblemIds` and
   warning-tolerant bulk publication.
-- The current post-repair repository audit output and exit semantics remain
-  unchanged: `rendererIncompatibleOptions: 5`, `normalizerWarnings: 126`,
+- At the PR 14 historical checkpoint, the post-repair repository audit output
+  and exit semantics were unchanged: `rendererIncompatibleOptions: 5`, `normalizerWarnings: 126`,
   `pronunciationWithoutValidTargetSpans: 30`, `shortExplanations: 437`, and
   `hasInventoryErrors: false`. The new persisted QA warning total depends on
   actual database rows and is not claimed from repository-only evidence.
@@ -885,8 +885,8 @@ User accounts must sign up again on production (passwords are not exported). The
 - Import fingerprint/similarity detection remains separate and unchanged:
   exact/high-similarity imports are skipped and possible matches remain
   `NEEDS_REVIEW`. PR 15 does not edit importer production code or thresholds.
-- Repository audit JSON remains byte-identical with exactly three substantive
-  duplicate groups and state `5/126/30/437/false`. Persisted warning totals are
+- At the PR 15 historical checkpoint, repository audit JSON was byte-identical
+  with exactly three substantive duplicate groups and state `5/126/30/437/false`. Persisted warning totals are
   database-dependent. Evidence is repository/local and mocked-client only; no
   real database, deployed admin page, semantic duplicate judgment, linguistic
   review, publication approval, import, migration, seed, deployment, provider,
@@ -904,8 +904,9 @@ User accounts must sign up again on production (passwords are not exported). The
   closed: Q2/Q10/Q29 `BLOCKED_DIALECT_AMBIGUITY`;
   Q3/Q11/Q14/Q17/Q21 `BLOCKED_MULTIPLE_DEFENSIBLE_ANSWERS`; Q7/Q20
   `BLOCKED_UNCLEAR_UNDERLINE`.
-- Current repository audit: `rendererIncompatibleOptions: 5`,
-  `normalizerWarnings: 46`, `pronunciationWithoutValidTargetSpans: 10`,
+- At PR16 handoff, the repository audit reported
+  `rendererIncompatibleOptions: 5`, `normalizerWarnings: 46`,
+  `pronunciationWithoutValidTargetSpans: 10`,
   `shortExplanations: 419`, `duplicatePromptGroups: 3`, and
   `hasInventoryErrors: false`. Inventory/manifests, answer positions, and the
   five Error Identification renderer findings are unchanged.
@@ -920,3 +921,32 @@ User accounts must sign up again on production (passwords are not exported). The
   import, publication, Preview, Production, browser-E2E, migration, seed,
   deployment, provider, or GitHub action occurred. Listening remains separately
   blocked pending approved delivery work; this PR does not complete all modes.
+
+### Phase 2 PR 17: Pronunciation blocker replacement pilot 001
+
+- Preserve PR 16 as history: it repaired 20 Pronunciation rows and left Q2,
+  Q3, Q7, Q10, Q11, Q14, Q17, Q20, Q21, and Q29 blocked. PR 17 replaces only
+  those ten rows with newly authored candidates; the retained 20 complete
+  question values remain identical to canonical base
+  `970259358a94ef68e51810bcb4854097297c2518`.
+- Current structural result: 6 problems, 30 questions, 120 safe options, and
+  30/30 Pronunciation rows passing the production Unicode-code-point target
+  contract. Exact spans, slices, keys, dictionary evidence, dialect review,
+  preservation proof, and field reconciliation are in
+  [`docs/PHASE_2_PRONUNCIATION_BLOCKER_REPLACEMENT_PILOT_001.md`](docs/PHASE_2_PRONUNCIATION_BLOCKER_REPLACEMENT_PILOT_001.md).
+- Current repository audit: `rendererIncompatibleOptions: 5`,
+  `normalizerWarnings: 6`, `pronunciationWithoutValidTargetSpans: 0`,
+  `shortExplanations: 410`, `duplicatePromptGroups: 3`, and
+  `hasInventoryErrors: false`. Two direct-JSON executions exited 0, emitted
+  147,665 stdout bytes and no stderr/banner, and were byte-identical at SHA-256
+  `5612f104e402e93a5c1cd9b354861affbf139c12d123680aa75cf85ef7d4b27d`.
+  `selectedAnswer` was removed from renderer-incompatible findings, so the
+  audit no longer serializes canonical or legacy answer values.
+- All content remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`. Structural
+  validity is not linguistic or dialect approval, naturalness, difficulty,
+  calibration, accessibility certification, or publication approval.
+- The five Error Identification renderer findings remain separate debt.
+  Listening remains unavailable pending delivery implementation.
+- Evidence is repository/local and dictionary-reference only. No real database,
+  import, publication, deployed Preview, Production, provider, browser E2E,
+  migration, seed, deployment, or GitHub action occurred.

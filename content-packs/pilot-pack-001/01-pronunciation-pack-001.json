@@ -70,30 +70,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "thorough"
+              "id": "A",
+              "text": "what",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "although"
+              "id": "B",
+              "text": "when",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "dough"
+              "id": "C",
+              "text": "where",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "though"
+              "id": "D",
+              "text": "whole",
+              "targetSpan": { "start": 0, "end": 2 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "D"
           },
-          "explanation": "thorough ends with schwa; others have /əʊ/.",
+          "explanation": "Trong General British, phần wh trong whole được phát âm /h/, còn what, when và where thường bắt đầu bằng /w/. Một số giọng Bắc Mỹ dùng /hw/ cho ba từ sau, nhưng whole vẫn tạo tương phản /h/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -111,30 +111,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "comb"
+              "id": "A",
+              "text": "gem",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "B",
-              "text": "bomb"
+              "id": "B",
+              "text": "gentle",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "C",
-              "text": "tomb"
+              "id": "C",
+              "text": "give",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "D",
-              "text": "debt"
+              "id": "D",
+              "text": "giant",
+              "targetSpan": { "start": 0, "end": 1 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "C"
           },
-          "explanation": "tomb has /uːm/.",
+          "explanation": "Chữ g được gạch chân trong give được phát âm /ɡ/; chữ g trong gem, gentle và giant được phát âm /dʒ/ trong cả General British và General American.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -291,30 +291,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "recipe"
+              "id": "A",
+              "text": "chrome",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "archive"
+              "id": "B",
+              "text": "church",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "machine"
+              "id": "C",
+              "text": "chemist",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "police"
+              "id": "D",
+              "text": "school",
+              "targetSpan": { "start": 1, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "B",
-            "accepted": [
-              "B"
-            ],
-            "display": "B"
+            "correctOptionId": "B"
           },
-          "explanation": "archive has a different stressed vowel.",
+          "explanation": "Phần ch trong church được phát âm /tʃ/; phần ch trong chrome, chemist và school được phát âm /k/ trong cả General British và General American.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -414,30 +414,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "genre"
+              "id": "A",
+              "text": "action",
+              "targetSpan": { "start": 2, "end": 6 }
             },
             {
-              "label": "B",
-              "text": "garage"
+              "id": "B",
+              "text": "question",
+              "targetSpan": { "start": 4, "end": 8 }
             },
             {
-              "label": "C",
-              "text": "giant"
+              "id": "C",
+              "text": "motion",
+              "targetSpan": { "start": 2, "end": 6 }
             },
             {
-              "label": "D",
-              "text": "mirage"
+              "id": "D",
+              "text": "nation",
+              "targetSpan": { "start": 2, "end": 6 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "B"
           },
-          "explanation": "giant begins /dʒ/; others contain /ʒ/.",
+          "explanation": "Phần tion trong question được phát âm /tʃən/ vì đứng sau phụ âm /s/; phần tion trong action, motion và nation được phát âm /ʃən/ trong General British và General American.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -471,30 +471,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "colonel"
+              "id": "A",
+              "text": "knife",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "B",
-              "text": "college"
+              "id": "B",
+              "text": "kite",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "C",
-              "text": "collar"
+              "id": "C",
+              "text": "knee",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "D",
-              "text": "colon"
+              "id": "D",
+              "text": "knob",
+              "targetSpan": { "start": 0, "end": 1 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "B"
           },
-          "explanation": "colonel has irregular pronunciation /kɜːnəl/.",
+          "explanation": "Chữ k được gạch chân trong kite được phát âm /k/; chữ k trong knife, knee và knob là âm câm vì đứng trước n trong cả General British và General American.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -594,30 +594,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "bury"
+              "id": "A",
+              "text": "think",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "B",
-              "text": "busy"
+              "id": "B",
+              "text": "thank",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "C",
-              "text": "butcher"
+              "id": "C",
+              "text": "this",
+              "targetSpan": { "start": 0, "end": 2 }
             },
             {
-              "label": "D",
-              "text": "butter"
+              "id": "D",
+              "text": "three",
+              "targetSpan": { "start": 0, "end": 2 }
             }
           ],
           "answer": {
-            "correctOption": "D",
-            "accepted": [
-              "D"
-            ],
-            "display": "D"
+            "correctOptionId": "C"
           },
-          "explanation": "butter has /ʌ/.",
+          "explanation": "Phần th trong this được phát âm /ð/; phần th trong think, thank và three được phát âm /θ/ trong General British và General American.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -733,30 +733,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "vague"
+              "id": "A",
+              "text": "long",
+              "targetSpan": { "start": 2, "end": 4 }
             },
             {
-              "label": "B",
-              "text": "plague"
+              "id": "B",
+              "text": "ring",
+              "targetSpan": { "start": 2, "end": 4 }
             },
             {
-              "label": "C",
-              "text": "league"
+              "id": "C",
+              "text": "singe",
+              "targetSpan": { "start": 2, "end": 4 }
             },
             {
-              "label": "D",
-              "text": "fatigue"
+              "id": "D",
+              "text": "sing",
+              "targetSpan": { "start": 2, "end": 4 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "C"
           },
-          "explanation": "league has /iːg/.",
+          "explanation": "Phần ng trong singe được phát âm /ndʒ/; trong long, ring và sing, phần ng là /ŋ/ ở General British và General American. Một số biến thể vùng có thể thêm /ɡ/ sau /ŋ/, nhưng không tạo /ndʒ/.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -856,30 +856,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "crescent"
+              "id": "A",
+              "text": "center",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "B",
-              "text": "scene"
+              "id": "B",
+              "text": "cat",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "C",
-              "text": "scent"
+              "id": "C",
+              "text": "cinema",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "D",
-              "text": "science"
+              "id": "D",
+              "text": "circle",
+              "targetSpan": { "start": 0, "end": 1 }
             }
           ],
           "answer": {
-            "correctOption": "B",
-            "accepted": [
-              "B"
-            ],
-            "display": "B"
+            "correctOptionId": "B"
           },
-          "explanation": "scene has /siːn/.",
+          "explanation": "Chữ c được gạch chân trong cat được phát âm /k/ vì đứng trước nguyên âm a; chữ c trong center, cinema và circle được phát âm /s/ vì đứng trước nguyên âm e, i, i trong General British và General American.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -913,30 +913,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "quay"
+              "id": "A",
+              "text": "word",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "B",
-              "text": "key"
+              "id": "B",
+              "text": "story",
+              "targetSpan": { "start": 2, "end": 4 }
             },
             {
-              "label": "C",
-              "text": "grey"
+              "id": "C",
+              "text": "work",
+              "targetSpan": { "start": 1, "end": 3 }
             },
             {
-              "label": "D",
-              "text": "they"
+              "id": "D",
+              "text": "world",
+              "targetSpan": { "start": 1, "end": 3 }
             }
           ],
           "answer": {
-            "correctOption": "A",
-            "accepted": [
-              "A"
-            ],
-            "display": "A"
+            "correctOptionId": "B"
           },
-          "explanation": "quay is pronounced /kiː/.",
+          "explanation": "Trong General British, phần or trong story được phát âm /ɔː/, còn trong word, work và world là /ɜː/. General American có /r/ trong cả hai nhóm nhưng vẫn giữ tương phản nguyên âm này.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
@@ -1257,30 +1257,30 @@
           "passage": null,
           "options": [
             {
-              "label": "A",
-              "text": "ballet"
+              "id": "A",
+              "text": "wrap",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "B",
-              "text": "valet"
+              "id": "B",
+              "text": "wrath",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "C",
-              "text": "wallet"
+              "id": "C",
+              "text": "wave",
+              "targetSpan": { "start": 0, "end": 1 }
             },
             {
-              "label": "D",
-              "text": "chalet"
+              "id": "D",
+              "text": "wreck",
+              "targetSpan": { "start": 0, "end": 1 }
             }
           ],
           "answer": {
-            "correctOption": "C",
-            "accepted": [
-              "C"
-            ],
-            "display": "C"
+            "correctOptionId": "C"
           },
-          "explanation": "wallet has /wɒl/ not final /eɪ/.",
+          "explanation": "Chữ w trong wave được phát âm /w/; chữ w trong wrap, wrath và wreck là âm câm trong General British và General American. Các biến thể nguyên âm của wrath không ảnh hưởng đến tương phản này.",
           "rootWord": null,
           "keyword": null,
           "targetSentence": null,
