@@ -206,6 +206,30 @@ function optionRendererPack(
   };
 }
 
+const ANSWER_BEARING_AUDIT_KEYS = new Set([
+  "answer",
+  "selectedAnswer",
+  "correctOptionId",
+  "correctOption",
+  "correctPart",
+  "correction",
+  "accepted",
+  "acceptedAnswers",
+  "display",
+  "rawAnswer",
+  "rawAnswers",
+]);
+
+function collectOwnKeys(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectOwnKeys(item));
+  }
+  if (!value || typeof value !== "object") return [];
+  return Object.entries(value as Record<string, unknown>).flatMap(
+    ([key, nested]) => [key, ...collectOwnKeys(nested)],
+  );
+}
+
 describe("content-pack repository audit", () => {
   it("counts inventory and both current manifest count shapes", () => {
     const modern = pack([problem([question(), question()])]);
@@ -547,13 +571,26 @@ describe("content-pack repository audit", () => {
   );
 
   it("keeps one deterministic finding with independently useful issue codes", () => {
+    const canonicalAnswerSentinel = "AUDIT_CANONICAL_ANSWER_SENTINEL";
+    const legacyAnswerSentinel = "AUDIT_LEGACY_ANSWER_SENTINEL";
+    const correctionSentinel = "AUDIT_CORRECTION_SENTINEL";
+    const acceptedAnswerSentinel = "AUDIT_ACCEPTED_ANSWER_SENTINEL";
+    const displaySentinel = "AUDIT_DISPLAY_SENTINEL";
     const report = auditContentPacks([
       optionRendererPack(
         [
           { id: "A", text: "Same" },
           { id: "a", text: " same " },
         ],
-        { correctOptionId: "Z" },
+        {
+          correctOptionId: canonicalAnswerSentinel,
+          correctOption: legacyAnswerSentinel,
+          correctPart: legacyAnswerSentinel,
+          correction: correctionSentinel,
+          accepted: [acceptedAnswerSentinel],
+          acceptedAnswers: [acceptedAnswerSentinel],
+          display: displaySentinel,
+        },
       ),
     ]);
 
@@ -565,9 +602,22 @@ describe("content-pack repository audit", () => {
         ],
         optionIds: ["A", "a"],
         optionTexts: ["Same", " same "],
-        selectedAnswer: "Z",
       }),
     ]);
+    expect(report.findings.rendererIncompatibleOptions.every(
+      (finding) => !Object.hasOwn(finding, "selectedAnswer"),
+    )).toBe(true);
+    const serializedReport = JSON.stringify(report);
+    expect(
+      collectOwnKeys(report).filter((key) => ANSWER_BEARING_AUDIT_KEYS.has(key)),
+    ).toEqual([]);
+    [
+      canonicalAnswerSentinel,
+      legacyAnswerSentinel,
+      correctionSentinel,
+      acceptedAnswerSentinel,
+      displaySentinel,
+    ].forEach((sentinel) => expect(serializedReport).not.toContain(sentinel));
     expect(report.findings.duplicateNormalizedOptionTexts).toEqual([
       expect.objectContaining({
         groups: [
@@ -974,8 +1024,8 @@ describe("content-pack repository audit", () => {
       questions: 495,
       optionQuestions: 230,
     });
-    expect(report.answerPositions).toEqual({ A: 156, B: 44, C: 18, D: 12 });
-    expect(report.findings.shortExplanations).toHaveLength(419);
+    expect(report.answerPositions).toEqual({ A: 153, B: 47, C: 18, D: 12 });
+    expect(report.findings.shortExplanations).toHaveLength(410);
     expect(report.findings.rendererIncompatibleOptions).toHaveLength(5);
     expect(report.findings.rendererIncompatibleOptions.map((finding) => ({
       packDirectory: finding.packDirectory,
@@ -989,6 +1039,12 @@ describe("content-pack repository audit", () => {
       { packDirectory: "content-pack-002", fileName: "07-error-identification-pack-002.json", problemIndex: 5, questionIndex: 4 },
       { packDirectory: "pilot-pack-001", fileName: "07-error-identification-pack-001.json", problemIndex: 4, questionIndex: 4 },
     ]);
+    expect(report.findings.rendererIncompatibleOptions.every(
+      (finding) => !Object.hasOwn(finding, "selectedAnswer"),
+    )).toBe(true);
+    expect(
+      collectOwnKeys(report).filter((key) => ANSWER_BEARING_AUDIT_KEYS.has(key)),
+    ).toEqual([]);
     expect(report.findings.duplicateNormalizedOptionTexts).toHaveLength(0);
     expect(report.findings.duplicatePromptGroups).toHaveLength(3);
     expect(report.findings.duplicatePromptGroups.map((group) =>
@@ -1044,30 +1100,10 @@ describe("content-pack repository audit", () => {
     ]);
     expect(report.byQuestionType.TRIOS_GAPPED_SENTENCES).toBe(15);
     expect(report.findings.triosWithoutThreeSentences).toEqual([]);
-    expect(report.findings.pronunciationWithoutValidTargetSpans)
-      .toHaveLength(10);
-    expect(report.findings.pronunciationWithoutValidTargetSpans.map(
-      (finding) => [finding.problemIndex, finding.questionIndex],
-    )).toEqual([
-      [0, 1],
-      [0, 2],
-      [1, 1],
-      [1, 4],
-      [2, 0],
-      [2, 3],
-      [3, 1],
-      [3, 4],
-      [4, 0],
-      [5, 3],
-    ]);
-    expect(report.findings.pronunciationWithoutValidTargetSpans.every(
-      (finding) =>
-        finding.issues.length === 1 &&
-        finding.issues[0] === "TARGET_SPAN_REQUIRED",
-    )).toBe(true);
+    expect(report.findings.pronunciationWithoutValidTargetSpans).toEqual([]);
     expect(report.manifestMismatches).toEqual([]);
     expect(report.malformedInputs).toEqual([]);
-    expect(report.normalizerWarnings).toHaveLength(46);
+    expect(report.normalizerWarnings).toHaveLength(6);
     expect(report.hasInventoryErrors).toBe(false);
   });
 

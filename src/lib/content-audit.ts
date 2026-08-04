@@ -116,7 +116,6 @@ export type RendererOptionFinding = AuditLocation & {
   issues: RendererOptionIssue[];
   optionIds: Array<string | null>;
   optionTexts: Array<string | null>;
-  selectedAnswer: string | null;
 };
 
 export type DuplicateNormalizedOptionTextGroup = {
@@ -1037,9 +1036,6 @@ export function auditContentPacks(
                   optionIds: projectedOptions.map((option) => option.visibleId),
                   optionTexts: projectedOptions.map(
                     (option) => option.visibleText,
-                  ),
-                  selectedAnswer: safeVisibleValue(
-                    rendererAnswerValue(questionType, rawQuestion.answer),
                   ),
                 },
               );

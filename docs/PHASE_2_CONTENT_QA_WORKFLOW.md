@@ -54,8 +54,8 @@ Preview, Production, provider, environment, or deployed content.
   (`BLOCKED_NO_ERROR_ITEM`); and `content-pack-002` Q7
   (`BLOCKED_REGISTER_AMBIGUITY`), Q9 (`BLOCKED_MANDATIVE_AMBIGUITY`), Q27
   (`BLOCKED_NO_ERROR_ITEM`), and Q30 (`BLOCKED_MANDATIVE_AMBIGUITY`). The
-  verified current audit remains at five Error Identification renderer findings
-  and 126 normalizer warnings.
+  post-PR11B historical checkpoint reported five Error Identification renderer
+  findings and 126 normalizer warnings.
 - All repaired rows remain `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`.
   Structural validity does not establish linguistic, difficulty, calibration,
   or publication approval; already-repaired rows do not require further A–D
@@ -394,7 +394,7 @@ publication approval. `canPublish` remains derived exclusively from zero
 Existing structural publication gates remain unchanged.
 
 PR 14 did not change repository-audit output or exit semantics. At the PR 14
-checkpoint, repository evidence remained `rendererIncompatibleOptions: 5`,
+historical checkpoint, repository evidence reported `rendererIncompatibleOptions: 5`,
 `normalizerWarnings: 126`, `pronunciationWithoutValidTargetSpans: 30`,
 `shortExplanations: 437`, and `hasInventoryErrors: false`. The number of new
 persisted QA warnings depends on actual database rows and is not claimed from
@@ -457,8 +457,8 @@ similarity thresholds, skipping exact and high-similarity imports and retaining
 possible matches as `NEEDS_REVIEW`. PR 15 neither calls that system nor changes
 its normalization or thresholds.
 
-Repository audit output remains byte-identical with exactly three substantive
-duplicate prompt groups and current state `5/126/30/437/false` for
+At the PR 15 historical checkpoint, repository audit output was byte-identical
+with exactly three substantive duplicate prompt groups and state `5/126/30/437/false` for
 `rendererIncompatibleOptions` / `normalizerWarnings` /
 `pronunciationWithoutValidTargetSpans` / `shortExplanations` /
 `hasInventoryErrors`. Persisted duplicate-warning totals depend on active
@@ -527,8 +527,8 @@ must not be read as the current repository state.
 After PR 11A repaired 24 pilot rows, the audit reported 31 renderer findings
 and 152 total normalizer warnings. PR 11B then reviewed all 30 rows in
 `content-pack-002`, canonically repaired 26, and left four genuinely ambiguous
-or no-error rows unchanged. The verified current audit reports 5 renderer
-findings and 126 normalizer warnings, with 30 unchanged
+or no-error rows unchanged. At the post-PR11B historical checkpoint, the audit
+reported 5 renderer findings and 126 normalizer warnings, with 30 unchanged
 `pronunciationWithoutValidTargetSpans` findings and
 `hasInventoryErrors=false`. The five renderer findings are pilot Q25 plus pack
 002 Q7, Q9, Q27, and Q30. JSON order remains deterministic and option
@@ -659,8 +659,8 @@ remaining content-repair and Listening items are not:
    rewritten, and arbitrary Unicode punctuation is not normalized. Pilot Q23
    remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`; scorer equivalence does
    not establish linguistic, difficulty, calibration, or publication approval.
-   At the PR 13 checkpoint, the five Error Identification blockers and
-   repository-audit counts remained unchanged: 5 renderer findings, 126
+   At the PR 13 historical checkpoint, the five Error Identification blockers
+   and repository-audit counts were unchanged: 5 renderer findings, 126
    normalizer warnings, 30 Pronunciation target-span findings, and
    `hasInventoryErrors=false`.
 2. **Trios linguistic review:** independently review the unchanged 15 current
@@ -792,7 +792,7 @@ fail closed: Q2, Q10, and Q29 are `BLOCKED_DIALECT_AMBIGUITY`; Q3, Q11, Q14,
 Q17, and Q21 are `BLOCKED_MULTIPLE_DEFENSIBLE_ANSWERS`; Q7 and Q20 are
 `BLOCKED_UNCLEAR_UNDERLINE`. No fake or partial spans were added.
 
-The verified current repository audit is
+At the post-PR16 historical checkpoint, the repository audit reported
 `rendererIncompatibleOptions: 5`, `normalizerWarnings: 46`,
 `pronunciationWithoutValidTargetSpans: 10`, `shortExplanations: 419`,
 `duplicatePromptGroups: 3`, and `hasInventoryErrors: false`. Inventory,
@@ -834,3 +834,34 @@ replay limits, approve dialect/licence policy, or define retention/deletion.
 Those project-owner decisions block real implementation/content. This PR
 changes no schema, importer, QA, scorer, DTO, renderer, test, content pack,
 media, database, provider, or runtime behavior.
+
+### Phase 2 PR 17 blocker-replacement result
+
+PR 17 preserves the historical PR 16 distinction: PR 16 structurally repaired
+20 rows and left Q2, Q3, Q7, Q10, Q11, Q14, Q17, Q20, Q21, and Q29 blocked.
+PR 17 replaces those ten complete rows with newly authored candidates in their
+existing positions. The other 20 question values remain identical to canonical
+base `970259358a94ef68e51810bcb4854097297c2518`.
+
+The current structural result is 30/30 Pronunciation rows contract-valid with
+exactly four renderer-safe options and exact Unicode-code-point target spans.
+The complete replacement/evidence matrix is in
+[`PHASE_2_PRONUNCIATION_BLOCKER_REPLACEMENT_PILOT_001.md`](PHASE_2_PRONUNCIATION_BLOCKER_REPLACEMENT_PILOT_001.md).
+All content remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`. Structural
+validity is not linguistic or dialect approval, naturalness, difficulty,
+calibration, accessibility certification, or publication approval.
+
+The verified audit is `rendererIncompatibleOptions: 5`,
+`normalizerWarnings: 6`, `pronunciationWithoutValidTargetSpans: 0`,
+`shortExplanations: 410`, `duplicatePromptGroups: 3`, and
+`hasInventoryErrors: false`. Two direct-JSON audit executions were
+byte-identical at 147,665 bytes with SHA-256
+`5612f104e402e93a5c1cd9b354861affbf139c12d123680aa75cf85ef7d4b27d`;
+stderr/banner size was zero. `selectedAnswer` was removed from
+renderer-incompatible findings, so the audit no longer serializes canonical or
+legacy answer values. The five Error Identification renderer findings remain
+separate debt. Listening remains unavailable pending delivery implementation.
+
+Evidence remains repository/local and dictionary-reference only. No real
+database, import, publication, deployed Preview, Production, provider,
+browser-E2E, migration, seed, deployment, or GitHub action is claimed.

@@ -145,7 +145,7 @@ persisted QA still derives `canPublish` exclusively from `errors === 0`.
 Existing Error Identification, Pronunciation, Trios, Listening, import, and
 publication blockers are unchanged.
 
-At the Phase 2 PR 14 checkpoint, the repository audit remained
+At the Phase 2 PR 14 historical checkpoint, the repository audit reported
 `rendererIncompatibleOptions: 5`, `normalizerWarnings: 126`,
 `pronunciationWithoutValidTargetSpans: 30`, `shortExplanations: 437`, and
 `hasInventoryErrors: false`. Persisted warning totals depend on actual database
@@ -200,8 +200,8 @@ similarity thresholds. Its exact/high-similarity skip and possible-match
 `NEEDS_REVIEW` behavior is unchanged; the persisted warning does not replace or
 weaken it.
 
-The machine-readable repository audit remains byte-identical with exactly
-three substantive duplicate groups and current state `5/126/30/437/false` for
+At the Phase 2 PR 15 historical checkpoint, the machine-readable repository
+audit was byte-identical with exactly three substantive duplicate groups and state `5/126/30/437/false` for
 renderer incompatibilities, normalizer warnings, Pronunciation target-span
 findings, short explanations, and inventory errors. Persisted warning totals
 are database-dependent. PR 15 evidence does not claim a real database or
@@ -467,8 +467,8 @@ Ten question objects remain base-identical and fail closed: Q2, Q10, and Q29
 are `BLOCKED_DIALECT_AMBIGUITY`; Q3, Q11, Q14, Q17, and Q21 are
 `BLOCKED_MULTIPLE_DEFENSIBLE_ANSWERS`; Q7 and Q20 are
 `BLOCKED_UNCLEAR_UNDERLINE`. Pronunciation becomes structurally renderable only
-for the repaired rows. The current audit is 5 renderer-incompatible Error
-Identification rows, 46 normalizer warnings, 10 Pronunciation target-span
+for the repaired rows. At the post-PR16 historical checkpoint, the repository
+audit reported 5 renderer-incompatible Error Identification rows, 46 normalizer warnings, 10 Pronunciation target-span
 findings, 419 short explanations, 3 substantive duplicate-prompt groups, and
 `hasInventoryErrors: false`; inventory and manifest counts are unchanged.
 
@@ -498,3 +498,36 @@ approved delivery work, so the platform modes are not all complete.
 13. **PR 13 — adaptive/random improvements:** passage-aware random selection, wrong-question option, and explainable within-session adaptation.
 
 Each PR should preserve the Phase 1D-A learner-safe DTO, avoid schema/data operations unless separately approved, and classify repository, Preview, and Production evidence independently.
+
+## Phase 2 PR 17 Pronunciation blocker replacement update
+
+PR 16 remains the historical record: it structurally repaired 20 of the 30
+pilot Pronunciation questions and left ten complete rows blocked. PR 17 keeps
+the 20 retained question values identical to canonical base and replaces only
+Q2, Q3, Q7, Q10, Q11, Q14, Q17, Q20, Q21, and Q29 with newly authored
+structural candidates. The final repository result is 6 problems, 30 questions,
+120 renderer-safe options, and 30/30 contract-valid Pronunciation rows.
+
+The exact row matrix, Unicode-code-point spans, renderer slices, dictionary
+evidence, dialect assessment, preservation proof, and answer reconciliation
+are recorded in
+[`PHASE_2_PRONUNCIATION_BLOCKER_REPLACEMENT_PILOT_001.md`](PHASE_2_PRONUNCIATION_BLOCKER_REPLACEMENT_PILOT_001.md).
+All content remains `NEEDS_REVIEW` and `PENDING_HUMAN_SIGN_OFF`. Structural
+validity does not establish linguistic, dialect, naturalness, difficulty,
+calibration, accessibility, or publication approval.
+
+The current audit is `rendererIncompatibleOptions: 5`,
+`normalizerWarnings: 6`, `pronunciationWithoutValidTargetSpans: 0`,
+`shortExplanations: 410`, `duplicatePromptGroups: 3`, and
+`hasInventoryErrors: false`. Two independent direct-JSON runs exited 0, each
+produced 147,665 stdout bytes and zero stderr/banner bytes, and were
+byte-identical at SHA-256
+`5612f104e402e93a5c1cd9b354861affbf139c12d123680aa75cf85ef7d4b27d`.
+`selectedAnswer` was removed from renderer-incompatible findings, so the audit
+no longer serializes canonical or legacy answer values. The five Error
+Identification renderer findings remain separate debt, and Listening remains
+unavailable pending delivery implementation.
+
+This is repository/local test, audit, and dictionary-reference evidence only.
+No real database, import, publication, deployed Preview, Production, provider,
+browser E2E, migration, seed, deployment, or GitHub action exists for PR 17.
